@@ -1,9 +1,18 @@
 {
+  "name": "multi-agent-dev-marketplace",
+  "owner": {
+    "name": "Michael Harris",
+    "email": "michael-harris@users.noreply.github.com"
+  },
   "plugins": [
     {
       "name": "multi-agent-dev-system",
-      "path": "/home/wburit/claude-code-multi-agent-dev-system",
-      "type": "local"
+      "source": {
+        "source": "github",
+        "repo": "michael-harris/claude-code-multi-agent-dev-system"
+      },
+      "description": "Multi-agent development system for Claude Code",
+      "version": "1.0.0"
     }
   ]
 }
