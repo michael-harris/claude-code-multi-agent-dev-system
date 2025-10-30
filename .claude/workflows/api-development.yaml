@@ -1,0 +1,74 @@
+name: api-development
+description: Backend API implementation (no frontend) with T1/T2 switching
+trigger: internal
+called_by: task-orchestrator
+
+parameters:
+  - name: task
+    type: object
+    required: true
+  - name: iteration
+    type: integer
+    default: 1
+  - name: tier
+    type: string
+    default: "t1"
+
+steps:
+  - name: load_tech_stack
+    action: read_prd
+    extract: technical.backend.language
+
+  - name: database_if_needed
+    condition: task.technical_requirements.database exists
+    sequence:
+      - agent: database-designer
+        action: design
+      
+      - agent: database-developer-{backend_language}-{tier}
+        action: implement
+        tier_selection:
+          iteration_1: t1
+          iteration_2: t1
+          iteration_3_plus: t2
+
+  - name: api_layer
+    sequence:
+      - name: design
+        agent: api-designer
+        action: design_api
+      
+      - name: implement
+        agent: api-developer-{backend_language}-{tier}
+        action: implement_api
+        tier_selection:
+          iteration_1: t1
+          iteration_2: t1
+          iteration_3_plus: t2
+      
+      - name: review
+        agent: backend-code-reviewer-{backend_language}
+        action: review_code
+
+  - name: quality
+    parallel: true
+    steps:
+      - agent: test-writer
+        action: write_backend_tests
+      
+      - agent: security-auditor
+        action: audit_backend
+
+  - name: documentation
+    agent: documentation-coordinator
+    action: document_api
+
+output:
+  artifacts:
+    api_implementation: "src/api/"
+    tests: "tests/api/"
+    security_audit: "docs/security/"
+    documentation: "docs/api/"
+  
+  metrics:
+    tier_used: "{tier}"

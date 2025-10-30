@@ -1,0 +1,141 @@
+name: task-execution
+description: Executes single task with iterative quality validation and T1/T2 switching
+trigger: internal
+called_by: sprint-orchestrator
+
+parameters:
+  - name: task_id
+    type: string
+    required: true
+  - name: sprint_id
+    type: string
+    required: false
+
+configuration:
+  max_iterations: 5
+  validation_required: true
+  tier_switching:
+    enabled: true
+    t1_iterations: 2
+    t2_starts_at: 3
+
+steps:
+  - name: initialize_task
+    agent: task-orchestrator
+    action: read_task_file
+    input:
+      file: "docs/planning/tasks/{task_id}.yaml"
+
+  - name: create_execution_log
+    agent: task-orchestrator
+    action: initialize_logging
+    output:
+      file: "docs/planning/tasks/{task_id}-execution.yaml"
+
+  - name: determine_workflow
+    agent: task-orchestrator
+    action: select_workflow_type
+    based_on: task.type
+    options:
+      fullstack: fullstack-feature
+      backend: api-development
+      frontend: frontend-development
+      database: database-only
+      python-generic: generic-python-development
+      infrastructure: infrastructure-setup
+
+  - name: iteration_loop
+    agent: task-orchestrator
+    action: execute_with_validation
+    max_iterations: 5
+    
+    iteration:
+      - name: determine_tier
+        action: calculate_tier
+        logic: |
+          if iteration <= 2:
+            tier = "t1"
+          else:
+            tier = "t2"
+      
+      - name: execute_workflow
+        action: run_workflow
+        workflow: "{selected_workflow}"
+        context:
+          task: "{task_data}"
+          iteration: "{current_iteration}"
+          tier: "{calculated_tier}"
+          previous_gaps: "{gaps_from_last_iteration}"
+
+      - name: collect_artifacts
+        action: gather_outputs
+        from:
+          - database_implementation
+          - api_implementation
+          - frontend_implementation
+          - python_implementation
+          - tests
+          - security_audit
+          - documentation
+
+      - name: validate_requirements
+        agent: requirements-validator
+        action: validate_task
+        input:
+          task_file: "docs/planning/tasks/{task_id}.yaml"
+          artifacts: "{collected_artifacts}"
+          iteration: "{current_iteration}"
+          tier_used: "{calculated_tier}"
+        
+        output:
+          file: "docs/planning/tasks/{task_id}-validation-iteration-{iteration}.yaml"
+
+      - name: check_validation_result
+        action: evaluate
+        conditions:
+          - condition: validation.status == "PASS"
+            then: complete_task
+          
+          - condition: validation.status == "FAIL" AND iteration < max_iterations
+            then: restart_with_gaps
+            parameters:
+              gaps: "{validation.outstanding_requirements}"
+              recommended_agents: "{validation.recommended_agents}"
+              next_tier: "{tier_for_next_iteration}"
+          
+          - condition: validation.status == "FAIL" AND iteration >= max_iterations
+            then: escalate_failure
+
+  - name: complete_task
+    when: validation_passed
+    actions:
+      - mark_task_complete
+      - generate_completion_report
+      - record_tier_statistics
+      - update_sprint_status
+      - notify_success
+
+  - name: escalate_failure
+    when: max_iterations_exceeded
+    actions:
+      - generate_failure_report
+      - identify_blocking_impact
+      - notify_human
+      - provide_options
+
+completion:
+  on_success:
+    status: "complete"
+    report: "docs/planning/tasks/{task_id}-completion.md"
+    metrics:
+      - iterations_used
+      - tier_switches
+      - time_elapsed
+  
+  on_failure:
+    status: "failed"
+    report: "docs/planning/tasks/{task_id}-failure.md"
+    options:
+      - "Review and provide guidance"
+      - "Adjust validation requirements"
+      - "Skip task (creates technical debt)"

@@ -1,0 +1,90 @@
+name: project-planning
+description: Decomposes PRD into tasks and organizes into sprints
+trigger: manual
+command: "/planning analyze"
+
+steps:
+  - name: analyze_prd
+    agent: task-graph-analyzer
+    action: read_prd
+    input:
+      file: "docs/planning/PROJECT_PRD.yaml"
+
+  - name: identify_features
+    agent: task-graph-analyzer
+    action: extract_features
+    process:
+      - parse must-have requirements
+      - parse should-have requirements
+      - identify technical foundations needed
+
+  - name: decompose_tasks
+    agent: task-graph-analyzer
+    action: break_down_features
+    for_each: feature
+    generate:
+      - task_definition
+      - acceptance_criteria
+      - technical_requirements
+      - complexity_estimate
+      - dependencies
+      - task_type
+
+  - name: analyze_dependencies
+    agent: task-graph-analyzer
+    action: build_dependency_graph
+    process:
+      - identify blocking relationships
+      - identify parallel opportunities
+      - validate no circular dependencies
+
+  - name: create_task_files
+    agent: task-graph-analyzer
+    action: generate_files
+    output:
+      directory: "docs/planning/tasks/"
+      pattern: "TASK-{number:03d}.yaml"
+      summary: "docs/planning/TASK_SUMMARY.md"
+
+  - name: organize_sprints
+    agent: sprint-planner
+    action: read_tasks
+    input:
+      directory: "docs/planning/tasks/"
+
+  - name: plan_sprints
+    agent: sprint-planner
+    action: create_sprints
+    strategy:
+      - respect dependencies
+      - balance workload
+      - deliver value early
+      - enable parallelization
+      - create checkpoints
+
+  - name: generate_sprint_files
+    agent: sprint-planner
+    action: write_files
+    output:
+      directory: "docs/sprints/"
+      pattern: "SPRINT-{number:03d}.yaml"
+      overview: "docs/sprints/SPRINT_OVERVIEW.md"
+
+  - name: confirm_completion
+    action: notify
+    message: |
+      Planning complete!
+      
+      Generated:
+      - {task_count} tasks in docs/planning/tasks/
+      - {sprint_count} sprints in docs/sprints/
+      
+      Summary: docs/planning/TASK_SUMMARY.md
+      Overview: docs/sprints/SPRINT_OVERVIEW.md
+      
+      Ready to execute:
+      `/sprint execute SPRINT-001`
+
+completion:
+  status: "Planning complete"
+  next_workflow: "sprint-execution"
