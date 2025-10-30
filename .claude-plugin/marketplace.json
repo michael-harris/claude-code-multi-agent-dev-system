@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "name": "multi-agent-dev-system",
+      "path": "/home/wburit/claude-code-multi-agent-dev-system",
+      "type": "local"
+    }
+  ]
+}
