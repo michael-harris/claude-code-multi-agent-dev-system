@@ -1,7 +1,7 @@
 {
   "name": "multi-agent-dev-system",
-  "version": "1.0.0",
-  "description": "27-agent automated development system with hierarchical orchestration and T1/T2 quality tiers for full-stack development",
+  "version": "2.0.0",
+  "description": "66-agent automated development system with hierarchical orchestration and T1/T2 quality tiers for full-stack development",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [
@@ -98,6 +98,96 @@
       "tier": "t2"
     },
     {
+      "id": "database:developer-java-t1",
+      "name": "Database Developer Java T1",
+      "description": "Implements JPA/Hibernate models and Flyway migrations (cost-optimized)",
+      "file": "agents/database/database-developer-java-t1.md",
+      "model": "haiku",
+      "category": "database",
+      "tier": "t1"
+    },
+    {
+      "id": "database:developer-java-t2",
+      "name": "Database Developer Java T2",
+      "description": "Implements JPA/Hibernate models and Flyway migrations (enhanced quality)",
+      "file": "agents/database/database-developer-java-t2.md",
+      "model": "sonnet",
+      "category": "database",
+      "tier": "t2"
+    },
+    {
+      "id": "database:developer-csharp-t1",
+      "name": "Database Developer C# T1",
+      "description": "Implements Entity Framework models and migrations (cost-optimized)",
+      "file": "agents/database/database-developer-csharp-t1.md",
+      "model": "haiku",
+      "category": "database",
+      "tier": "t1"
+    },
+    {
+      "id": "database:developer-csharp-t2",
+      "name": "Database Developer C# T2",
+      "description": "Implements Entity Framework models and migrations (enhanced quality)",
+      "file": "agents/database/database-developer-csharp-t2.md",
+      "model": "sonnet",
+      "category": "database",
+      "tier": "t2"
+    },
+    {
+      "id": "database:developer-go-t1",
+      "name": "Database Developer Go T1",
+      "description": "Implements GORM models and migrations (cost-optimized)",
+      "file": "agents/database/database-developer-go-t1.md",
+      "model": "haiku",
+      "category": "database",
+      "tier": "t1"
+    },
+    {
+      "id": "database:developer-go-t2",
+      "name": "Database Developer Go T2",
+      "description": "Implements GORM models and migrations (enhanced quality)",
+      "file": "agents/database/database-developer-go-t2.md",
+      "model": "sonnet",
+      "category": "database",
+      "tier": "t2"
+    },
+    {
+      "id": "database:developer-ruby-t1",
+      "name": "Database Developer Ruby T1",
+      "description": "Implements ActiveRecord models and migrations (cost-optimized)",
+      "file": "agents/database/database-developer-ruby-t1.md",
+      "model": "haiku",
+      "category": "database",
+      "tier": "t1"
+    },
+    {
+      "id": "database:developer-ruby-t2",
+      "name": "Database Developer Ruby T2",
+      "description": "Implements ActiveRecord models and migrations (enhanced quality)",
+      "file": "agents/database/database-developer-ruby-t2.md",
+      "model": "sonnet",
+      "category": "database",
+      "tier": "t2"
+    },
+    {
+      "id": "database:developer-php-t1",
+      "name": "Database Developer PHP T1",
+      "description": "Implements Doctrine/Eloquent models and migrations (cost-optimized)",
+      "file": "agents/database/database-developer-php-t1.md",
+      "model": "haiku",
+      "category": "database",
+      "tier": "t1"
+    },
+    {
+      "id": "database:developer-php-t2",
+      "name": "Database Developer PHP T2",
+      "description": "Implements Doctrine/Eloquent models and migrations (enhanced quality)",
+      "file": "agents/database/database-developer-php-t2.md",
+      "model": "sonnet",
+      "category": "database",
+      "tier": "t2"
+    },
+    {
       "id": "backend:api-designer",
       "name": "API Designer",
       "description": "Designs RESTful API specifications with OpenAPI",
@@ -154,6 +244,136 @@
       "name": "Backend Code Reviewer TypeScript",
       "description": "Reviews TypeScript backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-typescript.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-java-t1",
+      "name": "API Developer Java T1",
+      "description": "Implements Spring Boot REST APIs (cost-optimized)",
+      "file": "agents/backend/api-developer-java-t1.md",
+      "model": "haiku",
+      "category": "backend",
+      "tier": "t1"
+    },
+    {
+      "id": "backend:api-developer-java-t2",
+      "name": "API Developer Java T2",
+      "description": "Implements Spring Boot REST APIs (enhanced quality)",
+      "file": "agents/backend/api-developer-java-t2.md",
+      "model": "sonnet",
+      "category": "backend",
+      "tier": "t2"
+    },
+    {
+      "id": "backend:code-reviewer-java",
+      "name": "Backend Code Reviewer Java",
+      "description": "Reviews Java backend code for quality and security",
+      "file": "agents/backend/backend-code-reviewer-java.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-csharp-t1",
+      "name": "API Developer C# T1",
+      "description": "Implements ASP.NET Core REST APIs (cost-optimized)",
+      "file": "agents/backend/api-developer-csharp-t1.md",
+      "model": "haiku",
+      "category": "backend",
+      "tier": "t1"
+    },
+    {
+      "id": "backend:api-developer-csharp-t2",
+      "name": "API Developer C# T2",
+      "description": "Implements ASP.NET Core REST APIs (enhanced quality)",
+      "file": "agents/backend/api-developer-csharp-t2.md",
+      "model": "sonnet",
+      "category": "backend",
+      "tier": "t2"
+    },
+    {
+      "id": "backend:code-reviewer-csharp",
+      "name": "Backend Code Reviewer C#",
+      "description": "Reviews C# backend code for quality and security",
+      "file": "agents/backend/backend-code-reviewer-csharp.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-go-t1",
+      "name": "API Developer Go T1",
+      "description": "Implements Go REST APIs with Gin/Echo (cost-optimized)",
+      "file": "agents/backend/api-developer-go-t1.md",
+      "model": "haiku",
+      "category": "backend",
+      "tier": "t1"
+    },
+    {
+      "id": "backend:api-developer-go-t2",
+      "name": "API Developer Go T2",
+      "description": "Implements Go REST APIs with Gin/Echo (enhanced quality)",
+      "file": "agents/backend/api-developer-go-t2.md",
+      "model": "sonnet",
+      "category": "backend",
+      "tier": "t2"
+    },
+    {
+      "id": "backend:code-reviewer-go",
+      "name": "Backend Code Reviewer Go",
+      "description": "Reviews Go backend code for quality and security",
+      "file": "agents/backend/backend-code-reviewer-go.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-ruby-t1",
+      "name": "API Developer Ruby T1",
+      "description": "Implements Ruby on Rails REST APIs (cost-optimized)",
+      "file": "agents/backend/api-developer-ruby-t1.md",
+      "model": "haiku",
+      "category": "backend",
+      "tier": "t1"
+    },
+    {
+      "id": "backend:api-developer-ruby-t2",
+      "name": "API Developer Ruby T2",
+      "description": "Implements Ruby on Rails REST APIs (enhanced quality)",
+      "file": "agents/backend/api-developer-ruby-t2.md",
+      "model": "sonnet",
+      "category": "backend",
+      "tier": "t2"
+    },
+    {
+      "id": "backend:code-reviewer-ruby",
+      "name": "Backend Code Reviewer Ruby",
+      "description": "Reviews Ruby backend code for quality and security",
+      "file": "agents/backend/backend-code-reviewer-ruby.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-php-t1",
+      "name": "API Developer PHP T1",
+      "description": "Implements Laravel/Symfony REST APIs (cost-optimized)",
+      "file": "agents/backend/api-developer-php-t1.md",
+      "model": "haiku",
+      "category": "backend",
+      "tier": "t1"
+    },
+    {
+      "id": "backend:api-developer-php-t2",
+      "name": "API Developer PHP T2",
+      "description": "Implements Laravel/Symfony REST APIs (enhanced quality)",
+      "file": "agents/backend/api-developer-php-t2.md",
+      "model": "sonnet",
+      "category": "backend",
+      "tier": "t2"
+    },
+    {
+      "id": "backend:code-reviewer-php",
+      "name": "Backend Code Reviewer PHP",
+      "description": "Reviews PHP backend code for quality and security",
+      "file": "agents/backend/backend-code-reviewer-php.md",
       "model": "sonnet",
       "category": "backend"
     },
@@ -232,6 +452,128 @@
       "file": "agents/quality/documentation-coordinator.md",
       "model": "sonnet",
       "category": "quality"
+    },
+    {
+      "id": "scripting:powershell-developer-t1",
+      "name": "PowerShell Developer T1",
+      "description": "Implements PowerShell scripts and automation (cost-optimized)",
+      "file": "agents/scripting/powershell-developer-t1.md",
+      "model": "haiku",
+      "category": "scripting",
+      "tier": "t1"
+    },
+    {
+      "id": "scripting:powershell-developer-t2",
+      "name": "PowerShell Developer T2",
+      "description": "Implements PowerShell scripts and automation (enhanced quality)",
+      "file": "agents/scripting/powershell-developer-t2.md",
+      "model": "sonnet",
+      "category": "scripting",
+      "tier": "t2"
+    },
+    {
+      "id": "scripting:shell-developer-t1",
+      "name": "Shell Developer T1",
+      "description": "Implements Bash/shell scripts and automation (cost-optimized)",
+      "file": "agents/scripting/shell-developer-t1.md",
+      "model": "haiku",
+      "category": "scripting",
+      "tier": "t1"
+    },
+    {
+      "id": "scripting:shell-developer-t2",
+      "name": "Shell Developer T2",
+      "description": "Implements Bash/shell scripts and automation (enhanced quality)",
+      "file": "agents/scripting/shell-developer-t2.md",
+      "model": "sonnet",
+      "category": "scripting",
+      "tier": "t2"
+    },
+    {
+      "id": "devops:docker-specialist",
+      "name": "Docker Specialist",
+      "description": "Creates and optimizes Docker containers and compose files",
+      "file": "agents/devops/docker-specialist.md",
+      "model": "sonnet",
+      "category": "devops"
+    },
+    {
+      "id": "devops:kubernetes-specialist",
+      "name": "Kubernetes Specialist",
+      "description": "Creates and manages Kubernetes deployments and manifests",
+      "file": "agents/devops/kubernetes-specialist.md",
+      "model": "sonnet",
+      "category": "devops"
+    },
+    {
+      "id": "devops:cicd-specialist",
+      "name": "CI/CD Specialist",
+      "description": "Creates and optimizes CI/CD pipelines for various platforms",
+      "file": "agents/devops/cicd-specialist.md",
+      "model": "sonnet",
+      "category": "devops"
+    },
+    {
+      "id": "devops:terraform-specialist",
+      "name": "Terraform Specialist",
+      "description": "Creates and manages infrastructure as code with Terraform",
+      "file": "agents/devops/terraform-specialist.md",
+      "model": "sonnet",
+      "category": "devops"
+    },
+    {
+      "id": "infrastructure:configuration-manager-t1",
+      "name": "Configuration Manager T1",
+      "description": "Manages configuration files and environment setup (cost-optimized)",
+      "file": "agents/infrastructure/configuration-manager-t1.md",
+      "model": "haiku",
+      "category": "infrastructure",
+      "tier": "t1"
+    },
+    {
+      "id": "infrastructure:configuration-manager-t2",
+      "name": "Configuration Manager T2",
+      "description": "Manages configuration files and environment setup (enhanced quality)",
+      "file": "agents/infrastructure/configuration-manager-t2.md",
+      "model": "sonnet",
+      "category": "infrastructure",
+      "tier": "t2"
+    },
+    {
+      "id": "mobile:ios-developer-t1",
+      "name": "iOS Developer T1",
+      "description": "Implements iOS apps with Swift/SwiftUI (cost-optimized)",
+      "file": "agents/mobile/ios-developer-t1.md",
+      "model": "haiku",
+      "category": "mobile",
+      "tier": "t1"
+    },
+    {
+      "id": "mobile:ios-developer-t2",
+      "name": "iOS Developer T2",
+      "description": "Implements iOS apps with Swift/SwiftUI (enhanced quality)",
+      "file": "agents/mobile/ios-developer-t2.md",
+      "model": "sonnet",
+      "category": "mobile",
+      "tier": "t2"
+    },
+    {
+      "id": "mobile:android-developer-t1",
+      "name": "Android Developer T1",
+      "description": "Implements Android apps with Kotlin/Jetpack Compose (cost-optimized)",
+      "file": "agents/mobile/android-developer-t1.md",
+      "model": "haiku",
+      "category": "mobile",
+      "tier": "t1"
+    },
+    {
+      "id": "mobile:android-developer-t2",
+      "name": "Android Developer T2",
+      "description": "Implements Android apps with Kotlin/Jetpack Compose (enhanced quality)",
+      "file": "agents/mobile/android-developer-t2.md",
+      "model": "sonnet",
+      "category": "mobile",
+      "tier": "t2"
     }
   ],
   "commands": [
