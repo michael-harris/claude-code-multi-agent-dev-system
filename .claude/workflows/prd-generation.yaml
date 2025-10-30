@@ -1,0 +1,55 @@
+name: prd-generation
+description: Interactive PRD creation through structured Q&A
+trigger: manual
+command: "/prd generate"
+
+steps:
+  - name: initialize
+    agent: prd-generator
+    action: start_conversation
+    parameters:
+      greeting: "I'll help you create a comprehensive PRD. Let's start with your technology stack."
+
+  - name: gather_requirements
+    agent: prd-generator
+    action: structured_interview
+    flow: interactive
+    phases:
+      - tech_stack_selection
+      - problem_and_solution
+      - users_and_use_cases
+      - technical_context
+      - success_criteria
+      - constraints_and_dependencies
+      - details_if_needed
+
+  - name: validate_completeness
+    agent: prd-generator
+    action: check_requirements
+    validations:
+      - tech_stack_chosen: true
+      - min_requirements: 3
+      - success_metrics_defined: true
+      - constraints_identified: true
+
+  - name: generate_prd
+    agent: prd-generator
+    action: create_document
+    output:
+      file: "docs/planning/PROJECT_PRD.yaml"
+      format: yaml
+
+  - name: confirm_next_steps
+    agent: prd-generator
+    action: provide_guidance
+    message: |
+      PRD saved to docs/planning/PROJECT_PRD.yaml
+      
+      Next steps:
+      1. `/planning analyze` - Break PRD into tasks
+      2. `/planning sprints` - Organize tasks into sprints
+      3. `/sprint execute SPRINT-001` - Start development
+
+completion:
+  status: "PRD created successfully"
+  next_workflow: "project-planning"
