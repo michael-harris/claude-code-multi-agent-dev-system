@@ -18,7 +18,11 @@ The plugin is a complete 27-agent automated development system with:
 ### Install the Plugin
 
 ```bash
-# Local installation
+# From GitHub (Recommended)
+/plugin marketplace add https://github.com/michael-harris/claude-code-multi-agent-dev-system
+/plugin install multi-agent-dev-system
+
+# OR from local path (for plugin development)
 /plugin marketplace add file:///home/wburit/claude-code-multi-agent-dev-system
 /plugin install multi-agent-dev-system
 
@@ -44,9 +48,9 @@ Task(
 
 ## Documentation
 
-**Plugin Documentation:**
-- `../claude-code-multi-agent-dev-system/README.md` - Complete plugin docs
-- `../claude-code-multi-agent-dev-system/INSTALLATION.md` - Installation guide
+**Plugin Repository:**
+- GitHub: https://github.com/michael-harris/claude-code-multi-agent-dev-system
+- `../claude-code-multi-agent-dev-system/README.md` - Complete plugin documentation
 - `../claude-code-multi-agent-dev-system/examples/` - Usage examples
 
 **Development History:**
@@ -77,7 +81,6 @@ multi-agent-claude-workflow/          # This repository
 ├── commands/                          # 3 workflow commands
 ├── examples/                          # Usage examples
 ├── plugin.json                        # Plugin manifest
-├── INSTALLATION.md                    # Setup guide
 └── README.md                          # Plugin documentation
 ```
 
@@ -98,7 +101,7 @@ When you use the plugin in any project, it will generate files in directories li
 The plugin itself is the single source of truth for:
 - Agent definitions (27 agents in `agents/`)
 - Commands (3 commands in `commands/`)
-- Documentation (`README.md`, `INSTALLATION.md`)
+- Documentation (`README.md`)
 - Examples (`examples/`)
 
 This repository archives the development process:
