@@ -5,10 +5,10 @@ You are orchestrating **multi-sprint execution** using the agent-based approach.
 ## Command Usage
 
 ```bash
-/sprint all        # Execute all sprints (all tracks) sequentially
-/sprint all 01     # Execute all sprints in track 1 only
-/sprint all 02     # Execute all sprints in track 2 only
-/sprint all 03     # Execute all sprints in track 3 only
+/multi-agent:sprint all        # Execute all sprints (all tracks) sequentially
+/multi-agent:sprint all 01     # Execute all sprints in track 1 only
+/multi-agent:sprint all 02     # Execute all sprints in track 2 only
+/multi-agent:sprint all 03     # Execute all sprints in track 3 only
 ```
 
 Executes all sprints sequentially until completion. Supports track filtering for parallel development workflows.
@@ -57,8 +57,8 @@ ls docs/sprints/
 - Count total sprints to execute vs already completed
 
 **Check PRD Exists:**
-- Verify `docs/planning/PROJECT_PRD.yaml` exists (or feature/issue PRD)
-- If missing, instruct user to run `/prd` first
+- Verify `docs/planning/PROJECT_PRD.yaml` exists (or feature/multi-agent:issue PRD)
+- If missing, instruct user to run `/multi-agent:prd` first
 
 **Resume Point Determination:**
 ```python
@@ -302,7 +302,7 @@ Location: backend/auth/jwt_handler.py
 Pausing multi-sprint execution.
 Human intervention required.
 
-To resume after fix: /sprint all
+To resume after fix: /multi-agent:sprint all
 (Will skip completed sprints automatically)
 ```
 
@@ -310,12 +310,12 @@ To resume after fix: /sprint all
 ```
 Error: No sprint files found in docs/sprints/
 
-Have you run /planning to create sprints?
+Have you run /multi-agent:planning to create sprints?
 
 Workflow:
-1. /prd          - Create PRD
-2. /planning     - Break into tasks and sprints
-3. /sprint all   - Execute all sprints
+1. /multi-agent:prd          - Create PRD
+2. /multi-agent:planning     - Break into tasks and sprints
+3. /multi-agent:sprint all   - Execute all sprints
 ```
 
 ## Important Notes
@@ -330,12 +330,12 @@ Workflow:
 
 ## Comparison to Single Sprint
 
-**`/sprint SPRINT-001`:**
+**`/multi-agent:sprint SPRINT-001`:**
 - Executes one sprint
 - Final review for that sprint
 - Documentation updated for that sprint
 
-**`/sprint all`:**
+**`/multi-agent:sprint all`:**
 - Executes ALL sprints sequentially
 - Final review for each sprint
 - Additional project-level review at the end

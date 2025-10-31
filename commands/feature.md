@@ -4,14 +4,14 @@ You are implementing a **complete feature workflow** from description to deliver
 
 ## Command Usage
 
-`/feature [feature description]` - Complete workflow: PRD → Planning → Implementation
-`/feature [feature description] --tracks N` - Same workflow with N parallel development tracks
+`/multi-agent:feature [feature description]` - Complete workflow: PRD → Planning → Implementation
+`/multi-agent:feature [feature description] --tracks N` - Same workflow with N parallel development tracks
 
 Examples:
-- `/feature Add user authentication with OAuth and 2FA`
-- `/feature Implement real-time notifications using WebSockets`
-- `/feature Create analytics dashboard with charts and exports --tracks 2`
-- `/feature Build ML recommendation engine --tracks 3`
+- `/multi-agent:feature Add user authentication with OAuth and 2FA`
+- `/multi-agent:feature Implement real-time notifications using WebSockets`
+- `/multi-agent:feature Create analytics dashboard with charts and exports --tracks 2`
+- `/multi-agent:feature Build ML recommendation engine --tracks 3`
 
 The `--tracks` parameter is optional. If not specified, single-track mode is used.
 
@@ -264,9 +264,9 @@ Please provide more details. Examples:
 Recommendation: Break into smaller features
 
 Consider splitting into:
-1. /feature User authentication (OAuth only)
-2. /feature Two-factor authentication
-3. /feature Social login integration
+1. /multi-agent:feature User authentication (OAuth only)
+2. /multi-agent:feature Two-factor authentication
+3. /multi-agent:feature Social login integration
 ```
 
 **Integration conflicts:**
@@ -287,24 +287,24 @@ Recommend:
 
 **Add to existing project:**
 ```
-/feature Add GraphQL API alongside existing REST API
+/multi-agent:feature Add GraphQL API alongside existing REST API
 (System detects existing project structure and integrates)
 ```
 
 **Specify technical details:**
 ```
-/feature Implement caching layer using Redis with 5-minute TTL for user queries
+/multi-agent:feature Implement caching layer using Redis with 5-minute TTL for user queries
 ```
 
 **Complex features:**
 ```
-/feature Build ML-powered recommendation engine using scikit-learn, with API endpoints and admin dashboard
+/multi-agent:feature Build ML-powered recommendation engine using scikit-learn, with API endpoints and admin dashboard
 ```
 
 ## Workflow Diagram
 
 ```
-User: /feature Add real-time chat
+User: /multi-agent:feature Add real-time chat
 
     ↓
 1. PRD Generation (interactive)

@@ -563,7 +563,7 @@ Create:
 - Security audits
 - One-off scripts or utilities
 
-### Use Full Workflow (/prd → /planning → /sprint) When:
+### Use Full Workflow (/multi-agent:prd → /multi-agent:planning → /multi-agent:sprint) When:
 - Starting new projects
 - Building complete features from scratch
 - Need coordination between multiple components

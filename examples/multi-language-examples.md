@@ -419,15 +419,15 @@ Task(
 
 ```bash
 # 1. Generate PRD
-/prd
+/multi-agent:prd
 # Input: "Build an e-commerce platform with web and mobile apps"
 
 # 2. Create planning
-/planning
+/multi-agent:planning
 # System breaks down into tasks, identifies optimal languages per component
 
 # 3. Execute sprint
-/sprint SPRINT-001
+/multi-agent:sprint SPRINT-001
 # Orchestrator automatically routes tasks to appropriate language agents
 ```
 
@@ -469,7 +469,7 @@ Task(
 
 ## Tips for Multi-Language Projects
 
-1. **Language Selection**: Use `/prd` to specify language preferences based on:
+1. **Language Selection**: Use `/multi-agent:prd` to specify language preferences based on:
    - Team expertise
    - Performance requirements
    - Integration needs

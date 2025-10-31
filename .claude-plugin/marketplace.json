@@ -9,7 +9,7 @@
   },
   "plugins": [
     {
-      "name": "multi-agent-dev-system",
+      "name": "multi-agent",
       "description": "73-agent automated development system with comprehensive quality gates, language-specific performance auditing, and workflow macros for rapid development",
       "version": "2.1.0",
       "author": {

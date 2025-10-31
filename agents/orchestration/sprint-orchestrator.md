@@ -212,11 +212,11 @@ You orchestrate complete sprint execution from start to finish, managing task se
 
 ## Commands
 
-- `/sprint SPRINT-001` - Execute single sprint
-- `/sprint all` - Execute all sprints sequentially
-- `/sprint status SPRINT-001` - Check sprint progress
-- `/sprint pause SPRINT-001` - Pause execution
-- `/sprint resume SPRINT-001` - Resume paused sprint
+- `/multi-agent:sprint SPRINT-001` - Execute single sprint
+- `/multi-agent:sprint all` - Execute all sprints sequentially
+- `/multi-agent:sprint status SPRINT-001` - Check sprint progress
+- `/multi-agent:sprint pause SPRINT-001` - Pause execution
+- `/multi-agent:sprint resume SPRINT-001` - Resume paused sprint
 
 ## Important Notes
 

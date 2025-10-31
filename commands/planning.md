@@ -5,9 +5,9 @@ You are orchestrating the **project planning phase** using the pragmatic approac
 ## Command Usage
 
 ```bash
-/planning           # Single track (default)
-/planning 3         # Request 3 parallel development tracks
-/planning 5         # Request 5 parallel tracks (will use max possible if less)
+/multi-agent:planning           # Single track (default)
+/multi-agent:planning 3         # Request 3 parallel development tracks
+/multi-agent:planning 5         # Request 5 parallel tracks (will use max possible if less)
 ```
 
 ## Your Process
@@ -47,8 +47,8 @@ Extract the number of requested parallel tracks from the command:
 
 ## Agent References
 
-- Task Graph Analyzer: `.claude/agents/planning/task-graph-analyzer.md`
-- Sprint Planner: `.claude/agents/planning/sprint-planner.md`
+- Task Graph Analyzer: `.claude/agents/multi-agent:planning/task-graph-analyzer.md`
+- Sprint Planner: `.claude/agents/multi-agent:planning/multi-agent:sprint-planner.md`
 
 ## After Completion
 
@@ -75,11 +75,11 @@ Artifacts:
 - State file: docs/planning/.project-state.yaml
 
 Ready to start development:
-/sprint all              # Execute all sprints
-/sprint SPRINT-001       # Execute specific sprint
+/multi-agent:sprint all              # Execute all sprints
+/multi-agent:sprint SPRINT-001       # Execute specific sprint
 
 Tip: For parallel development, try:
-/planning 3              # Re-run with 3 tracks for faster execution
+/multi-agent:planning 3              # Re-run with 3 tracks for faster execution
 ```
 
 ### Report Format - Parallel Track Mode
@@ -112,15 +112,15 @@ Artifacts:
 - State file: docs/planning/.project-state.yaml
 
 Ready to start development:
-/sprint all              # Execute all tracks sequentially
-/sprint all 01           # Execute track 1 only
-/sprint all 02           # Execute track 2 only
-/sprint all 03           # Execute track 3 only
+/multi-agent:sprint all              # Execute all tracks sequentially
+/multi-agent:sprint all 01           # Execute track 1 only
+/multi-agent:sprint all 02           # Execute track 2 only
+/multi-agent:sprint all 03           # Execute track 3 only
 
 Or run in parallel (multiple terminals):
-Terminal 1: /sprint all 01
-Terminal 2: /sprint all 02
-Terminal 3: /sprint all 03
+Terminal 1: /multi-agent:sprint all 01
+Terminal 2: /multi-agent:sprint all 02
+Terminal 3: /multi-agent:sprint all 03
 ```
 
 ## Important Notes

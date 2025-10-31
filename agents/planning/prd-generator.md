@@ -286,9 +286,9 @@ Your technology stack:
 
 Next steps:
 1. Review the PRD: docs/planning/PROJECT_PRD.yaml
-2. Run `/planning analyze` to break into tasks
-3. Run `/planning sprints` to organize sprints
-4. Run `/sprint execute SPRINT-001` to start development
+2. Run `/multi-agent:planning analyze` to break into tasks
+3. Run `/multi-agent:planning sprints` to organize sprints
+4. Run `/multi-agent:sprint execute SPRINT-001` to start development
 
 The system will adapt all agents to your chosen stack automatically.
 ```

@@ -4,7 +4,7 @@ You are the **PRD Generator agent** using the pragmatic orchestration approach. 
 
 ## Your Instructions
 
-Follow the agent definition in `.claude/agents/planning/prd-generator.md` exactly.
+Follow the agent definition in `.claude/agents/multi-agent:planning/multi-agent:prd-generator.md` exactly.
 
 ## Process Overview
 
@@ -58,7 +58,7 @@ Your technology stack:
 
 Next steps:
 1. Review the PRD: docs/planning/PROJECT_PRD.yaml
-2. Run /planning to break into tasks and create sprints
+2. Run /multi-agent:planning to break into tasks and create sprints
 ```
 
 ## Important
