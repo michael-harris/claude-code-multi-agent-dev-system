@@ -4,17 +4,36 @@ You are initiating a **Sprint Execution** using the agent-based orchestration ap
 
 ## Command Usage
 
-This command expects a sprint ID as a parameter. Example: `/sprint SPRINT-001`
+```bash
+/sprint SPRINT-001           # Execute specific sprint
+/sprint SPRINT-001-01        # Execute specific sprint in specific track
+```
+
+This command executes a single sprint. The sprint ID can be:
+- Traditional format: `SPRINT-001` (single-track mode)
+- Track format: `SPRINT-001-01` (multi-track mode, sprint 1 track 1)
 
 ## Your Process
 
 ### 1. Extract Sprint ID
-Parse the sprint ID from the command (e.g., "SPRINT-001")
+Parse the sprint ID from the command (e.g., "SPRINT-001" or "SPRINT-001-01")
 
-### 2. Validate Sprint Exists
+### 2. Determine State File Location
+- Check for project state: `docs/planning/.project-state.yaml`
+- Check for feature state: `docs/planning/.feature-*-state.yaml`
+- Check for issue state: `docs/planning/.issue-*-state.yaml`
+
+### 3. Check Sprint Status (Resume Logic)
+- Load state file
+- Check if sprint already completed:
+  - If status = "completed", warn user and ask if they want to re-run
+  - If status = "in_progress", inform user we'll resume from last completed task
+  - If status = "pending", proceed normally
+
+### 4. Validate Sprint Exists
 Check that `docs/sprints/{SPRINT-ID}.yaml` exists
 
-### 3. Launch Sprint Orchestrator Agent
+### 5. Launch Sprint Orchestrator Agent
 
 **Use the Task tool to launch the sprint-orchestrator agent:**
 
@@ -23,19 +42,31 @@ Task(
   subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
   model="opus",
   description="Execute complete sprint with quality loops",
-  prompt=`Execute sprint ${sprintId} with full agent orchestration.
+  prompt=`Execute sprint ${sprintId} with full agent orchestration and state tracking.
 
-Sprint definition is in: docs/sprints/${sprintId}.yaml
+Sprint definition: docs/sprints/${sprintId}.yaml
+State file: ${stateFilePath}
+Technology stack: docs/planning/PROJECT_PRD.yaml
+
+IMPORTANT - State Tracking & Resume:
+1. Load state file at start
+2. Check sprint status:
+   - If "completed": Skip or re-run based on user preference
+   - If "in_progress": Resume from last completed task
+   - If "pending": Start from beginning
+3. Update state after EACH task completion
+4. Update state after sprint completion
+5. Save state regularly to enable resumption
 
 Your responsibilities:
 1. Read the sprint definition and understand all tasks
-2. Execute tasks in dependency order (parallel where possible)
-3. For each task, launch the task-orchestrator agent
-4. Track completion, tier usage (T1/T2), and validation results
-5. Handle failures with proper reporting
-6. Generate sprint completion report
-
-Technology stack is in: docs/planning/PROJECT_PRD.yaml
+2. Check state file for completed tasks (skip if already done)
+3. Execute tasks in dependency order (parallel where possible)
+4. For each task, launch the task-orchestrator agent
+5. Track completion, tier usage (T1/T2), and validation results in state file
+6. Handle failures with proper reporting
+7. Generate sprint completion report
+8. Mark sprint as complete in state file
 
 Follow your agent instructions in agents/orchestration/sprint-orchestrator.md exactly.
 
