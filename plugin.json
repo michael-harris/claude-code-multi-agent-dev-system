@@ -1,7 +1,7 @@
 {
   "name": "multi-agent-dev-system",
-  "version": "2.0.0",
-  "description": "66-agent automated development system with hierarchical orchestration and T1/T2 quality tiers for full-stack development",
+  "version": "2.1.0",
+  "description": "73-agent automated development system with comprehensive quality gates, language-specific performance auditing, and workflow macros for rapid development",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [
@@ -574,6 +574,62 @@
       "model": "sonnet",
       "category": "mobile",
       "tier": "t2"
+    },
+    {
+      "id": "quality:performance-auditor-python",
+      "name": "Performance Auditor (Python)",
+      "description": "Python-specific performance analysis and optimization",
+      "file": "agents/quality/performance-auditor-python.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:performance-auditor-typescript",
+      "name": "Performance Auditor (TypeScript)",
+      "description": "TypeScript/Node.js-specific performance analysis",
+      "file": "agents/quality/performance-auditor-typescript.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:performance-auditor-java",
+      "name": "Performance Auditor (Java)",
+      "description": "Java/Spring Boot-specific performance analysis",
+      "file": "agents/quality/performance-auditor-java.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:performance-auditor-csharp",
+      "name": "Performance Auditor (C#)",
+      "description": "C#/.NET-specific performance analysis",
+      "file": "agents/quality/performance-auditor-csharp.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:performance-auditor-go",
+      "name": "Performance Auditor (Go)",
+      "description": "Go-specific performance analysis",
+      "file": "agents/quality/performance-auditor-go.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:performance-auditor-ruby",
+      "name": "Performance Auditor (Ruby)",
+      "description": "Ruby/Rails-specific performance analysis",
+      "file": "agents/quality/performance-auditor-ruby.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:performance-auditor-php",
+      "name": "Performance Auditor (PHP)",
+      "description": "PHP/Laravel-specific performance analysis",
+      "file": "agents/quality/performance-auditor-php.md",
+      "model": "sonnet",
+      "category": "quality"
     }
   ],
   "commands": [
@@ -591,6 +647,21 @@
       "name": "/sprint",
       "description": "Execute a sprint with full agent orchestration",
       "file": "commands/sprint.md"
+    },
+    {
+      "name": "/sprint all",
+      "description": "Execute all sprints sequentially with comprehensive final review",
+      "file": "commands/sprint-all.md"
+    },
+    {
+      "name": "/feature",
+      "description": "Complete feature workflow: PRD → Planning → Implementation",
+      "file": "commands/feature.md"
+    },
+    {
+      "name": "/issue",
+      "description": "Complete bug fix workflow from issue to resolution",
+      "file": "commands/issue.md"
     }
   ]
 }

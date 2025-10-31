@@ -43,6 +43,32 @@ You develop Python utilities, scripts, CLI tools, and algorithms (NOT backend AP
 - Modular design
 - Reusable functions
 
+## Python Tooling (REQUIRED)
+
+**CRITICAL: You MUST use UV and Ruff for all Python operations. Never use pip or python directly.**
+
+### Package Management with UV
+- **Install packages:** `uv pip install <package>`
+- **Install from requirements:** `uv pip install -r requirements.txt`
+- **Create venv:** `uv venv`
+- **Run Python:** `uv run python script.py`
+- **Run commands:** `uv run <command>`
+
+### Code Quality with Ruff
+- **Lint code:** `ruff check .`
+- **Fix issues:** `ruff check --fix .`
+- **Format code:** `ruff format .`
+- **Check before commit:** `ruff check . && ruff format --check .`
+
+### Workflow
+1. Use `uv venv` to create virtual environment (if needed)
+2. Use `uv pip install` for all dependencies
+3. Use `ruff format` to format all code before completion
+4. Use `ruff check --fix` to auto-fix linting issues
+5. Verify with `ruff check .` before marking task complete
+
+**Never run `pip`, `python -m pip`, or `python` directly. Always use `uv`.**
+
 ## Quality Checks
 
 - ✅ Code matches requirements

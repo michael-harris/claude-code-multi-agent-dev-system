@@ -8,10 +8,13 @@
 ### Code Quality
 - ✅ Type hints used consistently
 - ✅ Docstrings for all functions
-- ✅ PEP 8 style guide followed
+- ✅ PEP 8 style guide followed (check with `ruff check .`)
+- ✅ Code formatted with Ruff (`ruff format --check .`)
 - ✅ No code duplication
 - ✅ Functions are single-purpose
 - ✅ Appropriate async/await usage
+- ✅ Dependencies use UV (check requirements.txt and scripts)
+- ✅ No direct `pip` or `python` commands (must use `uv`)
 
 ### Security
 - ✅ No SQL injection vulnerabilities
