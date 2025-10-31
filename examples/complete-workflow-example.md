@@ -16,7 +16,7 @@ This example shows the complete multi-agent workflow from idea to deployment.
 
 ### Command
 ```
-/prd
+/multi-agent:prd
 ```
 
 ### Interactive Session
@@ -107,7 +107,7 @@ requirements:
 
 ### Command
 ```
-/planning
+/multi-agent:planning
 ```
 
 ### What Happens
@@ -183,7 +183,7 @@ tasks:
 
 ### Command
 ```
-/sprint SPRINT-001
+/multi-agent:sprint SPRINT-001
 ```
 
 ### Detailed Execution Flow
@@ -408,13 +408,13 @@ Sprint Summary:
 ## Phase 4: Continue with Remaining Sprints
 
 ```bash
-/sprint SPRINT-002
+/multi-agent:sprint SPRINT-002
 ```
 
 *Similar detailed workflow for core task management features*
 
 ```bash
-/sprint SPRINT-003
+/multi-agent:sprint SPRINT-003
 ```
 
 *Real-time features and polish*
@@ -514,4 +514,4 @@ TaskFlow/
 - Deploy to production
 - Set up CI/CD pipeline
 - Configure monitoring and logging
-- Plan feature roadmap (use /prd again!)
+- Plan feature roadmap (use /multi-agent:prd again!)

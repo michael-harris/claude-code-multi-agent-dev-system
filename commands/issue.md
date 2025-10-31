@@ -4,15 +4,15 @@ You are implementing a **complete issue resolution workflow** from bug report to
 
 ## Command Usage
 
-`/issue [issue description or GitHub issue URL]` - Complete bug fix workflow
-`/issue [issue description] --tracks N` - Same workflow with N parallel tracks (rare for small issues)
+`/multi-agent:issue [issue description or GitHub issue URL]` - Complete bug fix workflow
+`/multi-agent:issue [issue description] --tracks N` - Same workflow with N parallel tracks (rare for small issues)
 
 Examples:
-- `/issue https://github.com/user/repo/issues/123`
-- `/issue Fix memory leak in WebSocket handler`
-- `/issue Users can't login after password reset`
-- `/issue API returns 500 error for /users endpoint with pagination`
-- `/issue Refactor authentication system for better performance --tracks 2`
+- `/multi-agent:issue https://github.com/user/repo/issues/123`
+- `/multi-agent:issue Fix memory leak in WebSocket handler`
+- `/multi-agent:issue Users can't login after password reset`
+- `/multi-agent:issue API returns 500 error for /users endpoint with pagination`
+- `/multi-agent:issue Refactor authentication system for better performance --tracks 2`
 
 Note: Most issues are small enough that tracks=1 (default) is sufficient. Parallel tracks are useful only for large, complex issues that span multiple independent components.
 
@@ -277,7 +277,7 @@ Include: Before/after benchmarks
 
 ### Enhancement/Small Feature
 ```
-(Consider using /feature instead)
+(Consider using /multi-agent:feature instead)
 This command better for: Quick fixes, small improvements
 ```
 
@@ -326,9 +326,9 @@ Issue affects:
 - Database queries (performance)
 
 Recommendation:
-1. Use /issue for WebSocket fix (blocking)
-2. Use /issue for React component separately
-3. Use /feature for query optimization (larger scope)
+1. Use /multi-agent:issue for WebSocket fix (blocking)
+2. Use /multi-agent:issue for React component separately
+3. Use /multi-agent:feature for query optimization (larger scope)
 
 Or proceed as single complex issue? (y/n)
 ```
@@ -337,26 +337,26 @@ Or proceed as single complex issue? (y/n)
 
 **With GitHub CLI:**
 ```
-/issue https://github.com/myorg/myrepo/issues/456
+/multi-agent:issue https://github.com/myorg/myrepo/issues/456
 (Automatically fetches details, closes issue when fixed)
 ```
 
 **Security issue:**
 ```
-/issue CRITICAL: SQL injection in /api/users endpoint
+/multi-agent:issue CRITICAL: SQL injection in /api/users endpoint
 (System prioritizes, uses T2 agents, runs security audit)
 ```
 
 **Performance issue:**
 ```
-/issue API response time degraded from 200ms to 3000ms
+/multi-agent:issue API response time degraded from 200ms to 3000ms
 (System profiles, identifies bottleneck, optimizes)
 ```
 
 ## Workflow Diagram
 
 ```
-User: /issue Fix login timeout
+User: /multi-agent:issue Fix login timeout
 
     ↓
 1. Analyze Issue

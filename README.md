@@ -224,19 +224,19 @@ cd claude-code-multi-agent-dev-system
 
 ```bash
 # 1. Generate PRD
-/prd
+/multi-agent:prd
 # Interactive interview to create comprehensive PRD
 # Output: docs/planning/PROJECT_PRD.yaml
 
 # 2. Create tasks and sprints
-/planning
+/multi-agent:planning
 # Breaks PRD into tasks with dependencies
 # Organizes tasks into sprints
 # Output: docs/planning/tasks/TASK-*.yaml
 #         docs/sprints/SPRINT-*.yaml
 
 # 3. Execute sprint
-/sprint SPRINT-001
+/multi-agent:sprint SPRINT-001
 # Automated execution with quality loops
 # T1 attempts first, escalates to T2 if needed
 # Requirements validator ensures 100% criteria met
@@ -247,35 +247,35 @@ cd claude-code-multi-agent-dev-system
 ```javascript
 // Design database schema
 Task(
-  subagent_type="multi-agent-dev-system:database:designer",
+  subagent_type="multi-agent:database:designer",
   model="opus",
   prompt="Design schema for user authentication with roles and permissions"
 )
 
 // Implement schema (T1 attempt)
 Task(
-  subagent_type="multi-agent-dev-system:database:developer-python-t1",
+  subagent_type="multi-agent:database:developer-python-t1",
   model="haiku",
   prompt="Implement the schema design from docs/api/database-schema.yaml using SQLAlchemy"
 )
 
 // If T1 fails validation, escalate to T2
 Task(
-  subagent_type="multi-agent-dev-system:database:developer-python-t2",
+  subagent_type="multi-agent:database:developer-python-t2",
   model="sonnet",
   prompt="Fix the implementation issues identified by the validator"
 )
 
 // Design API
 Task(
-  subagent_type="multi-agent-dev-system:backend:api-designer",
+  subagent_type="multi-agent:backend:api-designer",
   model="opus",
   prompt="Design REST API for user management"
 )
 
 // Security audit
 Task(
-  subagent_type="multi-agent-dev-system:quality:security-auditor",
+  subagent_type="multi-agent:quality:security-auditor",
   model="opus",
   prompt="Audit the authentication implementation for OWASP Top 10 vulnerabilities"
 )
@@ -301,12 +301,12 @@ All planning and execution workflows now include automatic progress tracking via
 **Example:**
 ```bash
 # Start sprint execution
-/sprint all
+/multi-agent:sprint all
 
 # ... system interrupted at SPRINT-003 ...
 
 # Resume from where you left off
-/sprint all
+/multi-agent:sprint all
 # System: "Resuming from SPRINT-003 (SPRINT-001, SPRINT-002 already complete)"
 ```
 
@@ -316,20 +316,20 @@ Enable parallel development across independent task chains to dramatically reduc
 
 **Single Track (Default):**
 ```bash
-/planning           # Creates sprints: SPRINT-001, SPRINT-002, SPRINT-003
-/sprint all         # Sequential execution: ~128 hours
+/multi-agent:planning           # Creates sprints: SPRINT-001, SPRINT-002, SPRINT-003
+/multi-agent:sprint all         # Sequential execution: ~128 hours
 ```
 
 **Parallel Tracks (Fast):**
 ```bash
-/planning 3         # Creates parallel tracks: SPRINT-001-01, SPRINT-001-02, SPRINT-001-03
-                    # System calculates max possible tracks from dependencies
-                    # Example output: "Requested 3 tracks, max possible is 3. Using 3 tracks."
+/multi-agent:planning 3         # Creates parallel tracks: SPRINT-001-01, SPRINT-001-02, SPRINT-001-03
+                                # System calculates max possible tracks from dependencies
+                                # Example output: "Requested 3 tracks, max possible is 3. Using 3 tracks."
 
 # Execute all tracks in parallel (different terminals/sessions):
-/sprint all 01      # Terminal 1: Track 1 (~42 hours)
-/sprint all 02      # Terminal 2: Track 2 (~48 hours)
-/sprint all 03      # Terminal 3: Track 3 (~38 hours)
+/multi-agent:sprint all 01      # Terminal 1: Track 1 (~42 hours)
+/multi-agent:sprint all 02      # Terminal 2: Track 2 (~48 hours)
+/multi-agent:sprint all 03      # Terminal 3: Track 3 (~38 hours)
 
 # Result: ~48 hours (62% faster than sequential)
 ```
@@ -360,7 +360,7 @@ Enable parallel development across independent task chains to dramatically reduc
 ### Hierarchical Orchestration
 
 ```
-User → /prd, /planning, /sprint commands
+User → /multi-agent:prd, /multi-agent:planning, /multi-agent:sprint commands
    ↓
 Sprint Orchestrator (Opus) - Manages entire sprint
    ↓

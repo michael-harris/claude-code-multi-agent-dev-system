@@ -192,7 +192,7 @@ Sprints:
 Total: 19 tasks, ~128 hours of development
 
 Ready to execute:
-/sprint all
+/multi-agent:sprint all
 ```
 
 ### Parallel Track Mode
@@ -225,17 +225,17 @@ State tracking initialized at: docs/planning/.project-state.yaml
 
 Ready to execute:
 Option 1 - All tracks sequentially:
-  /sprint all
+  /multi-agent:sprint all
 
 Option 2 - Specific track:
-  /sprint all 01    (Track 1 only)
-  /sprint all 02    (Track 2 only)
-  /sprint all 03    (Track 3 only)
+  /multi-agent:sprint all 01    (Track 1 only)
+  /multi-agent:sprint all 02    (Track 2 only)
+  /multi-agent:sprint all 03    (Track 3 only)
 
 Option 3 - Parallel execution (multiple terminals):
-  Terminal 1: /sprint all 01
-  Terminal 2: /sprint all 02
-  Terminal 3: /sprint all 03
+  Terminal 1: /multi-agent:sprint all 01
+  Terminal 2: /multi-agent:sprint all 02
+  Terminal 3: /multi-agent:sprint all 03
 ```
 
 ## Quality Checks

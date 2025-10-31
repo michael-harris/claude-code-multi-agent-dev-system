@@ -5,8 +5,8 @@ You are initiating a **Sprint Execution** using the agent-based orchestration ap
 ## Command Usage
 
 ```bash
-/sprint SPRINT-001           # Execute specific sprint
-/sprint SPRINT-001-01        # Execute specific sprint in specific track
+/multi-agent:sprint SPRINT-001           # Execute specific sprint
+/multi-agent:sprint SPRINT-001-01        # Execute specific sprint in specific track
 ```
 
 This command executes a single sprint. The sprint ID can be:
@@ -68,7 +68,7 @@ Your responsibilities:
 7. Generate sprint completion report
 8. Mark sprint as complete in state file
 
-Follow your agent instructions in agents/orchestration/sprint-orchestrator.md exactly.
+Follow your agent instructions in agents/orchestration/multi-agent:sprint-orchestrator.md exactly.
 
 Provide regular status updates to the user at each task completion.`
 )
@@ -113,20 +113,20 @@ If sprint file doesn't exist:
 ```
 Error: Sprint definition not found at docs/sprints/${sprintId}.yaml
 
-Have you run `/planning` to create sprints from your PRD?
+Have you run `/multi-agent:planning` to create sprints from your PRD?
 ```
 
 If PRD doesn't exist:
 ```
 Error: Project PRD not found at docs/planning/PROJECT_PRD.yaml
 
-Please run `/prd` first to create your project requirements document.
+Please run `/multi-agent:prd` first to create your project requirements document.
 ```
 
 ## Example Flow
 
 ```
-User: /sprint SPRINT-001
+User: /multi-agent:sprint SPRINT-001
 
 You: Starting execution of SPRINT-001 via sprint-orchestrator agent...
 

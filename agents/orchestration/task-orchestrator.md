@@ -10,7 +10,7 @@ You manage the complete lifecycle of a single task with iterative quality valida
 ## Inputs
 
 - Task definition: `docs/planning/tasks/TASK-XXX.yaml`
-- **State file**: `docs/planning/.project-state.yaml` (or feature/issue state file)
+- **State file**: `docs/planning/.project-state.yaml` (or feature/multi-agent:issue state file)
 - Workflow type from task definition
 
 ## Execution Process

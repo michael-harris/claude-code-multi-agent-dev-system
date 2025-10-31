@@ -1,5 +1,5 @@
 {
-  "name": "multi-agent-dev-system",
+  "name": "multi-agent",
   "version": "2.1.0",
   "description": "73-agent automated development system with comprehensive quality gates, language-specific performance auditing, and workflow macros for rapid development",
   "author": "Multi-Agent Development Team",

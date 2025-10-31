@@ -25,9 +25,9 @@ Your multi-agent development system has been successfully converted into a profe
 - ✅ Quality (3): test-writer, security-auditor, documentation-coordinator
 
 **3 Workflow Commands:**
-- ✅ `/prd` - Generate comprehensive PRD
-- ✅ `/planning` - Break into tasks and sprints
-- ✅ `/sprint` - Execute sprint with orchestrator (NEW: agent-based)
+- ✅ `/multi-agent:prd` - Generate comprehensive PRD
+- ✅ `/multi-agent:planning` - Break into tasks and sprints
+- ✅ `/multi-agent:sprint` - Execute sprint with orchestrator (NEW: agent-based)
 
 **Documentation:**
 - ✅ README.md - Complete plugin documentation
@@ -53,7 +53,7 @@ Your multi-agent development system has been successfully converted into a profe
 
 **Result:** All files now have explicit model specs (haiku/sonnet)
 
-### 2. Updated /sprint Command (NEW: Agent-Based Orchestration)
+### 2. Updated /multi-agent:sprint Command (NEW: Agent-Based Orchestration)
 **Before:** Manual orchestration by main Claude
 **After:** Launches sprint-orchestrator agent (Opus)
 
@@ -175,14 +175,14 @@ mkdir ~/test-multi-agent-plugin
 cd ~/test-multi-agent-plugin
 
 # Generate PRD
-/prd
+/multi-agent:prd
 # Input: "Build a simple todo list"
 
 # Plan project
-/planning
+/multi-agent:planning
 
 # Execute sprint
-/sprint SPRINT-001
+/multi-agent:sprint SPRINT-001
 ```
 
 ---
@@ -287,7 +287,7 @@ User → Main Claude → sprint-orchestrator → task-orchestrator → specializ
 - `INSTALLATION.md` - Setup and quick start guide
 
 **Agents (27 files):**
-- `agents/planning/*.md` (3 files)
+- `agents/multi-agent:planning/*.md` (3 files)
 - `agents/orchestration/*.md` (3 files)
 - `agents/database/*.md` (5 files)
 - `agents/backend/*.md` (7 files)
@@ -296,9 +296,9 @@ User → Main Claude → sprint-orchestrator → task-orchestrator → specializ
 - `agents/quality/*.md` (3 files)
 
 **Commands (3 files):**
-- `commands/prd.md`
-- `commands/planning.md`
-- `commands/sprint.md` (Updated to launch orchestrator)
+- `commands/multi-agent:prd.md`
+- `commands/multi-agent:planning.md`
+- `commands/multi-agent:sprint.md` (Updated to launch orchestrator)
 
 **Examples (2 files):**
 - `examples/complete-workflow-example.md` - Full project walkthrough
@@ -339,11 +339,11 @@ Task(
 ### 3. Test Full Workflow (30 minutes)
 
 ```bash
-/prd
+/multi-agent:prd
 # Input: "Build a blog"
 
-/planning
-/sprint SPRINT-001
+/multi-agent:planning
+/multi-agent:sprint SPRINT-001
 ```
 
 ### 4. Publish to GitHub (Optional, 10 minutes)
@@ -355,7 +355,7 @@ Follow instructions in INSTALLATION.md
 ```bash
 cd ~/your-actual-project
 /plugin install multi-agent-dev-system
-/prd
+/multi-agent:prd
 ```
 
 ---
@@ -396,7 +396,7 @@ All completed:
 - [x] plugin.json with 27 agents generated
 - [x] All agent files copied (27 files)
 - [x] All bash syntax fixed (12 files)
-- [x] /sprint command updated to launch orchestrator
+- [x] /multi-agent:sprint command updated to launch orchestrator
 - [x] Commands copied (3 files)
 - [x] README.md created
 - [x] INSTALLATION.md created
@@ -482,7 +482,7 @@ Your multi-agent development system is now a professional, reusable Claude Code 
 **Start building:**
 ```bash
 /plugin install multi-agent-dev-system
-/prd
+/multi-agent:prd
 ```
 
 **Happy automated coding!** 🚀
