@@ -4,49 +4,117 @@ You are orchestrating **multi-sprint execution** using the agent-based approach.
 
 ## Command Usage
 
-`/sprint all` - Executes all sprints sequentially until project completion
+```bash
+/sprint all        # Execute all sprints (all tracks) sequentially
+/sprint all 01     # Execute all sprints in track 1 only
+/sprint all 02     # Execute all sprints in track 2 only
+/sprint all 03     # Execute all sprints in track 3 only
+```
+
+Executes all sprints sequentially until completion. Supports track filtering for parallel development workflows.
 
 ## Your Process
 
-### 1. Project State Analysis
+### Step 0: Parse Parameters
+
+Extract track number from command (if specified):
+- If no parameter: execute all tracks sequentially
+- If parameter (e.g., "01", "02"): execute only that track
+
+### Step 1: Load State File
+
+**Determine state file location:**
+- Check `docs/planning/.project-state.yaml`
+- Check `docs/planning/.feature-*-state.yaml`
+- Check `docs/planning/.issue-*-state.yaml`
+
+**If state file doesn't exist:**
+- Create initial state file with all sprints marked "pending"
+- Initialize track configuration from sprint files
+
+**If state file exists:**
+- Load current progress
+- Identify completed vs pending sprints
+- Determine resume point
+
+### Step 2: Project State Analysis
 
 **Check Sprint Files:**
 ```bash
 ls docs/sprints/
 ```
 
-**Determine Sprint Status:**
-- Read each `SPRINT-XXX.yaml` file
-- Check for completion markers (if any)
-- Identify which sprint to start from
-- Count total sprints to execute
+**Filter by track (if specified):**
+- If track specified: filter to only sprints matching that track
+- Example: track=01 → only `SPRINT-*-01.yaml` files
+
+**Determine Sprint Status from State File:**
+- For each sprint in scope:
+  - Check state.sprints[sprintId].status
+  - "completed" → skip
+  - "in_progress" → resume from last completed task
+  - "pending" → execute normally
+- Count total sprints to execute vs already completed
 
 **Check PRD Exists:**
-- Verify `docs/planning/PROJECT_PRD.yaml` exists
+- Verify `docs/planning/PROJECT_PRD.yaml` exists (or feature/issue PRD)
 - If missing, instruct user to run `/prd` first
 
-### 2. Sequential Sprint Execution
+**Resume Point Determination:**
+```python
+# Pseudocode
+if track_specified:
+    sprints_in_track = filter(sprint for sprint in state.sprints if sprint.track == track_number)
+    resume_sprint = find_first_non_completed(sprints_in_track)
+else:
+    resume_sprint = find_first_non_completed(state.sprints)
 
-For each sprint (SPRINT-001, SPRINT-002, etc.):
+if resume_sprint:
+    print(f"Resuming from {resume_sprint} (previous sprints already complete)")
+else:
+    print("All sprints already complete!")
+    return
+```
+
+### 3. Sequential Sprint Execution
+
+For each sprint in scope (filtered by track if specified):
+
+**Skip if already completed:**
+- Check state file: if sprint status = "completed", skip to next sprint
+- Log: "SPRINT-XXX-YY already completed. Skipping."
+
+**Execute if pending or in_progress:**
 
 ```javascript
 Task(
   subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
   model="opus",
   description=`Execute sprint ${sprintId} with full quality gates`,
-  prompt=`Execute sprint ${sprintId} completely.
+  prompt=`Execute sprint ${sprintId} completely with state tracking.
 
 Sprint definition: docs/sprints/${sprintId}.yaml
-PRD reference: docs/planning/PROJECT_PRD.yaml
+State file: ${stateFilePath}
+PRD reference: docs/planning/PROJECT_PRD.yaml or FEATURE_*_PRD.yaml
+
+IMPORTANT - State Tracking:
+1. Load state file at start
+2. Check sprint and task status
+3. Skip completed tasks (resume from last incomplete task)
+4. Update state after EACH task completion
+5. Update state after sprint completion
+6. Save state regularly
 
 Your responsibilities:
 1. Read sprint definition
-2. Execute all tasks in dependency order
-3. Run task-orchestrator for each task
-4. Track completion and tier usage
-5. Run FULL final code review (code, security, performance)
-6. Update documentation
-7. Generate sprint completion report
+2. Load state and check for resume point
+3. Execute tasks in dependency order (skip completed tasks)
+4. Run task-orchestrator for each task
+5. Track completion and tier usage in state file
+6. Run FULL final code review (code, security, performance)
+7. Update documentation
+8. Generate sprint completion report
+9. Mark sprint as completed in state file
 
 Continue to next sprint only if THIS sprint completes successfully.
 
@@ -55,9 +123,10 @@ Provide updates at each task completion and final summary.`
 ```
 
 **Between Sprints:**
-- Verify previous sprint completed successfully
+- Verify previous sprint completed successfully (check state file)
 - Check all quality gates passed
 - Confirm no critical issues remaining
+- State file automatically updated
 - Brief pause to log progress
 
 ### 3. Final Project Review (After All Sprints)

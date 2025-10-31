@@ -5,12 +5,16 @@ You are implementing a **complete issue resolution workflow** from bug report to
 ## Command Usage
 
 `/issue [issue description or GitHub issue URL]` - Complete bug fix workflow
+`/issue [issue description] --tracks N` - Same workflow with N parallel tracks (rare for small issues)
 
 Examples:
 - `/issue https://github.com/user/repo/issues/123`
 - `/issue Fix memory leak in WebSocket handler`
 - `/issue Users can't login after password reset`
 - `/issue API returns 500 error for /users endpoint with pagination`
+- `/issue Refactor authentication system for better performance --tracks 2`
+
+Note: Most issues are small enough that tracks=1 (default) is sufficient. Parallel tracks are useful only for large, complex issues that span multiple independent components.
 
 ## Your Process
 

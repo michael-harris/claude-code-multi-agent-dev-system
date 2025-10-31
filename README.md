@@ -274,6 +274,80 @@ Task(
 )
 ```
 
+## Progress Tracking & Parallel Development
+
+### Progress Tracking (Resume Functionality)
+
+All planning and execution workflows now include automatic progress tracking via state files:
+
+**State Files:**
+- Projects: `docs/planning/.project-state.yaml`
+- Features: `docs/planning/.feature-{id}-state.yaml`
+- Issues: `docs/planning/.issue-{id}-state.yaml`
+
+**Resume Capabilities:**
+- System tracks completion status of all tasks and sprints
+- Automatically skips completed work when resuming
+- Resume from any interruption point (system crash, manual stop, etc.)
+- State files provide detailed audit trail of development progress
+
+**Example:**
+```bash
+# Start sprint execution
+/sprint all
+
+# ... system interrupted at SPRINT-003 ...
+
+# Resume from where you left off
+/sprint all
+# System: "Resuming from SPRINT-003 (SPRINT-001, SPRINT-002 already complete)"
+```
+
+### Parallel Development Tracks
+
+Enable parallel development across independent task chains to dramatically reduce development time:
+
+**Single Track (Default):**
+```bash
+/planning           # Creates sprints: SPRINT-001, SPRINT-002, SPRINT-003
+/sprint all         # Sequential execution: ~128 hours
+```
+
+**Parallel Tracks (Fast):**
+```bash
+/planning 3         # Creates parallel tracks: SPRINT-001-01, SPRINT-001-02, SPRINT-001-03
+                    # System calculates max possible tracks from dependencies
+                    # Example output: "Requested 3 tracks, max possible is 3. Using 3 tracks."
+
+# Execute all tracks in parallel (different terminals/sessions):
+/sprint all 01      # Terminal 1: Track 1 (~42 hours)
+/sprint all 02      # Terminal 2: Track 2 (~48 hours)
+/sprint all 03      # Terminal 3: Track 3 (~38 hours)
+
+# Result: ~48 hours (62% faster than sequential)
+```
+
+**How It Works:**
+1. **Task Graph Analyzer** calculates max parallel tracks from dependency analysis
+2. **Sprint Planner** distributes tasks across tracks using balanced bin-packing algorithm
+3. Each track contains independent task chains that can execute simultaneously
+4. If requested tracks > max possible, system uses max and warns user
+
+**Benefits:**
+- 50-70% reduction in wall-clock development time
+- Ideal for projects with independent components (backend, frontend, infrastructure)
+- State tracking enables resumption for any track independently
+- Perfect for team collaboration (different tracks = different team members)
+
+### Development History Preservation
+
+**Sprint and task files are intentionally preserved:**
+- Provides complete development history and audit trail
+- Shows decision-making process and evolution of requirements
+- Valuable for debugging, rollback, and understanding context
+- Can be manually removed if desired, but recommended to keep
+- `.gitignore` can exclude state files (`.*.yaml`) if desired while keeping sprint definitions
+
 ## Architecture
 
 ### Hierarchical Orchestration

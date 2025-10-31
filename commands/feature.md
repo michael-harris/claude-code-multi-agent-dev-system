@@ -5,13 +5,23 @@ You are implementing a **complete feature workflow** from description to deliver
 ## Command Usage
 
 `/feature [feature description]` - Complete workflow: PRD → Planning → Implementation
+`/feature [feature description] --tracks N` - Same workflow with N parallel development tracks
 
 Examples:
 - `/feature Add user authentication with OAuth and 2FA`
 - `/feature Implement real-time notifications using WebSockets`
-- `/feature Create analytics dashboard with charts and exports`
+- `/feature Create analytics dashboard with charts and exports --tracks 2`
+- `/feature Build ML recommendation engine --tracks 3`
+
+The `--tracks` parameter is optional. If not specified, single-track mode is used.
 
 ## Your Process
+
+### Step 0: Parse Parameters
+
+Extract parameters from the command:
+- Feature description (required)
+- Number of tracks (optional, from `--tracks N`, default: 1)
 
 This is a **macro command** that orchestrates the complete development lifecycle.
 
@@ -63,6 +73,7 @@ Create tasks in: docs/planning/tasks/
 Prefix task IDs with FEATURE-${featureId}-
 
 Identify dependencies and create dependency graph.
+Calculate maximum possible parallel development tracks.
 Keep tasks small (1-2 days each).
 `
 )
@@ -76,10 +87,17 @@ Task(
 
 Tasks: docs/planning/tasks/FEATURE-${featureId}-*
 Dependencies: docs/planning/task-dependency-graph.md
+Requested parallel tracks: ${requestedTracks}
 
-Create sprints: docs/sprints/FEATURE_${featureId}_SPRINT-XXX.yaml
+If tracks > 1:
+  Create sprints: docs/sprints/FEATURE_${featureId}_SPRINT-XXX-YY.yaml
+  Initialize state file: docs/planning/.feature-${featureId}-state.yaml
+If tracks = 1:
+  Create sprints: docs/sprints/FEATURE_${featureId}_SPRINT-XXX.yaml
+  Initialize state file: docs/planning/.feature-${featureId}-state.yaml
 
 Balance sprint capacity and respect dependencies.
+If requested tracks > max possible, use max possible and warn user.
 `
 )
 ```
@@ -95,18 +113,29 @@ Task(
   prompt=`Execute ALL sprints for feature ${featureId} sequentially:
 
 Sprint files: docs/sprints/FEATURE_${featureId}_SPRINT-*.yaml
+State file: docs/planning/.feature-${featureId}-state.yaml
+
+IMPORTANT - Progress Tracking:
+1. Load state file at start
+2. Check for resume point (skip completed sprints)
+3. Update state after each sprint/task completion
+4. Enable resumption if interrupted
 
 For each sprint:
-1. Execute all tasks with task-orchestrator
-2. Run final code review (code, security, performance)
-3. Update documentation
-4. Generate sprint report
+1. Check state file - skip if already completed
+2. Execute all tasks with task-orchestrator
+3. Update task status in state file after each completion
+4. Run final code review (code, security, performance)
+5. Update documentation
+6. Mark sprint as completed in state file
+7. Generate sprint report
 
 After all sprints:
 5. Run comprehensive feature review
 6. Verify integration with existing system
 7. Update project documentation
 8. Generate feature completion report
+9. Mark feature as complete in state file
 
 Do NOT proceed to next sprint unless current sprint passes all quality gates.
 `
