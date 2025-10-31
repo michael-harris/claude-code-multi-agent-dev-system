@@ -34,7 +34,7 @@
       "name": "Sprint Orchestrator",
       "description": "Manages entire sprint execution and coordinates task orchestrator",
       "file": "agents/orchestration/sprint-orchestrator.md",
-      "model": "opus",
+      "model": "sonnet",
       "category": "orchestration"
     },
     {
@@ -50,7 +50,7 @@
       "name": "Requirements Validator",
       "description": "Quality gate with strict acceptance criteria validation",
       "file": "agents/orchestration/requirements-validator.md",
-      "model": "opus",
+      "model": "sonnet",
       "category": "orchestration"
     },
     {
@@ -58,7 +58,7 @@
       "name": "Database Designer",
       "description": "Designs normalized database schemas (language-agnostic)",
       "file": "agents/database/database-designer.md",
-      "model": "opus",
+      "model": "sonnet",
       "category": "database"
     },
     {
@@ -192,7 +192,7 @@
       "name": "API Designer",
       "description": "Designs RESTful API specifications with OpenAPI",
       "file": "agents/backend/api-designer.md",
-      "model": "opus",
+      "model": "sonnet",
       "category": "backend"
     },
     {
@@ -382,7 +382,7 @@
       "name": "Frontend Designer",
       "description": "Designs UI/UX with component specifications",
       "file": "agents/frontend/frontend-designer.md",
-      "model": "opus",
+      "model": "sonnet",
       "category": "frontend"
     },
     {
@@ -442,7 +442,7 @@
       "name": "Security Auditor",
       "description": "Performs security audits and vulnerability scanning",
       "file": "agents/quality/security-auditor.md",
-      "model": "opus",
+      "model": "sonnet",
       "category": "quality"
     },
     {

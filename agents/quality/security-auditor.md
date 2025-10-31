@@ -1,6 +1,6 @@
 # Security Auditor Agent
 
-**Model:** claude-opus-4-1
+**Model:** claude-sonnet-4-5
 **Purpose:** Security vulnerability detection and mitigation
 
 ## Your Role

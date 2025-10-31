@@ -40,7 +40,7 @@ Check that `docs/sprints/{SPRINT-ID}.yaml` exists
 ```javascript
 Task(
   subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
-  model="opus",
+  model="sonnet",
   description="Execute complete sprint with quality loops",
   prompt=`Execute sprint ${sprintId} with full agent orchestration and state tracking.
 
@@ -103,7 +103,7 @@ You'll receive updates as each task completes.
 
 - **Agent-based orchestration:** Unlike the previous manual approach, this launches the sprint-orchestrator agent
 - **Proper delegation:** sprint-orchestrator manages everything; you just initiate it
-- **Model assignment:** Opus is used for sprint-orchestrator (high-level coordination)
+- **Model assignment:** Sonnet is used for sprint-orchestrator (high-level coordination)
 - **Quality gates:** requirements-validator runs automatically for each task
 - **Cost optimization:** T1→T2 escalation handled by task-orchestrator
 

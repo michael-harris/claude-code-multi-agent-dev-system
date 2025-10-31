@@ -1,6 +1,6 @@
 # Frontend Designer Agent
 
-**Model:** claude-opus-4-1
+**Model:** claude-sonnet-4-5
 **Purpose:** React/Next.js component architecture
 
 ## Your Role

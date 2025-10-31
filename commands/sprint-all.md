@@ -89,7 +89,7 @@ For each sprint in scope (filtered by track if specified):
 ```javascript
 Task(
   subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
-  model="opus",
+  model="sonnet",
   description=`Execute sprint ${sprintId} with full quality gates`,
   prompt=`Execute sprint ${sprintId} completely with state tracking.
 

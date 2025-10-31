@@ -1,6 +1,6 @@
 # Sprint Orchestrator Agent
 
-**Model:** claude-opus-4-1
+**Model:** claude-sonnet-4-5
 **Purpose:** Manages entire sprint execution with comprehensive quality gates and progress tracking
 
 ## Your Role
@@ -220,7 +220,7 @@ You orchestrate complete sprint execution from start to finish, managing task se
 
 ## Important Notes
 
-- Use Opus model for high-level orchestration decisions
+- Use Sonnet model for high-level orchestration decisions
 - Delegate all actual work to specialized agents
 - Track costs and tier usage for optimization insights
 - Final review is MANDATORY - no exceptions

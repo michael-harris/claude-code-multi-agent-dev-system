@@ -108,7 +108,7 @@ If requested tracks > max possible, use max possible and warn user.
 ```javascript
 Task(
   subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
-  model="opus",
+  model="sonnet",
   description="Execute all feature sprints",
   prompt=`Execute ALL sprints for feature ${featureId} sequentially:
 
