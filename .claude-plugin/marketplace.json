@@ -1,0 +1,53 @@
+{
+  "name": "multi-agent-dev-system",
+  "displayName": "Multi-Agent Development System",
+  "version": "2.1.0",
+  "description": "73-agent automated development system with comprehensive quality gates, language-specific performance auditing, progress tracking, and parallel development for rapid full-stack development across 7 programming languages",
+  "author": "Multi-Agent Development Team",
+  "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
+  "license": "MIT",
+  "tags": [
+    "development",
+    "automation",
+    "multi-language",
+    "python",
+    "typescript",
+    "java",
+    "csharp",
+    "go",
+    "ruby",
+    "php",
+    "mobile",
+    "devops",
+    "full-stack",
+    "orchestration",
+    "quality-gates",
+    "testing",
+    "security",
+    "performance"
+  ],
+  "categories": [
+    "Development",
+    "Automation",
+    "Code Quality",
+    "DevOps"
+  ],
+  "pluginFile": "plugin.json",
+  "readme": "README.md",
+  "features": [
+    "73 specialized AI agents with T1/T2 cost optimization",
+    "7 programming languages: Python, TypeScript, Java, C#, Go, Ruby, PHP",
+    "Progress tracking with automatic resume functionality",
+    "Parallel development tracks for 50-70% faster execution",
+    "Comprehensive quality gates (security, performance, testing)",
+    "Mobile development (iOS Swift, Android Kotlin)",
+    "DevOps automation (Docker, Kubernetes, CI/CD, Terraform)",
+    "Language-specific performance auditing"
+  ],
+  "requirements": {
+    "claudeCode": ">=1.0.0"
+  },
+  "homepage": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
+  "bugs": "https://github.com/michael-harris/claude-code-multi-agent-dev-system/issues",
+  "documentation": "https://github.com/michael-harris/claude-code-multi-agent-dev-system#readme"
+}
