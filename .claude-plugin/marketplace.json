@@ -16,7 +16,7 @@
         "name": "Multi-Agent Development Team",
         "email": "michael-harris@users.noreply.github.com"
       },
-      "source": ".",
+      "source": "./",
       "category": "development",
       "tags": [
         "development",
