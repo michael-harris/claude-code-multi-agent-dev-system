@@ -1,15 +1,23 @@
 {
-  "owner": "michael-harris",
-  "contact": "michael-harris@users.noreply.github.com",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "multi-agent-dev-marketplace",
+  "version": "2.1.0",
+  "description": "Marketplace for the Multi-Agent Development System plugin",
+  "owner": {
+    "name": "michael-harris",
+    "email": "michael-harris@users.noreply.github.com"
+  },
   "plugins": [
     {
       "name": "multi-agent-dev-system",
-      "displayName": "Multi-Agent Development System",
+      "description": "73-agent automated development system with comprehensive quality gates, language-specific performance auditing, and workflow macros for rapid development",
       "version": "2.1.0",
-      "description": "73-agent automated development system with comprehensive quality gates, language-specific performance auditing, progress tracking, and parallel development for rapid full-stack development across 7 programming languages",
-      "author": "Multi-Agent Development Team",
-      "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
-      "license": "MIT",
+      "author": {
+        "name": "Multi-Agent Development Team",
+        "email": "michael-harris@users.noreply.github.com"
+      },
+      "source": ".",
+      "category": "development",
       "tags": [
         "development",
         "automation",
@@ -30,30 +38,8 @@
         "security",
         "performance"
       ],
-      "categories": [
-        "Development",
-        "Automation",
-        "Code Quality",
-        "DevOps"
-      ],
-      "pluginFile": "plugin.json",
-      "readme": "README.md",
-      "features": [
-        "73 specialized AI agents with T1/T2 cost optimization",
-        "7 programming languages: Python, TypeScript, Java, C#, Go, Ruby, PHP",
-        "Progress tracking with automatic resume functionality",
-        "Parallel development tracks for 50-70% faster execution",
-        "Comprehensive quality gates (security, performance, testing)",
-        "Mobile development (iOS Swift, Android Kotlin)",
-        "DevOps automation (Docker, Kubernetes, CI/CD, Terraform)",
-        "Language-specific performance auditing"
-      ],
-      "requirements": {
-        "claudeCode": ">=1.0.0"
-      },
-      "homepage": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
-      "bugs": "https://github.com/michael-harris/claude-code-multi-agent-dev-system/issues",
-      "documentation": "https://github.com/michael-harris/claude-code-multi-agent-dev-system#readme"
+      "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
+      "license": "MIT"
     }
   ]
 }
