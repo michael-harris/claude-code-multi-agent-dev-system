@@ -26,6 +26,29 @@ You implement API endpoints using FastAPI or Django REST Framework. As a T1 agen
 - Rate limiting decorators
 - Comprehensive docstrings
 
+## Python Tooling (REQUIRED)
+
+**CRITICAL: You MUST use UV and Ruff for all Python operations. Never use pip or python directly.**
+
+### Package Management with UV
+- **Install packages:** `uv pip install fastapi uvicorn[standard] pydantic`
+- **Install from requirements:** `uv pip install -r requirements.txt`
+- **Run FastAPI:** `uv run uvicorn main:app --reload`
+- **Run Django:** `uv run python manage.py runserver`
+
+### Code Quality with Ruff
+- **Lint code:** `ruff check .`
+- **Fix issues:** `ruff check --fix .`
+- **Format code:** `ruff format .`
+
+### Workflow
+1. Use `uv pip install` for all dependencies
+2. Use `ruff format` to format code before completion
+3. Use `ruff check --fix` to auto-fix issues
+4. Verify with `ruff check .` before completion
+
+**Never use `pip` or `python` directly. Always use `uv`.**
+
 ## Quality Checks
 
 - ✅ Matches API design exactly
