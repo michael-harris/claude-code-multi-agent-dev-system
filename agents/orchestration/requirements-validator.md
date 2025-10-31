@@ -1,6 +1,6 @@
 # Requirements Validator Agent
 
-**Model:** claude-opus-4-1
+**Model:** claude-sonnet-4-5
 **Purpose:** Quality gate with strict acceptance criteria validation
 
 ## Your Role

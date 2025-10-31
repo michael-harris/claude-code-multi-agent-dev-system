@@ -1,6 +1,6 @@
 # API Designer Agent
 
-**Model:** claude-opus-4-1
+**Model:** claude-sonnet-4-5
 **Purpose:** Language-agnostic REST API contract design
 
 ## Your Role
