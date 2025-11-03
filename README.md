@@ -320,11 +320,11 @@ Enable parallel development across independent task chains to dramatically reduc
 /multi-agent:sprint all         # Sequential execution: ~128 hours
 ```
 
-**Parallel Tracks (Fast):**
+**Parallel Tracks - State-Only Mode:**
 ```bash
 /multi-agent:planning 3         # Creates parallel tracks: SPRINT-001-01, SPRINT-001-02, SPRINT-001-03
                                 # System calculates max possible tracks from dependencies
-                                # Example output: "Requested 3 tracks, max possible is 3. Using 3 tracks."
+                                # Logical separation via state files
 
 # Execute all tracks in parallel (different terminals/sessions):
 /multi-agent:sprint all 01      # Terminal 1: Track 1 (~42 hours)
@@ -334,17 +334,49 @@ Enable parallel development across independent task chains to dramatically reduc
 # Result: ~48 hours (62% faster than sequential)
 ```
 
+**Parallel Tracks - Git Worktrees Mode (NEW):**
+```bash
+/multi-agent:planning 3 --use-worktrees
+# Creates isolated git worktrees for true physical separation:
+#  - .multi-agent/track-01/ (branch: dev-track-01)
+#  - .multi-agent/track-02/ (branch: dev-track-02)
+#  - .multi-agent/track-03/ (branch: dev-track-03)
+
+# Each track works in its own directory - zero conflicts!
+/multi-agent:sprint all 01      # Auto-switches to .multi-agent/track-01/
+/multi-agent:sprint all 02      # Auto-switches to .multi-agent/track-02/
+/multi-agent:sprint all 03      # Auto-switches to .multi-agent/track-03/
+
+# After all tracks complete, merge them back:
+/multi-agent:merge-tracks       # Intelligently merges all tracks, cleans up worktrees
+
+# Expert commands (optional):
+/multi-agent:worktree status    # Show detailed status of all worktrees
+/multi-agent:worktree cleanup   # Manually clean up worktrees
+```
+
 **How It Works:**
 1. **Task Graph Analyzer** calculates max parallel tracks from dependency analysis
 2. **Sprint Planner** distributes tasks across tracks using balanced bin-packing algorithm
-3. Each track contains independent task chains that can execute simultaneously
-4. If requested tracks > max possible, system uses max and warns user
+3. **Worktree Mode** (optional): Creates isolated git worktrees + branches for each track
+4. **Track Merger** (worktrees only): Intelligently merges tracks back to main branch
+5. Each track contains independent task chains that can execute simultaneously
+6. If requested tracks > max possible, system uses max and warns user
 
 **Benefits:**
 - 50-70% reduction in wall-clock development time
+- **State-Only Mode**: Simple, works in single directory, state files coordinate tracks
+- **Worktree Mode**: True isolation, no file conflicts, git-native separation
 - Ideal for projects with independent components (backend, frontend, infrastructure)
 - State tracking enables resumption for any track independently
 - Perfect for team collaboration (different tracks = different team members)
+
+**Worktree Mode Advantages:**
+- **Zero file conflicts** - each track in separate directory
+- **Better git history** - separate branches with clear merge points
+- **Safer parallel execution** - no risk of state file conflicts
+- **Natural merge workflow** - git handles combining the work
+- **Easier collaboration** - team members can work in isolated worktrees
 
 ### Development History Preservation
 
