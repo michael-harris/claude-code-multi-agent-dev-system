@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "multi-agent-dev-marketplace",
-  "version": "2.1.0",
-  "description": "Marketplace for the Multi-Agent Development System plugin",
+  "version": "2.4.0",
+  "description": "Marketplace for the Multi-Agent Development System plugin with runtime testing verification",
   "owner": {
     "name": "michael-harris",
     "email": "michael-harris@users.noreply.github.com"
@@ -10,8 +10,8 @@
   "plugins": [
     {
       "name": "multi-agent",
-      "description": "73-agent automated development system with comprehensive quality gates, language-specific performance auditing, and workflow macros for rapid development",
-      "version": "2.1.0",
+      "description": "75-agent automated development system with PR-based workflow, git worktree-based parallel development, runtime testing verification, comprehensive summaries, and quality gates",
+      "version": "2.4.0",
       "author": {
         "name": "Multi-Agent Development Team",
         "email": "michael-harris@users.noreply.github.com"
@@ -36,7 +36,10 @@
         "quality-gates",
         "testing",
         "security",
-        "performance"
+        "performance",
+        "runtime-testing",
+        "docker",
+        "ci-cd"
       ],
       "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
       "license": "MIT"
