@@ -155,33 +155,145 @@ You orchestrate complete sprint execution from start to finish, managing task se
    - Max 3 iterations of fix->re-review cycle
    - Escalate to human if issues persist
 
-   Step 6: Runtime Testing & Verification (MANDATORY)
-   - Call quality:runtime-verifier
-   - Verify application launches without errors:
-     * Build and start Docker containers (if applicable)
-     * Launch application locally (if not containerized)
-     * Wait for services to become healthy
-     * Check health endpoints respond correctly
-   - Run ALL automated tests:
-     * Execute test suite (pytest, npm test, go test, etc.)
-     * Verify 100% pass rate (no failures allowed)
-     * Confirm coverage meets ≥80% threshold
-     * Verify no skipped tests without justification
-   - Check for runtime errors:
-     * Scan application logs for errors/exceptions
-     * Verify all services connect properly (database, redis, etc.)
-     * Test API endpoints respond with correct status codes
-     * Ensure no startup failures or crashes
-   - Document manual testing procedures:
-     * Create comprehensive manual testing guide
-     * Document step-by-step verification for each feature
-     * List expected outcomes for each test case
-     * Provide setup instructions for humans to test
-     * Include API endpoint testing examples
-     * Document how to verify database state
-   - If FAIL: Fix issues before proceeding
-   - Max 2 runtime fix iterations before escalation
-   - **BLOCKER: Sprint cannot complete if runtime verification fails**
+   Step 6: Runtime Testing & Verification (MANDATORY - NO SHORTCUTS)
+
+   **CRITICAL: This step MUST be completed with ACTUAL test execution**
+
+   A. Call quality:runtime-verifier with explicit instructions
+
+   B. Runtime verifier MUST execute tests using actual test commands:
+
+      **Python Projects:**
+      ```bash
+      # REQUIRED: Run actual pytest, not just import checks
+      uv run pytest -v --cov=. --cov-report=term-missing
+
+      # NOT ACCEPTABLE: python -c "import app"
+      # NOT ACCEPTABLE: Checking if files import successfully
+      ```
+
+      **TypeScript/JavaScript Projects:**
+      ```bash
+      # REQUIRED: Run actual tests
+      npm test -- --coverage
+      # or
+      jest --coverage --verbose
+
+      # NOT ACCEPTABLE: npm run build (just compilation check)
+      ```
+
+      **Go Projects:**
+      ```bash
+      # REQUIRED: Run actual tests
+      go test -v -cover ./...
+      ```
+
+   C. Zero Failing Tests Policy (NON-NEGOTIABLE):
+      - **100% pass rate REQUIRED** - Not 99%, not 95%, not "mostly passing"
+      - If even 1 test fails → Status = FAIL
+      - Failing tests must be fixed, not noted and moved on
+      - "We found failures but they're minor" = NOT ACCEPTABLE
+      - Test suite must show: X/X passed (where X is total tests)
+
+      **EXCEPTION: External API Tests Without Credentials**
+      - Tests calling external third-party APIs (Stripe, Twilio, SendGrid, etc.) may be skipped if:
+        * No valid API credentials/keys provided
+        * Test is properly marked as skipped (using @pytest.mark.skip or equivalent)
+        * Skip reason clearly states: "requires valid [ServiceName] API key"
+        * Documented in TESTING_SUMMARY.md with explanation
+      - These skipped tests do NOT count against pass rate
+      - Example acceptable skip:
+        ```python
+        @pytest.mark.skip(reason="requires valid Stripe API key")
+        def test_stripe_payment_processing():
+            # Test that would call Stripe API
+        ```
+      - Example documentation in TESTING_SUMMARY.md:
+        ```
+        ## Skipped Tests (3)
+        - test_stripe_payment_processing: requires valid Stripe API key
+        - test_twilio_sms_send: requires valid Twilio credentials
+        - test_sendgrid_email: requires valid SendGrid API key
+
+        Note: These tests call external third-party APIs and cannot run without
+        valid credentials. They are properly skipped and do not indicate code issues.
+        ```
+      - Tests that call mocked/stubbed external APIs MUST pass (no excuse for failure)
+
+   D. TESTING_SUMMARY.md Generation (MANDATORY):
+      - Must be created at: docs/runtime-testing/TESTING_SUMMARY.md
+      - Must contain:
+        * Exact test command used (e.g., "uv run pytest -v")
+        * Test framework name and version
+        * Total tests executed
+        * Pass/fail breakdown (must be 100% pass)
+        * Coverage percentage (must be ≥80%)
+        * List of ALL test files executed
+        * Duration of test run
+        * Command to reproduce results
+      - Missing this file = Automatic FAIL
+
+   E. Application Launch Verification:
+      - Build and start Docker containers (if applicable)
+      - Launch application locally (if not containerized)
+      - Wait for services to become healthy (health checks pass)
+      - Check health endpoints respond correctly
+      - Verify no runtime errors/exceptions in startup logs
+
+   F. API Endpoint Verification (if sprint includes API tasks):
+      **REQUIRED: Manual verification of ALL API endpoints implemented in sprint**
+
+      For EACH API endpoint in sprint:
+      ```bash
+      # Example for user registration endpoint
+      curl -X POST http://localhost:8000/api/users/register \
+        -H "Content-Type: application/json" \
+        -d '{"email": "test@example.com", "password": "test123"}'
+
+      # Verify:
+      # - Response status code (should be 201 for create)
+      # - Response body structure matches documentation
+      # - Data persisted to database (check DB)
+      # - No errors in application logs
+      ```
+
+      Document in manual testing guide:
+      - Endpoint URL and method
+      - Request payload example
+      - Expected response (status code and body)
+      - How to verify in database
+      - Any side effects (emails sent, etc.)
+
+   G. Check for runtime errors:
+      - Scan application logs for errors/exceptions
+      - Verify all services connect properly (database, redis, etc.)
+      - Test API endpoints respond with correct status codes
+      - Ensure no startup failures or crashes
+
+   H. Document manual testing procedures:
+      - Create comprehensive manual testing guide
+      - Document step-by-step verification for each feature
+      - List expected outcomes for each test case
+      - Provide setup instructions for humans to test
+      - Include API endpoint testing examples (with actual curl commands)
+      - Document how to verify database state
+      - Save to: docs/runtime-testing/SPRINT-XXX-manual-tests.md
+
+   I. Failure Handling:
+      - If ANY test fails → Status = FAIL, fix tests
+      - If application won't launch → Status = FAIL, fix errors
+      - If TESTING_SUMMARY.md missing → Status = FAIL, generate it
+      - If API endpoints don't respond correctly → Status = FAIL, fix endpoints
+      - Max 2 runtime fix iterations before escalation
+
+   **BLOCKER: Sprint CANNOT complete if runtime verification fails**
+
+   **Common Shortcuts That Will Cause FAIL:**
+   - ❌ "Application imports successfully" (not sufficient)
+   - ❌ Only checking if code compiles (tests must run)
+   - ❌ Noting failing tests and moving on (must fix them)
+   - ❌ Not generating TESTING_SUMMARY.md
+   - ❌ Not actually testing API endpoints with curl/requests
 
    Step 7: Final Requirements Validation
    - Call orchestration:requirements-validator

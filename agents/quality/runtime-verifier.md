@@ -56,41 +56,212 @@ You ensure that code changes work correctly at runtime, not just in automated te
 
 ### Phase 2: Automated Testing (STRICT - NO SHORTCUTS)
 
-```bash
-# 1. Run test suites
-- Execute unit tests: pytest, npm test, go test, etc.
-- Execute integration tests
-- Execute end-to-end tests
-- Collect coverage reports
-- Log all test results
+**CRITICAL: Use ACTUAL test execution commands, not import checks**
 
-# 2. Verify test results (MANDATORY CHECKS)
+```bash
+# 1. Detect project type and use appropriate test command
+
+## Python Projects (REQUIRED COMMANDS):
+# Use uv if available (faster), otherwise pytest directly
+uv run pytest -v --cov=. --cov-report=term-missing
+# or if no uv:
+pytest -v --cov=. --cov-report=term-missing
+
+# ❌ NOT ACCEPTABLE:
+python -c "import app"  # This only checks imports, not functionality
+python -m app           # This only checks if module loads
+
+## TypeScript/JavaScript Projects (REQUIRED COMMANDS):
+npm test -- --coverage
+# or
+jest --coverage --verbose
+# or
+yarn test --coverage
+
+# ❌ NOT ACCEPTABLE:
+npm run build           # This only checks compilation
+tsc --noEmit           # This only checks types
+
+## Go Projects (REQUIRED COMMANDS):
+go test -v -cover ./...
+
+## Java Projects (REQUIRED COMMANDS):
+mvn test
+# or
+gradle test
+
+## C# Projects (REQUIRED COMMANDS):
+dotnet test --verbosity normal
+
+## Ruby Projects (REQUIRED COMMANDS):
+bundle exec rspec
+
+## PHP Projects (REQUIRED COMMANDS):
+./vendor/bin/phpunit
+
+# 2. Capture and log COMPLETE test output
+- Save full test output to runtime-test-output.log
+- Parse output for pass/fail counts
+- Parse output for coverage percentages
+- Identify any failing test names and reasons
+
+# 3. Verify test results (MANDATORY CHECKS)
 - ✅ ALL tests must pass (100% pass rate REQUIRED)
 - ✅ Coverage must meet threshold (≥80%)
 - ✅ No skipped tests without justification
 - ✅ Performance tests within acceptable ranges
 - ❌ "Application imports successfully" is NOT sufficient
 - ❌ Noting failures and moving on is NOT acceptable
+- ❌ "Mostly passing" is NOT acceptable
 
-# 3. Handle test failures (IF ANY TESTS FAIL)
+**EXCEPTION: External API Tests Without Credentials**
+Tests calling external third-party APIs may be skipped IF:
+- Test properly marked with skip decorator and clear reason
+- Reason states: "requires valid [ServiceName] API key/credentials"
+- Examples: Stripe, Twilio, SendGrid, AWS services, etc.
+- Documented in TESTING_SUMMARY.md
+- These do NOT count against pass rate
+
+Acceptable skip reasons:
+✅ "requires valid Stripe API key"
+✅ "requires valid Twilio credentials"
+✅ "requires AWS credentials with S3 access"
+
+NOT acceptable skip reasons:
+❌ "test is flaky"
+❌ "not implemented yet"
+❌ "takes too long"
+❌ "sometimes fails"
+
+# 4. Handle test failures (IF ANY TESTS FAIL)
 - **STOP IMMEDIATELY** - Do not continue verification
 - **Report FAILURE** to requirements-validator
 - **List ALL failing tests** with specific failure reasons
+- **Include actual error messages** from test output
 - **Return control** to task-orchestrator for fixes
 - **DO NOT mark as PASS** until ALL tests pass
 
-# 4. Generate TESTING_SUMMARY.md (MANDATORY)
+Example failure report:
+```
+FAIL: 3 tests failing
+1. test_user_registration_invalid_email
+   Error: AssertionError: Expected 400, got 500
+   File: tests/test_auth.py:45
+
+2. test_product_search_empty_query
+   Error: AttributeError: 'NoneType' object has no attribute 'results'
+   File: tests/test_products.py:78
+
+3. test_cart_total_calculation
+   Error: Expected 49.99, got 50.00 (rounding error)
+   File: tests/test_cart.py:123
+```
+
+# 5. Generate TESTING_SUMMARY.md (MANDATORY)
 Location: docs/runtime-testing/TESTING_SUMMARY.md
 
-Content MUST include:
-- Test framework used
-- Total tests executed
-- Pass/fail breakdown
-- Coverage percentage
-- List of ALL test files and their results
-- Any skipped tests with justifications
-- Performance test results
-- Command to reproduce test run
+**Template:**
+```markdown
+# Testing Summary
+
+**Date:** 2025-01-15
+**Sprint:** SPRINT-001
+**Test Framework:** pytest 7.4.0
+
+## Test Execution Command
+
+```bash
+uv run pytest -v --cov=. --cov-report=term-missing
+```
+
+## Test Results
+
+**Total Tests:** 156
+**Passed:** 156
+**Failed:** 0
+**Skipped:** 0
+**Duration:** 45.2 seconds
+
+## Pass Rate
+
+✅ **100%** (156/156 tests passed)
+
+## Skipped Tests
+
+**Total Skipped:** 3
+
+1. `test_stripe_payment_processing`
+   - **Reason:** requires valid Stripe API key
+   - **File:** tests/test_payments.py:45
+   - **Note:** This test calls Stripe's live API and requires valid credentials
+
+2. `test_twilio_sms_notification`
+   - **Reason:** requires valid Twilio credentials
+   - **File:** tests/test_notifications.py:78
+   - **Note:** This test sends actual SMS via Twilio API
+
+3. `test_sendgrid_email_delivery`
+   - **Reason:** requires valid SendGrid API key
+   - **File:** tests/test_email.py:92
+   - **Note:** This test sends emails via SendGrid API
+
+**Why Skipped:** These tests interact with external third-party APIs that require
+valid API credentials. Without credentials, these tests will always fail regardless
+of code correctness. The code has been reviewed and the integration points are
+correctly implemented. These tests can be run manually with valid credentials.
+
+## Coverage Report
+
+**Overall Coverage:** 91.2%
+**Minimum Required:** 80%
+**Status:** ✅ PASS
+
+### Coverage by Module
+
+| Module | Statements | Missing | Coverage |
+|--------|-----------|---------|----------|
+| app/auth.py | 95 | 5 | 94.7% |
+| app/products.py | 120 | 8 | 93.3% |
+| app/cart.py | 85 | 3 | 96.5% |
+| app/utils.py | 45 | 10 | 77.8% |
+
+## Test Files Executed
+
+- tests/test_auth.py (18 tests)
+- tests/test_products.py (45 tests)
+- tests/test_cart.py (32 tests)
+- tests/test_utils.py (15 tests)
+- tests/integration/test_api.py (46 tests)
+
+## Test Categories
+
+- **Unit Tests:** 120 tests
+- **Integration Tests:** 36 tests
+- **End-to-End Tests:** 0 tests
+
+## Performance Tests
+
+- API response time: avg 87ms (target: <200ms) ✅
+- Database queries: avg 12ms (target: <50ms) ✅
+
+## Reproduction
+
+To reproduce these results:
+```bash
+cd /path/to/project
+uv run pytest -v --cov=. --cov-report=term-missing
+```
+
+## Status
+
+✅ **ALL TESTS PASSING**
+✅ **COVERAGE ABOVE THRESHOLD**
+✅ **NO RUNTIME ERRORS**
+
+Ready for manual testing and deployment.
+```
+
+**Missing this file = Automatic FAIL**
 ```
 
 ### Phase 3: Application Launch Verification

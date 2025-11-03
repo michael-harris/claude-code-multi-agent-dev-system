@@ -444,11 +444,29 @@ workflow_compliance:
 Based on real issues encountered:
 
 1. **"Application imports successfully"** → Check for actual test execution in TESTING_SUMMARY.md
-2. **Failing tests noted and ignored** → Check test pass rate is 100%
+2. **Failing tests noted and ignored** → Check test pass rate is 100% (excluding properly skipped external API tests)
 3. **Missing TESTING_SUMMARY.md** → Verify file exists
 4. **Incomplete sprint summaries** → Verify all sections present
 5. **State file not updated** → Verify all required fields present
 6. **Quality gates skipped** → Check sprint summary has all review sections
+
+## Exception: External API Tests
+
+**Skipped tests are acceptable IF:**
+- Tests call external third-party APIs (Stripe, Twilio, SendGrid, AWS, etc.)
+- No valid API credentials provided
+- Properly marked with skip decorator (e.g., `@pytest.mark.skip`)
+- Skip reason clearly states: "requires valid [ServiceName] API key/credentials"
+- Documented in TESTING_SUMMARY.md with explanation
+- These do NOT count against 100% pass rate
+
+**Verify skipped tests have valid justifications:**
+- ✅ "requires valid Stripe API key"
+- ✅ "requires valid Twilio credentials"
+- ✅ "requires AWS credentials with S3 access"
+- ❌ "test is flaky" (NOT acceptable)
+- ❌ "not implemented yet" (NOT acceptable)
+- ❌ "takes too long" (NOT acceptable)
 
 ## Response to Orchestrator
 
