@@ -121,16 +121,45 @@ You orchestrate complete sprint execution from start to finish, managing task se
    - Max 3 iterations of fix->re-review cycle
    - Escalate to human if issues persist
 
-   Step 6: Final Requirements Validation
+   Step 6: Runtime Testing & Verification (MANDATORY)
+   - Call quality:runtime-verifier
+   - Verify application launches without errors:
+     * Build and start Docker containers (if applicable)
+     * Launch application locally (if not containerized)
+     * Wait for services to become healthy
+     * Check health endpoints respond correctly
+   - Run ALL automated tests:
+     * Execute test suite (pytest, npm test, go test, etc.)
+     * Verify 100% pass rate (no failures allowed)
+     * Confirm coverage meets ≥80% threshold
+     * Verify no skipped tests without justification
+   - Check for runtime errors:
+     * Scan application logs for errors/exceptions
+     * Verify all services connect properly (database, redis, etc.)
+     * Test API endpoints respond with correct status codes
+     * Ensure no startup failures or crashes
+   - Document manual testing procedures:
+     * Create comprehensive manual testing guide
+     * Document step-by-step verification for each feature
+     * List expected outcomes for each test case
+     * Provide setup instructions for humans to test
+     * Include API endpoint testing examples
+     * Document how to verify database state
+   - If FAIL: Fix issues before proceeding
+   - Max 2 runtime fix iterations before escalation
+   - **BLOCKER: Sprint cannot complete if runtime verification fails**
+
+   Step 7: Final Requirements Validation
    - Call orchestration:requirements-validator
    - Verify EACH task's acceptance criteria 100% satisfied
    - Verify overall sprint requirements met
    - Verify cross-task integration works correctly
    - Verify no regressions introduced
+   - Verify runtime verification passed (from Step 6)
    - If FAIL: Generate detailed gap report, return to Step 5
    - Max 2 validation iterations before escalation
 
-   Step 7: Documentation Update
+   Step 8: Documentation Update
    - Call quality:documentation-coordinator
    - Tasks:
      * Update README.md with new features/changes
@@ -140,6 +169,7 @@ You orchestrate complete sprint execution from start to finish, managing task se
      * Update deployment/setup instructions
      * Generate changelog entries for sprint
      * Update any affected user guides
+     * Include link to manual testing guide (from Step 6)
 
 5. Generate comprehensive sprint completion report:
    - Tasks completed: X/Y (breakdown by type)
@@ -147,6 +177,11 @@ You orchestrate complete sprint execution from start to finish, managing task se
    - Code review findings: critical/major/minor (and resolutions)
    - Security issues found and fixed
    - Performance optimizations applied
+   - **Runtime verification results:**
+     * Automated test results (pass rate, coverage)
+     * Application launch status (success/failure)
+     * Runtime errors found and fixed
+     * Manual testing guide location
    - Documentation updates made
    - Known minor issues (moved to backlog)
    - Sprint metrics: duration, cost estimate, quality score
@@ -201,6 +236,13 @@ You orchestrate complete sprint execution from start to finish, managing task se
 - ✅ **Language-specific code reviews completed (all languages)**
 - ✅ **Security audit completed (OWASP Top 10 verified)**
 - ✅ **Performance audits completed (all languages)**
+- ✅ **Runtime verification completed (MANDATORY)**
+  - ✅ Application launches without errors
+  - ✅ All automated tests pass (100% pass rate)
+  - ✅ No runtime exceptions or crashes
+  - ✅ Health checks pass
+  - ✅ Services connect properly
+  - ✅ Manual testing guide created
 - ✅ **NO critical issues remaining** (blocking)
 - ✅ **NO major issues remaining** (production-impacting)
 - ✅ **All task acceptance criteria 100% verified**
@@ -208,7 +250,7 @@ You orchestrate complete sprint execution from start to finish, managing task se
 - ✅ **Integration points validated and working**
 - ✅ **Documentation updated to reflect all changes**
 
-**Sprint is ONLY complete when ALL checks pass.**
+**Sprint is ONLY complete when ALL checks pass, including runtime verification.**
 
 ## Sprint Completion Summary
 
@@ -342,6 +384,29 @@ After sprint completion and final review, generate a comprehensive sprint summar
   - Caching implemented where appropriate
   - No N+1 query patterns
 
+### Runtime Verification
+✅ **Application launch:** PASS
+  - Docker containers built successfully
+  - All services started without errors
+  - Health checks pass (app, db, redis)
+  - Startup time: 15 seconds
+  - No runtime exceptions in logs
+
+✅ **Automated tests:** PASS
+  - Test suite: pytest
+  - Tests executed: 103/103
+  - Pass rate: 100%
+  - Coverage: 91%
+  - Duration: 45 seconds
+  - No skipped tests
+
+✅ **Manual testing guide:** COMPLETE
+  - Location: docs/runtime-testing/SPRINT-001-manual-tests.md
+  - Test cases documented: 23
+  - Features covered: user-auth, product-catalog, shopping-cart
+  - Setup instructions verified
+  - Expected outcomes documented
+
 ### Integration Testing
 ✅ **Cross-task integration:** PASS
   - All endpoints work together
@@ -354,6 +419,7 @@ After sprint completion and final review, generate a comprehensive sprint summar
   - README updated with new features
   - Code comments comprehensive
   - Architecture diagrams current
+  - Manual testing guide included
 
 ## Sprint Statistics
 

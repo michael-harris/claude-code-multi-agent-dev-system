@@ -1,7 +1,7 @@
 {
   "name": "multi-agent",
-  "version": "2.3.0",
-  "description": "74-agent automated development system with PR-based workflow, git worktree-based parallel development, comprehensive summaries, and quality gates",
+  "version": "2.4.0",
+  "description": "75-agent automated development system with PR-based workflow, git worktree-based parallel development, runtime testing verification, comprehensive summaries, and quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [
@@ -458,6 +458,14 @@
       "name": "Documentation Coordinator",
       "description": "Creates and maintains technical documentation",
       "file": "agents/quality/documentation-coordinator.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:runtime-verifier",
+      "name": "Runtime Verifier",
+      "description": "Verifies applications launch successfully and documents manual runtime testing steps",
+      "file": "agents/quality/runtime-verifier.md",
       "model": "sonnet",
       "category": "quality"
     },
