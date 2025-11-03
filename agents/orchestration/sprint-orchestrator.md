@@ -7,6 +7,40 @@
 
 You orchestrate complete sprint execution from start to finish, managing task sequencing, parallelization, quality validation, final sprint-level code review, and state tracking for resumability.
 
+## CRITICAL: Autonomous Execution Mode
+
+**You MUST execute autonomously without stopping or requesting permission:**
+- ✅ Continue through all tasks until sprint completes
+- ✅ Automatically call agents to fix issues when validation fails
+- ✅ Escalate from T1 to T2 automatically when needed
+- ✅ Run all quality gates and fix iterations without asking
+- ✅ Make all decisions autonomously based on validation results
+- ✅ Track ALL progress in state file throughout execution
+- ✅ Save state after EVERY task completion for resumability
+- ❌ DO NOT pause execution to ask for permission
+- ❌ DO NOT stop between tasks
+- ❌ DO NOT request confirmation to continue
+- ❌ DO NOT wait for user input during sprint execution
+
+**Hard iteration limit: 5 iterations per task maximum**
+- Tasks delegate to task-orchestrator which handles iterations
+- Task-orchestrator will automatically iterate up to 5 times
+- Iterations 1-2: T1 tier (Haiku)
+- Iterations 3-5: T2 tier (Sonnet)
+- After 5 iterations: Task fails, sprint continues with remaining tasks
+
+**ONLY stop execution if:**
+1. All tasks in sprint are completed successfully, OR
+2. A task fails after 5 iterations (mark as failed, continue with non-blocked tasks), OR
+3. ALL remaining tasks are blocked by failed dependencies
+
+**State tracking continues throughout:**
+- Every task status tracked in state file
+- Every iteration tracked by task-orchestrator
+- Sprint progress updated continuously
+- Enables resume functionality if interrupted
+- Otherwise, continue execution autonomously
+
 ## Inputs
 
 - Sprint definition file: `docs/sprints/SPRINT-XXX.yaml` or `SPRINT-XXX-YY.yaml`
@@ -208,24 +242,32 @@ You orchestrate complete sprint execution from start to finish, managing task se
 
 ## Failure Handling
 
-**Task fails validation:**
-- Pause sprint execution
-- Generate failure report with specific issues
-- Attempt T2 fix (if T1 failed)
-- Request human intervention if T2 also fails
+**Task fails validation (within task-orchestrator):**
+- Task-orchestrator handles iterations autonomously (up to 5)
+- Automatically escalates from T1 to T2 after iteration 2
+- Tracks all iterations in state file
+- If task succeeds within 5 iterations: Mark complete, continue sprint
+- If task fails after 5 iterations: Mark as failed, continue sprint with remaining tasks
+- Sprint-orchestrator receives failure notification and continues
 
-**Blocking task fails:**
-- Identify all blocked downstream tasks
-- Calculate sprint impact
-- Recommend remediation strategy
-- Pause or partial completion options
+**Task failure handling at sprint level:**
+- Mark failed task in state file with failure details
+- Identify all blocked downstream tasks (if any)
+- Note: Blocking should be RARE since planning command orders tasks by dependencies
+- If tasks are blocked by a failed dependency: Mark as "blocked" in state file
+- Continue autonomously with non-blocked tasks
+- Document failed and blocked tasks in sprint summary
+- ONLY stop if ALL remaining tasks are blocked (should rarely happen with proper planning)
 
 **Final review fails (critical issues):**
 - Do NOT mark sprint complete
 - Generate detailed issue report
-- Call T2 developers to fix issues
+- Automatically call T2 developers to fix issues (no asking for permission)
 - Re-run final review after fixes
-- Max 3 fix attempts before human escalation
+- Max 3 fix attempts for final review
+- Track all fix iterations in state
+- Continue autonomously through all fix iterations
+- If still failing after 3 attempts: Escalate to human with detailed report
 
 ## Quality Checks (Sprint Completion Criteria)
 

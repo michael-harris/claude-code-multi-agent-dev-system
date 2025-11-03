@@ -298,8 +298,9 @@ desktop.ini
 *.sublime-project
 *.sublime-workspace
 
-# Keep manual testing guides (these should be committed)
+# Keep runtime testing documentation (these should be committed)
 !docs/runtime-testing/*.md
+!docs/runtime-testing/TESTING_SUMMARY.md
 
 # Java runtime artifacts
 *.class
