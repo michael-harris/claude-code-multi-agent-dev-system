@@ -1,7 +1,7 @@
 {
   "name": "multi-agent",
-  "version": "2.4.0",
-  "description": "75-agent automated development system with PR-based workflow, git worktree-based parallel development, runtime testing verification, comprehensive summaries, and quality gates",
+  "version": "2.5.0",
+  "description": "76-agent automated development system with PR-based workflow, git worktree-based parallel development, runtime testing verification, workflow compliance validation, comprehensive summaries, and quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [
@@ -58,6 +58,14 @@
       "name": "Track Merger",
       "description": "Intelligently merges parallel development tracks using git worktrees",
       "file": "agents/orchestration/track-merger.md",
+      "model": "sonnet",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:workflow-compliance",
+      "name": "Workflow Compliance",
+      "description": "Validates that orchestrators followed their required workflows and generated all mandatory artifacts",
+      "file": "agents/orchestration/workflow-compliance.md",
       "model": "sonnet",
       "category": "orchestration"
     },

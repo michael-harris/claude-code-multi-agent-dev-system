@@ -144,6 +144,9 @@ Sprint definition: docs/sprints/${sprintId}.yaml
 State file: ${stateFilePath}
 PRD reference: docs/planning/PROJECT_PRD.yaml or FEATURE_*_PRD.yaml
 
+CRITICAL - Autonomous Execution:
+You MUST execute autonomously without stopping or requesting permission. Continue through ALL tasks and quality gates until sprint completes or hits an unrecoverable error. DO NOT pause, DO NOT ask for confirmation, DO NOT wait for user input.
+
 IMPORTANT - State Tracking:
 1. Load state file at start
 2. Check sprint and task status
@@ -163,9 +166,7 @@ Your responsibilities:
 8. Generate sprint completion report
 9. Mark sprint as completed in state file
 
-Continue to next sprint only if THIS sprint completes successfully.
-
-Provide updates at each task completion and final summary.`
+Continue autonomously. Provide updates but DO NOT stop for permissions.`
 )
 ```
 

@@ -1,23 +1,24 @@
 # Multi-Agent Development System
 
-A Claude Code plugin providing **73 specialized AI agents** with hierarchical orchestration, T1/T2 cost optimization, and comprehensive support for **7 programming languages** across **10+ technology stacks**. Built for full-stack, multi-language development with progress tracking and parallel development capabilities.
+A Claude Code plugin providing **75 specialized AI agents** with hierarchical orchestration, T1/T2 cost optimization, runtime verification, and comprehensive support for **7 programming languages** across **10+ technology stacks**. Built for full-stack, multi-language development with progress tracking, parallel development capabilities, and automated runtime testing.
 
 ---
 
-### 73 Specialized Agents
+### 75 Specialized Agents
 
 **Planning Agents (3)**
 - **PRD Generator** - Interactive PRD creation with technology stack selection
 - **Task Graph Analyzer** - Breaks PRD into tasks with dependency analysis
 - **Sprint Planner** - Organizes tasks into executable sprints
 
-**Orchestration Agents (3)**
-- **Sprint Orchestrator** - Manages entire sprint execution (Opus)
+**Orchestration Agents (4)**
+- **Sprint Orchestrator** - Manages entire sprint execution with runtime verification (Sonnet)
 - **Task Orchestrator** - Coordinates single task with T1/T2 escalation (Sonnet)
-- **Requirements Validator** - Quality gate ensuring 100% criteria satisfaction (Opus)
+- **Requirements Validator** - Quality gate ensuring 100% criteria satisfaction and runtime checks (Sonnet)
+- **Track Merger** - Intelligently merges parallel development tracks using git worktrees (Sonnet)
 
 **Database Agents (15)** - *Expanded 3x for multi-language support*
-- **Database Designer** - Schema design and normalization (Opus)
+- **Database Designer** - Schema design and normalization (Sonnet)
 - **Database Developer Python T1/T2** - SQLAlchemy + Alembic (Haiku/Sonnet)
 - **Database Developer TypeScript T1/T2** - Prisma/TypeORM (Haiku/Sonnet)
 - **Database Developer Java T1/T2** - JPA/Hibernate + Flyway (Haiku/Sonnet)
@@ -27,7 +28,7 @@ A Claude Code plugin providing **73 specialized AI agents** with hierarchical or
 - **Database Developer PHP T1/T2** - Eloquent/Doctrine + migrations (Haiku/Sonnet)
 
 **Backend Agents (22)** - *Expanded 3x for enterprise stacks*
-- **API Designer** - RESTful API specifications with OpenAPI (Opus)
+- **API Designer** - RESTful API specifications with OpenAPI (Sonnet)
 - **API Developer Python T1/T2** - FastAPI/Django/Flask endpoints (Haiku/Sonnet)
 - **API Developer TypeScript T1/T2** - Express/NestJS/Fastify endpoints (Haiku/Sonnet)
 - **API Developer Java T1/T2** - Spring Boot/Micronaut endpoints (Haiku/Sonnet)
@@ -38,17 +39,18 @@ A Claude Code plugin providing **73 specialized AI agents** with hierarchical or
 - **Backend Code Reviewers** - Python, TypeScript, Java, C#, Go, Ruby, PHP variants (Sonnet)
 
 **Frontend Agents (4)**
-- **Frontend Designer** - UI/UX component specifications (Opus)
+- **Frontend Designer** - UI/UX component specifications (Sonnet)
 - **Frontend Developer T1/T2** - React/Vue/Next.js/Angular implementation (Haiku/Sonnet)
 - **Frontend Code Reviewer** - Accessibility, performance, best practices (Sonnet)
 
 **Python Agents (2)**
 - **Python Developer Generic T1/T2** - CLI tools, scripts, utilities (Haiku/Sonnet)
 
-**Quality Agents (10)** - *Expanded 3x for language-specific performance auditing*
+**Quality Agents (11)** - *Comprehensive quality assurance and runtime verification*
 - **Test Writer** - Unit, integration, and e2e tests (Sonnet)
-- **Security Auditor** - OWASP Top 10 compliance (Opus)
+- **Security Auditor** - OWASP Top 10 compliance (Sonnet)
 - **Documentation Coordinator** - Technical documentation (Sonnet)
+- **Runtime Verifier** - Application launch verification and manual testing documentation (Sonnet)
 - **Performance Auditor Python** - Python-specific performance optimization (Sonnet)
 - **Performance Auditor TypeScript** - TypeScript/Node.js performance optimization (Sonnet)
 - **Performance Auditor Java** - Java/Spring Boot performance optimization (Sonnet)
@@ -86,20 +88,17 @@ A Claude Code plugin providing **73 specialized AI agents** with hierarchical or
 - 15-20% of work requiring deeper analysis
 - $0.003 per 1K tokens
 
-**Design Tier (Opus)** - High-value decisions
-- Schema design, API contracts, component architecture
-- Critical quality gates and security audits
-- 10% of work requiring architectural thinking
-- $0.015 per 1K tokens
-
-**Result: 60-70% cost savings vs all-Opus approach while maintaining quality**
+**Result: Significant cost optimization through intelligent model selection**
 
 ### Quality Gates
 
 - **100% Criteria Satisfaction** - Requirements validator enforces acceptance criteria
+- **Runtime Verification** - Applications must launch without errors before completion
+- **Automated Testing** - All tests must pass (100% pass rate required)
 - **Security First** - OWASP Top 10 audits on all implementations
 - **80%+ Test Coverage** - Enforced by test writer agent
 - **Code Review** - Language-specific reviewers for every implementation
+- **Manual Testing Documentation** - Comprehensive testing guides for human verification
 - **Iterative Refinement** - Max 5 iterations with T1→T2 escalation
 
 ### Supported Languages & Frameworks
@@ -239,6 +238,9 @@ cd claude-code-multi-agent-dev-system
 /multi-agent:sprint SPRINT-001
 # Automated execution with quality loops
 # T1 attempts first, escalates to T2 if needed
+# Runtime verification ensures app launches without errors
+# All automated tests must pass (100% pass rate)
+# Manual testing guide generated for human verification
 # Requirements validator ensures 100% criteria met
 ```
 
@@ -369,14 +371,14 @@ Enable parallel development across independent task chains to dramatically reduc
 - **Worktree Mode**: True isolation, no file conflicts, git-native separation
 - Ideal for projects with independent components (backend, frontend, infrastructure)
 - State tracking enables resumption for any track independently
-- Perfect for team collaboration (different tracks = different team members)
+- Supports team collaboration (different tracks = different team members)
 
 **Worktree Mode Advantages:**
 - **Zero file conflicts** - each track in separate directory
 - **Better git history** - separate branches with clear merge points
 - **Safer parallel execution** - no risk of state file conflicts
 - **Natural merge workflow** - git handles combining the work
-- **Easier collaboration** - team members can work in isolated worktrees
+- **Supports collaboration** - team members can work in isolated worktrees
 
 ### Development History Preservation
 
@@ -418,33 +420,40 @@ Max Iterations: 5 before human intervention required
 
 ### Quality Gate System
 
-Every task passes through:
+Every sprint passes through:
 1. **Code Reviewers** - Language-specific quality checks
 2. **Security Auditor** - OWASP Top 10 compliance
-3. **Test Writer** - 80%+ coverage requirement
-4. **Requirements Validator** - Binary pass/fail on acceptance criteria
+3. **Performance Auditors** - Language-specific optimization
+4. **Runtime Verifier** - Application launch verification and testing
+   - Builds and launches application (Docker or local)
+   - Runs all automated tests (100% pass rate required)
+   - Checks for runtime errors and exceptions
+   - Documents manual testing procedures for humans
+5. **Requirements Validator** - Binary pass/fail on acceptance criteria
+6. **Test Writer** - 80%+ coverage requirement
 
-**No task completes without 100% criteria satisfaction**
+**No sprint completes without 100% criteria satisfaction and successful runtime verification**
 
 ## Model Distribution
 
 | Model | Count | Use Cases | Cost/1K Tokens |
 |-------|-------|-----------|----------------|
-| **Opus** | 6 | Design decisions, quality gates, security | $0.015 |
-| **Sonnet** | 45 | T2 developers, reviewers, orchestration, code review, performance auditing | $0.003 |
+| **Sonnet** | 53 | T2 developers, reviewers, orchestration, code review, performance auditing, runtime verification | $0.003 |
 | **Haiku** | 22 | T1 developers (first attempt across all languages) | $0.001 |
 
-**Total: 73 Agents**
+**Total: 75 Agents**
+
+**Note:** All agents now use Sonnet or Haiku for cost optimization. Previous Opus-only agents (orchestrators, designers, security auditor) have been migrated to Sonnet with maintained quality standards.
 
 **Cost Optimization Logic:**
 1. T1 (Haiku) attempts implementation first (70-80% success rate)
 2. T2 (Sonnet) handles complex cases after T1 failure (15-20% of work)
-3. Opus only for critical design decisions and quality gates (10% of work)
+3. Sonnet for design decisions, orchestration, and quality gates
 
 **Multi-Language Scaling:**
 - Each language gets T1/T2 developer pairs for database and backend work
 - Language-specific code reviewers ensure quality standards
-- Shared design agents (Opus) work across all languages
+- Shared design agents (Sonnet) work across all languages
 - Same cost optimization applies to Java, C#, Go, Ruby, PHP as Python/TypeScript
 
 ## Examples
@@ -485,20 +494,21 @@ See [examples/parallel-tracks-example.md](examples/parallel-tracks-example.md) f
 
 ## Agent Reference
 
-Complete list of all 73 agents organized by category:
+Complete list of all 75 agents organized by category:
 
 ### Planning (3 agents)
 - `planning:prd-generator` (Sonnet)
 - `planning:task-graph-analyzer` (Sonnet)
 - `planning:sprint-planner` (Sonnet)
 
-### Orchestration (3 agents)
-- `orchestration:sprint-orchestrator` (Opus)
+### Orchestration (4 agents)
+- `orchestration:sprint-orchestrator` (Sonnet)
 - `orchestration:task-orchestrator` (Sonnet)
-- `orchestration:requirements-validator` (Opus)
+- `orchestration:requirements-validator` (Sonnet)
+- `orchestration:track-merger` (Sonnet)
 
 ### Database (15 agents)
-- `database:designer` (Opus)
+- `database:designer` (Sonnet)
 - `database:developer-python-t1` (Haiku)
 - `database:developer-python-t2` (Sonnet)
 - `database:developer-typescript-t1` (Haiku)
@@ -515,7 +525,7 @@ Complete list of all 73 agents organized by category:
 - `database:developer-php-t2` (Sonnet)
 
 ### Backend (22 agents)
-- `backend:api-designer` (Opus)
+- `backend:api-designer` (Sonnet)
 - `backend:api-developer-python-t1` (Haiku)
 - `backend:api-developer-python-t2` (Sonnet)
 - `backend:api-developer-typescript-t1` (Haiku)
@@ -539,7 +549,7 @@ Complete list of all 73 agents organized by category:
 - `backend:code-reviewer-php` (Sonnet)
 
 ### Frontend (4 agents)
-- `frontend:designer` (Opus)
+- `frontend:designer` (Sonnet)
 - `frontend:developer-t1` (Haiku)
 - `frontend:developer-t2` (Sonnet)
 - `frontend:code-reviewer` (Sonnet)
@@ -548,10 +558,11 @@ Complete list of all 73 agents organized by category:
 - `python:developer-generic-t1` (Haiku)
 - `python:developer-generic-t2` (Sonnet)
 
-### Quality (10 agents)
+### Quality (11 agents)
 - `quality:test-writer` (Sonnet)
-- `quality:security-auditor` (Opus)
+- `quality:security-auditor` (Sonnet)
 - `quality:documentation-coordinator` (Sonnet)
+- `quality:runtime-verifier` (Sonnet)
 - `quality:performance-auditor-python` (Sonnet)
 - `quality:performance-auditor-typescript` (Sonnet)
 - `quality:performance-auditor-java` (Sonnet)
@@ -586,14 +597,13 @@ Complete list of all 73 agents organized by category:
 
 ```
 claude-code-multi-agent-dev-system/
-├── plugin.json              # Plugin manifest (73 agents, 6 commands)
+├── plugin.json              # Plugin manifest (75 agents, 6 commands)
 ├── README.md                # This file
 ├── LICENSE                  # MIT License
 ├── install-local.sh         # Local installation script
-├── ENHANCEMENTS_V2.1.md     # Version 2.1 enhancement documentation
-├── agents/                  # 73 agent definitions
+├── agents/                  # 75 agent definitions
 │   ├── planning/           # PRD, task analysis, sprint planning (3)
-│   ├── orchestration/      # Sprint/task orchestration, validation (3)
+│   ├── orchestration/      # Sprint/task orchestration, validation, track merging (4)
 │   ├── database/           # Schema design + 7-language implementation (15)
 │   │   ├── designer.md
 │   │   ├── developer-python-t1.md
@@ -631,10 +641,11 @@ claude-code-multi-agent-dev-system/
 │   ├── infrastructure/     # Configuration management (2) - NEW
 │   │   ├── configuration-manager-t1.md
 │   │   └── configuration-manager-t2.md
-│   ├── quality/            # Testing, security, documentation, performance (10)
+│   ├── quality/            # Testing, security, documentation, performance, runtime verification (11)
 │   │   ├── test-writer.md
 │   │   ├── security-auditor.md
 │   │   ├── documentation-coordinator.md
+│   │   ├── runtime-verifier.md
 │   │   ├── performance-auditor-python.md
 │   │   ├── performance-auditor-typescript.md
 │   │   ├── performance-auditor-java.md
@@ -672,41 +683,42 @@ claude-code-multi-agent-dev-system/
 ## Cost Analysis
 
 ### Plugin Development
-- **Manual Development (73 agents)**: 250-350 hours × $150/hour = $37,500-52,500
+- **Manual Development (75 agents)**: 250-350 hours × $150/hour = $37,500-52,500
 - **AI-Assisted Build**: ~6 hours × $0.50/hour = $3.00
 - **Savings**: 99.99%
 
 ### Using the Plugin (Per Project)
 
-**Cost per sprint remains similar despite 2.4x agent expansion:**
+**Cost per sprint optimized with T1/T2 system:**
 - T1/T2 system ensures only relevant language agents are used
 - Most projects use 1-2 languages, not all 7
-- Shared design agents (Opus) work across all languages
+- Shared design agents (Sonnet) work across all languages
 
-**Estimated project costs:**
-- **Small project (1 sprint, 1 language)**: ~$0.70-1.00
-- **Medium project (3 sprints, 2 languages)**: ~$6-10
-- **Large project (10 sprints, 3 languages)**: ~$30-40
-- **Enterprise polyglot (20 sprints, 5+ languages)**: ~$80-120
+**Estimated project costs (using Sonnet/Haiku pricing):**
+- **Small project (1 sprint, 1 language)**: ~$0.50-0.80
+- **Medium project (3 sprints, 2 languages)**: ~$4-8
+- **Large project (10 sprints, 3 languages)**: ~$20-35
+- **Enterprise polyglot (20 sprints, 5+ languages)**: ~$60-100
 
 **Multi-language example breakdown:**
-- Database design (Opus): $0.50
-- Database implementation Java (T1/T2): $0.30
-- API design (Opus): $0.60
-- API implementation Java (T1/T2): $0.40
-- Frontend implementation (T1/T2): $0.50
-- Testing + Security (Sonnet/Opus): $0.70
-- Code reviews (Sonnet): $0.30
-- **Total per sprint**: ~$3.30
+- Database design (Sonnet): $0.30
+- Database implementation Java (T1/T2): $0.25
+- API design (Sonnet): $0.40
+- API implementation Java (T1/T2): $0.35
+- Frontend implementation (T1/T2): $0.40
+- Runtime verification (Sonnet): $0.20
+- Testing + Security (Sonnet): $0.50
+- Code reviews (Sonnet): $0.25
+- **Total per sprint**: ~$2.65
 
 **Compared to:**
 - Human developers: 99%+ savings
-- All-Opus AI: 60-70% savings
+- Previous Opus-heavy approach: Significantly more cost-effective
 - Single-language AI systems: Same cost, 7x language coverage
 
 ## Why This System?
 
-### Enterprise-Ready Multi-Language Support
+### Multi-Language Development Support
 - **7 Programming Languages**: Python, TypeScript, Java, C#, Go, Ruby, PHP
 - **10+ Development Stacks**: From MEAN/MERN to Spring Boot to Rails
 - **Consistent Quality**: Same T1/T2 optimization and quality gates across all languages
@@ -725,16 +737,19 @@ claude-code-multi-agent-dev-system/
 - **Scripting**: Shell and Python automation scripts
 
 ### Cost-Optimized Intelligence
-- **73 Agents**: Specialized for every language and task
-- **3-Tier System**: Haiku (fast/cheap) → Sonnet (balanced) → Opus (expert)
+- **75 Agents**: Specialized for every language and task
+- **2-Tier System**: Haiku (fast/cheap) → Sonnet (balanced)
 - **Smart Escalation**: T1 handles 70-80% of work, T2 only when needed
-- **60-70% Cost Savings**: Compared to all-Opus approaches
+- **Significant Cost Savings**: Optimized model selection for each agent type
 
 ### Quality Without Compromise
 - **100% Criteria Satisfaction**: Requirements validator enforces every acceptance criteria
+- **Runtime Verification**: Applications must launch without errors
+- **Automated Testing**: All tests must pass (100% pass rate required)
 - **Security First**: OWASP Top 10 audits on all implementations
 - **80%+ Test Coverage**: Automated test generation
 - **Language-Specific Review**: Code reviewers for Python, TypeScript, Java, C#, Go, Ruby, PHP
+- **Manual Testing Documentation**: Comprehensive guides for human verification
 
 ## Use Cases
 
@@ -785,6 +800,8 @@ This plugin was developed through an iterative AI-assisted process. Development 
 - **v1.0**: Initial release with 27 agents (Python/TypeScript only)
 - **v2.0**: Expanded to 66 agents with 7 languages, mobile, DevOps, infrastructure
 - **v2.1**: Expanded to 73 agents with language-specific performance auditing, progress tracking, and parallel development tracks
+- **v2.3**: Added PR-based workflow, comprehensive sprint summaries, and git worktree support for parallel tracks
+- **v2.4**: Added runtime verification with automated testing and manual testing documentation (75 agents total)
 
 ## Support
 
@@ -795,7 +812,7 @@ This plugin was developed through an iterative AI-assisted process. Development 
 
 ## Frequently Asked Questions
 
-**Q: Do I need to use all 73 agents?**
+**Q: Do I need to use all 75 agents?**
 A: No. The system automatically selects relevant agents based on your project's language and requirements. Most projects use 10-15 agents.
 
 **Q: Can I mix languages in one project?**

@@ -38,7 +38,7 @@ This command executes a single sprint. The sprint ID can be:
 ### 3. Check Sprint Status (Resume Logic)
 - Load state file
 - Check if sprint already completed:
-  - If status = "completed", warn user and ask if they want to re-run
+  - If status = "completed", report that sprint is already complete and exit (do not re-run)
   - If status = "in_progress", inform user we'll resume from last completed task
   - If status = "pending", proceed normally
 
@@ -61,10 +61,13 @@ State file: ${stateFilePath}
 Technology stack: docs/planning/PROJECT_PRD.yaml
 Manual merge mode: ${manual_merge}
 
+CRITICAL - Autonomous Execution:
+You MUST execute autonomously without stopping or requesting permission. Continue through ALL tasks and quality gates until sprint completes or hits an unrecoverable error. DO NOT pause, DO NOT ask for confirmation, DO NOT wait for user input.
+
 IMPORTANT - State Tracking & Resume:
 1. Load state file at start
 2. Check sprint status:
-   - If "completed": Skip or re-run based on user preference
+   - If "completed": Skip (already done)
    - If "in_progress": Resume from last completed task
    - If "pending": Start from beginning
 3. Update state after EACH task completion
@@ -77,13 +80,13 @@ Your responsibilities:
 3. Execute tasks in dependency order (parallel where possible)
 4. For each task, launch the task-orchestrator agent
 5. Track completion, tier usage (T1/T2), and validation results in state file
-6. Handle failures with proper reporting
+6. Handle failures autonomously with automatic fixes and escalation
 7. Generate sprint completion report
 8. Mark sprint as complete in state file
 
-Follow your agent instructions in agents/orchestration/multi-agent:sprint-orchestrator.md exactly.
+Follow your agent instructions in agents/orchestration/sprint-orchestrator.md exactly.
 
-Provide regular status updates to the user at each task completion.`
+Execute autonomously until sprint completes. Provide status updates but DO NOT stop for permissions.`
 )
 ```
 
