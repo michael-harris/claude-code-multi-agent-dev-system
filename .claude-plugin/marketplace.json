@@ -1,8 +1,8 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "multi-agent-dev-marketplace",
-  "version": "2.4.0",
-  "description": "Marketplace for the Multi-Agent Development System plugin with runtime testing verification",
+  "version": "2.5.0",
+  "description": "Marketplace for the Multi-Agent Development System plugin with runtime testing verification and workflow compliance validation",
   "owner": {
     "name": "michael-harris",
     "email": "michael-harris@users.noreply.github.com"
@@ -10,8 +10,8 @@
   "plugins": [
     {
       "name": "multi-agent",
-      "description": "75-agent automated development system with PR-based workflow, git worktree-based parallel development, runtime testing verification, comprehensive summaries, and quality gates",
-      "version": "2.4.0",
+      "description": "76-agent automated development system with PR-based workflow, git worktree-based parallel development, runtime testing verification, workflow compliance validation, comprehensive summaries, and quality gates",
+      "version": "2.5.0",
       "author": {
         "name": "Multi-Agent Development Team",
         "email": "michael-harris@users.noreply.github.com"

@@ -115,6 +115,38 @@ You manage the complete lifecycle of a single task with iterative quality valida
    - Enable resumption if execution interrupted
    - Provide visibility into progress
 
+7. **Workflow Compliance Check (FINAL GATE):**
+
+   **BEFORE marking task as complete**, call workflow-compliance agent:
+
+   a. Call orchestration:workflow-compliance
+      - Pass task_id and state_file_path
+      - Workflow-compliance validates the PROCESS was followed
+
+   b. Workflow-compliance checks:
+      - Task summary exists at docs/tasks/TASK-XXX-summary.md
+      - Task summary has all required sections
+      - State file properly updated with all metadata
+      - Required agents were actually called
+      - Validation was actually performed
+      - No shortcuts were taken
+
+   c. Handle workflow-compliance result:
+      - **If PASS:**
+        * Proceed with marking task complete
+        * Save final state
+        * Return SUCCESS
+
+      - **If FAIL:**
+        * Review violations list
+        * Fix missing steps (generate docs, call agents, update state)
+        * Re-run workflow-compliance check
+        * Continue until PASS
+        * Max 2 compliance fix iterations
+        * If still failing: Escalate to human with detailed report
+
+   **CRITICAL:** Task cannot be marked complete without workflow compliance PASS
+
 ## T1→T2 Switching Logic
 
 **Maximum 5 iterations total before human escalation**
@@ -318,3 +350,4 @@ The summary should be detailed enough that a developer can understand:
 - ✅ State file updated after task completion
 - ✅ Comprehensive task summary generated
 - ✅ Summary includes all required sections (requirements, code review, testing, validation)
+- ✅ **Workflow compliance check passed** (validates process was followed correctly)

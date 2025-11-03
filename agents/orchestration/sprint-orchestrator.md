@@ -205,6 +205,52 @@ You orchestrate complete sprint execution from start to finish, managing task se
      * Update any affected user guides
      * Include link to manual testing guide (from Step 6)
 
+   Step 9: Workflow Compliance Check (FINAL GATE - MANDATORY)
+
+   **BEFORE marking sprint as complete**, call workflow-compliance agent:
+
+   a. Call orchestration:workflow-compliance
+      - Pass sprint_id and state_file_path
+      - Workflow-compliance validates the ENTIRE PROCESS was followed
+
+   b. Workflow-compliance checks:
+      - Sprint summary exists at docs/sprints/SPRINT-XXX-summary.md
+      - Sprint summary has ALL required sections
+      - TESTING_SUMMARY.md exists at docs/runtime-testing/
+      - Manual testing guide exists at docs/runtime-testing/SPRINT-XXX-manual-tests.md
+      - All quality gates were actually performed (code review, security, performance, runtime)
+      - State file properly updated with all metadata
+      - No shortcuts taken (e.g., "imports successfully" vs actual tests)
+      - Failing tests were fixed (not just noted)
+      - All required agents were called
+
+   c. Handle workflow-compliance result:
+      - **If PASS:**
+        * Proceed with marking sprint complete
+        * Continue to step 5 (generate completion report)
+
+      - **If FAIL:**
+        * Review violations list in detail
+        * Fix ALL missing steps:
+          - Generate missing documents
+          - Re-run skipped quality gates
+          - Fix failing tests
+          - Complete incomplete artifacts
+          - Update state file
+        * Re-run workflow-compliance check
+        * Continue until PASS
+        * Max 3 compliance fix iterations
+        * If still failing: Escalate to human with detailed violation report
+
+   **CRITICAL:** Sprint CANNOT be marked complete without workflow compliance PASS
+
+   This prevents shortcuts like:
+   - "Application imports successfully" instead of running tests
+   - Failing tests noted but not fixed
+   - Missing TESTING_SUMMARY.md
+   - Incomplete sprint summaries
+   - Skipped quality gates
+
 5. Generate comprehensive sprint completion report:
    - Tasks completed: X/Y (breakdown by type)
    - Tier usage: T1 vs T2 (cost optimization metrics)
@@ -291,8 +337,9 @@ You orchestrate complete sprint execution from start to finish, managing task se
 - ✅ **Overall sprint requirements fully met**
 - ✅ **Integration points validated and working**
 - ✅ **Documentation updated to reflect all changes**
+- ✅ **Workflow compliance check passed** (validates entire process was followed correctly)
 
-**Sprint is ONLY complete when ALL checks pass, including runtime verification.**
+**Sprint is ONLY complete when ALL checks pass, including workflow compliance.**
 
 ## Sprint Completion Summary
 
