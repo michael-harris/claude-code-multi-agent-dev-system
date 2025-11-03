@@ -36,11 +36,48 @@ Extract track number from command (if specified):
 - Load current progress
 - Identify completed vs pending sprints
 - Determine resume point
+- **NEW:** Check if worktree mode is enabled (`parallel_tracks.mode = "worktrees"`)
+
+### Step 1.5: Determine Working Directory (NEW)
+
+**If worktree mode is enabled AND track is specified:**
+1. Get worktree path from state file:
+   ```python
+   worktree_path = state.parallel_tracks.track_info[track_number].worktree_path
+   # Example: ".multi-agent/track-01"
+   ```
+
+2. Verify worktree exists:
+   ```bash
+   if [ -d "$worktree_path" ]; then
+       echo "Working in worktree: $worktree_path"
+       cd "$worktree_path"
+   else
+       echo "ERROR: Worktree not found at $worktree_path"
+       echo "Run /multi-agent:planning again with --use-worktrees"
+       exit 1
+   fi
+   ```
+
+3. Verify we're on the correct branch:
+   ```bash
+   expected_branch = state.parallel_tracks.track_info[track_number].branch
+   current_branch = git rev-parse --abbrev-ref HEAD
+   if current_branch != expected_branch:
+       echo "WARNING: Worktree is on branch $current_branch, expected $expected_branch"
+   ```
+
+4. All subsequent file operations (reading sprints, tasks, creating files) happen in this worktree directory
+
+**If state-only mode OR no track specified:**
+- Work in current directory (main repo)
+- No directory switching needed
 
 ### Step 2: Project State Analysis
 
 **Check Sprint Files:**
 ```bash
+# In worktree directory if applicable, otherwise main directory
 ls docs/sprints/
 ```
 
@@ -57,7 +94,7 @@ ls docs/sprints/
 - Count total sprints to execute vs already completed
 
 **Check PRD Exists:**
-- Verify `docs/planning/PROJECT_PRD.yaml` exists (or feature/multi-agent:issue PRD)
+- Verify `docs/planning/PROJECT_PRD.yaml` exists (or feature/issue PRD)
 - If missing, instruct user to run `/multi-agent:prd` first
 
 **Resume Point Determination:**
@@ -239,11 +276,12 @@ next_steps:
 
 ### 5. User Communication
 
-**During Execution:**
+**During Execution (State-Only Mode):**
 ```
 Starting multi-sprint execution...
 
 Found 5 sprints in docs/sprints/
+Mode: State-only (logical separation)
 Starting from SPRINT-001
 
 ═══════════════════════════════════════
@@ -269,6 +307,51 @@ Running performance audit...
 Updating final documentation...
 
 ✅ PROJECT COMPLETE!
+```
+
+**During Execution (Worktree Mode):**
+```
+Starting multi-sprint execution for Track 01...
+
+Mode: Git worktrees (physical isolation)
+Working directory: .multi-agent/track-01/
+Branch: dev-track-01
+Found 2 sprints for track 01
+Starting from SPRINT-001-01
+
+═══════════════════════════════════════
+Track 1: Backend (Worktree Mode)
+═══════════════════════════════════════
+Location: .multi-agent/track-01/
+Branch: dev-track-01
+Status: 0/2 sprints complete
+
+═══════════════════════════════════════
+Sprint 1/2: SPRINT-001-01 (Foundation)
+═══════════════════════════════════════
+Launching sprint-orchestrator...
+[sprint-orchestrator executes in worktree]
+Committing to branch: dev-track-01
+✅ SPRINT-001-01 complete (5 tasks, 32 min)
+
+═══════════════════════════════════════
+Sprint 2/2: SPRINT-002-01 (Advanced Features)
+═══════════════════════════════════════
+Launching sprint-orchestrator...
+[sprint-orchestrator executes in worktree]
+Committing to branch: dev-track-01
+✅ SPRINT-002-01 complete (2 tasks, 18 min)
+
+═══════════════════════════════════════
+Track 1 Complete!
+═══════════════════════════════════════
+
+All sprints in track 01 completed ✅
+Commits pushed to branch: dev-track-01
+
+Next steps:
+- Wait for other tracks to complete (if running in parallel)
+- When all tracks done, run: /multi-agent:merge-tracks
 ```
 
 **On Completion:**
@@ -316,6 +399,18 @@ Workflow:
 1. /multi-agent:prd          - Create PRD
 2. /multi-agent:planning     - Break into tasks and sprints
 3. /multi-agent:sprint all   - Execute all sprints
+```
+
+**Worktree not found:**
+```
+Error: Worktree not found at .multi-agent/track-01/
+
+This project was planned with git worktrees, but the worktree is missing.
+
+To recreate worktrees, run:
+/multi-agent:planning <tracks> --use-worktrees
+
+Or if you want to switch to state-only mode, update the state file manually.
 ```
 
 ## Important Notes

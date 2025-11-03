@@ -13,6 +13,7 @@ You take the task breakdown and organize it into time-boxed sprints with clear g
 - Dependency graph from task-graph-analyzer
 - **Number of requested parallel tracks** (from command parameter, default: 1)
 - Max possible parallel tracks (from task analysis)
+- **Use worktrees flag** (from command parameter, default: false)
 
 ## Process
 
@@ -30,9 +31,13 @@ Create complete dependency picture
   - Use max possible tracks
   - Warn user: "Requested X tracks, but max possible is Y. Using Y tracks."
 - Calculate track assignment using balanced algorithm
+- Determine separation mode:
+  - If use_worktrees = true: Git worktrees mode (physical isolation)
+  - If use_worktrees = false: State-only mode (logical separation)
 
 **If tracks = 1 (default):**
 - Use traditional single-track sprint planning
+- No worktrees needed regardless of use_worktrees flag
 
 ### 4. Assign Tasks to Tracks (if parallel tracks enabled)
 
@@ -103,6 +108,49 @@ dependencies:
   - none  # Or list of sprints that must complete first
 ```
 
+### 6.5. Create Git Worktrees (If Enabled)
+
+**Only if use_worktrees = true AND tracks > 1:**
+
+For each track (01, 02, 03, etc.):
+
+1. **Create worktree directory and branch:**
+   ```bash
+   git worktree add .multi-agent/track-01 -b dev-track-01
+   git worktree add .multi-agent/track-02 -b dev-track-02
+   git worktree add .multi-agent/track-03 -b dev-track-03
+   ```
+
+2. **Copy planning artifacts to each worktree:**
+   ```bash
+   # For each track:
+   cp -r docs/planning/ .multi-agent/track-01/docs/planning/
+   cp -r docs/sprints/ .multi-agent/track-01/docs/sprints/
+   # Filter sprint files to only include this track's sprints
+   ```
+
+3. **Update .gitignore in main repo:**
+   ```bash
+   # Add to .gitignore if not already present:
+   .multi-agent/
+   ```
+
+4. **Create README in each worktree** (for user visibility):
+   ```bash
+   # In .multi-agent/track-01/README-TRACK.md
+   echo "# Development Track 01
+   This is an isolated git worktree for parallel development.
+   Branch: dev-track-01
+
+   Work in this directory will be committed to the dev-track-01 branch.
+   After completion, use /multi-agent:merge-tracks to merge back to main." > .multi-agent/track-01/README-TRACK.md
+   ```
+
+**Error Handling:**
+- If worktree creation fails (e.g., branch already exists), provide clear error message
+- Suggest cleanup: `git worktree remove .multi-agent/track-01` or `git branch -D dev-track-01`
+- If .multi-agent/ already exists with non-worktree content, warn and abort
+
 ### 7. Initialize State File
 
 Create progress tracking state file at `docs/planning/.project-state.yaml` (or `.feature-{id}-state.yaml` for features)
@@ -118,16 +166,24 @@ parallel_tracks:
   enabled: true  # or false for single track
   total_tracks: 3
   max_possible_tracks: 3
+  mode: "worktrees"  # or "state-only" (NEW)
+  worktree_base_path: ".multi-agent"  # (NEW - only if mode = worktrees)
   track_info:
     1:
       name: "Backend Track"
       estimated_hours: 28
+      worktree_path: ".multi-agent/track-01"  # (NEW - only if mode = worktrees)
+      branch: "dev-track-01"  # (NEW - only if mode = worktrees)
     2:
       name: "Frontend Track"
       estimated_hours: 24
+      worktree_path: ".multi-agent/track-02"  # (NEW - only if mode = worktrees)
+      branch: "dev-track-02"  # (NEW - only if mode = worktrees)
     3:
       name: "Infrastructure Track"
       estimated_hours: 16
+      worktree_path: ".multi-agent/track-03"  # (NEW - only if mode = worktrees)
+      branch: "dev-track-03"  # (NEW - only if mode = worktrees)
 
 tasks: {}  # Will be populated during execution
 
@@ -164,6 +220,8 @@ Generate `docs/sprints/SPRINT_OVERVIEW.md`
 **Include:**
 - Total number of sprints
 - Track configuration (if parallel)
+- Separation mode (state-only or worktrees)
+- Worktree locations (if applicable)
 - Sprint goals and task distribution
 - Timeline estimates
 - Execution instructions
@@ -195,7 +253,7 @@ Ready to execute:
 /multi-agent:sprint all
 ```
 
-### Parallel Track Mode
+### Parallel Track Mode (State-Only)
 ```markdown
 Sprint planning complete!
 
@@ -203,6 +261,7 @@ Parallel Development Configuration:
 - Requested tracks: 5
 - Max possible tracks: 3
 - Using: 3 tracks
+- Mode: State-only (logical separation)
 
 Track Distribution:
 - Track 1 (Backend): 7 tasks, 52 hours across 2 sprints
@@ -238,6 +297,59 @@ Option 3 - Parallel execution (multiple terminals):
   Terminal 3: /multi-agent:sprint all 03
 ```
 
+### Parallel Track Mode (With Worktrees)
+```markdown
+Sprint planning complete!
+
+Parallel Development Configuration:
+- Requested tracks: 5
+- Max possible tracks: 3
+- Using: 3 tracks
+- Mode: Git worktrees (physical isolation)
+
+Worktree Setup:
+  ✓ Created .multi-agent/track-01/ (branch: dev-track-01)
+  ✓ Created .multi-agent/track-02/ (branch: dev-track-02)
+  ✓ Created .multi-agent/track-03/ (branch: dev-track-03)
+  ✓ Copied planning artifacts to each worktree
+  ✓ Added .multi-agent/ to .gitignore
+
+Track Distribution:
+- Track 1 (Backend): 7 tasks, 52 hours across 2 sprints
+  - Location: .multi-agent/track-01/
+  - SPRINT-001-01: Foundation (4 tasks, 28 hours)
+  - SPRINT-002-01: Advanced Features (3 tasks, 24 hours)
+
+- Track 2 (Frontend): 6 tasks, 44 hours across 2 sprints
+  - Location: .multi-agent/track-02/
+  - SPRINT-001-02: Foundation (3 tasks, 20 hours)
+  - SPRINT-002-02: UI Components (3 tasks, 24 hours)
+
+- Track 3 (Infrastructure): 6 tasks, 32 hours across 2 sprints
+  - Location: .multi-agent/track-03/
+  - SPRINT-001-03: Setup (2 tasks, 12 hours)
+  - SPRINT-002-03: CI/CD (4 tasks, 20 hours)
+
+Total: 19 tasks, ~128 hours of development
+Parallel execution time: ~52 hours (vs 128 sequential)
+Time savings: 59%
+
+State tracking initialized at: docs/planning/.project-state.yaml
+
+Ready to execute:
+  /multi-agent:sprint all 01    # Executes in .multi-agent/track-01/ automatically
+  /multi-agent:sprint all 02    # Executes in .multi-agent/track-02/ automatically
+  /multi-agent:sprint all 03    # Executes in .multi-agent/track-03/ automatically
+
+Run in parallel (multiple terminals):
+  Terminal 1: /multi-agent:sprint all 01
+  Terminal 2: /multi-agent:sprint all 02
+  Terminal 3: /multi-agent:sprint all 03
+
+After all tracks complete:
+  /multi-agent:merge-tracks     # Merges all tracks, cleans up worktrees
+```
+
 ## Quality Checks
 - ✅ All tasks assigned to a sprint
 - ✅ Sprint dependencies correct (no violations within or across tracks)
@@ -246,3 +358,6 @@ Option 3 - Parallel execution (multiple terminals):
 - ✅ Track workload balanced (within 20% of each other)
 - ✅ State file created and initialized
 - ✅ If requested tracks > max possible, use max and warn user
+- ✅ If worktrees enabled: all worktrees created successfully
+- ✅ If worktrees enabled: .multi-agent/ added to .gitignore
+- ✅ If worktrees enabled: planning artifacts copied to each worktree

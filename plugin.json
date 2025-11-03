@@ -1,7 +1,7 @@
 {
   "name": "multi-agent",
-  "version": "2.1.0",
-  "description": "73-agent automated development system with comprehensive quality gates, language-specific performance auditing, and workflow macros for rapid development",
+  "version": "2.2.0",
+  "description": "74-agent automated development system with git worktree-based parallel development, comprehensive quality gates, and workflow macros for rapid development",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [
@@ -50,6 +50,14 @@
       "name": "Requirements Validator",
       "description": "Quality gate with strict acceptance criteria validation",
       "file": "agents/orchestration/requirements-validator.md",
+      "model": "sonnet",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:track-merger",
+      "name": "Track Merger",
+      "description": "Intelligently merges parallel development tracks using git worktrees",
+      "file": "agents/orchestration/track-merger.md",
       "model": "sonnet",
       "category": "orchestration"
     },
@@ -662,6 +670,26 @@
       "name": "/issue",
       "description": "Complete bug fix workflow from issue to resolution",
       "file": "commands/issue.md"
+    },
+    {
+      "name": "/merge-tracks",
+      "description": "Merge parallel development tracks back to main branch",
+      "file": "commands/merge-tracks.md"
+    },
+    {
+      "name": "/worktree status",
+      "description": "Show detailed status of all development track worktrees",
+      "file": "commands/worktree-status.md"
+    },
+    {
+      "name": "/worktree cleanup",
+      "description": "Manually clean up development track worktrees",
+      "file": "commands/worktree-cleanup.md"
+    },
+    {
+      "name": "/worktree list",
+      "description": "List all git worktrees with track information",
+      "file": "commands/worktree-list.md"
     }
   ]
 }
