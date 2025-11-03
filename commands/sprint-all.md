@@ -5,21 +5,31 @@ You are orchestrating **multi-sprint execution** using the agent-based approach.
 ## Command Usage
 
 ```bash
-/multi-agent:sprint all        # Execute all sprints (all tracks) sequentially
-/multi-agent:sprint all 01     # Execute all sprints in track 1 only
-/multi-agent:sprint all 02     # Execute all sprints in track 2 only
-/multi-agent:sprint all 03     # Execute all sprints in track 3 only
+/multi-agent:sprint all                    # Execute all sprints, create PRs (default)
+/multi-agent:sprint all --manual-merge     # Execute all sprints, skip PR creation
+/multi-agent:sprint all 01                 # Execute track 1, create PRs
+/multi-agent:sprint all 01 --manual-merge  # Execute track 1, skip PRs
+/multi-agent:sprint all 02                 # Execute track 2, create PRs
+/multi-agent:sprint all 03                 # Execute track 3, create PRs
 ```
 
 Executes all sprints sequentially until completion. Supports track filtering for parallel development workflows.
+
+**Flags:**
+- `--manual-merge`: Skip automatic PR creation after each sprint, allow manual merge/PR creation
 
 ## Your Process
 
 ### Step 0: Parse Parameters
 
-Extract track number from command (if specified):
+**Extract track number** from command (if specified):
 - If no parameter: execute all tracks sequentially
 - If parameter (e.g., "01", "02"): execute only that track
+
+**Extract flags:**
+- Check for `--manual-merge` flag
+- If present: manual_merge = true (skip PR creation after each sprint)
+- If absent: manual_merge = false (create PR after each sprint)
 
 ### Step 1: Load State File
 

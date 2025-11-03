@@ -5,18 +5,30 @@ You are initiating a **Sprint Execution** using the agent-based orchestration ap
 ## Command Usage
 
 ```bash
-/multi-agent:sprint SPRINT-001           # Execute specific sprint
-/multi-agent:sprint SPRINT-001-01        # Execute specific sprint in specific track
+/multi-agent:sprint SPRINT-001                    # Execute sprint, create PR (default)
+/multi-agent:sprint SPRINT-001 --manual-merge     # Execute sprint, skip PR creation
+/multi-agent:sprint SPRINT-001-01                 # Execute sprint in track, create PR
+/multi-agent:sprint SPRINT-001-01 --manual-merge  # Execute sprint in track, skip PR
 ```
 
 This command executes a single sprint. The sprint ID can be:
 - Traditional format: `SPRINT-001` (single-track mode)
 - Track format: `SPRINT-001-01` (multi-track mode, sprint 1 track 1)
 
+**Flags:**
+- `--manual-merge`: Skip automatic PR creation, allow manual merge/PR creation
+
 ## Your Process
 
-### 1. Extract Sprint ID
-Parse the sprint ID from the command (e.g., "SPRINT-001" or "SPRINT-001-01")
+### 1. Parse Command Parameters
+
+**Extract sprint ID:**
+- Parse the sprint ID from the command (e.g., "SPRINT-001" or "SPRINT-001-01")
+
+**Extract flags:**
+- Check for `--manual-merge` flag
+- If present: manual_merge = true (skip PR creation)
+- If absent: manual_merge = false (create PR after sprint)
 
 ### 2. Determine State File Location
 - Check for project state: `docs/planning/.project-state.yaml`
@@ -47,6 +59,7 @@ Task(
 Sprint definition: docs/sprints/${sprintId}.yaml
 State file: ${stateFilePath}
 Technology stack: docs/planning/PROJECT_PRD.yaml
+Manual merge mode: ${manual_merge}
 
 IMPORTANT - State Tracking & Resume:
 1. Load state file at start
