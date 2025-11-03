@@ -1,7 +1,7 @@
 {
   "name": "multi-agent",
-  "version": "2.2.0",
-  "description": "74-agent automated development system with git worktree-based parallel development, comprehensive quality gates, and workflow macros for rapid development",
+  "version": "2.3.0",
+  "description": "74-agent automated development system with PR-based workflow, git worktree-based parallel development, comprehensive summaries, and quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [

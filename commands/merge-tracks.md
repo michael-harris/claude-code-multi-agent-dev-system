@@ -5,11 +5,18 @@ You are orchestrating the **parallel development tracks merging phase** to combi
 ## Command Usage
 
 ```bash
-/multi-agent:merge-tracks                    # Merge all tracks, cleanup worktrees (default)
-/multi-agent:merge-tracks --keep-worktrees   # Merge but keep worktrees
-/multi-agent:merge-tracks --delete-branches  # Merge, cleanup worktrees and delete track branches
-/multi-agent:merge-tracks --dry-run          # Show what would be merged without doing it
+/multi-agent:merge-tracks                      # Merge all tracks, create PR, cleanup worktrees (default)
+/multi-agent:merge-tracks --manual-merge       # Merge all tracks, skip PR, cleanup worktrees
+/multi-agent:merge-tracks --keep-worktrees     # Merge, create PR, keep worktrees
+/multi-agent:merge-tracks --delete-branches    # Merge, create PR, cleanup worktrees & branches
+/multi-agent:merge-tracks --dry-run            # Show what would be merged without doing it
 ```
+
+**Flags:**
+- `--manual-merge`: Skip automatic PR creation after merge, allow manual PR creation
+- `--keep-worktrees`: Keep worktrees after merge (default: delete)
+- `--delete-branches`: Delete track branches after merge (default: keep)
+- `--dry-run`: Preview merge plan without executing
 
 ## Prerequisites
 
@@ -26,6 +33,7 @@ This command only works for projects planned with git worktrees (`--use-worktree
 ### Step 0: Parse Parameters
 
 Extract flags from command:
+- `--manual-merge`: Skip PR creation after merge (default: false)
 - `--keep-worktrees`: Do not delete worktrees after merge (default: false)
 - `--delete-branches`: Delete track branches after merge (default: false)
 - `--dry-run`: Show merge plan without executing (default: false)
@@ -144,12 +152,14 @@ Your responsibilities:
 5. Run integration tests after each merge
 6. Create merge commit messages that reference track work
 7. Tag the final merged state
-8. Clean up worktrees (unless --keep-worktrees)
-9. Optionally delete track branches (if --delete-branches)
-10. Update state file to mark merge complete
-11. Generate merge completion report
+8. Create pull request (unless --manual-merge)
+9. Clean up worktrees (unless --keep-worktrees)
+10. Optionally delete track branches (if --delete-branches)
+11. Update state file to mark merge complete
+12. Generate merge completion report
 
 Flags:
+- manual_merge: ${manual_merge}
 - keep_worktrees: ${keep_worktrees}
 - delete_branches: ${delete_branches}
 

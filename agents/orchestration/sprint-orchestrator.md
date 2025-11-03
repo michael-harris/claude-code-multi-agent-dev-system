@@ -210,6 +210,326 @@ You orchestrate complete sprint execution from start to finish, managing task se
 
 **Sprint is ONLY complete when ALL checks pass.**
 
+## Sprint Completion Summary
+
+After sprint completion and final review, generate a comprehensive sprint summary at `docs/sprints/SPRINT-XXX-summary.md`:
+
+```markdown
+# Sprint Summary: SPRINT-XXX
+
+**Sprint:** [Sprint name from sprint file]
+**Status:** ✅ Completed
+**Duration:** 5.5 hours
+**Total Tasks:** 7/7 completed
+**Track:** 1 (if multi-track mode)
+
+## Sprint Goals
+
+### Objectives
+[From sprint file goal field]
+- Set up backend API foundation
+- Implement user authentication
+- Create product catalog endpoints
+
+### Goals Achieved
+✅ All sprint objectives met
+
+## Tasks Completed
+
+| Task | Name | Tier | Iterations | Duration | Status |
+|------|------|------|------------|----------|--------|
+| TASK-001 | Database schema design | T1 | 2 | 45 min | ✅ |
+| TASK-004 | User authentication API | T1 | 3 | 62 min | ✅ |
+| TASK-008 | Product catalog API | T1 | 1 | 38 min | ✅ |
+| TASK-012 | Shopping cart API | T2 | 4 | 85 min | ✅ |
+| TASK-016 | Payment integration | T1 | 2 | 55 min | ✅ |
+| TASK-006 | Email notifications | T1 | 1 | 32 min | ✅ |
+| TASK-018 | Admin dashboard API | T2 | 3 | 68 min | ✅ |
+
+**Total:** 7 tasks, 385 minutes, T1: 5 tasks (71%), T2: 2 tasks (29%)
+
+## Aggregated Requirements
+
+### All Requirements Met
+✅ 35/35 total acceptance criteria satisfied across all tasks
+
+### Task-Level Validation Results
+- TASK-001: 5/5 criteria ✅
+- TASK-004: 6/6 criteria ✅
+- TASK-008: 4/4 criteria ✅
+- TASK-012: 5/5 criteria ✅
+- TASK-016: 7/7 criteria ✅
+- TASK-006: 3/3 criteria ✅
+- TASK-018: 5/5 criteria ✅
+
+## Code Review Findings
+
+### Total Checks Performed
+✅ Code style and formatting (all tasks)
+✅ Error handling (all tasks)
+✅ Security vulnerabilities (all tasks)
+✅ Performance optimization (all tasks)
+✅ Documentation quality (all tasks)
+✅ Type safety (all tasks)
+
+### Issues Identified Across Sprint
+- **Total Issues:** 18
+  - Critical: 0
+  - Major: 3 (all resolved)
+  - Minor: 15 (all resolved)
+
+### How Issues Were Addressed
+
+**Major Issues (3):**
+1. **TASK-004:** Missing rate limiting on auth endpoint
+   - **Resolved:** Added rate limiting middleware (10 req/min)
+2. **TASK-012:** SQL injection vulnerability in cart query
+   - **Resolved:** Switched to parameterized queries
+3. **TASK-016:** Exposed API keys in code
+   - **Resolved:** Moved to environment variables
+
+**Minor Issues (15):**
+- Missing docstrings: 8 instances → All added
+- Inconsistent error messages: 4 instances → Standardized
+- Unused imports: 3 instances → Removed
+
+**Final Status:** All 18 issues resolved ✅
+
+## Testing Summary
+
+### Aggregate Test Coverage
+- **Overall Coverage:** 91% (523/575 statements)
+- **Uncovered Lines:** 52 (mostly error edge cases)
+
+### Test Results by Task
+| Task | Tests | Passed | Failed | Coverage |
+|------|-------|--------|--------|----------|
+| TASK-001 | 12 | 12 | 0 | 95% |
+| TASK-004 | 18 | 18 | 0 | 88% |
+| TASK-008 | 14 | 14 | 0 | 92% |
+| TASK-012 | 16 | 16 | 0 | 89% |
+| TASK-016 | 20 | 20 | 0 | 90% |
+| TASK-006 | 8 | 8 | 0 | 94% |
+| TASK-018 | 15 | 15 | 0 | 93% |
+
+**Total:** 103 tests, 103 passed, 0 failed (100% pass rate)
+
+### Test Types
+- Unit tests: 67 (65%)
+- Integration tests: 28 (27%)
+- End-to-end tests: 8 (8%)
+
+## Final Sprint Review
+
+### Code Review (Language-Specific)
+✅ **Python code review:** PASS
+  - All PEP 8 guidelines followed
+  - Proper type hints throughout
+  - Comprehensive error handling
+
+### Security Audit
+✅ **OWASP Top 10 compliance:** PASS
+  - No SQL injection vulnerabilities
+  - Authentication properly implemented
+  - No exposed secrets or API keys
+  - Input validation on all endpoints
+  - CORS configured correctly
+
+### Performance Audit
+✅ **Performance optimization:** PASS
+  - Database queries optimized (proper indexes)
+  - API response times < 150ms average
+  - Caching implemented where appropriate
+  - No N+1 query patterns
+
+### Integration Testing
+✅ **Cross-task integration:** PASS
+  - All endpoints work together
+  - Data flows correctly between tasks
+  - No breaking changes to existing functionality
+
+### Documentation
+✅ **Documentation complete:** PASS
+  - All endpoints documented (OpenAPI spec)
+  - README updated with new features
+  - Code comments comprehensive
+  - Architecture diagrams current
+
+## Sprint Statistics
+
+**Cost Analysis:**
+- T1 agent usage: $2.40
+- T2 agent usage: $1.20
+- Design agents (Opus): $0.80
+- Total sprint cost: $4.40
+
+**Efficiency Metrics:**
+- Average iterations per task: 2.3
+- T1 success rate: 71% (5/7 tasks)
+- Average task duration: 55 minutes
+- Cost per task: $0.63
+
+## Summary
+
+Successfully completed Sprint-001 (Foundation) with all 7 tasks meeting acceptance criteria. Implemented backend API foundation including user authentication, product catalog, shopping cart, payment integration, email notifications, and admin dashboard. All code reviews passed with 18 issues identified and resolved. Achieved 91% test coverage with 100% test pass rate (103/103 tests). All security, performance, and integration checks passed.
+
+**Ready for next sprint:** ✅
+```
+
+## Pull Request Creation
+
+After generating the sprint summary, create a pull request (default behavior):
+
+### When to Create PR
+
+**Default (create PR):**
+- After sprint completion
+- After all quality gates pass
+- After sprint summary is generated
+
+**Skip PR (manual merge):**
+- When `--manual-merge` flag is present
+- In this case, changes remain on current branch
+- User can review and create PR manually
+
+### PR Creation Process
+
+1. **Verify current branch and changes:**
+   ```bash
+   current_branch=$(git rev-parse --abbrev-ref HEAD)
+   if git diff --quiet && git diff --cached --quiet; then
+       echo "No changes to commit - skip PR"
+       exit 0
+   fi
+   ```
+
+2. **Commit sprint changes:**
+   ```bash
+   git add .
+   git commit -m "Complete SPRINT-XXX: [Sprint name]
+
+   Sprint Summary:
+   - Tasks completed: 7/7
+   - Test coverage: 91%
+   - Test pass rate: 100% (103/103)
+   - Code reviews: All passed
+   - Security audit: PASS
+   - Performance audit: PASS
+
+   Tasks:
+   - TASK-001: Database schema design
+   - TASK-004: User authentication API
+   - TASK-008: Product catalog API
+   - TASK-012: Shopping cart API
+   - TASK-016: Payment integration
+   - TASK-006: Email notifications
+   - TASK-018: Admin dashboard API
+
+   All acceptance criteria met (35/35).
+   All issues found in code review resolved (18/18).
+
+   Full summary: docs/sprints/SPRINT-XXX-summary.md"
+   ```
+
+3. **Push to remote:**
+   ```bash
+   git push origin $current_branch
+   ```
+
+4. **Create pull request using gh CLI:**
+   ```bash
+   gh pr create \
+     --title "Sprint-XXX: [Sprint name]" \
+     --body "$(cat <<'EOF'
+   ## Sprint Summary
+
+   **Status:** ✅ All tasks completed
+   **Tasks:** 7/7 completed
+   **Test Coverage:** 91%
+   **Test Pass Rate:** 100% (103/103 tests)
+   **Code Review:** All passed
+   **Security:** PASS (OWASP Top 10 verified)
+   **Performance:** PASS (avg response time 147ms)
+
+   ## Tasks Completed
+
+   - ✅ TASK-001: Database schema design (T1, 45 min)
+   - ✅ TASK-004: User authentication API (T1, 62 min)
+   - ✅ TASK-008: Product catalog API (T1, 38 min)
+   - ✅ TASK-012: Shopping cart API (T2, 85 min)
+   - ✅ TASK-016: Payment integration (T1, 55 min)
+   - ✅ TASK-006: Email notifications (T1, 32 min)
+   - ✅ TASK-018: Admin dashboard API (T2, 68 min)
+
+   ## Quality Assurance
+
+   ### Requirements
+   ✅ All 35 acceptance criteria met across all tasks
+
+   ### Code Review Issues
+   - Total found: 18 (0 critical, 3 major, 15 minor)
+   - All resolved: 18/18 ✅
+
+   ### Testing
+   - Coverage: 91% (523/575 statements)
+   - Tests: 103 total (67 unit, 28 integration, 8 e2e)
+   - Pass rate: 100%
+
+   ### Security & Performance
+   - OWASP Top 10: All checks passed ✅
+   - No vulnerabilities found ✅
+   - Performance targets met (< 150ms avg) ✅
+
+   ## Documentation
+
+   - API documentation updated (OpenAPI spec)
+   - README updated with new features
+   - Architecture diagrams current
+   - Full sprint summary: docs/sprints/SPRINT-XXX-summary.md
+
+   ## Ready to Merge
+
+   This PR is ready for review and merge. All quality gates passed, no blocking issues remain.
+
+   **Cost:** $4.40 (T1: $2.40, T2: $1.20, Design: $0.80)
+   **Duration:** 5.5 hours
+   **Efficiency:** 71% T1 success rate
+
+   EOF
+   )" \
+     --label "sprint" \
+     --label "automated"
+   ```
+
+5. **Report PR creation:**
+   ```
+   ✅ Sprint completed successfully!
+   ✅ Pull request created: https://github.com/user/repo/pull/123
+
+   Next steps:
+   - Review PR: https://github.com/user/repo/pull/123
+   - Merge when ready
+   - Continue to next sprint or track
+   ```
+
+### Manual Merge Mode
+
+If `--manual-merge` flag is present:
+
+```
+✅ Sprint completed successfully!
+⚠️  Manual merge mode - no PR created
+
+Changes committed to branch: feature-branch
+
+To create PR manually:
+  gh pr create --title "Sprint-XXX: [name]"
+
+Or merge directly:
+  git checkout main
+  git merge feature-branch
+```
+
 ## Commands
 
 - `/multi-agent:sprint SPRINT-001` - Execute single sprint
