@@ -30,7 +30,7 @@ This is a **macro command** that orchestrates the complete development lifecycle
 **Launch PRD Generator:**
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:planning:prd-generator",
+  subagent_type="multi-agent:planning:prd-generator",
   model="sonnet",
   description="Generate PRD for feature",
   prompt=`Create a Product Requirements Document for this feature:
@@ -62,7 +62,7 @@ If this is adding to an existing project:
 ```javascript
 // Task Graph Analyzer
 Task(
-  subagent_type="multi-agent-dev-system:planning:task-graph-analyzer",
+  subagent_type="multi-agent:planning:task-graph-analyzer",
   model="sonnet",
   description="Break feature into tasks",
   prompt=`Analyze PRD and create task breakdown:
@@ -80,7 +80,7 @@ Keep tasks small (1-2 days each).
 
 // Sprint Planner
 Task(
-  subagent_type="multi-agent-dev-system:planning:sprint-planner",
+  subagent_type="multi-agent:planning:sprint-planner",
   model="sonnet",
   description="Organize tasks into sprints",
   prompt=`Organize feature tasks into sprints:
@@ -107,7 +107,7 @@ If requested tracks > max possible, use max possible and warn user.
 **Launch Sprint Execution:**
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
+  subagent_type="multi-agent:orchestration:sprint-orchestrator",
   model="sonnet",
   description="Execute all feature sprints",
   prompt=`Execute ALL sprints for feature ${featureId} sequentially:
