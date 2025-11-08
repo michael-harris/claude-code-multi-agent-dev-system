@@ -58,6 +58,109 @@ Extract the number of requested parallel tracks and worktree mode from the comma
    - Still initialize state file for progress tracking
    - No worktrees needed for single track
 
+## Special Pattern: API-First Full-Stack Applications
+
+**Use this pattern when building applications with separate backend and frontend that communicate via API.**
+
+### When to Use API-First Pattern
+
+Use this when your PRD indicates:
+- Full-stack application (backend + frontend)
+- REST API or GraphQL API
+- Mobile app + backend
+- Microservices architecture
+- Any scenario with API contract between components
+
+### How API-First Works
+
+1. **First Task = API Design**: Create OpenAPI specification BEFORE any code
+2. **Backend implements FROM spec**: Exact schemas, no deviations
+3. **Frontend generates FROM spec**: Auto-generated type-safe client
+4. **Result**: Perfect alignment, compile-time safety
+
+### Task Structure Template
+
+When you detect a full-stack project, ensure tasks follow this order:
+
+```
+TASK-001: Design API Specification (NO dependencies)
+  ├── Agent: backend:api-designer
+  ├── Output: docs/api/openapi.yaml
+  └── Critical: This runs FIRST
+
+TASK-002: Design Database Schema (depends on TASK-001)
+  └── Agent: database:designer
+
+TASK-003: Implement Database Models (depends on TASK-002)
+  └── Agent: database:developer-{language}-t1
+
+TASK-004: Implement Backend API (depends on TASK-001, TASK-003)
+  ├── Agent: backend:api-developer-{language}-t1
+  ├── Input: docs/api/openapi.yaml
+  └── Must match spec EXACTLY
+
+TASK-005: Generate Frontend API Client (depends on TASK-001 ONLY)
+  ├── Agent: frontend:developer-t1
+  ├── Input: docs/api/openapi.yaml
+  ├── Tool: openapi-typescript-codegen
+  └── Output: Auto-generated type-safe client
+
+TASK-006: Implement Frontend UI (depends on TASK-005)
+  └── Agent: frontend:developer-t1
+  └── Uses ONLY generated client
+```
+
+### Important Dependencies
+
+- **Backend depends on**: API spec + Database models
+- **Frontend client depends on**: API spec ONLY (not backend implementation!)
+- **Frontend UI depends on**: Generated client
+
+This allows frontend and backend to develop in parallel after the API spec is complete.
+
+### Validation Requirements
+
+When creating tasks for API-first projects, include these acceptance criteria:
+
+**For TASK-001 (API Design):**
+- OpenAPI 3.0 specification at docs/api/openapi.yaml
+- Passes openapi-spec-validator
+- All endpoints, schemas, errors documented
+
+**For TASK-004 (Backend):**
+- Implements ONLY endpoints in spec
+- Schemas match spec EXACTLY
+- Passes openapi-spec-validator
+- /docs endpoint serves the specification
+
+**For TASK-005 (Frontend Client):**
+- Client auto-generated from spec
+- NO manual endpoint definitions
+- TypeScript types from spec
+- CI verifies client is up-to-date
+
+**For TASK-006 (Frontend UI):**
+- Uses ONLY generated client
+- NO fetch/axios outside generated code
+- TypeScript compilation enforces correctness
+
+### Example Detection
+
+If PRD contains:
+- "backend API" + "frontend application"
+- "REST API" + "React/Vue/Angular"
+- "mobile app" + "API server"
+- "microservices" with communication
+
+Then recommend API-first pattern and structure tasks accordingly.
+
+### Reference
+
+See complete example: `examples/api-first-fullstack-workflow.md`
+See task templates: `docs/templates/api-first-tasks.yaml`
+
+---
+
 ## Agent References
 
 - Task Graph Analyzer: `.claude/agents/multi-agent:planning/task-graph-analyzer.md`
