@@ -82,45 +82,78 @@ Keep it concise - this is a bug fix, not a feature.
 )
 ```
 
-### Phase 3: Task Creation
+### Phase 3: Task Creation & Sprint Planning
 
-**Create single task (most issues are 1 task):**
+**Create tasks and organize into sprint:**
 
 ```javascript
+// First, create tasks
 Task(
   subagent_type="multi-agent-dev-system:planning:task-graph-analyzer",
   model="sonnet",
-  description="Create issue resolution task",
-  prompt=`Create task for issue resolution:
+  description="Create issue resolution tasks",
+  prompt=`Create tasks for issue resolution:
 
 Issue PRD: docs/planning/ISSUE_${issueId}_PRD.yaml
 
-Create task: docs/planning/tasks/ISSUE-${issueId}-001.yaml
+Create tasks in: docs/planning/tasks/
+Prefix task IDs with ISSUE-${issueId}-
 
-Task should include:
+Task breakdown should include:
 - Investigate and identify root cause
 - Implement fix
 - Add/update tests
 - Verify no regressions
 
-If issue is complex, create multiple tasks with dependencies.
+Most issues will be 1 task, but complex issues may require multiple tasks with dependencies.
+Identify all dependencies between tasks.
+`
+)
+
+// Then, organize into sprint
+Task(
+  subagent_type="multi-agent-dev-system:planning:sprint-planner",
+  model="sonnet",
+  description="Organize issue tasks into sprint",
+  prompt=`Organize issue resolution tasks into a sprint:
+
+Tasks: docs/planning/tasks/ISSUE-${issueId}-*
+Dependencies: Check task files for dependencies
+Requested parallel tracks: 1 (single-track for issues)
+
+Create sprint: docs/sprints/ISSUE_${issueId}_SPRINT-001.yaml
+Initialize state file: docs/planning/.issue-${issueId}-state.yaml
+
+Even if there's only 1 task, create a proper sprint structure to ensure consistent workflow.
+Balance sprint capacity and respect dependencies.
 `
 )
 ```
 
-### Phase 4: Execute Fix
+### Phase 4: Execute Sprint
 
-**Launch task orchestrator:**
+**Launch sprint orchestrator:**
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:orchestration:task-orchestrator",
+  subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
   model="sonnet",
-  description="Execute issue fix",
-  prompt=`Execute issue resolution:
+  description="Execute issue resolution sprint",
+  prompt=`Execute sprint for issue ${issueId}:
 
-Task: docs/planning/tasks/ISSUE-${issueId}-001.yaml
+Sprint file: docs/sprints/ISSUE_${issueId}_SPRINT-001.yaml
+State file: docs/planning/.issue-${issueId}-state.yaml
+Technology stack: docs/planning/PROJECT_PRD.yaml or ISSUE_${issueId}_PRD.yaml
 
-Workflow:
+CRITICAL - Autonomous Execution:
+You MUST execute autonomously without stopping or requesting permission. Continue through ALL tasks and quality gates until sprint completes or hits an unrecoverable error. DO NOT pause, DO NOT ask for confirmation, DO NOT wait for user input.
+
+IMPORTANT - State Tracking & Resume:
+1. Load state file at start
+2. Check sprint status (skip if completed, resume if in_progress)
+3. Update state after EACH task completion
+4. Save state regularly to enable resumption
+
+Workflow for each task:
 1. Investigate root cause (use appropriate language developer)
 2. Implement fix (T1 first, escalate to T2 if needed)
 3. Run code reviewer
@@ -128,11 +161,14 @@ Workflow:
 5. Run performance auditor (if performance issue)
 6. Add tests to prevent regression
 7. Verify fix with requirements validator
+8. Run workflow compliance check
 
 Use T2 agents directly if:
 - Critical severity
 - Security vulnerability
 - Complex root cause
+
+Execute autonomously until sprint completes.
 `
 )
 ```
@@ -179,37 +215,49 @@ gh issue close ${issueNumber}
 
 Issue: ${issueDescription}
 
-Phase 1/4: Analyzing issue...
+Phase 1/5: Analyzing issue...
   Identifying affected components...
   Determining severity: ${severity}
 ```
 
 **Progress:**
 ```
-✅ Phase 1: Analysis complete
+✅ Phase 1/5: Analysis complete
    Root cause: Memory leak in event handler (handlers/websocket.py)
    Severity: High
 
-📋 Phase 2: Creating resolution plan...
+📋 Phase 2/5: Creating resolution plan...
    ✅ Generated focused PRD
-   ✅ Created fix task
 
-🔨 Phase 3: Implementing fix...
-   Investigating root cause...
-   ✅ Found: Goroutine leak, missing context cancellation
+📋 Phase 3/5: Planning sprint...
+   ✅ Created 2 resolution tasks
+   ✅ Organized into sprint ISSUE_001_SPRINT-001
 
-   Implementing fix (T1 agent)...
-   ✅ Added context.WithCancel()
-   ✅ Added proper cleanup
+🔨 Phase 4/5: Executing sprint...
+   Sprint 1/1: ISSUE_001_SPRINT-001
 
-   Running code review...
-   ✅ Code review passed
+   Task 1/2: Investigate and fix root cause
+      Investigating root cause...
+      ✅ Found: Goroutine leak, missing context cancellation
 
-   Adding tests...
-   ✅ Added regression test
-   ✅ Test confirms fix works
+      Implementing fix (T1 agent)...
+      ✅ Added context.WithCancel()
+      ✅ Added proper cleanup
 
-✅ Phase 4: Verification...
+      Running code review...
+      ✅ Code review passed
+
+   Task 2/2: Add regression tests
+      Adding tests...
+      ✅ Added regression test
+      ✅ Test confirms fix works
+
+   Running workflow compliance check...
+   ✅ Workflow compliance verified
+
+   ✅ Sprint complete
+
+✅ Phase 5/5: Verification...
    ✅ All existing tests pass
    ✅ Issue resolved
    ✅ No regressions
@@ -257,28 +305,32 @@ Next steps:
 
 ### Bug Fix (standard)
 ```
-Workflow: Analyze → Fix → Test → Verify
-Agents: Appropriate developer (T1/T2) → Reviewer → Validator
+Workflow: Analyze → Plan → Create Sprint → Execute Sprint → Verify
+Agents: sprint-orchestrator → task-orchestrator → Developer (T1/T2) → Reviewer → Validator
+Sprint: Usually 1 sprint with 1-2 tasks
 ```
 
 ### Security Vulnerability (critical)
 ```
-Workflow: Analyze → Fix (T2) → Security audit → Deploy urgently
-Agents: Developer T2 → Security auditor → Validator
+Workflow: Analyze → Plan → Create Sprint → Execute Sprint (T2) → Security audit → Verify
+Agents: sprint-orchestrator → Developer T2 → Security auditor → Validator
 Priority: IMMEDIATE
+Sprint: 1 sprint, T2 agents used immediately
 ```
 
 ### Performance Issue
 ```
-Workflow: Profile → Optimize → Benchmark → Verify
-Agents: Developer → Performance auditor → Validator
+Workflow: Analyze → Profile → Plan → Create Sprint → Execute Sprint → Benchmark → Verify
+Agents: sprint-orchestrator → Developer → Performance auditor → Validator
 Include: Before/after benchmarks
+Sprint: 1 sprint with profiling + optimization tasks
 ```
 
 ### Enhancement/Small Feature
 ```
-(Consider using /multi-agent:feature instead)
-This command better for: Quick fixes, small improvements
+(Consider using /multi-agent:feature instead for larger enhancements)
+This command better for: Quick fixes, small improvements, single-component changes
+Sprint: 1 sprint with 1-3 tasks
 ```
 
 ## Error Handling
@@ -366,16 +418,27 @@ User: /multi-agent:issue Fix login timeout
     ↓
 2. Create Fix Plan (lightweight PRD)
     ↓
-3. Implement Fix
-    ├── Developer (T1 or T2)
-    ├── Code review
-    ├── Tests added
-    └── Validation
+3. Create Tasks & Sprint
+    ├── Break into tasks (task-graph-analyzer)
+    ├── Organize into sprint (sprint-planner)
+    └── Create state file for tracking
     ↓
-4. Verify
+4. Execute Sprint
+    ├── Sprint orchestrator manages execution
+    ├── For each task:
+    │   ├── Developer (T1 or T2)
+    │   ├── Code review
+    │   ├── Security audit (if needed)
+    │   ├── Performance audit (if needed)
+    │   ├── Tests added
+    │   └── Requirements validation
+    ├── Workflow compliance check
+    └── Runtime verification
+    ↓
+5. Verify
     ├── No regressions
     ├── Issue resolved
-    └── Tests pass
+    └── All tests pass
     ↓
 ✅ Issue Resolved
     └── (Close GitHub issue if applicable)
