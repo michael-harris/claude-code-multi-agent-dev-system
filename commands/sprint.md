@@ -51,7 +51,7 @@ Check that `docs/sprints/{SPRINT-ID}.yaml` exists
 
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
+  subagent_type="multi-agent:orchestration:sprint-orchestrator",
   model="sonnet",
   description="Execute complete sprint with quality loops",
   prompt=`Execute sprint ${sprintId} with full agent orchestration and state tracking.

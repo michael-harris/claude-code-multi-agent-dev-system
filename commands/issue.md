@@ -57,7 +57,7 @@ If description provided:
 **Generate focused PRD:**
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:planning:prd-generator",
+  subagent_type="multi-agent:planning:prd-generator",
   model="sonnet",
   description="Create issue PRD",
   prompt=`Create focused PRD for issue resolution:
@@ -89,7 +89,7 @@ Keep it concise - this is a bug fix, not a feature.
 ```javascript
 // First, create tasks
 Task(
-  subagent_type="multi-agent-dev-system:planning:task-graph-analyzer",
+  subagent_type="multi-agent:planning:task-graph-analyzer",
   model="sonnet",
   description="Create issue resolution tasks",
   prompt=`Create tasks for issue resolution:
@@ -112,7 +112,7 @@ Identify all dependencies between tasks.
 
 // Then, organize into sprint
 Task(
-  subagent_type="multi-agent-dev-system:planning:sprint-planner",
+  subagent_type="multi-agent:planning:sprint-planner",
   model="sonnet",
   description="Organize issue tasks into sprint",
   prompt=`Organize issue resolution tasks into a sprint:
@@ -135,7 +135,7 @@ Balance sprint capacity and respect dependencies.
 **Launch sprint orchestrator:**
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
+  subagent_type="multi-agent:orchestration:sprint-orchestrator",
   model="sonnet",
   description="Execute issue resolution sprint",
   prompt=`Execute sprint for issue ${issueId}:

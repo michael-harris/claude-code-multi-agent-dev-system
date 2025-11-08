@@ -14,7 +14,7 @@ This guide shows how to use specific agents for targeted tasks without running f
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:database:designer",
+  subagent_type="multi-agent:database:designer",
   model="opus",
   description="Design user profile schema",
   prompt=`Design a normalized database schema for user profiles with the following requirements:
@@ -82,7 +82,7 @@ tables:
 ### Code (T1 First)
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:database:developer-python-t1",
+  subagent_type="multi-agent:database:developer-python-t1",
   model="haiku",
   description="Implement user profile SQLAlchemy models",
   prompt=`Implement SQLAlchemy models based on the schema design in docs/design/database/user-profile-schema.yaml
@@ -104,7 +104,7 @@ Project uses:
 ### If T1 Has Issues → Escalate to T2
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:database:developer-python-t2",
+  subagent_type="multi-agent:database:developer-python-t2",
   model="sonnet",
   description="Fix complex relationship issues in models",
   prompt=`Review and fix the SQLAlchemy models created by T1 agent.
@@ -130,7 +130,7 @@ Fix these issues while maintaining all other requirements.`
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:backend:api-designer",
+  subagent_type="multi-agent:backend:api-designer",
   model="opus",
   description="Review and improve API design",
   prompt=`Review the following API design and provide recommendations:
@@ -164,7 +164,7 @@ Provide a complete, improved API specification in YAML format.`
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:backend:api-developer-python-t1",
+  subagent_type="multi-agent:backend:api-developer-python-t1",
   model="haiku",
   description="Implement user profile API endpoints",
   prompt=`Implement the following FastAPI endpoints based on docs/design/api/profile-api.yaml:
@@ -202,7 +202,7 @@ Project structure:
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:quality:security-auditor",
+  subagent_type="multi-agent:quality:security-auditor",
   model="opus",
   description="Security audit of authentication system",
   prompt=`Perform a comprehensive security audit of the authentication system:
@@ -286,7 +286,7 @@ async def login(credentials: LoginSchema):
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:quality:test-writer",
+  subagent_type="multi-agent:quality:test-writer",
   model="sonnet",
   description="Create test suite for profile API",
   prompt=`Create comprehensive tests for the profile API endpoints:
@@ -325,7 +325,7 @@ Place tests in tests/test_profiles.py and tests/test_follows.py`
 **Step 1: Design Phase**
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:frontend:designer",
+  subagent_type="multi-agent:frontend:designer",
   model="opus",
   description="Design user profile component",
   prompt=`Design a UserProfile React component with:
@@ -345,7 +345,7 @@ Provide component specification in YAML format.`
 **Step 2: Implementation (T1)**
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:frontend:developer-t1",
+  subagent_type="multi-agent:frontend:developer-t1",
   model="haiku",
   description="Implement UserProfile component",
   prompt=`Implement the UserProfile component based on docs/design/frontend/user-profile-component.yaml
@@ -378,7 +378,7 @@ Create:
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:backend:code-reviewer-python",
+  subagent_type="multi-agent:backend:code-reviewer-python",
   model="sonnet",
   description="Review profile management code",
   prompt=`Review the following Python files for quality and best practices:
@@ -414,7 +414,7 @@ Provide categorized issues: CRITICAL / MAJOR / MINOR`
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:python:developer-generic-t1",
+  subagent_type="multi-agent:python:developer-generic-t1",
   model="haiku",
   description="Create user data export CLI tool",
   prompt=`Create a CLI tool that exports user data to various formats:
@@ -453,7 +453,7 @@ Create:
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:quality:documentation-coordinator",
+  subagent_type="multi-agent:quality:documentation-coordinator",
   model="sonnet",
   description="Create complete project documentation",
   prompt=`Generate comprehensive documentation for the TaskFlow project:
