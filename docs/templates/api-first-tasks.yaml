@@ -1,0 +1,351 @@
+# API-First Full-Stack Task Templates
+# Copy these task structures to ensure proper API-first workflow
+
+---
+# TASK 1: API Specification (MUST BE FIRST)
+id: TASK-001
+title: Design Complete API Specification
+description: Create OpenAPI 3.0 specification as the contract between frontend and backend
+agent: backend:api-designer
+model: sonnet
+dependencies: []  # NO DEPENDENCIES - This runs first!
+priority: critical
+
+acceptance_criteria:
+  - OpenAPI 3.0 spec created at docs/api/openapi.yaml
+  - All endpoints fully documented with request/response schemas
+  - Authentication flow defined (JWT, OAuth, API Key, etc.)
+  - Error response formats standardized (400, 401, 403, 404, 500)
+  - Request/response examples included for all endpoints
+  - Pagination pattern defined (if applicable)
+  - Rate limiting documented (if applicable)
+  - Passes openapi-spec-validator validation
+  - API versioning strategy documented
+
+deliverables:
+  - docs/api/openapi.yaml (OpenAPI specification)
+  - docs/api/API_DESIGN_DECISIONS.md (rationale for design choices)
+
+validation:
+  commands:
+    - openapi-spec-validator docs/api/openapi.yaml
+
+notes: |
+  This specification is the single source of truth.
+  Backend MUST implement exactly what this spec defines.
+  Frontend WILL generate client from this spec.
+  Any API changes require updating this spec FIRST.
+
+---
+# TASK 2: Database Schema (Depends on API spec)
+id: TASK-002
+title: Design Database Schema
+description: Design database schema based on API data models
+agent: database:designer
+model: sonnet
+dependencies: [TASK-001]  # Needs API spec to know data models
+
+acceptance_criteria:
+  - Schema matches data models defined in openapi.yaml
+  - Proper indexes for API query patterns
+  - Foreign keys for all relationships
+  - Constraints match API validation rules
+  - Migration strategy defined
+
+deliverables:
+  - docs/design/database/schema.yaml
+
+---
+# TASK 3: Implement Database Models (Depends on schema)
+id: TASK-003
+title: Implement Database Models
+description: Implement database models in chosen ORM
+agent: database:developer-{language}-t1  # Replace {language} with python, typescript, java, etc.
+model: haiku
+dependencies: [TASK-002]
+
+acceptance_criteria:
+  - Models match database schema design
+  - Migrations created and tested
+  - Models align with API response schemas from openapi.yaml
+  - All relationships properly configured
+
+deliverables:
+  # Python example:
+  - backend/models/*.py
+  - alembic/versions/*.py
+  # OR TypeScript example:
+  - src/models/*.ts
+  - prisma/migrations/*
+
+---
+# TASK 4: Implement Backend API (Depends on API spec + DB models)
+id: TASK-004
+title: Implement Backend API from OpenAPI Specification
+description: Implement backend that EXACTLY matches the OpenAPI spec
+agent: backend:api-developer-{language}-t1  # Replace {language} with python, typescript, java, etc.
+model: haiku
+dependencies: [TASK-001, TASK-003]  # Needs both API spec AND database models
+
+acceptance_criteria:
+  - Implements ALL endpoints from docs/api/openapi.yaml
+  - Request/response schemas EXACTLY match spec
+  - Generated models/schemas from OpenAPI (if framework supports)
+  - Framework auto-validates requests/responses against spec
+  - API documentation endpoint serves the specification
+  - Passes openapi-spec-validator
+  - NO endpoints that aren't in the spec
+  - NO schema deviations from spec
+  - All error responses match spec format
+  - Authentication implemented as per spec
+
+deliverables:
+  # Python/FastAPI example:
+  - backend/routes/*.py
+  - backend/schemas/*.py (generated from OpenAPI or matching it exactly)
+  - tests/test_api_compliance.py
+
+validation:
+  commands:
+    - openapi-spec-validator docs/api/openapi.yaml
+    - pytest tests/test_api_compliance.py  # Validates responses match schemas
+  manual:
+    - Verify /docs endpoint matches docs/api/openapi.yaml
+    - Verify no endpoints exist that aren't in spec
+    - Verify all spec endpoints are implemented
+
+strict_requirements: |
+  CRITICAL: Backend implementation MUST NOT deviate from spec.
+  - If you need to add an endpoint: Update openapi.yaml FIRST
+  - If you need to change a schema: Update openapi.yaml FIRST
+  - If validation fails: Fix implementation, NOT the spec
+
+---
+# TASK 5: Generate Frontend API Client (Depends ONLY on API spec)
+id: TASK-005
+title: Generate Type-Safe Frontend API Client
+description: Auto-generate TypeScript API client from OpenAPI specification
+agent: frontend:developer-t1
+model: haiku
+dependencies: [TASK-001]  # Only needs API spec, NOT backend implementation
+
+acceptance_criteria:
+  - Client auto-generated using openapi-typescript-codegen or similar
+  - TypeScript types match API schemas exactly
+  - All endpoints have type-safe methods
+  - Authentication handled automatically
+  - NO manual endpoint definitions anywhere
+  - TypeScript compilation ensures type safety
+  - Generation script added to package.json
+  - Generated files committed to git (for review)
+
+deliverables:
+  - package.json (with "generate-api" script)
+  - src/api/generated/* (auto-generated code, committed)
+  - src/api/client.ts (wrapper for configuration)
+  - .github/workflows/verify-api-client.yml (CI check)
+
+validation:
+  commands:
+    - npm run generate-api
+    - npm run type-check  # Must pass
+    - git diff --exit-code src/api/generated/  # Generated files should be up-to-date
+  manual:
+    - Verify NO fetch() or axios() calls outside generated client
+    - Verify all API types imported from generated/
+
+tools:
+  typescript:
+    - openapi-typescript-codegen
+    - openapi-typescript
+  other_languages:
+    - Swift: openapi-generator (swift5)
+    - Kotlin: openapi-generator (kotlin)
+    - Dart: openapi-generator (dart)
+
+example_setup: |
+  # package.json
+  {
+    "scripts": {
+      "generate-api": "openapi-typescript-codegen --input docs/api/openapi.yaml --output src/api/generated --client axios",
+      "predev": "npm run generate-api",
+      "prebuild": "npm run generate-api"
+    }
+  }
+
+---
+# TASK 6: Implement Frontend UI (Depends on generated client)
+id: TASK-006
+title: Implement Frontend UI with Generated Client
+description: Build frontend UI using ONLY the generated type-safe API client
+agent: frontend:developer-t1
+model: haiku
+dependencies: [TASK-005]  # Needs generated API client
+
+acceptance_criteria:
+  - Uses ONLY generated API client (no direct fetch/axios)
+  - All API types imported from generated client
+  - TypeScript compilation enforces API correctness
+  - Proper error handling for all error codes from spec
+  - Loading states for all async operations
+  - Authentication integrated with generated client
+
+deliverables:
+  - src/components/*.tsx
+  - src/pages/*.tsx
+  - src/hooks/useApi.ts (React Query or similar)
+
+strict_requirements: |
+  CRITICAL: Frontend MUST use generated client.
+  - Import types from src/api/generated
+  - Use service classes from generated client
+  - NO manual endpoint URLs
+  - TypeScript will catch API errors at compile time
+
+example_usage: |
+  // ✅ CORRECT
+  import { TasksService, Task } from '@/api/generated';
+
+  const tasks = await TasksService.listTasks({ page: 1, status: 'todo' });
+  // TypeScript knows exact types!
+
+  // ❌ WRONG - Don't do this!
+  const response = await fetch('/api/tasks');  // NO!
+  const tasks = await axios.get('/api/tasks');  // NO!
+
+---
+# TASK 7: Integration Testing (Depends on both implementations)
+id: TASK-007
+title: API Contract Integration Testing
+description: Verify frontend and backend work together and both comply with OpenAPI spec
+agent: quality:test-writer
+model: sonnet
+dependencies: [TASK-004, TASK-006]  # Needs both implementations complete
+
+acceptance_criteria:
+  - End-to-end tests verify API contract compliance
+  - Tests validate backend responses against OpenAPI schemas
+  - Tests verify frontend handles all response types correctly
+  - Tests cover all error scenarios from spec
+  - CI/CD pipeline enforces contract compliance
+
+deliverables:
+  - tests/integration/test_api_contract.py
+  - e2e/tests/*.spec.ts
+  - .github/workflows/api-compliance.yml
+
+validation:
+  - pytest tests/integration/test_api_contract.py
+  - npm run test:e2e
+
+---
+# OPTIONAL TASKS (if needed)
+
+# Code Review
+id: TASK-008
+title: Backend Code Review
+agent: backend:code-reviewer-{language}
+model: sonnet
+dependencies: [TASK-004]
+
+# Security Audit
+id: TASK-009
+title: Security Audit
+agent: quality:security-auditor
+model: sonnet
+dependencies: [TASK-004, TASK-006]
+
+# Performance Audit
+id: TASK-010
+title: Performance Audit
+agent: quality:performance-auditor-{language}
+model: sonnet
+dependencies: [TASK-004]
+
+---
+# CI/CD TEMPLATE
+
+# .github/workflows/api-compliance.yml
+name: API Contract Compliance
+
+on: [push, pull_request]
+
+jobs:
+  validate-openapi-spec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Validate OpenAPI Specification
+        run: |
+          pip install openapi-spec-validator
+          openapi-spec-validator docs/api/openapi.yaml
+
+  backend-compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Verify Backend Implements Spec
+        run: |
+          # Start backend server
+          python -m backend.main &
+          sleep 5
+          # Download generated spec from server
+          curl http://localhost:8000/openapi.json > actual-spec.json
+          # Compare with source spec (should be identical)
+          diff <(jq -S . docs/api/openapi.yaml) <(jq -S . actual-spec.json)
+
+  frontend-compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Verify No Manual API Calls
+        run: |
+          # Ensure no fetch/axios outside generated client directory
+          ! grep -r "fetch\|axios\.get\|axios\.post" src/ --exclude-dir=api/generated
+
+      - name: Verify Generated Client Is Up-to-Date
+        run: |
+          npm install
+          npm run generate-api
+          # Generated files should not have changed
+          git diff --exit-code src/api/generated/
+
+      - name: Type Check
+        run: npm run type-check
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: [backend-compliance, frontend-compliance]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Integration Tests
+        run: |
+          # Start backend
+          python -m backend.main &
+          # Run frontend against real backend
+          npm run test:integration
+
+---
+# QUICK START CHECKLIST
+
+# For Users Starting an API-First Project:
+
+1. ☐ Create PRD specifying "API Design First" approach
+2. ☐ Run /planning - ensure TASK-001 (API Design) has NO dependencies
+3. ☐ Verify task order: API Design → DB Design → DB Models → Backend → Frontend Client → Frontend UI
+4. ☐ Add API spec validation to CI/CD
+5. ☐ Train team: API spec is the contract, not the implementation
+6. ☐ Establish rule: Changes to API require spec update FIRST
+
+---
+# BENEFITS RECAP
+
+✅ Single Source of Truth: OpenAPI spec is the contract
+✅ No Endpoint Mismatches: Frontend uses only what backend implements
+✅ Compile-Time Safety: TypeScript catches API errors before runtime
+✅ Automatic Validation: Both sides validate against spec
+✅ Self-Documenting: OpenAPI spec serves as live API documentation
+✅ Version Control: API changes tracked and reviewed in git
+✅ CI/CD Enforcement: Pipelines prevent accidental deviations
+✅ Team Alignment: Backend and frontend teams work from same contract
