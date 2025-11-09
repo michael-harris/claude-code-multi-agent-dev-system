@@ -1,21 +1,22 @@
 # Multi-Agent Development System
 
-A Claude Code plugin providing **75 specialized AI agents** with hierarchical orchestration, T1/T2 cost optimization, runtime verification, and comprehensive support for **7 programming languages** across **10+ technology stacks**. Built for full-stack, multi-language development with progress tracking, parallel development capabilities, and automated runtime testing.
+A Claude Code plugin providing **76 specialized AI agents** with hierarchical orchestration, T1/T2 cost optimization, runtime verification, workflow compliance validation, and comprehensive support for **7 programming languages** across **10+ technology stacks**. Built for full-stack, multi-language development with progress tracking, parallel development capabilities, automated runtime testing, and PR-based workflows.
 
 ---
 
-### 75 Specialized Agents
+### 76 Specialized Agents
 
 **Planning Agents (3)**
 - **PRD Generator** - Interactive PRD creation with technology stack selection
 - **Task Graph Analyzer** - Breaks PRD into tasks with dependency analysis
 - **Sprint Planner** - Organizes tasks into executable sprints
 
-**Orchestration Agents (4)**
+**Orchestration Agents (5)**
 - **Sprint Orchestrator** - Manages entire sprint execution with runtime verification (Sonnet)
 - **Task Orchestrator** - Coordinates single task with T1/T2 escalation (Sonnet)
 - **Requirements Validator** - Quality gate ensuring 100% criteria satisfaction and runtime checks (Sonnet)
 - **Track Merger** - Intelligently merges parallel development tracks using git worktrees (Sonnet)
+- **Workflow Compliance** - Validates orchestrators followed required workflows and generated all mandatory artifacts (Sonnet)
 
 **Database Agents (15)** - *Expanded 3x for multi-language support*
 - **Database Designer** - Schema design and normalization (Sonnet)
@@ -94,7 +95,9 @@ A Claude Code plugin providing **75 specialized AI agents** with hierarchical or
 
 - **100% Criteria Satisfaction** - Requirements validator enforces acceptance criteria
 - **Runtime Verification** - Applications must launch without errors before completion
-- **Automated Testing** - All tests must pass (100% pass rate required)
+- **Automated Testing** - All tests must pass (100% pass rate required, external API tests may be skipped)
+- **Testing Documentation** - TESTING_SUMMARY.md generated with complete test results
+- **Workflow Compliance** - Validates all required artifacts generated and processes followed
 - **Security First** - OWASP Top 10 audits on all implementations
 - **80%+ Test Coverage** - Enforced by test writer agent
 - **Code Review** - Language-specific reviewers for every implementation
@@ -354,6 +357,7 @@ Enable parallel development across independent task chains to dramatically reduc
 
 # Expert commands (optional):
 /multi-agent:worktree status    # Show detailed status of all worktrees
+/multi-agent:worktree list      # List all worktrees with paths
 /multi-agent:worktree cleanup   # Manually clean up worktrees
 ```
 
@@ -380,6 +384,55 @@ Enable parallel development across independent task chains to dramatically reduc
 - **Natural merge workflow** - git handles combining the work
 - **Supports collaboration** - team members can work in isolated worktrees
 
+### Worktree Management Commands
+
+The system provides dedicated commands for managing git worktrees used in parallel development:
+
+**View detailed status:**
+```bash
+/multi-agent:worktree status
+```
+Shows comprehensive status including:
+- Active worktrees with paths and branches
+- Number of commits in each track
+- Modified/staged files per worktree
+- Merge conflicts (if any)
+- Sprint progress per track
+- Recommendations for next steps
+
+**List all worktrees:**
+```bash
+/multi-agent:worktree list
+```
+Simple tabular view of all worktrees with:
+- Worktree paths
+- Associated branches
+- Current HEAD commit
+- Lock status
+
+**Clean up worktrees:**
+```bash
+/multi-agent:worktree cleanup [--delete-branches]
+```
+Safely removes worktrees:
+- Checks for uncommitted changes (warns and aborts if found)
+- Removes worktree directories
+- Optionally deletes associated branches with `--delete-branches`
+- Updates state files
+- Preserves main repository
+
+**Merge parallel tracks:**
+```bash
+/multi-agent:merge-tracks [--keep-worktrees] [--delete-branches]
+```
+Intelligently merges all parallel development tracks:
+- Sequential merge strategy (track-01 → track-02 → track-03)
+- Intelligent conflict resolution for common patterns
+- Post-merge testing after each track integration
+- Automatic cleanup (unless `--keep-worktrees` specified)
+- Optional branch deletion with `--delete-branches`
+- Generates comprehensive merge completion report
+
 ### Development History Preservation
 
 **Sprint and task files are intentionally preserved:**
@@ -396,13 +449,15 @@ Enable parallel development across independent task chains to dramatically reduc
 ```
 User → /multi-agent:prd, /multi-agent:planning, /multi-agent:sprint commands
    ↓
-Sprint Orchestrator (Opus) - Manages entire sprint
+Sprint Orchestrator (Sonnet) - Manages entire sprint
    ↓
 Task Orchestrator (Sonnet) - Coordinates single task with T1/T2 switching
    ↓
 Specialized Agents (T1/T2) - Implement with automatic escalation
    ↓
-Requirements Validator (Opus) - Quality gate (100% criteria met)
+Requirements Validator (Sonnet) - Quality gate (100% criteria met)
+   ↓
+Workflow Compliance (Sonnet) - Validates process adherence
 ```
 
 ### T1→T2 Escalation Flow
@@ -428,22 +483,32 @@ Every sprint passes through:
    - Builds and launches application (Docker or local)
    - Runs all automated tests (100% pass rate required)
    - Checks for runtime errors and exceptions
+   - Generates TESTING_SUMMARY.md with complete results
    - Documents manual testing procedures for humans
 5. **Requirements Validator** - Binary pass/fail on acceptance criteria
-6. **Test Writer** - 80%+ coverage requirement
+6. **Workflow Compliance** - Validates all required artifacts and processes
+7. **Test Writer** - 80%+ coverage requirement
 
-**No sprint completes without 100% criteria satisfaction and successful runtime verification**
+**No sprint completes without 100% criteria satisfaction, successful runtime verification, and workflow compliance**
 
 ## Model Distribution
 
 | Model | Count | Use Cases | Cost/1K Tokens |
 |-------|-------|-----------|----------------|
-| **Sonnet** | 53 | T2 developers, reviewers, orchestration, code review, performance auditing, runtime verification | $0.003 |
+| **Sonnet** | 54 | T2 developers, reviewers, orchestration, code review, performance auditing, runtime verification, workflow compliance | $0.003 |
 | **Haiku** | 22 | T1 developers (first attempt across all languages) | $0.001 |
 
-**Total: 75 Agents**
+**Total: 76 Agents**
 
 **Note:** All agents now use Sonnet or Haiku for cost optimization. Previous Opus-only agents (orchestrators, designers, security auditor) have been migrated to Sonnet with maintained quality standards.
+
+**Orchestration Intelligence:**
+- 5 orchestration agents (all Sonnet) coordinate the entire workflow
+- Sprint Orchestrator manages overall execution with 9-step process
+- Task Orchestrator handles individual tasks with T1→T2 escalation
+- Requirements Validator enforces 100% acceptance criteria satisfaction
+- Workflow Compliance ensures all mandatory artifacts generated
+- Track Merger handles parallel development track integration
 
 **Cost Optimization Logic:**
 1. T1 (Haiku) attempts implementation first (70-80% success rate)
@@ -494,18 +559,19 @@ See [examples/parallel-tracks-example.md](examples/parallel-tracks-example.md) f
 
 ## Agent Reference
 
-Complete list of all 75 agents organized by category:
+Complete list of all 76 agents organized by category:
 
 ### Planning (3 agents)
 - `planning:prd-generator` (Sonnet)
 - `planning:task-graph-analyzer` (Sonnet)
 - `planning:sprint-planner` (Sonnet)
 
-### Orchestration (4 agents)
+### Orchestration (5 agents)
 - `orchestration:sprint-orchestrator` (Sonnet)
 - `orchestration:task-orchestrator` (Sonnet)
 - `orchestration:requirements-validator` (Sonnet)
 - `orchestration:track-merger` (Sonnet)
+- `orchestration:workflow-compliance` (Sonnet)
 
 ### Database (15 agents)
 - `database:designer` (Sonnet)
@@ -597,13 +663,13 @@ Complete list of all 75 agents organized by category:
 
 ```
 claude-code-multi-agent-dev-system/
-├── plugin.json              # Plugin manifest (75 agents, 6 commands)
+├── plugin.json              # Plugin manifest (76 agents, 10 commands)
 ├── README.md                # This file
 ├── LICENSE                  # MIT License
 ├── install-local.sh         # Local installation script
-├── agents/                  # 75 agent definitions
+├── agents/                  # 76 agent definitions
 │   ├── planning/           # PRD, task analysis, sprint planning (3)
-│   ├── orchestration/      # Sprint/task orchestration, validation, track merging (4)
+│   ├── orchestration/      # Sprint/task orchestration, validation, workflow compliance, track merging (5)
 │   ├── database/           # Schema design + 7-language implementation (15)
 │   │   ├── designer.md
 │   │   ├── developer-python-t1.md
@@ -658,13 +724,17 @@ claude-code-multi-agent-dev-system/
 │       ├── ios-developer-t2.md
 │       ├── android-developer-t1.md
 │       └── android-developer-t2.md
-├── commands/               # 6 workflow commands
+├── commands/               # 10 workflow commands
 │   ├── prd.md             # Generate PRD
 │   ├── planning.md        # Create tasks and sprints (with parallel tracks support)
 │   ├── sprint.md          # Execute single sprint
 │   ├── sprint-all.md      # Execute all sprints (with track filtering)
 │   ├── feature.md         # Complete feature workflow (PRD → Planning → Implementation)
-│   └── issue.md           # Complete issue resolution workflow
+│   ├── issue.md           # Complete issue resolution workflow
+│   ├── merge-tracks.md    # Merge parallel development tracks
+│   ├── worktree-status.md # Show detailed worktree status
+│   ├── worktree-list.md   # List all worktrees
+│   └── worktree-cleanup.md # Clean up worktrees and branches
 ├── examples/              # Usage examples
 │   ├── complete-workflow-example.md           # Full PRD-to-deployment walkthrough
 │   ├── individual-agent-usage.md             # 10 targeted scenarios
@@ -801,7 +871,8 @@ This plugin was developed through an iterative AI-assisted process. Development 
 - **v2.0**: Expanded to 66 agents with 7 languages, mobile, DevOps, infrastructure
 - **v2.1**: Expanded to 73 agents with language-specific performance auditing, progress tracking, and parallel development tracks
 - **v2.3**: Added PR-based workflow, comprehensive sprint summaries, and git worktree support for parallel tracks
-- **v2.4**: Added runtime verification with automated testing and manual testing documentation (75 agents total)
+- **v2.4**: Added runtime verification with automated testing and manual testing documentation (75 agents)
+- **v2.5**: Added workflow compliance agent and worktree management commands (76 agents, 10 commands total)
 
 ## Support
 
@@ -812,7 +883,7 @@ This plugin was developed through an iterative AI-assisted process. Development 
 
 ## Frequently Asked Questions
 
-**Q: Do I need to use all 75 agents?**
+**Q: Do I need to use all 76 agents?**
 A: No. The system automatically selects relevant agents based on your project's language and requirements. Most projects use 10-15 agents.
 
 **Q: Can I mix languages in one project?**
