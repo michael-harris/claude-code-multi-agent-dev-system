@@ -10,7 +10,7 @@
       "name": "PRD Generator",
       "description": "Interactive PRD creation through structured Q&A with technology stack selection",
       "file": "agents/planning/prd-generator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "planning"
     },
     {
@@ -18,7 +18,7 @@
       "name": "Task Graph Analyzer",
       "description": "Analyzes PRD and creates task breakdown with dependency graph",
       "file": "agents/planning/task-graph-analyzer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "planning"
     },
     {
@@ -26,7 +26,7 @@
       "name": "Sprint Planner",
       "description": "Organizes tasks into sprints based on dependencies and capacity",
       "file": "agents/planning/sprint-planner.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "planning"
     },
     {
@@ -34,7 +34,7 @@
       "name": "Sprint Orchestrator",
       "description": "Manages entire sprint execution and coordinates task orchestrator",
       "file": "agents/orchestration/sprint-orchestrator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -42,7 +42,7 @@
       "name": "Task Orchestrator",
       "description": "Coordinates specialized agents for single task with T1/T2 escalation",
       "file": "agents/orchestration/task-orchestrator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -50,7 +50,7 @@
       "name": "Requirements Validator",
       "description": "Quality gate with strict acceptance criteria validation",
       "file": "agents/orchestration/requirements-validator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -58,7 +58,7 @@
       "name": "Track Merger",
       "description": "Intelligently merges parallel development tracks using git worktrees",
       "file": "agents/orchestration/track-merger.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -66,7 +66,7 @@
       "name": "Workflow Compliance",
       "description": "Validates that orchestrators followed their required workflows and generated all mandatory artifacts",
       "file": "agents/orchestration/workflow-compliance.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -74,7 +74,7 @@
       "name": "Database Designer",
       "description": "Designs normalized database schemas (language-agnostic)",
       "file": "agents/database/database-designer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "database"
     },
     {
@@ -91,7 +91,7 @@
       "name": "Database Developer Python T2",
       "description": "Implements SQLAlchemy models and Alembic migrations (enhanced quality)",
       "file": "agents/database/database-developer-python-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "database",
       "tier": "t2"
     },
@@ -109,7 +109,7 @@
       "name": "Database Developer TypeScript T2",
       "description": "Implements Prisma/TypeORM models and migrations (enhanced quality)",
       "file": "agents/database/database-developer-typescript-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "database",
       "tier": "t2"
     },
@@ -127,7 +127,7 @@
       "name": "Database Developer Java T2",
       "description": "Implements JPA/Hibernate models and Flyway migrations (enhanced quality)",
       "file": "agents/database/database-developer-java-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "database",
       "tier": "t2"
     },
@@ -145,7 +145,7 @@
       "name": "Database Developer C# T2",
       "description": "Implements Entity Framework models and migrations (enhanced quality)",
       "file": "agents/database/database-developer-csharp-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "database",
       "tier": "t2"
     },
@@ -163,7 +163,7 @@
       "name": "Database Developer Go T2",
       "description": "Implements GORM models and migrations (enhanced quality)",
       "file": "agents/database/database-developer-go-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "database",
       "tier": "t2"
     },
@@ -181,7 +181,7 @@
       "name": "Database Developer Ruby T2",
       "description": "Implements ActiveRecord models and migrations (enhanced quality)",
       "file": "agents/database/database-developer-ruby-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "database",
       "tier": "t2"
     },
@@ -199,7 +199,7 @@
       "name": "Database Developer PHP T2",
       "description": "Implements Doctrine/Eloquent models and migrations (enhanced quality)",
       "file": "agents/database/database-developer-php-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "database",
       "tier": "t2"
     },
@@ -208,7 +208,7 @@
       "name": "API Designer",
       "description": "Designs RESTful API specifications with OpenAPI",
       "file": "agents/backend/api-designer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend"
     },
     {
@@ -225,7 +225,7 @@
       "name": "API Developer Python T2",
       "description": "Implements FastAPI/Django endpoints (enhanced quality)",
       "file": "agents/backend/api-developer-python-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend",
       "tier": "t2"
     },
@@ -243,7 +243,7 @@
       "name": "API Developer TypeScript T2",
       "description": "Implements Express/NestJS endpoints (enhanced quality)",
       "file": "agents/backend/api-developer-typescript-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend",
       "tier": "t2"
     },
@@ -252,7 +252,7 @@
       "name": "Backend Code Reviewer Python",
       "description": "Reviews Python backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-python.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend"
     },
     {
@@ -260,7 +260,7 @@
       "name": "Backend Code Reviewer TypeScript",
       "description": "Reviews TypeScript backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-typescript.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend"
     },
     {
@@ -277,7 +277,7 @@
       "name": "API Developer Java T2",
       "description": "Implements Spring Boot REST APIs (enhanced quality)",
       "file": "agents/backend/api-developer-java-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend",
       "tier": "t2"
     },
@@ -286,7 +286,7 @@
       "name": "Backend Code Reviewer Java",
       "description": "Reviews Java backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-java.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend"
     },
     {
@@ -303,7 +303,7 @@
       "name": "API Developer C# T2",
       "description": "Implements ASP.NET Core REST APIs (enhanced quality)",
       "file": "agents/backend/api-developer-csharp-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend",
       "tier": "t2"
     },
@@ -312,7 +312,7 @@
       "name": "Backend Code Reviewer C#",
       "description": "Reviews C# backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-csharp.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend"
     },
     {
@@ -329,7 +329,7 @@
       "name": "API Developer Go T2",
       "description": "Implements Go REST APIs with Gin/Echo (enhanced quality)",
       "file": "agents/backend/api-developer-go-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend",
       "tier": "t2"
     },
@@ -338,7 +338,7 @@
       "name": "Backend Code Reviewer Go",
       "description": "Reviews Go backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-go.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend"
     },
     {
@@ -355,7 +355,7 @@
       "name": "API Developer Ruby T2",
       "description": "Implements Ruby on Rails REST APIs (enhanced quality)",
       "file": "agents/backend/api-developer-ruby-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend",
       "tier": "t2"
     },
@@ -364,7 +364,7 @@
       "name": "Backend Code Reviewer Ruby",
       "description": "Reviews Ruby backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-ruby.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend"
     },
     {
@@ -381,7 +381,7 @@
       "name": "API Developer PHP T2",
       "description": "Implements Laravel/Symfony REST APIs (enhanced quality)",
       "file": "agents/backend/api-developer-php-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend",
       "tier": "t2"
     },
@@ -390,7 +390,7 @@
       "name": "Backend Code Reviewer PHP",
       "description": "Reviews PHP backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-php.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "backend"
     },
     {
@@ -398,7 +398,7 @@
       "name": "Frontend Designer",
       "description": "Designs UI/UX with component specifications",
       "file": "agents/frontend/frontend-designer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "frontend"
     },
     {
@@ -415,7 +415,7 @@
       "name": "Frontend Developer T2",
       "description": "Implements React/Vue components (enhanced quality)",
       "file": "agents/frontend/frontend-developer-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "frontend",
       "tier": "t2"
     },
@@ -424,7 +424,7 @@
       "name": "Frontend Code Reviewer",
       "description": "Reviews frontend code for quality, accessibility, and performance",
       "file": "agents/frontend/frontend-code-reviewer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "frontend"
     },
     {
@@ -441,7 +441,7 @@
       "name": "Python Developer Generic T2",
       "description": "Implements Python utilities, scripts, CLI tools (enhanced quality)",
       "file": "agents/python/python-developer-generic-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "python",
       "tier": "t2"
     },
@@ -450,7 +450,7 @@
       "name": "Test Writer",
       "description": "Creates comprehensive test suites (unit, integration, e2e)",
       "file": "agents/quality/test-writer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -458,7 +458,7 @@
       "name": "Security Auditor",
       "description": "Performs security audits and vulnerability scanning",
       "file": "agents/quality/security-auditor.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -466,7 +466,7 @@
       "name": "Documentation Coordinator",
       "description": "Creates and maintains technical documentation",
       "file": "agents/quality/documentation-coordinator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -474,7 +474,7 @@
       "name": "Runtime Verifier",
       "description": "Verifies applications launch successfully and documents manual runtime testing steps",
       "file": "agents/quality/runtime-verifier.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -491,7 +491,7 @@
       "name": "PowerShell Developer T2",
       "description": "Implements PowerShell scripts and automation (enhanced quality)",
       "file": "agents/scripting/powershell-developer-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "scripting",
       "tier": "t2"
     },
@@ -509,7 +509,7 @@
       "name": "Shell Developer T2",
       "description": "Implements Bash/shell scripts and automation (enhanced quality)",
       "file": "agents/scripting/shell-developer-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "scripting",
       "tier": "t2"
     },
@@ -518,7 +518,7 @@
       "name": "Docker Specialist",
       "description": "Creates and optimizes Docker containers and compose files",
       "file": "agents/devops/docker-specialist.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "devops"
     },
     {
@@ -526,7 +526,7 @@
       "name": "Kubernetes Specialist",
       "description": "Creates and manages Kubernetes deployments and manifests",
       "file": "agents/devops/kubernetes-specialist.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "devops"
     },
     {
@@ -534,7 +534,7 @@
       "name": "CI/CD Specialist",
       "description": "Creates and optimizes CI/CD pipelines for various platforms",
       "file": "agents/devops/cicd-specialist.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "devops"
     },
     {
@@ -542,7 +542,7 @@
       "name": "Terraform Specialist",
       "description": "Creates and manages infrastructure as code with Terraform",
       "file": "agents/devops/terraform-specialist.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "devops"
     },
     {
@@ -559,7 +559,7 @@
       "name": "Configuration Manager T2",
       "description": "Manages configuration files and environment setup (enhanced quality)",
       "file": "agents/infrastructure/configuration-manager-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "infrastructure",
       "tier": "t2"
     },
@@ -577,7 +577,7 @@
       "name": "iOS Developer T2",
       "description": "Implements iOS apps with Swift/SwiftUI (enhanced quality)",
       "file": "agents/mobile/ios-developer-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "mobile",
       "tier": "t2"
     },
@@ -595,7 +595,7 @@
       "name": "Android Developer T2",
       "description": "Implements Android apps with Kotlin/Jetpack Compose (enhanced quality)",
       "file": "agents/mobile/android-developer-t2.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "mobile",
       "tier": "t2"
     },
@@ -604,7 +604,7 @@
       "name": "Performance Auditor (Python)",
       "description": "Python-specific performance analysis and optimization",
       "file": "agents/quality/performance-auditor-python.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -612,7 +612,7 @@
       "name": "Performance Auditor (TypeScript)",
       "description": "TypeScript/Node.js-specific performance analysis",
       "file": "agents/quality/performance-auditor-typescript.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -620,7 +620,7 @@
       "name": "Performance Auditor (Java)",
       "description": "Java/Spring Boot-specific performance analysis",
       "file": "agents/quality/performance-auditor-java.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -628,7 +628,7 @@
       "name": "Performance Auditor (C#)",
       "description": "C#/.NET-specific performance analysis",
       "file": "agents/quality/performance-auditor-csharp.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -636,7 +636,7 @@
       "name": "Performance Auditor (Go)",
       "description": "Go-specific performance analysis",
       "file": "agents/quality/performance-auditor-go.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -644,7 +644,7 @@
       "name": "Performance Auditor (Ruby)",
       "description": "Ruby/Rails-specific performance analysis",
       "file": "agents/quality/performance-auditor-ruby.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -652,7 +652,7 @@
       "name": "Performance Auditor (PHP)",
       "description": "PHP/Laravel-specific performance analysis",
       "file": "agents/quality/performance-auditor-php.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     }
   ],
