@@ -1,574 +1,495 @@
-# Ralph Integration Options Analysis
+# Adding Ralph Functionality to Multi-Agent System
 
-This document analyzes options for integrating [ralph-claude-code](https://github.com/frankbria/ralph-claude-code) autonomous loop functionality into the claude-code-multi-agent-dev-system.
-
-## Executive Summary
-
-Ralph provides **autonomous iterative development loops** with intelligent exit detection, while this project provides **76 specialized agents** with orchestrated workflows. The integration goal is to combine Ralph's "keep working until done" autonomy with this project's structured multi-agent development pipeline.
+This document identifies the specific functionality that Ralph provides which this project lacks, and presents options for adding those capabilities natively.
 
 ---
 
-## Architecture Comparison
+## Functional Gap Analysis
 
-### This Project (claude-code-multi-agent-dev-system)
+### What Ralph Does That This Project Doesn't
 
-| Aspect | Implementation |
-|--------|----------------|
-| **Execution Model** | Agent-based orchestration via Task tool |
-| **Loop Control** | Internal agent logic with max 5 iterations per task |
-| **State Tracking** | YAML state files (`.project-state.yaml`) |
-| **Exit Condition** | All tasks completed + quality gates passed |
-| **Resumability** | State file enables resume from any point |
-| **Safety** | Workflow compliance validation, max iterations |
-| **Commands** | `/multi-agent:prd`, `/planning`, `/sprint`, `/feature` |
+| Capability | Ralph | This Project | Gap |
+|------------|-------|--------------|-----|
+| **Continuous execution until done** | Loop re-injects prompt until complete | Executes within single session | **CRITICAL GAP** |
+| **Stop interception** | Hook blocks Claude exit, re-prompts | No hook system | **CRITICAL GAP** |
+| **Intelligent exit detection** | Dual-gate: completion indicators + EXIT_SIGNAL | State file status only | Moderate gap |
+| **Rate limiting** | Tracks calls/hour, handles 5-hour limit | None | Moderate gap |
+| **Circuit breaker** | Stops after N consecutive failures | Per-task only (5 iterations) | Moderate gap |
+| **Real-time monitoring** | tmux dashboard | Text output only | Nice to have |
+| **Session persistence** | Automatic continuation after interruption | Manual re-invocation required | **CRITICAL GAP** |
 
-### Ralph (ralph-claude-code)
+### The Core Problem
 
-| Aspect | Implementation |
-|--------|----------------|
-| **Execution Model** | Bash loop with Stop hook interception |
-| **Loop Control** | External shell loop with re-prompt injection |
-| **State Tracking** | `.ralph/status.json`, session persistence |
-| **Exit Condition** | Dual-gate: completion indicators + EXIT_SIGNAL |
-| **Resumability** | Session continuity with `--continue` flag |
-| **Safety** | Circuit breaker, rate limiting (100 calls/hr), 5-hour limit handling |
-| **Commands** | `ralph`, `/ralph-loop`, `/cancel-ralph` |
+**This project requires the user to stay engaged.** If Claude's session ends, context limits hit, or the user closes their terminal, work stops. The user must manually re-run `/multi-agent:sprint all` to continue.
+
+**Ralph lets you walk away.** The stop hook intercepts exit attempts and re-injects the prompt, creating a self-sustaining loop until the project is genuinely complete.
 
 ---
 
-## Integration Options
+## Implementation Options
 
-### Option 1: External Ralph Wrapper (Minimal Integration)
+### Option 1: Claude Code Hooks (Recommended)
 
-**Approach:** Use Ralph as an external orchestrator that wraps multi-agent commands.
+**Approach:** Use Claude Code's native hook system to intercept stop events and re-inject prompts.
+
+**What to add:**
 
 ```
-Ralph Loop
-  └─► /multi-agent:sprint all
-        └─► sprint-orchestrator
-              └─► task-orchestrator
-                    └─► specialized agents
+hooks/
+├── stop-hook.sh        # Intercepts exit, checks completion, re-injects
+└── post-message.sh     # Optional: tracks progress metrics
 ```
 
-**Implementation:**
-1. Install Ralph globally (`ralph-setup`)
-2. Create `.ralph/PROMPT.md` that calls multi-agent commands
-3. Ralph's loop handles retry on failures
-
-**Example `.ralph/PROMPT.md`:**
-```markdown
-Execute the multi-agent development workflow for this project.
-
-1. Check if docs/planning/PROJECT_PRD.yaml exists
-   - If not: Run /multi-agent:prd to create it
-
-2. Check if docs/sprints/ contains sprint files
-   - If not: Run /multi-agent:planning
-
-3. Execute all sprints: /multi-agent:sprint all
-
-4. Verify completion by checking:
-   - All sprints marked "completed" in .project-state.yaml
-   - All tests pass
-   - All quality gates satisfied
-
-When ALL sprints are complete and verified:
-<promise>PROJECT_COMPLETE</promise>
-EXIT_SIGNAL: true
-```
-
-**Pros:**
-- No code changes to multi-agent system
-- Uses Ralph's proven safety mechanisms (circuit breaker, rate limiting)
-- Ralph's monitoring dashboard available
-- Quick to implement
-
-**Cons:**
-- Two separate state tracking systems
-- Potential confusion between Ralph and multi-agent state
-- Less tight integration
-- Extra shell process overhead
-
-**Effort:** Low (1-2 hours)
-
----
-
-### Option 2: Stop Hook Integration (Hook-Based)
-
-**Approach:** Implement Ralph's Stop hook pattern directly in the multi-agent plugin.
-
-**Implementation:**
-
-1. **Create hooks directory in plugin:**
-```
-claude-code-multi-agent-dev-system/
-├── hooks/
-│   ├── stop-hook.sh          # Ralph-style stop interceptor
-│   └── post-tool-hook.sh     # Progress tracking hook
-```
-
-2. **Create Stop Hook (`hooks/stop-hook.sh`):**
+**`hooks/stop-hook.sh`:**
 ```bash
 #!/bin/bash
-# Intercept Claude's stop attempts and check if work is complete
+# Ralph-style stop hook for multi-agent system
 
 STATE_FILE="docs/planning/.project-state.yaml"
+CIRCUIT_BREAKER_FILE=".multi-agent/circuit-breaker.json"
 
-# Check completion status
+# Initialize circuit breaker if needed
+if [ ! -f "$CIRCUIT_BREAKER_FILE" ]; then
+    mkdir -p .multi-agent
+    echo '{"consecutive_failures": 0, "total_iterations": 0}' > "$CIRCUIT_BREAKER_FILE"
+fi
+
+# Read circuit breaker state
+FAILURES=$(jq -r '.consecutive_failures' "$CIRCUIT_BREAKER_FILE")
+ITERATIONS=$(jq -r '.total_iterations' "$CIRCUIT_BREAKER_FILE")
+MAX_FAILURES=5
+MAX_ITERATIONS=100
+
+# Check circuit breaker limits
+if [ "$FAILURES" -ge "$MAX_FAILURES" ]; then
+    echo "Circuit breaker OPEN: $FAILURES consecutive failures. Human intervention required."
+    exit 0  # Allow exit
+fi
+
+if [ "$ITERATIONS" -ge "$MAX_ITERATIONS" ]; then
+    echo "Maximum iterations ($MAX_ITERATIONS) reached. Stopping."
+    exit 0  # Allow exit
+fi
+
+# Check for explicit EXIT_SIGNAL in Claude's output
+if echo "$STOP_HOOK_MESSAGE" | grep -q "EXIT_SIGNAL: true"; then
+    echo "EXIT_SIGNAL received. Project complete."
+    exit 0  # Allow exit
+fi
+
+# Check state file for completion
 if [ -f "$STATE_FILE" ]; then
-    # Parse state file for completion
-    COMPLETED=$(grep -c 'status: completed' "$STATE_FILE" || echo "0")
-    TOTAL=$(grep -c 'status:' "$STATE_FILE" || echo "0")
+    # Count completed vs total sprints
+    COMPLETED=$(grep -c "status: completed" "$STATE_FILE" 2>/dev/null || echo "0")
+    TOTAL_SPRINTS=$(grep -c "SPRINT-" "$STATE_FILE" 2>/dev/null || echo "0")
 
-    # Check for explicit EXIT_SIGNAL in Claude's output
-    if echo "$CLAUDE_OUTPUT" | grep -q "EXIT_SIGNAL: true"; then
-        # Allow exit
-        exit 0
-    fi
-
-    # Check if all work is done
-    if [ "$COMPLETED" -eq "$TOTAL" ] && [ "$TOTAL" -gt 0 ]; then
-        exit 0  # Allow exit - work complete
+    if [ "$COMPLETED" -eq "$TOTAL_SPRINTS" ] && [ "$TOTAL_SPRINTS" -gt 0 ]; then
+        echo "All sprints complete. Allowing exit."
+        exit 0  # Allow exit
     fi
 fi
 
-# Block exit and re-inject prompt
-echo "Work not complete. Continuing..."
-exit 2  # Exit code 2 = block and continue
+# Work not complete - block exit and continue
+ITERATIONS=$((ITERATIONS + 1))
+jq ".total_iterations = $ITERATIONS" "$CIRCUIT_BREAKER_FILE" > tmp.$$ && mv tmp.$$ "$CIRCUIT_BREAKER_FILE"
+
+echo "Work not complete (iteration $ITERATIONS). Continuing..."
+exit 2  # Exit code 2 = block exit, re-inject prompt
 ```
 
-3. **Add new command `/multi-agent:auto`:**
-```markdown
-# Autonomous Development Command
-
-Starts autonomous development loop using Ralph-style hooks.
-
-## Usage
-/multi-agent:auto [--max-iterations N] [--completion-promise TEXT]
-
-This command:
-1. Activates stop hook interception
-2. Runs /multi-agent:feature or /multi-agent:sprint all
-3. Loops until EXIT_SIGNAL or max iterations reached
+**How to enable:**
+```bash
+# In project .claude/settings.json or user settings
+{
+  "hooks": {
+    "stop": ["./hooks/stop-hook.sh"]
+  }
+}
 ```
 
 **Pros:**
-- Uses Claude Code's native hook system
-- State tracked in existing state files
-- Single integrated system
-- No external processes
+- Native Claude Code integration
+- No changes to existing agents/commands
+- Simple shell scripts
+- Easy to enable/disable
 
 **Cons:**
-- Requires understanding Claude Code's hook mechanism
-- More implementation effort
-- Need to handle hook installation
+- Requires user to configure hooks
+- Hook behavior may vary across Claude Code versions
 
-**Effort:** Medium (4-8 hours)
+**Effort:** 2-4 hours
 
 ---
 
-### Option 3: Autonomous Orchestrator Agent (Agent-Based)
+### Option 2: Autonomous Controller Agent
 
-**Approach:** Create a new top-level agent that implements Ralph's loop logic internally.
+**Approach:** Create a top-level orchestration agent that implements loop logic within the agent system itself.
 
-**Implementation:**
+**What to add:**
 
-1. **Create `agents/orchestration/autonomous-orchestrator.md`:**
+```
+agents/orchestration/autonomous-controller.md
+commands/auto.md
+```
 
+**`agents/orchestration/autonomous-controller.md`:**
 ```markdown
-# Autonomous Orchestrator Agent
+# Autonomous Controller Agent
 
 **Model:** claude-opus-4-5
-**Purpose:** Top-level autonomous controller with Ralph-style loop logic
+**Purpose:** Top-level controller that runs until project completion
 
 ## Your Role
 
-You are the autonomous development controller. You continuously execute development
-tasks until the project is complete, implementing Ralph's iterative approach within
-the agent system.
+You are the autonomous execution controller. You continuously execute the
+development workflow until ALL work is complete, implementing safety limits
+and intelligent exit detection.
 
-## CRITICAL: Loop Until Complete
+## CRITICAL: Continuous Execution Protocol
 
-**You MUST continue working until one of these conditions:**
-1. All sprints completed with all quality gates passed
-2. You output `EXIT_SIGNAL: true` (only when genuinely complete)
-3. Circuit breaker triggered (5+ consecutive failures)
-4. Maximum iterations reached (configurable, default 50)
+You MUST continue working in a loop until one of these conditions:
+1. All sprints marked "completed" in state file AND EXIT_SIGNAL output
+2. Circuit breaker triggered (5+ consecutive failures at same point)
+3. Maximum iterations reached (default: 50)
+4. Explicit user interrupt
 
-## Autonomous Execution Protocol
+## Execution Loop
 
 ```
-LOOP:
-  1. Read state file (.project-state.yaml)
-  2. Identify next incomplete work unit:
-     - If no PRD → Generate PRD
-     - If no tasks → Run planning
-     - If incomplete sprints → Execute next sprint
-  3. Execute work using appropriate orchestrator
-  4. Validate completion:
-     - Check state file for completion markers
-     - Verify quality gates passed
-     - Run test verification
-  5. If complete → Output EXIT_SIGNAL: true
-  6. If not complete → GOTO 1
-  7. If stuck (3+ attempts at same work) → Escalate or adjust strategy
+iteration = 0
+consecutive_failures = 0
+last_failure_point = null
+
+WHILE true:
+    iteration += 1
+
+    # Safety check
+    IF iteration > MAX_ITERATIONS:
+        OUTPUT "Maximum iterations reached. Stopping."
+        OUTPUT "EXIT_SIGNAL: true"
+        BREAK
+
+    IF consecutive_failures >= 5:
+        OUTPUT "Circuit breaker: 5 failures at {last_failure_point}"
+        OUTPUT "EXIT_SIGNAL: true"
+        BREAK
+
+    # Load state
+    state = READ "docs/planning/.project-state.yaml"
+
+    # Determine next action
+    IF no PRD exists:
+        CALL prd-generator
+    ELSE IF no tasks/sprints exist:
+        CALL task-graph-analyzer, sprint-planner
+    ELSE IF incomplete sprints exist:
+        next_sprint = find_first_incomplete_sprint(state)
+        result = CALL sprint-orchestrator(next_sprint)
+
+        IF result.failed:
+            IF last_failure_point == next_sprint:
+                consecutive_failures += 1
+            ELSE:
+                consecutive_failures = 1
+                last_failure_point = next_sprint
+        ELSE:
+            consecutive_failures = 0
+    ELSE:
+        # All complete
+        OUTPUT "All sprints complete. Project finished."
+        OUTPUT "EXIT_SIGNAL: true"
+        BREAK
+
+    # Progress update
+    OUTPUT "ITERATION: {iteration}, Sprints: {completed}/{total}, Status: CONTINUING"
 ```
 
-## Exit Signal Protocol
+## EXIT_SIGNAL Protocol
 
-**When to output EXIT_SIGNAL: true:**
-- ALL sprints marked completed in state file
-- ALL acceptance criteria verified (100%)
-- ALL tests passing (0 failures)
-- ALL quality gates passed
+**You MUST output `EXIT_SIGNAL: true` when:**
+- All sprints are marked "completed" in state file
+- Circuit breaker triggered
+- Maximum iterations reached
+- Unrecoverable error encountered
 
-**When to continue (no EXIT_SIGNAL):**
-- Any sprint still pending or in_progress
-- Any failing tests
-- Any unmet acceptance criteria
-- Any validation failures
+**You MUST NOT output EXIT_SIGNAL when:**
+- Any sprint is still "pending" or "in_progress"
+- Recoverable failures occurred (retry instead)
+- Quality gates failed (fix and continue)
 
-## Failure Recovery
+## Progress Tracking
 
-If a task/sprint fails:
-1. Log failure reason
-2. Increment failure counter
-3. If failure_count < 3: Retry with adjusted approach
-4. If failure_count >= 3: Try alternative strategy
-5. If failure_count >= 5: Output problem report and EXIT_SIGNAL
-
-## Inputs
-
-- Optional: PRD or project description
-- Optional: Maximum iterations (default: 50)
-- State file path
-
-## Outputs
-
-- Complete project with all sprints done
-- Or: Detailed status report with blockers
+After each iteration, output status:
+```
+═══════════════════════════════════════════
+AUTONOMOUS MODE - Iteration {N}
+═══════════════════════════════════════════
+Sprints: {completed}/{total}
+Current: {current_sprint} - {current_task}
+Failures: {consecutive_failures}/5
+Status: CONTINUING | COMPLETE | CIRCUIT_BREAKER
+═══════════════════════════════════════════
+```
 ```
 
-2. **Add command `/multi-agent:auto`:**
-
+**`commands/auto.md`:**
 ```markdown
-# Autonomous Development Command
+# Autonomous Execution Command
 
 ## Usage
-/multi-agent:auto [--max-iterations 50] [--from-scratch | --resume]
+/multi-agent:auto [--max-iterations N]
+
+## Description
+Launches autonomous controller that runs until project completion.
 
 ## Process
 
-Launch the autonomous-orchestrator agent which will:
-1. Assess current project state
-2. Identify next required action
-3. Execute PRD → Planning → Sprint workflow
-4. Loop until completion or max iterations
-5. Output EXIT_SIGNAL when done
+1. Launch autonomous-controller agent
+2. Agent loops through: PRD → Planning → Sprint execution
+3. Continues until all work complete or safety limit hit
+4. Outputs EXIT_SIGNAL when done
+
+## Options
+- `--max-iterations N`: Maximum loop iterations (default: 50)
 ```
 
 **Pros:**
-- Pure agent-based solution (consistent with project architecture)
-- No external dependencies
+- Pure agent-based (consistent with project architecture)
+- No external scripts or hooks needed
 - Uses existing state management
 - Full integration with quality gates
 
 **Cons:**
-- Agent context limits may require careful state management
-- More complex agent logic
-- Need to handle very long-running sessions
+- Agent context limits may require careful management
+- Need to handle very long sessions
 
-**Effort:** Medium-High (8-16 hours)
-
----
-
-### Option 4: Skills + Hooks Hybrid
-
-**Approach:** Use Claude Code's skills mechanism combined with lightweight hooks.
-
-**Implementation:**
-
-1. **Create skill file `.claude/skills/ralph-autonomy.md`:**
-
-```markdown
-# Ralph Autonomy Skill
-
-When working on this project, you have autonomous development capabilities.
-
-## Autonomous Mode Activation
-
-When the user invokes `/multi-agent:auto` or says "work autonomously":
-
-1. **Read Project State**
-   - Check docs/planning/.project-state.yaml
-   - Understand current progress
-
-2. **Iterative Execution**
-   - DO NOT stop to ask for permission
-   - DO NOT wait for confirmation between steps
-   - CONTINUE working until genuinely complete
-
-3. **Completion Detection**
-   When you have verified:
-   - All sprints: status=completed
-   - All tests: passing (check TESTING_SUMMARY.md)
-   - All quality gates: passed
-
-   Then output:
-   ```
-   EXIT_SIGNAL: true
-   COMPLETION_REASON: All sprints completed, tests passing, quality gates satisfied
-   ```
-
-4. **Progress Indicators**
-   After each significant action, output:
-   ```
-   RALPH_STATUS: {
-     "iteration": N,
-     "sprints_complete": X/Y,
-     "current_action": "description",
-     "blockers": [],
-     "EXIT_SIGNAL": false
-   }
-   ```
-
-## Safety Limits
-
-- Max iterations per session: 50
-- Max consecutive failures: 5 (then pause and report)
-- Always update state file after actions
-```
-
-2. **Create minimal stop hook (`hooks/stop-hook.sh`):**
-
-```bash
-#!/bin/bash
-# Check if autonomous mode is active and work is complete
-
-if [ -f ".ralph-mode" ]; then
-    # Check for EXIT_SIGNAL in output
-    if ! echo "$STOP_HOOK_MESSAGE" | grep -q "EXIT_SIGNAL: true"; then
-        echo "Autonomous mode active - continuing work"
-        exit 2
-    fi
-fi
-exit 0
-```
-
-3. **Add activation command:**
-
-```markdown
-# /multi-agent:auto command
-
-Activates autonomous mode:
-1. Create .ralph-mode marker file
-2. Load ralph-autonomy skill
-3. Begin iterative execution
-4. Remove .ralph-mode on completion
-```
-
-**Pros:**
-- Leverages Claude Code's native skills system
-- Minimal hook complexity
-- Skills provide context without code changes
-- Flexible and extensible
-
-**Cons:**
-- Skills may not fully control Claude's behavior
-- Hook still needed for stop interception
-- May need experimentation to tune
-
-**Effort:** Medium (6-12 hours)
+**Effort:** 4-8 hours
 
 ---
 
-### Option 5: Full Project Merge (Comprehensive)
+### Option 3: Enhanced State File + Sprint-All Extension
 
-**Approach:** Merge Ralph's infrastructure into this project as a first-class feature.
+**Approach:** Extend the state file to track autonomous mode, and enhance `/multi-agent:sprint all` to read these settings.
 
-**Implementation:**
+**What to add/modify:**
 
-1. **Project Structure After Merge:**
-```
-claude-code-multi-agent-dev-system/
-├── agents/                    # Existing 76 agents
-├── commands/
-│   ├── (existing commands)
-│   └── auto.md               # New autonomous command
-├── hooks/
-│   ├── stop-hook.sh          # Ralph stop hook
-│   ├── post-tool-hook.sh     # Progress tracking
-│   └── rate-limiter.sh       # API rate limiting
-├── lib/
-│   ├── circuit_breaker.sh    # From Ralph
-│   ├── response_analyzer.sh  # From Ralph
-│   └── state_manager.sh      # Unified state management
-├── monitoring/
-│   ├── dashboard.sh          # Ralph's tmux dashboard
-│   └── progress-tracker.sh   # Real-time progress
-├── templates/
-│   └── autonomous-prompt.md  # Default autonomous prompt
-└── plugin.json               # Updated with new capabilities
-```
-
-2. **Unified State Management:**
-
-Extend `.project-state.yaml`:
+1. **Extend state file schema:**
 ```yaml
+# docs/planning/.project-state.yaml
 version: "2.0"
-type: project
 
-# Existing fields...
-sprints: ...
-tasks: ...
+# ... existing fields ...
 
-# New Ralph integration fields
 autonomous_mode:
   enabled: true
-  iteration: 15
   max_iterations: 50
-  started_at: "2025-01-28T10:00:00Z"
-  rate_limit:
-    calls_this_hour: 45
-    limit: 100
-    reset_at: "2025-01-28T11:00:00Z"
+  current_iteration: 12
   circuit_breaker:
-    failures: 0
-    threshold: 5
-    state: closed  # closed | open | half-open
+    consecutive_failures: 0
+    max_failures: 5
+    last_failure_point: null
+    state: closed  # closed | open
+  session:
+    started_at: "2025-01-28T10:00:00Z"
+    last_activity: "2025-01-28T12:30:00Z"
   exit_detection:
     completion_indicators: 2
-    exit_signal_received: false
-    last_status: "Executing SPRINT-003"
+    exit_signal_required: true
 ```
 
-3. **New Commands:**
+2. **Modify `commands/sprint-all.md`** to add `--autonomous` flag:
+```markdown
+## Command Usage
 
-| Command | Description |
-|---------|-------------|
-| `/multi-agent:auto` | Start autonomous development |
-| `/multi-agent:auto status` | Show autonomous mode status |
-| `/multi-agent:auto pause` | Pause autonomous execution |
-| `/multi-agent:auto resume` | Resume from pause |
-| `/multi-agent:monitor` | Open tmux monitoring dashboard |
-
-4. **Monitoring Dashboard:**
-
-Adapt Ralph's monitoring to show multi-agent progress:
+/multi-agent:sprint all                     # Normal mode
+/multi-agent:sprint all --autonomous        # Autonomous mode
+/multi-agent:sprint all --autonomous --max-iterations 100
 ```
-┌─────────────────────────────────────────────────────────────┐
-│ Multi-Agent Autonomous Development Monitor                   │
-├─────────────────────────────────────────────────────────────┤
-│ Project: My Awesome App                                      │
-│ Status: RUNNING                                              │
-│ Iteration: 15/50                                             │
-├─────────────────────────────────────────────────────────────┤
-│ Progress:                                                    │
-│ ├─ PRD:      ✅ Complete                                    │
-│ ├─ Planning: ✅ Complete (3 sprints, 15 tasks)              │
-│ ├─ Sprint 1: ✅ Complete (5/5 tasks)                        │
-│ ├─ Sprint 2: ⏳ In Progress (3/5 tasks)                     │
-│ │   └─ Current: TASK-009 - API Authentication (T2, iter 2)  │
-│ └─ Sprint 3: ⏸ Pending (0/5 tasks)                         │
-├─────────────────────────────────────────────────────────────┤
-│ Rate: 45/100 calls/hr │ Circuit: CLOSED │ Failures: 0/5    │
-├─────────────────────────────────────────────────────────────┤
-│ [P]ause  [R]esume  [S]top  [L]ogs  [Q]uit                   │
-└─────────────────────────────────────────────────────────────┘
-```
+
+3. **Add autonomous behavior to sprint-orchestrator:**
+
+When `autonomous_mode.enabled = true` in state file:
+- Continue past normal stopping points
+- Check circuit breaker before each sprint
+- Output EXIT_SIGNAL only when genuinely complete
+- Update iteration count after each action
 
 **Pros:**
-- Most complete integration
-- Unified state management
-- Professional monitoring
-- All Ralph safety features (rate limiting, circuit breaker)
-- Single cohesive tool
+- Builds on existing infrastructure
+- State-driven (resumable)
+- Minimal new code
 
 **Cons:**
-- Highest implementation effort
-- More maintenance burden
-- Need to keep features synchronized
+- Requires modifying existing agents
+- More complex state management
 
-**Effort:** High (24-40 hours)
+**Effort:** 6-10 hours
 
 ---
 
-## Comparison Matrix
+### Option 4: Hybrid - Hooks + Skills
 
-| Aspect | Option 1 | Option 2 | Option 3 | Option 4 | Option 5 |
-|--------|----------|----------|----------|----------|----------|
-| **Integration Depth** | Low | Medium | High | Medium | Very High |
-| **Implementation Effort** | 1-2 hrs | 4-8 hrs | 8-16 hrs | 6-12 hrs | 24-40 hrs |
-| **State Management** | Separate | Shared | Shared | Shared | Unified |
-| **Safety Features** | Ralph's | Custom | Agent-based | Hybrid | Full |
-| **Monitoring** | Ralph's | None | None | Basic | Full |
-| **Maintenance** | Low | Low | Medium | Low | High |
-| **User Experience** | Two tools | Seamless | Seamless | Seamless | Best |
+**Approach:** Combine a lightweight stop hook with a Claude Code skill file that guides autonomous behavior.
+
+**What to add:**
+
+```
+hooks/
+└── stop-hook.sh           # Minimal hook for exit interception
+.claude/
+└── skills/
+    └── autonomous-mode.md # Behavioral guidance for Claude
+```
+
+**`hooks/stop-hook.sh`** (minimal version):
+```bash
+#!/bin/bash
+# Check for explicit completion signal
+if echo "$STOP_HOOK_MESSAGE" | grep -q "EXIT_SIGNAL: true"; then
+    exit 0  # Allow exit
+fi
+
+# Check if autonomous mode marker exists
+if [ -f ".multi-agent/autonomous-mode" ]; then
+    exit 2  # Block exit, continue
+fi
+
+exit 0  # Normal exit
+```
+
+**`.claude/skills/autonomous-mode.md`:**
+```markdown
+# Autonomous Development Mode
+
+When autonomous mode is active (`.multi-agent/autonomous-mode` file exists),
+you operate with these behaviors:
+
+## Continuous Execution
+- DO NOT stop after completing a task or sprint
+- DO NOT ask for permission to continue
+- DO NOT wait for user input between operations
+- DO check state file and proceed to next incomplete work
+
+## Exit Conditions
+Output `EXIT_SIGNAL: true` ONLY when:
+- All sprints marked completed in state file
+- All quality gates passed
+- No pending work remains
+
+## Safety Limits
+- Track iterations (stop at 50 if not specified)
+- Monitor consecutive failures (stop at 5)
+- Always update state file for resumability
+
+## Progress Output
+After each significant action:
+```
+[AUTO] Iteration N | Sprint X/Y | Task: TASK-XXX | Status: CONTINUING
+```
+
+## Activation
+Autonomous mode is activated by running:
+/multi-agent:auto
+
+This creates `.multi-agent/autonomous-mode` marker file.
+```
+
+**`commands/auto.md`:**
+```markdown
+# Autonomous Mode Command
+
+## Usage
+/multi-agent:auto [--max-iterations N]
+
+## Process
+1. Create `.multi-agent/autonomous-mode` marker
+2. Run `/multi-agent:sprint all`
+3. Stop hook keeps session alive until EXIT_SIGNAL
+4. Remove marker on completion
+```
+
+**Pros:**
+- Leverages Claude Code's built-in systems
+- Skills provide context without code changes
+- Hook is minimal and simple
+- Easy to toggle on/off
+
+**Cons:**
+- Skills influence but don't control behavior
+- May need tuning
+
+**Effort:** 3-5 hours
+
+---
+
+## Comparison Summary
+
+| Option | Integration | Effort | Reliability | Maintenance |
+|--------|-------------|--------|-------------|-------------|
+| **1. Hooks Only** | Native | 2-4 hrs | High | Low |
+| **2. Autonomous Agent** | Agent-based | 4-8 hrs | High | Medium |
+| **3. Extended State** | State-driven | 6-10 hrs | High | Medium |
+| **4. Hooks + Skills** | Hybrid | 3-5 hrs | Medium | Low |
 
 ---
 
 ## Recommendation
 
-### For Quick Start: **Option 1 (External Ralph Wrapper)**
+**Start with Option 1 (Hooks Only)** because:
 
-If you want to start using autonomous loops immediately with minimal effort, use Ralph as an external wrapper. Create a `.ralph/PROMPT.md` that invokes multi-agent commands.
+1. **Fastest to implement** - Just shell scripts
+2. **Non-invasive** - No changes to existing agents/commands
+3. **Native integration** - Uses Claude Code's built-in hook system
+4. **Easy to disable** - Just remove the hook configuration
+5. **Foundation for more** - Can layer Option 2 or 3 on top later
 
-### For Best Integration: **Option 3 (Autonomous Orchestrator Agent)**
-
-This aligns best with the project's existing architecture. It keeps everything agent-based, uses existing state files, and doesn't introduce external dependencies.
-
-### For Production Use: **Option 5 (Full Merge)**
-
-If you're committed to long-term use and want the best experience, invest in the full merge. This provides unified state management, professional monitoring, and all safety features.
-
-### Recommended Path
-
-1. **Phase 1:** Start with Option 1 to validate the workflow (1-2 hours)
-2. **Phase 2:** Implement Option 3 for proper integration (1-2 days)
-3. **Phase 3:** If heavily used, evolve to Option 5 (1-2 weeks)
+**Implementation path:**
+1. Create `hooks/stop-hook.sh` with completion detection
+2. Create `hooks/settings.json` for hook configuration
+3. Add documentation for enabling autonomous mode
+4. Test with a small project
+5. If needed, add Option 2 (autonomous agent) for richer control
 
 ---
 
-## Implementation Notes
+## Files to Create
 
-### Claude Code Hooks System
+### Minimum Viable Implementation (Option 1)
 
-Hooks are shell scripts that run at specific points:
-- **Stop Hook:** Runs when Claude tries to exit - can block exit (exit code 2)
-- **Post-Tool Hook:** Runs after each tool execution
-- **Pre-Tool Hook:** Runs before tool execution
+```
+hooks/
+├── stop-hook.sh              # Main stop interception logic
+├── README.md                 # How to enable/configure
+└── circuit-breaker.sh        # Circuit breaker logic (optional separate file)
 
-To use hooks, create `.claude/hooks/` directory and register in settings.
+.multi-agent/                  # Runtime state (gitignored)
+├── autonomous-mode           # Marker file when active
+├── circuit-breaker.json      # Failure tracking
+└── session.json              # Session metrics
 
-### Skills System
+commands/
+└── auto.md                   # New command to start autonomous mode
+```
 
-Skills are markdown files in `.claude/skills/` that Claude reads for context. They influence behavior but don't programmatically control execution.
+### Full Implementation (Options 1 + 2)
 
-### Rate Limiting Considerations
+Add to above:
+```
+agents/orchestration/
+└── autonomous-controller.md  # Top-level loop controller
 
-Claude API has a 5-hour usage limit. Ralph handles this with:
-- Tracking calls per hour
-- Prompting user to wait when limit approached
-- Graceful session save for continuation
-
-### Circuit Breaker Pattern
-
-Ralph's circuit breaker prevents infinite loops:
-- Tracks consecutive failures
-- Opens after threshold (default: 5)
-- Prevents further API calls when open
-- Can be reset manually or after cooldown
+docs/development/
+└── AUTONOMOUS_MODE.md        # User documentation
+```
 
 ---
 
 ## Next Steps
 
-1. Choose an integration option based on your needs
-2. Review the implementation details for your chosen option
-3. Test with a small project first
-4. Iterate based on results
+1. Choose implementation option
+2. Create the hook scripts
+3. Add the `/multi-agent:auto` command
+4. Test with a sample project
+5. Document usage for end users
 
-For questions or assistance with implementation, refer to:
-- [Ralph-claude-code repository](https://github.com/frankbria/ralph-claude-code)
-- [Ralph Wiggum technique origin](https://ghuntley.com/ralph/)
-- Multi-agent system documentation in this repository
+Would you like me to implement any of these options?
