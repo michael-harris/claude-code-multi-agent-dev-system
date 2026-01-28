@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Required MCP servers for DevTeam core functionality",
+
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "metadata": {
+        "purpose": "GitHub issue and PR management",
+        "required_for": ["/devteam:issue", "/devteam:issue-new"],
+        "install": "Requires GITHUB_TOKEN environment variable"
+      }
+    },
+
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "metadata": {
+        "purpose": "Session persistence for autonomous mode",
+        "required_for": ["/devteam:auto"],
+        "install": "No additional setup required"
+      }
+    }
+  },
+
+  "installation": {
+    "instructions": [
+      "1. Copy this configuration to your ~/.claude.json or project .claude/settings.json",
+      "2. Set GITHUB_TOKEN environment variable with repo and issues permissions",
+      "3. Restart Claude Code to activate MCPs"
+    ],
+    "example_env": {
+      "GITHUB_TOKEN": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  }
+}

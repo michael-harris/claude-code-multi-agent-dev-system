@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Language Server Protocol MCP configurations for semantic code intelligence",
+
+  "mcpServers": {
+    "lsp-typescript": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", "${PROJECT_ROOT}"],
+      "env": {
+        "LSP_SERVER": "typescript-language-server",
+        "LSP_SERVER_ARGS": "--stdio"
+      },
+      "metadata": {
+        "language": "typescript",
+        "detect_files": ["package.json", "tsconfig.json", "*.ts", "*.tsx"],
+        "install_server": "npm install -g typescript-language-server typescript",
+        "capabilities": ["definition", "references", "diagnostics", "hover", "rename"]
+      }
+    },
+
+    "lsp-python": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", "${PROJECT_ROOT}"],
+      "env": {
+        "LSP_SERVER": "pyright",
+        "LSP_SERVER_ARGS": ""
+      },
+      "metadata": {
+        "language": "python",
+        "detect_files": ["pyproject.toml", "requirements.txt", "setup.py", "*.py"],
+        "install_server": "npm install -g pyright",
+        "capabilities": ["definition", "references", "diagnostics", "hover", "rename"]
+      }
+    },
+
+    "lsp-go": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", "${PROJECT_ROOT}"],
+      "env": {
+        "LSP_SERVER": "gopls",
+        "LSP_SERVER_ARGS": ""
+      },
+      "metadata": {
+        "language": "go",
+        "detect_files": ["go.mod", "go.sum", "*.go"],
+        "install_server": "go install golang.org/x/tools/gopls@latest",
+        "capabilities": ["definition", "references", "diagnostics", "hover", "rename"]
+      }
+    },
+
+    "lsp-rust": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", "${PROJECT_ROOT}"],
+      "env": {
+        "LSP_SERVER": "rust-analyzer",
+        "LSP_SERVER_ARGS": ""
+      },
+      "metadata": {
+        "language": "rust",
+        "detect_files": ["Cargo.toml", "Cargo.lock", "*.rs"],
+        "install_server": "rustup component add rust-analyzer",
+        "capabilities": ["definition", "references", "diagnostics", "hover", "rename"]
+      }
+    },
+
+    "lsp-java": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", "${PROJECT_ROOT}"],
+      "env": {
+        "LSP_SERVER": "jdtls",
+        "LSP_SERVER_ARGS": ""
+      },
+      "metadata": {
+        "language": "java",
+        "detect_files": ["pom.xml", "build.gradle", "*.java"],
+        "install_server": "See https://github.com/eclipse/eclipse.jdt.ls",
+        "capabilities": ["definition", "references", "diagnostics", "hover", "rename"]
+      }
+    },
+
+    "lsp-csharp": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", "${PROJECT_ROOT}"],
+      "env": {
+        "LSP_SERVER": "omnisharp",
+        "LSP_SERVER_ARGS": ""
+      },
+      "metadata": {
+        "language": "csharp",
+        "detect_files": ["*.csproj", "*.sln", "*.cs"],
+        "install_server": "dotnet tool install -g omnisharp",
+        "capabilities": ["definition", "references", "diagnostics", "hover", "rename"]
+      }
+    },
+
+    "lsp-ruby": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", "${PROJECT_ROOT}"],
+      "env": {
+        "LSP_SERVER": "ruby-lsp",
+        "LSP_SERVER_ARGS": ""
+      },
+      "metadata": {
+        "language": "ruby",
+        "detect_files": ["Gemfile", "*.rb", "Rakefile"],
+        "install_server": "gem install ruby-lsp",
+        "capabilities": ["definition", "references", "diagnostics", "hover"]
+      }
+    },
+
+    "lsp-php": {
+      "command": "mcp-language-server",
+      "args": ["--workspace", "${PROJECT_ROOT}"],
+      "env": {
+        "LSP_SERVER": "phpactor",
+        "LSP_SERVER_ARGS": "language-server"
+      },
+      "metadata": {
+        "language": "php",
+        "detect_files": ["composer.json", "*.php"],
+        "install_server": "composer global require phpactor/phpactor",
+        "capabilities": ["definition", "references", "diagnostics", "hover", "rename"]
+      }
+    }
+  },
+
+  "installation": {
+    "prerequisites": [
+      "Install mcp-language-server: go install github.com/isaacphi/mcp-language-server@latest",
+      "Or use cclsp for better position handling: See https://github.com/ktnyt/cclsp"
+    ],
+    "auto_detection": {
+      "description": "DevTeam will automatically detect project languages and suggest which LSP servers to enable",
+      "config_location": "LSP settings are stored in .devteam/state.yaml under lsp_config"
+    },
+    "context_warning": "Each active LSP adds ~5-10k tokens. Only enable for languages in your project."
+  },
+
+  "alternatives": {
+    "cclsp": {
+      "description": "Alternative LSP bridge with smarter position handling",
+      "url": "https://github.com/ktnyt/cclsp",
+      "benefit": "Better handles LLM position inaccuracies"
+    },
+    "claude-code-lsps": {
+      "description": "Plugin marketplace with language-specific LSP plugins",
+      "url": "https://github.com/Piebald-AI/claude-code-lsps",
+      "benefit": "Individual plugins for 17 languages"
+    }
+  }
+}

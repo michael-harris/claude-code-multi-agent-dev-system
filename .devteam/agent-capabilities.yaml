@@ -1,0 +1,291 @@
+# DevTeam Agent Capabilities Index
+# Used for dynamic agent selection based on task requirements
+
+version: "1.0"
+
+# Agent categories and their capabilities
+# This index helps the orchestrator select appropriate agents
+
+categories:
+  architecture:
+    description: "System design and structural decisions"
+    agents:
+      - id: architect
+        capabilities:
+          - system_design
+          - api_design
+          - database_schema
+          - microservices
+          - scalability
+        complexity_range: [6, 14]
+        default_model: opus
+
+      - id: tech_lead
+        capabilities:
+          - code_review
+          - standards_enforcement
+          - mentoring
+          - technical_decisions
+        complexity_range: [4, 12]
+        default_model: sonnet
+
+  diagnosis:
+    description: "Bug analysis and debugging"
+    agents:
+      - id: root_cause_analyst
+        capabilities:
+          - error_analysis
+          - stack_trace_interpretation
+          - hypothesis_generation
+        complexity_range: [5, 14]
+        default_model: opus
+        bug_council_role: true
+
+      - id: code_archaeologist
+        capabilities:
+          - git_history_analysis
+          - regression_detection
+          - blame_analysis
+        complexity_range: [5, 14]
+        default_model: opus
+        bug_council_role: true
+
+      - id: pattern_matcher
+        capabilities:
+          - codebase_search
+          - similar_bug_detection
+          - anti_pattern_identification
+        complexity_range: [5, 14]
+        default_model: opus
+        bug_council_role: true
+
+      - id: systems_thinker
+        capabilities:
+          - dependency_analysis
+          - integration_issues
+          - architectural_bugs
+        complexity_range: [5, 14]
+        default_model: opus
+        bug_council_role: true
+
+      - id: adversarial_tester
+        capabilities:
+          - edge_case_discovery
+          - stress_testing
+          - security_vulnerabilities
+        complexity_range: [5, 14]
+        default_model: opus
+        bug_council_role: true
+
+  implementation:
+    description: "Code writing and feature development"
+    agents:
+      - id: backend_developer
+        capabilities:
+          - api_implementation
+          - database_operations
+          - business_logic
+          - server_configuration
+        complexity_range: [2, 12]
+        languages: [python, javascript, typescript, go, rust, java]
+
+      - id: frontend_developer
+        capabilities:
+          - ui_implementation
+          - state_management
+          - styling
+          - accessibility
+        complexity_range: [2, 12]
+        languages: [javascript, typescript]
+        frameworks: [react, vue, svelte, angular]
+
+      - id: fullstack_developer
+        capabilities:
+          - api_implementation
+          - ui_implementation
+          - integration
+        complexity_range: [3, 10]
+
+      - id: database_engineer
+        capabilities:
+          - schema_design
+          - query_optimization
+          - migrations
+          - indexing
+        complexity_range: [3, 12]
+
+      - id: devops_engineer
+        capabilities:
+          - ci_cd
+          - containerization
+          - infrastructure
+          - monitoring
+        complexity_range: [4, 12]
+
+  quality:
+    description: "Testing and quality assurance"
+    agents:
+      - id: test_engineer
+        capabilities:
+          - unit_testing
+          - integration_testing
+          - test_strategy
+          - mocking
+        complexity_range: [2, 10]
+
+      - id: e2e_tester
+        capabilities:
+          - browser_testing
+          - user_flow_testing
+          - visual_regression
+        complexity_range: [3, 10]
+        tools: [playwright, cypress, selenium]
+
+      - id: security_auditor
+        capabilities:
+          - vulnerability_scanning
+          - code_review_security
+          - owasp_compliance
+          - penetration_testing
+        complexity_range: [6, 14]
+        default_model: opus
+
+      - id: performance_engineer
+        capabilities:
+          - profiling
+          - optimization
+          - load_testing
+          - caching
+        complexity_range: [5, 12]
+
+  documentation:
+    description: "Documentation and communication"
+    agents:
+      - id: technical_writer
+        capabilities:
+          - api_documentation
+          - readme_creation
+          - architecture_docs
+          - user_guides
+        complexity_range: [1, 6]
+        default_model: haiku
+
+      - id: code_commenter
+        capabilities:
+          - inline_comments
+          - jsdoc
+          - docstrings
+        complexity_range: [1, 4]
+        default_model: haiku
+
+  data_ai:
+    description: "Data and AI/ML tasks"
+    agents:
+      - id: data_engineer
+        capabilities:
+          - etl_pipelines
+          - data_modeling
+          - data_validation
+        complexity_range: [4, 12]
+
+      - id: ml_engineer
+        capabilities:
+          - model_training
+          - feature_engineering
+          - model_deployment
+          - evaluation
+        complexity_range: [6, 14]
+        default_model: opus
+
+  support:
+    description: "Support and utility functions"
+    agents:
+      - id: dependency_manager
+        capabilities:
+          - package_updates
+          - vulnerability_fixes
+          - compatibility_checks
+        complexity_range: [2, 8]
+
+      - id: refactoring_specialist
+        capabilities:
+          - code_cleanup
+          - pattern_application
+          - dead_code_removal
+        complexity_range: [3, 10]
+
+      - id: migration_specialist
+        capabilities:
+          - framework_migration
+          - language_migration
+          - api_versioning
+        complexity_range: [6, 14]
+        default_model: opus
+
+# Capability to agent mapping for quick lookup
+capability_index:
+  # Architecture
+  system_design: [architect]
+  api_design: [architect, backend_developer]
+  database_schema: [architect, database_engineer]
+
+  # Implementation
+  api_implementation: [backend_developer, fullstack_developer]
+  ui_implementation: [frontend_developer, fullstack_developer]
+  database_operations: [backend_developer, database_engineer]
+
+  # Quality
+  unit_testing: [test_engineer]
+  integration_testing: [test_engineer, e2e_tester]
+  security_review: [security_auditor]
+  performance_optimization: [performance_engineer]
+
+  # Bug diagnosis
+  error_analysis: [root_cause_analyst]
+  regression_detection: [code_archaeologist]
+  pattern_matching: [pattern_matcher]
+  architectural_bugs: [systems_thinker]
+  edge_case_discovery: [adversarial_tester]
+
+  # Documentation
+  documentation: [technical_writer]
+  code_comments: [code_commenter]
+
+# Task type to agent recommendations
+task_type_agents:
+  feature:
+    primary: [backend_developer, frontend_developer, fullstack_developer]
+    support: [test_engineer, technical_writer]
+    review: [tech_lead]
+
+  bug:
+    diagnosis: [root_cause_analyst, code_archaeologist, pattern_matcher, systems_thinker, adversarial_tester]
+    fix: [backend_developer, frontend_developer]
+    verify: [test_engineer]
+
+  refactor:
+    primary: [refactoring_specialist]
+    review: [tech_lead, architect]
+    verify: [test_engineer]
+
+  security:
+    primary: [security_auditor]
+    fix: [backend_developer]
+    review: [tech_lead]
+
+  performance:
+    primary: [performance_engineer]
+    fix: [backend_developer, database_engineer]
+    verify: [e2e_tester]
+
+  documentation:
+    primary: [technical_writer]
+    review: [tech_lead]
+
+  infrastructure:
+    primary: [devops_engineer]
+    review: [architect]
+
+  database:
+    primary: [database_engineer]
+    review: [architect, backend_developer]

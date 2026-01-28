@@ -1,0 +1,312 @@
+# DevTeam State File Example
+# This shows what a populated state file looks like during execution
+# Actual state files are created in user projects at .devteam/state.yaml
+
+version: "3.0"
+
+metadata:
+  created_at: "2025-01-28T10:00:00Z"
+  updated_at: "2025-01-28T14:30:00Z"
+  project_name: "TaskManager Pro"
+  project_type: project
+
+# Autonomous mode configuration
+autonomous_mode:
+  enabled: true
+  started_at: "2025-01-28T10:00:00Z"
+  max_iterations: 50
+  current_iteration: 12
+
+  circuit_breaker:
+    consecutive_failures: 0
+    max_failures: 5
+    last_failure_point: null
+    state: closed
+
+  session:
+    memory_file: ".devteam/memory/session-20250128-100000.md"
+    last_checkpoint: "2025-01-28T13:00:00Z"
+
+model_selection:
+  strategy: dynamic
+
+# Task tracking with complexity and model history
+tasks:
+  TASK-001:
+    status: completed
+    started_at: "2025-01-28T10:05:00Z"
+    completed_at: "2025-01-28T10:25:00Z"
+
+    complexity:
+      score: 3
+      tier: simple
+      factors:
+        files_affected: 2
+        estimated_lines: 45
+        new_dependencies: 0
+        task_type: database
+        risk_flags: []
+
+    model_history:
+      - iteration: 1
+        model: haiku
+        reason: "Simple task, starting tier"
+        result: pass
+
+    iterations: 1
+    validation_result: PASS
+    acceptance_criteria_met: 3
+    acceptance_criteria_total: 3
+    parallel_eligible: false
+
+  TASK-002:
+    status: completed
+    started_at: "2025-01-28T10:26:00Z"
+    completed_at: "2025-01-28T10:50:00Z"
+
+    complexity:
+      score: 6
+      tier: moderate
+      factors:
+        files_affected: 4
+        estimated_lines: 150
+        new_dependencies: 1
+        task_type: backend
+        risk_flags: []
+
+    model_history:
+      - iteration: 1
+        model: sonnet
+        reason: "Moderate complexity, starting tier"
+        result: fail
+      - iteration: 2
+        model: sonnet
+        reason: "Retry at same tier"
+        result: pass
+
+    iterations: 2
+    validation_result: PASS
+    acceptance_criteria_met: 5
+    acceptance_criteria_total: 5
+    parallel_eligible: true
+    parallel_group: 1
+
+  TASK-003:
+    status: completed
+    started_at: "2025-01-28T10:26:00Z"  # Started same time as TASK-002 (parallel)
+    completed_at: "2025-01-28T10:40:00Z"
+
+    complexity:
+      score: 4
+      tier: simple
+      factors:
+        files_affected: 2
+        estimated_lines: 80
+        new_dependencies: 0
+        task_type: backend
+        risk_flags: []
+
+    model_history:
+      - iteration: 1
+        model: haiku
+        reason: "Simple task, parallel eligible"
+        result: pass
+
+    iterations: 1
+    validation_result: PASS
+    acceptance_criteria_met: 4
+    acceptance_criteria_total: 4
+    parallel_eligible: true
+    parallel_group: 1
+
+  TASK-004:
+    status: in_progress
+    started_at: "2025-01-28T14:00:00Z"
+
+    complexity:
+      score: 9
+      tier: complex
+      factors:
+        files_affected: 7
+        estimated_lines: 300
+        new_dependencies: 2
+        task_type: fullstack
+        risk_flags:
+          - security_sensitive
+          - external_integration
+
+    model_history:
+      - iteration: 1
+        model: opus
+        reason: "Complex task with security flags"
+        result: fail
+      - iteration: 2
+        model: opus
+        reason: "Retry at opus"
+        result: pending
+
+    iterations: 2
+    parallel_eligible: false
+
+  TASK-005:
+    status: pending
+    complexity:
+      score: 5
+      tier: moderate
+    parallel_eligible: true
+    parallel_group: 2
+
+# Parallel execution state
+parallel_execution:
+  enabled: true
+  max_concurrent: 3
+
+  active_slots:
+    - slot: 1
+      task: TASK-004
+      started_at: "2025-01-28T14:00:00Z"
+      status: running
+
+  queue:
+    - TASK-005
+    - TASK-006
+
+# Sprint tracking
+sprints:
+  SPRINT-001:
+    status: completed
+    started_at: "2025-01-28T10:05:00Z"
+    completed_at: "2025-01-28T12:30:00Z"
+    tasks_completed: 5
+    tasks_total: 5
+    quality_gates_passed: true
+
+  SPRINT-002:
+    status: in_progress
+    started_at: "2025-01-28T13:00:00Z"
+    tasks_completed: 2
+    tasks_total: 6
+    quality_gates_passed: false
+
+  SPRINT-003:
+    status: pending
+    tasks_total: 4
+
+# Bug council example (from a previous issue)
+bug_council:
+  activated: false
+  issue_number: 127
+
+  agents:
+    root_cause_analyst:
+      status: complete
+      proposal: "A"
+      summary: "Null reference due to missing guest user handling"
+      confidence: 0.85
+
+    code_archaeologist:
+      status: complete
+      proposal: "B"
+      summary: "Regression from commit abc123, guest feature incomplete"
+      confidence: 0.78
+
+    pattern_matcher:
+      status: complete
+      proposal: "C"
+      summary: "Optional chaining pattern missing in 4 locations"
+      confidence: 0.92
+
+    systems_thinker:
+      status: complete
+      proposal: "D"
+      summary: "AuthContext contract doesn't handle guest state"
+      confidence: 0.80
+
+    adversarial_tester:
+      status: complete
+      proposal: "E"
+      summary: "Also affects SSR and expired sessions"
+      confidence: 0.75
+
+  voting:
+    results:
+      A:
+        total: 16
+        ranks: [3, 4, 2, 4, 3]
+      B:
+        total: 22
+        ranks: [5, 2, 5, 5, 5]
+      C:
+        total: 11
+        ranks: [2, 3, 1, 3, 2]
+      D:
+        total: 10
+        ranks: [1, 1, 3, 1, 4]
+      E:
+        total: 16
+        ranks: [4, 5, 4, 2, 1]
+    winner: "C"
+    runner_up: "D"
+    consensus_notes: "Proposal C addresses immediate bug and prevents similar issues"
+
+# LSP configuration
+lsp_config:
+  auto_detect: true
+  active_servers:
+    - language: python
+      server: pyright
+      status: running
+      workspace: "/project"
+    - language: typescript
+      server: typescript-language-server
+      status: running
+      workspace: "/project/frontend"
+
+# Memory and learning
+memory:
+  last_session_file: ".devteam/memory/session-20250128-140000.md"
+
+  checkpoints:
+    - name: "post-sprint-001"
+      timestamp: "2025-01-28T12:30:00Z"
+      commit_sha: "abc123def"
+      verification:
+        tests_passing: 45
+        coverage: 82.5
+        build_status: green
+
+learned_patterns:
+  - id: "auth-argon2"
+    confidence: 0.95
+    pattern: "Use argon2id for password hashing in this project"
+    context: "Authentication implementations"
+    learned_from:
+      - TASK-002
+      - TASK-004
+
+  - id: "api-cursor-pagination"
+    confidence: 0.88
+    pattern: "Use cursor-based pagination for list endpoints"
+    context: "API endpoint implementations"
+    learned_from:
+      - TASK-003
+
+# Current execution context
+current_execution:
+  command: "/devteam:auto"
+  current_sprint: "SPRINT-002"
+  current_task: "TASK-004"
+  phase: execution
+
+# Statistics
+statistics:
+  total_tasks: 15
+  completed_tasks: 8
+  failed_tasks: 0
+  total_sprints: 3
+  completed_sprints: 1
+  haiku_tasks: 4
+  sonnet_tasks: 3
+  opus_tasks: 1
+  parallel_tasks_run: 4
+  bug_councils_convened: 1
