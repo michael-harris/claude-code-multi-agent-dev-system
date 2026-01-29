@@ -181,6 +181,74 @@ If `add more`: Continue with remaining interview questions
 
 This command combines PRD generation and sprint planning into a single workflow.
 
+### Phase 0: Git Repository Check (REQUIRED)
+
+Before any planning, verify git repository exists:
+
+```bash
+# Check for git repository
+git rev-parse --git-dir 2>/dev/null
+```
+
+**If NOT a git repository:**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  📁 Git Repository Required                                  │
+│                                                              │
+│  DevTeam requires a git repository for:                      │
+│  • Change tracking and rollback                              │
+│  • Parallel plan execution (worktrees)                       │
+│  • Safe merge of feature branches                            │
+│  • Circuit breaker recovery                                  │
+│                                                              │
+│  Initialize a git repository now? (yes/no): _                │
+└──────────────────────────────────────────────────────────────┘
+```
+
+If user says **yes**:
+```bash
+git init
+git add .
+git commit -m "Initial commit before DevTeam planning"
+echo "✅ Git repository initialized"
+```
+
+If user says **no**:
+```
+❌ Cannot proceed without git repository.
+
+To initialize manually:
+  git init
+  git add .
+  git commit -m "Initial commit"
+
+Then run /devteam:plan again.
+```
+
+**If git repo exists but has uncommitted changes:**
+
+```
+⚠️  Uncommitted Changes Detected
+
+You have uncommitted changes in your working directory.
+It's recommended to commit before planning.
+
+Options:
+  1. Commit changes now (recommended)
+  2. Stash changes temporarily
+  3. Continue anyway (changes tracked but not snapshotted)
+
+Select option (1/2/3): _
+```
+
+Option 1:
+```bash
+git add -A
+git commit -m "Pre-planning snapshot"
+echo "✅ Changes committed"
+```
+
 ### Phase 1: Requirements Interview
 
 **Technology Stack Selection (FIRST):**

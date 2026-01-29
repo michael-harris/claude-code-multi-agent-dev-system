@@ -7,8 +7,136 @@ Autonomous execution mode - executes all sprints continuously until project comp
 ## Usage
 
 ```bash
-/devteam:auto                    # Execute all sprints autonomously
-/devteam:auto --max-iterations 30  # Limit iterations
+/devteam:auto                       # Execute active/only plan
+/devteam:auto --plan dark-mode      # Execute specific plan
+/devteam:auto --plan 2              # Execute by plan number
+/devteam:auto --max-iterations 30   # Limit iterations
+/devteam:auto --worktree            # Force worktree isolation
+```
+
+## Plan Selection Logic
+
+### Step 0: Select Plan to Execute
+
+```yaml
+plan_selection:
+  # Check for explicit --plan flag
+  if_explicit_plan:
+    action: use_specified_plan
+
+  # Check active plan pointer
+  if_active_plan_set:
+    action: use_active_plan
+
+  # Auto-select if only one actionable plan
+  if_one_actionable_plan:
+    # Actionable = status in [planned, in_progress]
+    action: auto_select_and_notify
+    message: "Auto-selected: {plan_name} (only actionable plan)"
+
+  # Multiple actionable plans - prompt user
+  if_multiple_actionable:
+    action: prompt_user
+    display: plan_selection_table
+    message: "Multiple plans available. Please select one:"
+
+  # No actionable plans
+  if_no_actionable:
+    action: error
+    message: "No plans to execute. Create one with /devteam:plan"
+```
+
+### User Prompt for Multiple Plans
+
+```
+⚠️  Multiple plans available. Please select one:
+
+┌──────────────────────────────────────────────────────────────┐
+│ #  │ Name                 │ Type    │ Status      │ Progress │
+├──────────────────────────────────────────────────────────────┤
+│ 1  │ Task Manager App     │ project │ ✅ complete │ 5/5      │
+│ 2  │ Push Notifications   │ feature │ 🔄 active   │ 1/2      │
+│ 3  │ Dark Mode Support    │ feature │ 📋 planned  │ 0/1      │
+└──────────────────────────────────────────────────────────────┘
+
+Enter number to execute, or use: /devteam:auto --plan <name>
+>
+```
+
+## Parallel Instance Handling
+
+### Step 0.5: Acquire Plan Lock
+
+Before execution, acquire exclusive lock:
+
+```bash
+# Check for existing lock
+lock_file=".devteam/plans/${plan_id}/lock.json"
+
+if [ -f "$lock_file" ]; then
+    # Check if lock is stale (no heartbeat for 30 min)
+    # Check if locking process still alive
+    # If valid lock exists:
+    show_lock_error
+    exit 1
+fi
+
+# Create lock
+cat > "$lock_file" << EOF
+{
+  "locked_by": "$(hostname)-$(date +%s)",
+  "locked_at": "$(date -Iseconds)",
+  "pid": $$,
+  "plan_id": "${plan_id}",
+  "expires_at": "$(date -d '+2 hours' -Iseconds)"
+}
+EOF
+```
+
+### Lock Collision Behavior
+
+```
+🔒 Plan "dark-mode" is locked
+
+Currently being executed by another instance:
+  Started: 10 minutes ago
+  Instance: users-laptop-1706540400
+  PID: 12345
+
+Options:
+  1. Wait for lock release (checks every 30 seconds)
+  2. Execute a DIFFERENT plan: /devteam:auto --plan <other>
+  3. Force unlock (DANGER): /devteam:auto --plan dark-mode --force-unlock
+
+Waiting for lock release... (Ctrl+C to cancel)
+```
+
+### Parallel Plans with Worktrees
+
+If user wants to run a DIFFERENT plan while one is executing:
+
+```yaml
+parallel_detection:
+  check: "Is another plan currently locked and executing?"
+
+  if_parallel_plans:
+    # Different plans, parallel execution
+    action: create_worktree
+    worktree_path: ".devteam-worktrees/${plan_id}"
+    branch: "devteam/${plan_id}"
+
+    notify_user: |
+      🔀 Parallel Execution Detected
+
+      Another plan is currently running:
+        Plan: {other_plan_name}
+        Progress: {other_plan_progress}
+
+      Creating isolated workspace for "{plan_name}"...
+      ✅ Worktree created: .devteam-worktrees/{plan_id}/
+
+      Your changes will be isolated until merge.
+      Starting execution in worktree...
 ```
 
 ## Autonomous Mode Behavior
