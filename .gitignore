@@ -400,3 +400,7 @@ docker-compose.*.local.yml
 !.devteam/agent-capabilities.yaml
 !.devteam/state-schema.yaml
 !.devteam/state-example.yaml
+
+# Keep scripts/lib directory (overrides Python lib/ exclusion)
+!scripts/lib/
+!scripts/lib/**

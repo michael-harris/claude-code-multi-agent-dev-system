@@ -1,16 +1,95 @@
 #!/bin/bash
 # DevTeam Event Logging Functions
-# Source this file to log events from hooks and commands
+# Provides secure event logging for DevTeam hooks and commands
+#
+# SECURITY: All SQL queries use proper escaping and input validation
+# ERROR HANDLING: Uses set -euo pipefail and validates all inputs
+#
+# Usage: source this file in hooks and commands
+#   source "$(dirname "$0")/../scripts/events.sh"
 
-# Get script directory and source state functions
+set -euo pipefail
+
+# Get script directory and source state functions (which also sources common.sh)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/state.sh"
+
+# ============================================================================
+# VALID EVENT TYPES AND CATEGORIES
+# ============================================================================
+
+readonly VALID_EVENT_TYPES=(
+    "session_started"
+    "session_ended"
+    "phase_changed"
+    "agent_started"
+    "agent_completed"
+    "agent_failed"
+    "model_escalated"
+    "model_deescalated"
+    "gate_passed"
+    "gate_failed"
+    "bug_council_activated"
+    "bug_council_completed"
+    "interview_started"
+    "interview_question"
+    "interview_completed"
+    "research_started"
+    "research_finding"
+    "research_completed"
+    "task_started"
+    "task_completed"
+    "task_failed"
+    "error_occurred"
+    "warning_issued"
+    "abandonment_detected"
+    "abandonment_prevented"
+)
+
+readonly VALID_EVENT_CATEGORIES=(
+    "general"
+    "session"
+    "phase"
+    "agent"
+    "escalation"
+    "gate"
+    "bug_council"
+    "interview"
+    "research"
+    "task"
+    "error"
+    "warning"
+    "persistence"
+)
+
+# ============================================================================
+# VALIDATION HELPERS
+# ============================================================================
+
+# Validate event type
+validate_event_type() {
+    local event_type="$1"
+    if ! _in_array "$event_type" "${VALID_EVENT_TYPES[@]}"; then
+        log_warn "Unknown event type: $event_type (allowing anyway)" "events"
+    fi
+    return 0  # Allow unknown types but log warning
+}
+
+# Validate event category
+validate_event_category() {
+    local category="$1"
+    if ! _in_array "$category" "${VALID_EVENT_CATEGORIES[@]}"; then
+        log_warn "Unknown event category: $category (allowing anyway)" "events"
+    fi
+    return 0  # Allow unknown categories but log warning
+}
 
 # ============================================================================
 # CORE EVENT LOGGING
 # ============================================================================
 
-# Log an event
+# Log an event to the database
+# Args: event_type, [category], [message], [data], [agent], [model], [tokens_input], [tokens_output], [cost_cents]
 log_event() {
     local event_type="$1"
     local category="${2:-general}"
@@ -22,85 +101,148 @@ log_event() {
     local tokens_output="${8:-0}"
     local cost_cents="${9:-0}"
 
+    # Get current session
     local session_id
-    session_id=$(get_current_session_id)
+    session_id=$(get_current_session_id) || true
 
     if [ -z "$session_id" ]; then
-        return 0  # No active session, skip logging
+        log_debug "No active session, skipping event log" "events"
+        return 0
     fi
 
-    local iteration
-    local phase
-    iteration=$(get_current_iteration)
-    phase=$(get_current_phase)
+    # Validate numeric values
+    if ! validate_numeric "$tokens_input" "tokens_input" 2>/dev/null; then
+        tokens_input=0
+    fi
+    if ! validate_numeric "$tokens_output" "tokens_output" 2>/dev/null; then
+        tokens_output=0
+    fi
+    if ! validate_decimal "$cost_cents" "cost_cents" 2>/dev/null; then
+        cost_cents=0
+    fi
 
-    # Escape single quotes in message and data
-    message="${message//\'/\'\'}"
-    data="${data//\'/\'\'}"
+    # Get current iteration and phase
+    local iteration phase
+    iteration=$(get_current_iteration) || iteration=0
+    phase=$(get_current_phase) || phase=""
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO events (
+    # Escape all string values for SQL safety
+    local esc_session_id esc_event_type esc_category esc_message esc_data esc_agent esc_model esc_phase
+    esc_session_id=$(sql_escape "$session_id")
+    esc_event_type=$(sql_escape "$event_type")
+    esc_category=$(sql_escape "$category")
+    esc_message=$(sql_escape "$message")
+    esc_data=$(sql_escape "$data")
+    esc_agent=$(sql_escape "$agent")
+    esc_model=$(sql_escape "$model")
+    esc_phase=$(sql_escape "$phase")
+
+    local query="INSERT INTO events (
             session_id, event_type, event_category, message, data,
             agent, model, iteration, phase,
             tokens_input, tokens_output, cost_cents
         ) VALUES (
-            '$session_id', '$event_type', '$category', '$message', '$data',
-            '$agent', '$model', $iteration, '$phase',
-            $tokens_input, $tokens_output, $cost_cents
-        );
-    "
+            '$esc_session_id', '$esc_event_type', '$esc_category', '$esc_message', '$esc_data',
+            '$esc_agent', '$esc_model', ${iteration:-0}, '$esc_phase',
+            ${tokens_input:-0}, ${tokens_output:-0}, ${cost_cents:-0}
+        );"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_warn "Failed to log event: $event_type" "events"
+        return 1
+    fi
+
+    log_debug "Event logged: $event_type" "events"
 }
 
 # ============================================================================
 # SESSION EVENTS
 # ============================================================================
 
+# Log session started event
+# Args: command, command_type
 log_session_started() {
     local command="$1"
     local command_type="$2"
-    log_event "session_started" "session" "Session started: $command" "{\"command_type\": \"$command_type\"}"
+
+    local esc_type
+    esc_type=$(sql_escape "$command_type")
+    log_event "session_started" "session" "Session started: $command" "{\"command_type\": \"$esc_type\"}"
 }
 
+# Log session ended event
+# Args: status, reason
 log_session_ended() {
     local status="$1"
     local reason="$2"
-    log_event "session_ended" "session" "Session ended: $status" "{\"status\": \"$status\", \"reason\": \"$reason\"}"
+
+    local esc_status esc_reason
+    esc_status=$(sql_escape "$status")
+    esc_reason=$(sql_escape "$reason")
+    log_event "session_ended" "session" "Session ended: $status" "{\"status\": \"$esc_status\", \"reason\": \"$esc_reason\"}"
 }
 
 # ============================================================================
 # PHASE EVENTS
 # ============================================================================
 
+# Log phase change event
+# Args: new_phase, [previous_phase]
 log_phase_changed() {
     local new_phase="$1"
     local previous_phase="${2:-}"
-    log_event "phase_changed" "phase" "Phase: $new_phase" "{\"previous\": \"$previous_phase\", \"current\": \"$new_phase\"}"
+
+    local esc_prev esc_new
+    esc_prev=$(sql_escape "$previous_phase")
+    esc_new=$(sql_escape "$new_phase")
+    log_event "phase_changed" "phase" "Phase: $new_phase" "{\"previous\": \"$esc_prev\", \"current\": \"$esc_new\"}"
 }
 
 # ============================================================================
 # AGENT EVENTS
 # ============================================================================
 
+# Log agent started event
+# Args: agent, model, [task_id]
 log_agent_started() {
     local agent="$1"
     local model="$2"
     local task_id="${3:-}"
 
+    if [ -z "$agent" ]; then
+        log_error "Agent name required" "events"
+        return 1
+    fi
+
+    local esc_task_id
+    esc_task_id=$(sql_escape "$task_id")
     log_event "agent_started" "agent" "Agent started: $agent ($model)" \
-        "{\"task_id\": \"$task_id\"}" "$agent" "$model"
+        "{\"task_id\": \"$esc_task_id\"}" "$agent" "$model"
 
-    # Also insert into agent_runs
+    # Also insert into agent_runs table
     local session_id
-    session_id=$(get_current_session_id)
-    local iteration
-    iteration=$(get_current_iteration)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO agent_runs (session_id, agent, model, task_id, iteration, status)
-        VALUES ('$session_id', '$agent', '$model', '$task_id', $iteration, 'running');
-    "
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local iteration
+    iteration=$(get_current_iteration) || iteration=0
+
+    local esc_session_id esc_agent esc_model
+    esc_session_id=$(sql_escape "$session_id")
+    esc_agent=$(sql_escape "$agent")
+    esc_model=$(sql_escape "$model")
+
+    local query="INSERT INTO agent_runs (session_id, agent, model, task_id, iteration, status)
+        VALUES ('$esc_session_id', '$esc_agent', '$esc_model', '$esc_task_id', ${iteration:-0}, 'running');"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to insert agent_runs record" "events"
 }
 
+# Log agent completed event
+# Args: agent, model, [files_changed], [tokens_input], [tokens_output], [cost_cents]
 log_agent_completed() {
     local agent="$1"
     local model="$2"
@@ -109,149 +251,260 @@ log_agent_completed() {
     local tokens_output="${5:-0}"
     local cost_cents="${6:-0}"
 
+    if [ -z "$agent" ]; then
+        log_error "Agent name required" "events"
+        return 1
+    fi
+
+    # Validate numeric values
+    if ! validate_numeric "$tokens_input" "tokens_input" 2>/dev/null; then
+        tokens_input=0
+    fi
+    if ! validate_numeric "$tokens_output" "tokens_output" 2>/dev/null; then
+        tokens_output=0
+    fi
+    if ! validate_decimal "$cost_cents" "cost_cents" 2>/dev/null; then
+        cost_cents=0
+    fi
+
     log_event "agent_completed" "agent" "Agent completed: $agent" \
         "{\"files_changed\": $files_changed}" "$agent" "$model" \
         "$tokens_input" "$tokens_output" "$cost_cents"
 
-    # Update agent_runs
+    # Update agent_runs table
     local session_id
-    session_id=$(get_current_session_id)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        UPDATE agent_runs
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local esc_session_id esc_agent esc_files_changed
+    esc_session_id=$(sql_escape "$session_id")
+    esc_agent=$(sql_escape "$agent")
+    esc_files_changed=$(sql_escape "$files_changed")
+
+    local query="UPDATE agent_runs
         SET status = 'success',
             ended_at = CURRENT_TIMESTAMP,
             duration_seconds = CAST((julianday(CURRENT_TIMESTAMP) - julianday(started_at)) * 86400 AS INTEGER),
-            files_changed = '$files_changed',
-            tokens_input = $tokens_input,
-            tokens_output = $tokens_output,
-            cost_cents = $cost_cents
-        WHERE session_id = '$session_id'
-        AND agent = '$agent'
+            files_changed = '$esc_files_changed',
+            tokens_input = ${tokens_input:-0},
+            tokens_output = ${tokens_output:-0},
+            cost_cents = ${cost_cents:-0}
+        WHERE session_id = '$esc_session_id'
+        AND agent = '$esc_agent'
         AND status = 'running'
         ORDER BY started_at DESC
-        LIMIT 1;
-    "
+        LIMIT 1;"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to update agent_runs record" "events"
 
     # Update session totals
-    add_tokens "$tokens_input" "$tokens_output" "$cost_cents"
+    add_tokens "$tokens_input" "$tokens_output" "$cost_cents" || true
 }
 
+# Log agent failed event
+# Args: agent, model, error_message, [error_type]
 log_agent_failed() {
     local agent="$1"
     local model="$2"
     local error_message="$3"
     local error_type="${4:-unknown}"
 
+    if [ -z "$agent" ]; then
+        log_error "Agent name required" "events"
+        return 1
+    fi
+
+    local esc_error_type
+    esc_error_type=$(sql_escape "$error_type")
     log_event "agent_failed" "agent" "Agent failed: $agent - $error_message" \
-        "{\"error_type\": \"$error_type\"}" "$agent" "$model"
+        "{\"error_type\": \"$esc_error_type\"}" "$agent" "$model"
 
-    # Update agent_runs
+    # Update agent_runs table
     local session_id
-    session_id=$(get_current_session_id)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        UPDATE agent_runs
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local esc_session_id esc_agent esc_error_message
+    esc_session_id=$(sql_escape "$session_id")
+    esc_agent=$(sql_escape "$agent")
+    esc_error_message=$(sql_escape "$error_message")
+
+    local query="UPDATE agent_runs
         SET status = 'failed',
             ended_at = CURRENT_TIMESTAMP,
             duration_seconds = CAST((julianday(CURRENT_TIMESTAMP) - julianday(started_at)) * 86400 AS INTEGER),
-            error_message = '${error_message//\'/\'\'}',
-            error_type = '$error_type'
-        WHERE session_id = '$session_id'
-        AND agent = '$agent'
+            error_message = '$esc_error_message',
+            error_type = '$esc_error_type'
+        WHERE session_id = '$esc_session_id'
+        AND agent = '$esc_agent'
         AND status = 'running'
         ORDER BY started_at DESC
-        LIMIT 1;
-    "
+        LIMIT 1;"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to update agent_runs record" "events"
 
     # Increment failure counter
-    increment_failures
+    increment_failures || true
 }
 
 # ============================================================================
 # ESCALATION EVENTS
 # ============================================================================
 
+# Log model escalated event
+# Args: from_model, to_model, reason, [agent]
 log_model_escalated() {
     local from_model="$1"
     local to_model="$2"
     local reason="$3"
     local agent="${4:-}"
 
+    local esc_from esc_to esc_reason
+    esc_from=$(sql_escape "$from_model")
+    esc_to=$(sql_escape "$to_model")
+    esc_reason=$(sql_escape "$reason")
+
     log_event "model_escalated" "escalation" "Model escalated: $from_model -> $to_model ($reason)" \
-        "{\"from\": \"$from_model\", \"to\": \"$to_model\", \"reason\": \"$reason\"}" "$agent" "$to_model"
+        "{\"from\": \"$esc_from\", \"to\": \"$esc_to\", \"reason\": \"$esc_reason\"}" "$agent" "$to_model"
 
     # Record in escalations table
-    record_escalation "$from_model" "$to_model" "$reason" "$agent"
+    record_escalation "$from_model" "$to_model" "$reason" "$agent" || true
 }
 
+# Log model de-escalated event
+# Args: from_model, to_model, reason
 log_model_deescalated() {
     local from_model="$1"
     local to_model="$2"
     local reason="$3"
 
+    local esc_from esc_to esc_reason
+    esc_from=$(sql_escape "$from_model")
+    esc_to=$(sql_escape "$to_model")
+    esc_reason=$(sql_escape "$reason")
+
     log_event "model_deescalated" "escalation" "Model de-escalated: $from_model -> $to_model ($reason)" \
-        "{\"from\": \"$from_model\", \"to\": \"$to_model\", \"reason\": \"$reason\"}"
+        "{\"from\": \"$esc_from\", \"to\": \"$esc_to\", \"reason\": \"$esc_reason\"}"
 }
 
 # ============================================================================
 # QUALITY GATE EVENTS
 # ============================================================================
 
+# Log gate passed event
+# Args: gate, [details]
 log_gate_passed() {
     local gate="$1"
     local details="${2:-{}}"
 
+    if [ -z "$gate" ]; then
+        log_error "Gate name required" "events"
+        return 1
+    fi
+
+    local esc_details
+    esc_details=$(sql_escape "$details")
     log_event "gate_passed" "gate" "Gate passed: $gate" "$details"
 
-    # Insert into gate_results
+    # Insert into gate_results table
     local session_id
-    session_id=$(get_current_session_id)
-    local iteration
-    iteration=$(get_current_iteration)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO gate_results (session_id, gate, iteration, passed, details)
-        VALUES ('$session_id', '$gate', $iteration, TRUE, '$details');
-    "
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local iteration
+    iteration=$(get_current_iteration) || iteration=0
+
+    local esc_session_id esc_gate
+    esc_session_id=$(sql_escape "$session_id")
+    esc_gate=$(sql_escape "$gate")
+
+    local query="INSERT INTO gate_results (session_id, gate, iteration, passed, details)
+        VALUES ('$esc_session_id', '$esc_gate', ${iteration:-0}, TRUE, '$esc_details');"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to insert gate_results record" "events"
 }
 
+# Log gate failed event
+# Args: gate, [error_count], [details]
 log_gate_failed() {
     local gate="$1"
     local error_count="${2:-0}"
     local details="${3:-{}}"
 
+    if [ -z "$gate" ]; then
+        log_error "Gate name required" "events"
+        return 1
+    fi
+
+    # Validate error_count
+    if ! validate_numeric "$error_count" "error_count" 2>/dev/null; then
+        error_count=0
+    fi
+
+    local esc_details
+    esc_details=$(sql_escape "$details")
     log_event "gate_failed" "gate" "Gate failed: $gate ($error_count errors)" "$details"
 
-    # Insert into gate_results
+    # Insert into gate_results table
     local session_id
-    session_id=$(get_current_session_id)
-    local iteration
-    iteration=$(get_current_iteration)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO gate_results (session_id, gate, iteration, passed, error_count, details)
-        VALUES ('$session_id', '$gate', $iteration, FALSE, $error_count, '$details');
-    "
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local iteration
+    iteration=$(get_current_iteration) || iteration=0
+
+    local esc_session_id esc_gate
+    esc_session_id=$(sql_escape "$session_id")
+    esc_gate=$(sql_escape "$gate")
+
+    local query="INSERT INTO gate_results (session_id, gate, iteration, passed, error_count, details)
+        VALUES ('$esc_session_id', '$esc_gate', ${iteration:-0}, FALSE, ${error_count:-0}, '$esc_details');"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to insert gate_results record" "events"
 }
 
 # ============================================================================
 # BUG COUNCIL EVENTS
 # ============================================================================
 
+# Log bug council activated event
+# Args: reason
 log_bug_council_activated() {
     local reason="$1"
 
-    log_event "bug_council_activated" "bug_council" "Bug Council activated: $reason" \
-        "{\"reason\": \"$reason\"}"
+    if [ -z "$reason" ]; then
+        log_error "Reason required" "events"
+        return 1
+    fi
 
-    activate_bug_council "$reason"
+    local esc_reason
+    esc_reason=$(sql_escape "$reason")
+    log_event "bug_council_activated" "bug_council" "Bug Council activated: $reason" \
+        "{\"reason\": \"$esc_reason\"}"
+
+    activate_bug_council "$reason" || true
 }
 
+# Log bug council completed event
+# Args: winning_proposal, [votes]
 log_bug_council_completed() {
     local winning_proposal="$1"
     local votes="${2:-{}}"
 
+    local esc_votes
+    esc_votes=$(sql_escape "$votes")
     log_event "bug_council_completed" "bug_council" "Bug Council decision: $winning_proposal" "$votes"
 }
 
@@ -259,162 +512,273 @@ log_bug_council_completed() {
 # INTERVIEW EVENTS
 # ============================================================================
 
+# Log interview started event
+# Args: interview_type
 log_interview_started() {
     local interview_type="$1"
 
+    if [ -z "$interview_type" ]; then
+        log_error "Interview type required" "events"
+        return 1
+    fi
+
+    local esc_type
+    esc_type=$(sql_escape "$interview_type")
     log_event "interview_started" "interview" "Interview started: $interview_type" \
-        "{\"type\": \"$interview_type\"}"
+        "{\"type\": \"$esc_type\"}"
 
     # Create interview record
     local session_id
-    session_id=$(get_current_session_id)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO interviews (session_id, interview_type, status)
-        VALUES ('$session_id', '$interview_type', 'in_progress');
-    "
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local esc_session_id
+    esc_session_id=$(sql_escape "$session_id")
+
+    local query="INSERT INTO interviews (session_id, interview_type, status)
+        VALUES ('$esc_session_id', '$esc_type', 'in_progress');"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to insert interview record" "events"
 }
 
+# Log interview question event
+# Args: question_key, question_text, [response]
 log_interview_question() {
     local question_key="$1"
     local question_text="$2"
     local response="${3:-}"
 
+    local esc_key esc_response
+    esc_key=$(sql_escape "$question_key")
+    esc_response=$(sql_escape "$response")
     log_event "interview_question" "interview" "Q: $question_text" \
-        "{\"key\": \"$question_key\", \"response\": \"$response\"}"
+        "{\"key\": \"$esc_key\", \"response\": \"$esc_response\"}"
 }
 
+# Log interview completed event
+# Args: questions_count
 log_interview_completed() {
     local questions_count="$1"
 
+    # Validate questions_count
+    if ! validate_numeric "$questions_count" "questions_count" 2>/dev/null; then
+        questions_count=0
+    fi
+
     log_event "interview_completed" "interview" "Interview completed ($questions_count questions)" \
-        "{\"questions_count\": $questions_count}"
+        "{\"questions_count\": ${questions_count:-0}}"
 
     # Update interview record
     local session_id
-    session_id=$(get_current_session_id)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        UPDATE interviews
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local esc_session_id
+    esc_session_id=$(sql_escape "$session_id")
+
+    local query="UPDATE interviews
         SET status = 'completed',
             completed_at = CURRENT_TIMESTAMP,
-            questions_answered = $questions_count
-        WHERE session_id = '$session_id'
+            questions_answered = ${questions_count:-0}
+        WHERE session_id = '$esc_session_id'
         AND status = 'in_progress'
         ORDER BY started_at DESC
-        LIMIT 1;
-    "
+        LIMIT 1;"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to update interview record" "events"
 }
 
 # ============================================================================
 # RESEARCH EVENTS
 # ============================================================================
 
+# Log research started event
 log_research_started() {
     log_event "research_started" "research" "Research phase started"
 
-    # Create research session
+    # Create research session record
     local session_id
-    session_id=$(get_current_session_id)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO research_sessions (session_id, status)
-        VALUES ('$session_id', 'in_progress');
-    "
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local esc_session_id
+    esc_session_id=$(sql_escape "$session_id")
+
+    local query="INSERT INTO research_sessions (session_id, status)
+        VALUES ('$esc_session_id', 'in_progress');"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to insert research_sessions record" "events"
 }
 
+# Log research finding event
+# Args: finding_type, title, [description], [priority]
 log_research_finding() {
     local finding_type="$1"
     local title="$2"
     local description="${3:-}"
     local priority="${4:-medium}"
 
+    if [ -z "$finding_type" ] || [ -z "$title" ]; then
+        log_error "Finding type and title required" "events"
+        return 1
+    fi
+
+    local esc_type esc_priority
+    esc_type=$(sql_escape "$finding_type")
+    esc_priority=$(sql_escape "$priority")
     log_event "research_finding" "research" "Finding: $title" \
-        "{\"type\": \"$finding_type\", \"priority\": \"$priority\"}"
+        "{\"type\": \"$esc_type\", \"priority\": \"$esc_priority\"}"
 
-    # Insert finding
+    # Insert finding record
     local session_id
-    session_id=$(get_current_session_id)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO research_findings (
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local esc_session_id esc_title esc_description
+    esc_session_id=$(sql_escape "$session_id")
+    esc_title=$(sql_escape "$title")
+    esc_description=$(sql_escape "$description")
+
+    local query="INSERT INTO research_findings (
             research_session_id,
             finding_type,
             title,
             description,
             priority
         )
-        SELECT id, '$finding_type', '${title//\'/\'\'}', '${description//\'/\'\'}', '$priority'
+        SELECT id, '$esc_type', '$esc_title', '$esc_description', '$esc_priority'
         FROM research_sessions
-        WHERE session_id = '$session_id'
+        WHERE session_id = '$esc_session_id'
         ORDER BY started_at DESC
-        LIMIT 1;
-    "
+        LIMIT 1;"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to insert research_findings record" "events"
 }
 
+# Log research completed event
+# Args: findings_count, [blockers_count]
 log_research_completed() {
     local findings_count="$1"
     local blockers_count="${2:-0}"
 
+    # Validate numeric values
+    if ! validate_numeric "$findings_count" "findings_count" 2>/dev/null; then
+        findings_count=0
+    fi
+    if ! validate_numeric "$blockers_count" "blockers_count" 2>/dev/null; then
+        blockers_count=0
+    fi
+
     log_event "research_completed" "research" "Research completed ($findings_count findings, $blockers_count blockers)" \
-        "{\"findings\": $findings_count, \"blockers\": $blockers_count}"
+        "{\"findings\": ${findings_count:-0}, \"blockers\": ${blockers_count:-0}}"
 
-    # Update research session
+    # Update research session record
     local session_id
-    session_id=$(get_current_session_id)
+    session_id=$(get_current_session_id) || true
 
-    sqlite3 "$DB_FILE" "
-        UPDATE research_sessions
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    local esc_session_id
+    esc_session_id=$(sql_escape "$session_id")
+
+    local query="UPDATE research_sessions
         SET status = 'completed',
             completed_at = CURRENT_TIMESTAMP,
-            findings_count = $findings_count,
-            blockers_found = $blockers_count
-        WHERE session_id = '$session_id'
+            findings_count = ${findings_count:-0},
+            blockers_found = ${blockers_count:-0}
+        WHERE session_id = '$esc_session_id'
         AND status = 'in_progress'
         ORDER BY started_at DESC
-        LIMIT 1;
-    "
+        LIMIT 1;"
+
+    sql_exec "$query" > /dev/null || log_warn "Failed to update research_sessions record" "events"
 }
 
 # ============================================================================
 # TASK EVENTS
 # ============================================================================
 
+# Log task started event
+# Args: task_id, task_description
 log_task_started() {
     local task_id="$1"
     local task_description="$2"
 
+    if [ -z "$task_id" ]; then
+        log_error "Task ID required" "events"
+        return 1
+    fi
+
+    local esc_task_id
+    esc_task_id=$(sql_escape "$task_id")
     log_event "task_started" "task" "Task started: $task_id - $task_description" \
-        "{\"task_id\": \"$task_id\"}"
+        "{\"task_id\": \"$esc_task_id\"}"
 }
 
+# Log task completed event
+# Args: task_id
 log_task_completed() {
     local task_id="$1"
 
+    if [ -z "$task_id" ]; then
+        log_error "Task ID required" "events"
+        return 1
+    fi
+
+    local esc_task_id
+    esc_task_id=$(sql_escape "$task_id")
     log_event "task_completed" "task" "Task completed: $task_id" \
-        "{\"task_id\": \"$task_id\"}"
+        "{\"task_id\": \"$esc_task_id\"}"
 }
 
+# Log task failed event
+# Args: task_id, reason
 log_task_failed() {
     local task_id="$1"
     local reason="$2"
 
+    if [ -z "$task_id" ]; then
+        log_error "Task ID required" "events"
+        return 1
+    fi
+
+    local esc_task_id esc_reason
+    esc_task_id=$(sql_escape "$task_id")
+    esc_reason=$(sql_escape "$reason")
     log_event "task_failed" "task" "Task failed: $task_id - $reason" \
-        "{\"task_id\": \"$task_id\", \"reason\": \"$reason\"}"
+        "{\"task_id\": \"$esc_task_id\", \"reason\": \"$esc_reason\"}"
 }
 
 # ============================================================================
 # ERROR AND WARNING EVENTS
 # ============================================================================
 
-log_error() {
+# Log error event
+# Args: message, [details]
+log_error_event() {
     local message="$1"
     local details="${2:-{}}"
 
     log_event "error_occurred" "error" "$message" "$details"
 }
 
-log_warning() {
+# Log warning event
+# Args: message, [details]
+log_warning_event() {
     local message="$1"
     local details="${2:-{}}"
 
@@ -425,19 +789,32 @@ log_warning() {
 # ABANDONMENT EVENTS
 # ============================================================================
 
+# Log abandonment detected event
+# Args: pattern, attempt_number
 log_abandonment_detected() {
     local pattern="$1"
     local attempt_number="$2"
 
+    # Validate attempt_number
+    if ! validate_numeric "$attempt_number" "attempt_number" 2>/dev/null; then
+        attempt_number=0
+    fi
+
+    local esc_pattern
+    esc_pattern=$(sql_escape "$pattern")
     log_event "abandonment_detected" "persistence" "Abandonment pattern detected: $pattern (attempt $attempt_number)" \
-        "{\"pattern\": \"$pattern\", \"attempt\": $attempt_number}"
+        "{\"pattern\": \"$esc_pattern\", \"attempt\": ${attempt_number:-0}}"
 }
 
+# Log abandonment prevented event
+# Args: action
 log_abandonment_prevented() {
     local action="$1"
 
+    local esc_action
+    esc_action=$(sql_escape "$action")
     log_event "abandonment_prevented" "persistence" "Abandonment prevented: $action" \
-        "{\"action\": \"$action\"}"
+        "{\"action\": \"$esc_action\"}"
 }
 
 # ============================================================================
@@ -445,52 +822,130 @@ log_abandonment_prevented() {
 # ============================================================================
 
 # Get recent events for current session
+# Args: [limit], [session_id]
 get_recent_events() {
     local limit="${1:-20}"
-    local session_id="${2:-$(get_current_session_id)}"
+    local session_id="${2:-}"
 
-    sqlite3 -column -header "$DB_FILE" "
-        SELECT timestamp, event_type, message
+    # Validate limit
+    if ! validate_numeric "$limit" "limit" 2>/dev/null; then
+        limit=20
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id) || true
+    fi
+
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_session_id
+    esc_session_id=$(sql_escape "$session_id")
+
+    sql_exec_table "SELECT timestamp, event_type, message
         FROM events
-        WHERE session_id = '$session_id'
+        WHERE session_id = '$esc_session_id'
         ORDER BY timestamp DESC
-        LIMIT $limit;
-    "
+        LIMIT ${limit:-20};"
 }
 
 # Get events by type
+# Args: event_type, [session_id]
 get_events_by_type() {
     local event_type="$1"
-    local session_id="${2:-$(get_current_session_id)}"
+    local session_id="${2:-}"
 
-    sqlite3 -json "$DB_FILE" "
-        SELECT * FROM events
-        WHERE session_id = '$session_id'
-        AND event_type = '$event_type'
-        ORDER BY timestamp;
-    "
+    if [ -z "$event_type" ]; then
+        log_error "Event type required" "events"
+        return 1
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id) || true
+    fi
+
+    if [ -z "$session_id" ]; then
+        echo "[]"
+        return 0
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        echo "[]"
+        return 1
+    fi
+
+    local esc_session_id esc_event_type
+    esc_session_id=$(sql_escape "$session_id")
+    esc_event_type=$(sql_escape "$event_type")
+
+    sql_exec_json "SELECT * FROM events
+        WHERE session_id = '$esc_session_id'
+        AND event_type = '$esc_event_type'
+        ORDER BY timestamp;"
 }
 
 # Get escalation history
+# Args: [session_id]
 get_escalation_history() {
-    local session_id="${1:-$(get_current_session_id)}"
+    local session_id="${1:-}"
 
-    sqlite3 -column -header "$DB_FILE" "
-        SELECT timestamp, from_model, to_model, reason, agent
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id) || true
+    fi
+
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_session_id
+    esc_session_id=$(sql_escape "$session_id")
+
+    sql_exec_table "SELECT timestamp, from_model, to_model, reason, agent
         FROM escalations
-        WHERE session_id = '$session_id'
-        ORDER BY timestamp;
-    "
+        WHERE session_id = '$esc_session_id'
+        ORDER BY timestamp;"
 }
 
 # Get gate results for current session
+# Args: [session_id]
 get_gate_results() {
-    local session_id="${1:-$(get_current_session_id)}"
+    local session_id="${1:-}"
 
-    sqlite3 -column -header "$DB_FILE" "
-        SELECT iteration, gate, passed, error_count, timestamp
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id) || true
+    fi
+
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_session_id
+    esc_session_id=$(sql_escape "$session_id")
+
+    sql_exec_table "SELECT iteration, gate, passed, error_count, timestamp
         FROM gate_results
-        WHERE session_id = '$session_id'
-        ORDER BY timestamp;
-    "
+        WHERE session_id = '$esc_session_id'
+        ORDER BY timestamp;"
 }
+
+# ============================================================================
+# INITIALIZATION
+# ============================================================================
+
+# Set up error handling when script is sourced
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    setup_error_trap
+fi
