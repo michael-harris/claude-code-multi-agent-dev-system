@@ -68,9 +68,9 @@ Expanded worktree support from 1 command to 4 comprehensive management commands 
 
 ### New Commands
 
-**1. `/multi-agent:worktree status`**
+**1. `/devteam:worktree-status`**
 ```bash
-/multi-agent:worktree status
+/devteam:worktree-status
 ```
 
 Shows comprehensive status:
@@ -81,9 +81,9 @@ Shows comprehensive status:
 - Sprint progress per track
 - Actionable recommendations
 
-**2. `/multi-agent:worktree list`**
+**2. `/devteam:worktree-list`**
 ```bash
-/multi-agent:worktree list
+/devteam:worktree-list
 ```
 
 Simple tabular view:
@@ -92,9 +92,9 @@ Simple tabular view:
 - Current HEAD commit
 - Lock status
 
-**3. `/multi-agent:worktree cleanup`**
+**3. `/devteam:worktree-cleanup`**
 ```bash
-/multi-agent:worktree cleanup [--delete-branches]
+/devteam:worktree-cleanup [--delete-branches]
 ```
 
 Safe cleanup:
@@ -104,9 +104,9 @@ Safe cleanup:
 - Updates state files
 - Preserves main repository
 
-**Enhanced: `/multi-agent:merge-tracks`**
+**Enhanced: `/devteam:merge-tracks`**
 ```bash
-/multi-agent:merge-tracks [--keep-worktrees] [--delete-branches]
+/devteam:merge-tracks [--keep-worktrees] [--delete-branches]
 ```
 
 Enhanced with additional options:
@@ -120,22 +120,22 @@ Enhanced with additional options:
 **During Development:**
 ```bash
 # Check status of all parallel tracks
-/multi-agent:worktree status
+/devteam:worktree-status
 
 # See simple list
-/multi-agent:worktree list
+/devteam:worktree-list
 ```
 
 **After Completion:**
 ```bash
 # Merge all tracks and clean up
-/multi-agent:merge-tracks
+/devteam:merge-tracks
 
 # Or merge but keep worktrees for review
-/multi-agent:merge-tracks --keep-worktrees
+/devteam:merge-tracks --keep-worktrees
 
 # Manual cleanup later
-/multi-agent:worktree cleanup --delete-branches
+/devteam:worktree-cleanup --delete-branches
 ```
 
 ---
@@ -321,9 +321,9 @@ Comprehensive documentation updates to reflect actual system capabilities.
 **Worktree Management:**
 ```bash
 # New commands available
-/multi-agent:worktree status
-/multi-agent:worktree list
-/multi-agent:worktree cleanup
+/devteam:worktree-status
+/devteam:worktree-list
+/devteam:worktree-cleanup
 ```
 
 **Workflow Compliance:**

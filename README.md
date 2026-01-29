@@ -1,6 +1,6 @@
 # DevTeam: Multi-Agent Autonomous Development System
 
-An enterprise-grade Claude Code plugin providing **90+ specialized AI agents** with autonomous orchestration, intelligent agent selection, iterative quality refinement (Ralph), multi-perspective debugging (Bug Council), and comprehensive support for the entire software development lifecycle.
+An enterprise-grade Claude Code plugin providing **76+ specialized AI agents** with autonomous orchestration, intelligent agent selection, iterative quality refinement (Ralph), multi-perspective debugging (Bug Council), and comprehensive support for the entire software development lifecycle.
 
 ---
 
@@ -114,7 +114,7 @@ Abandonment Attempt → Detected → Re-engagement Prompt
 
 ---
 
-## 90+ Specialized Agents
+## 76+ Specialized Agents
 
 ### Enterprise Roles (NEW)
 
@@ -419,59 +419,113 @@ User Request
 
 ```
 .devteam/
+├── config.yaml              # Main project configuration
 ├── ralph-config.yaml        # Ralph quality loop config
 ├── agent-capabilities.yaml  # Agent registry with triggers
 ├── agent-selection.md       # Selection algorithm docs
 ├── persistence-config.yaml  # Anti-abandonment rules
 ├── scope-enforcement.md     # Scope system docs
-├── current-task.txt         # Active task tracking
-├── state.yaml               # Execution state
-├── circuit-breaker.json     # Failure tracking
-└── out-of-scope-observations.md  # Logged observations
+├── model-selection.md       # Dynamic model assignment
+├── parallel-execution.md    # Concurrent task handling
+├── plan-management.md       # Plan lifecycle tracking
+├── state.yaml               # Execution state (runtime)
+├── circuit-breaker.json     # Failure tracking (runtime)
+└── plans/                   # Multi-plan storage (runtime)
 
 agents/
-├── orchestration/
+├── orchestration/           # 9 orchestration agents
 │   ├── ralph-orchestrator.md
 │   ├── task-orchestrator.md
+│   ├── sprint-orchestrator.md
 │   ├── bug-council-orchestrator.md
-│   └── scope-validator.md
-├── diagnosis/               # Bug Council agents
-├── sre/                     # SRE & Platform
-├── security/                # Security & Compliance
-├── product/                 # Product Management
-├── implementation/          # Language-specific devs
+│   ├── scope-validator.md
+│   └── workflow-compliance.md
+├── planning/                # PRD & sprint planning
+├── diagnosis/               # Bug Council agents (5)
+├── backend/                 # Backend API developers
+├── frontend/                # Frontend developers
+├── database/                # Database specialists
+├── python/                  # Python utilities
 ├── quality/                 # Testing & QA
 ├── devops/                  # CI/CD, Docker, K8s
+├── sre/                     # Site Reliability Engineering
+├── security/                # Security & Compliance
+├── mobile/                  # iOS & Android
+├── scripting/               # Shell & PowerShell
+├── ux/                      # Design system agents
 ├── accessibility/           # A11y specialists
-├── devrel/                  # Developer advocacy
 └── templates/
-    └── base-agent.md        # Persistence rules all inherit
+    └── base-agent.md
 
-hooks/
-├── stop-hook.sh             # Exit control (Linux/macOS)
-├── stop-hook.ps1            # Exit control (Windows)
-├── persistence-hook.sh      # Abandonment detection (Linux/macOS)
-├── persistence-hook.ps1     # Abandonment detection (Windows)
-├── scope-check.sh           # Commit validation (Linux/macOS)
-├── scope-check.ps1          # Commit validation (Windows)
-└── README.md                # Hook documentation (cross-platform)
+commands/                    # 18 slash commands
+├── devteam-auto.md
+├── devteam-plan.md
+├── devteam-sprint.md
+├── devteam-list.md
+├── devteam-select.md
+├── devteam-issue.md
+├── devteam-issue-new.md
+└── ...
+
+hooks/                       # Cross-platform hooks
+├── stop-hook.sh / .ps1      # Exit control
+├── persistence-hook.sh / .ps1
+├── scope-check.sh / .ps1
+└── README.md
+
+skills/                      # Specialized capabilities
+├── core/
+├── testing/
+├── quality/
+├── workflow/
+└── frontend/
+
+mcp-configs/                 # MCP server configurations
+├── required.json
+├── recommended.json
+└── lsp-servers.json
 ```
 
 ---
 
 ## Commands Reference
 
+### Primary Commands (Recommended)
+
 | Command | Description |
 |---------|-------------|
 | `/devteam:auto <task>` | Autonomous execution with agent selection |
+| `/devteam:plan [description]` | Interactive planning - creates PRD, tasks, and sprints |
+| `/devteam:plan --feature "<desc>"` | Plan a new feature for existing project |
+| `/devteam:plan --from <file>` | Generate plan from spec file or folder |
+| `/devteam:sprint <id>` | Execute specific sprint |
+| `/devteam:sprint all` | Execute all sprints sequentially |
+| `/devteam:list [--type] [--all]` | List all plans and their status |
+| `/devteam:select <name\|#>` | Select a plan to work on |
+| `/devteam:issue <#>` | Fix a GitHub issue by number |
+| `/devteam:issue-new "<desc>"` | Create a new GitHub issue |
+
+### Worktree Management
+
+| Command | Description |
+|---------|-------------|
+| `/devteam:worktree status` | Show detailed status of all worktrees |
+| `/devteam:worktree list` | List all git worktrees |
+| `/devteam:worktree cleanup` | Clean up development worktrees |
+| `/devteam:merge-tracks` | Merge parallel development tracks |
+
+### Legacy Commands (Still Supported)
+
+| Command | Description |
+|---------|-------------|
 | `/devteam:prd` | Generate Product Requirements Document |
 | `/devteam:planning` | Create tasks and sprints from PRD |
-| `/devteam:sprint <id>` | Execute specific sprint |
-| `/devteam:sprint all` | Execute all sprints |
 | `/devteam:feature <desc>` | Complete feature workflow |
 | `/devteam:bug <desc>` | Bug fix with Bug Council if needed |
 | `/devteam:security` | Security audit and remediation |
-| `/devteam:merge-tracks` | Merge parallel development |
+| `/devteam:refactor` | Code refactoring workflow |
+
+See [commands/README.md](commands/README.md) for detailed command documentation and migration guide.
 
 ---
 
