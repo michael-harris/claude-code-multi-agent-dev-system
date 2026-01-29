@@ -63,7 +63,7 @@ Analysis of functionality from [everything-claude-code](https://github.com/affaa
 
 **User experience:**
 - **Automatic:** Memory saved/loaded without user action
-- **Optional:** `/multi-agent:memory show` to view, `/multi-agent:memory clear` to reset
+- **Optional:** `/devteam:memory show` to view, `/devteam:memory clear` to reset
 
 ---
 
@@ -96,7 +96,7 @@ context_management:
 
 **User experience:**
 - **Automatic:** Happens transparently during long runs
-- **Optional:** `/multi-agent:compact now` to manually trigger
+- **Optional:** `/devteam:compact now` to manually trigger
 
 ---
 
@@ -188,9 +188,9 @@ checkpoints:
 
 **Commands (optional exposure):**
 ```
-/multi-agent:checkpoint list          # Show checkpoints
-/multi-agent:checkpoint restore NAME  # Rollback to checkpoint
-/multi-agent:checkpoint verify        # Compare current vs last
+/devteam:checkpoint list          # Show checkpoints
+/devteam:checkpoint restore NAME  # Rollback to checkpoint
+/devteam:checkpoint verify        # Compare current vs last
 ```
 
 **User experience:**
@@ -322,8 +322,8 @@ patterns:
 
 **User experience:**
 - **Automatic:** Learning happens silently
-- **Optional:** `/multi-agent:patterns show` to view learned patterns
-- **Optional:** `/multi-agent:patterns import FILE` to import from another project
+- **Optional:** `/devteam:patterns show` to view learned patterns
+- **Optional:** `/devteam:patterns import FILE` to import from another project
 
 ---
 

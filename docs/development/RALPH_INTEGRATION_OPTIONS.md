@@ -20,7 +20,7 @@ This document identifies the specific functionality that Ralph provides which th
 
 ### The Core Problem
 
-**This project requires the user to stay engaged.** If Claude's session ends, context limits hit, or the user closes their terminal, work stops. The user must manually re-run `/multi-agent:sprint all` to continue.
+**This project requires the user to stay engaged.** If Claude's session ends, context limits hit, or the user closes their terminal, work stops. The user must manually re-run `/devteam:sprint all` to continue.
 
 **Ralph lets you walk away.** The stop hook intercepts exit attempts and re-injects the prompt, creating a self-sustaining loop until the project is genuinely complete.
 
@@ -237,7 +237,7 @@ Status: CONTINUING | COMPLETE | CIRCUIT_BREAKER
 # Autonomous Execution Command
 
 ## Usage
-/multi-agent:auto [--max-iterations N]
+/devteam:auto [--max-iterations N]
 
 ## Description
 Launches autonomous controller that runs until project completion.
@@ -269,7 +269,7 @@ Launches autonomous controller that runs until project completion.
 
 ### Option 3: Enhanced State File + Sprint-All Extension
 
-**Approach:** Extend the state file to track autonomous mode, and enhance `/multi-agent:sprint all` to read these settings.
+**Approach:** Extend the state file to track autonomous mode, and enhance `/devteam:sprint all` to read these settings.
 
 **What to add/modify:**
 
@@ -301,9 +301,9 @@ autonomous_mode:
 ```markdown
 ## Command Usage
 
-/multi-agent:sprint all                     # Normal mode
-/multi-agent:sprint all --autonomous        # Autonomous mode
-/multi-agent:sprint all --autonomous --max-iterations 100
+/devteam:sprint all                     # Normal mode
+/devteam:sprint all --autonomous        # Autonomous mode
+/devteam:sprint all --autonomous --max-iterations 100
 ```
 
 3. **Add autonomous behavior to sprint-orchestrator:**
@@ -389,7 +389,7 @@ After each significant action:
 
 ## Activation
 Autonomous mode is activated by running:
-/multi-agent:auto
+/devteam:auto
 
 This creates `.multi-agent/autonomous-mode` marker file.
 ```
@@ -399,11 +399,11 @@ This creates `.multi-agent/autonomous-mode` marker file.
 # Autonomous Mode Command
 
 ## Usage
-/multi-agent:auto [--max-iterations N]
+/devteam:auto [--max-iterations N]
 
 ## Process
 1. Create `.multi-agent/autonomous-mode` marker
-2. Run `/multi-agent:sprint all`
+2. Run `/devteam:sprint all`
 3. Stop hook keeps session alive until EXIT_SIGNAL
 4. Remove marker on completion
 ```
@@ -488,7 +488,7 @@ docs/development/
 
 1. Choose implementation option
 2. Create the hook scripts
-3. Add the `/multi-agent:auto` command
+3. Add the `/devteam:auto` command
 4. Test with a sample project
 5. Document usage for end users
 

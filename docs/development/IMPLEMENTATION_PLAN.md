@@ -9,7 +9,7 @@ Comprehensive step-by-step plan to transform the multi-agent system into an enha
 | Metric | Before | After |
 |--------|--------|-------|
 | **Agents** | 76 | ~55 (consolidated + enhanced) |
-| **Commands** | 10 (`/multi-agent:*`) | 6 (`/devteam:*`) |
+| **Commands** | 10 (`/devteam:*`) | 6 (`/devteam:*`) |
 | **Model Selection** | Fixed T1/T2 | Dynamic (Haiku/Sonnet/Opus) |
 | **Execution Mode** | User-driven | Autonomous with safety limits |
 | **Parallelism** | Manual track setup | Automatic (up to 3 concurrent) |

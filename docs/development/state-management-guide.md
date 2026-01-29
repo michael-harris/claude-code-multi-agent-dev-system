@@ -6,7 +6,7 @@ This guide explains how agents should manage progress tracking state files.
 
 ### Creating a State File
 
-When starting a new project/multi-agent:feature/multi-agent:issue, create a state file:
+When starting a new project/devteam:feature/devteam:issue, create a state file:
 
 ```yaml
 # docs/planning/.project-state.yaml
@@ -223,7 +223,7 @@ Dependency Analysis:
 - Max possible parallel tracks: 3
 
 If you want to enable parallel development, run:
-/multi-agent:planning 3
+/devteam:planning 3
 
 This will organize tasks into 3 parallel development tracks.
 ```
@@ -260,12 +260,12 @@ Track Distribution:
 - Track 3: 4 tasks (16 hours) - SPRINT-001-03, SPRINT-002-03
 
 To execute all tracks in parallel:
-- Terminal 1: /multi-agent:sprint all 01
-- Terminal 2: /multi-agent:sprint all 02
-- Terminal 3: /multi-agent:sprint all 03
+- Terminal 1: /devteam:sprint all 01
+- Terminal 2: /devteam:sprint all 02
+- Terminal 3: /devteam:sprint all 03
 
 Or execute sequentially:
-/multi-agent:sprint all
+/devteam:sprint all
 ```
 
 ### sprint-orchestrator Agent
@@ -362,16 +362,16 @@ tasks:
 
 ## Command Parameter Handling
 
-### /multi-agent:planning Command
+### /devteam:planning Command
 
 ```markdown
 # Old
-/multi-agent:planning
+/devteam:planning
 
 # New (with optional tracks parameter)
-/multi-agent:planning          # Default: 1 track
-/multi-agent:planning 3        # Request 3 tracks
-/multi-agent:planning 10       # Request 10 tracks (will use max possible if less)
+/devteam:planning          # Default: 1 track
+/devteam:planning 3        # Request 3 tracks
+/devteam:planning 10       # Request 10 tracks (will use max possible if less)
 ```
 
 **Implementation in planning.md:**
@@ -396,16 +396,16 @@ Pass number of tracks to sprint-planner:
 - Initialize state file with track configuration
 ```
 
-### /multi-agent:sprint all Command
+### /devteam:sprint all Command
 
 ```markdown
 # Old
-/multi-agent:sprint all
+/devteam:sprint all
 
 # New (with optional track parameter)
-/multi-agent:sprint all        # Execute all tracks sequentially
-/multi-agent:sprint all 01     # Execute only track 1
-/multi-agent:sprint all 02     # Execute only track 2
+/devteam:sprint all        # Execute all tracks sequentially
+/devteam:sprint all 01     # Execute only track 1
+/devteam:sprint all 02     # Execute only track 2
 ```
 
 **Implementation in sprint-all.md:**
@@ -585,9 +585,9 @@ If two agents try to modify state simultaneously:
 
 ### Manual Testing
 
-1. Create test project with /multi-agent:planning 3
-2. Run /multi-agent:sprint all 01 and interrupt mid-sprint
-3. Resume with /multi-agent:sprint all 01
+1. Create test project with /devteam:planning 3
+2. Run /devteam:sprint all 01 and interrupt mid-sprint
+3. Resume with /devteam:sprint all 01
 4. Verify it continues from correct point
 5. Check state file for correct status
 

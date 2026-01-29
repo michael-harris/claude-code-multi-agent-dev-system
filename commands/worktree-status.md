@@ -201,7 +201,7 @@ To recreate:
   git worktree add .multi-agent/track-02 -b dev-track-02
 
 Or recreate all with:
-  /multi-agent:planning 3 --use-worktrees
+  /devteam:planning 3 --use-worktrees
 ```
 
 **Wrong branch:**

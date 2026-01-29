@@ -799,11 +799,11 @@ Or merge directly:
 
 ## Commands
 
-- `/multi-agent:sprint SPRINT-001` - Execute single sprint
-- `/multi-agent:sprint all` - Execute all sprints sequentially
-- `/multi-agent:sprint status SPRINT-001` - Check sprint progress
-- `/multi-agent:sprint pause SPRINT-001` - Pause execution
-- `/multi-agent:sprint resume SPRINT-001` - Resume paused sprint
+- `/devteam:sprint SPRINT-001` - Execute single sprint
+- `/devteam:sprint all` - Execute all sprints sequentially
+- `/devteam:sprint status SPRINT-001` - Check sprint progress
+- `/devteam:sprint pause SPRINT-001` - Pause execution
+- `/devteam:sprint resume SPRINT-001` - Resume paused sprint
 
 ## Important Notes
 

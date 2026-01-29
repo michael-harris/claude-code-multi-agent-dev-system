@@ -328,7 +328,7 @@ If `delete_branches = false` (default):
 echo "⚠️  Track branches kept (provides development history)"
 echo "  Branches: dev-track-01, dev-track-02, dev-track-03, ..."
 echo "  To delete later: git branch -d <branch-name>"
-echo "  Or use: /multi-agent:merge-tracks --delete-branches"
+echo "  Or use: /devteam:merge-tracks --delete-branches"
 ```
 
 ### 7. Update State File
@@ -532,7 +532,7 @@ Both changes are needed. Please:
 5. Stage: git add src/complex-file.ts
 6. Commit: git commit
 
-When done, re-run: /multi-agent:merge-tracks
+When done, re-run: /devteam:merge-tracks
 ```
 
 **Test failures after merge:**

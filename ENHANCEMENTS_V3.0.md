@@ -357,7 +357,7 @@ New configuration sections in `.devteam/ralph-config.yaml`:
 - Agent count inconsistency across documentation
 - Missing Bug Council agents in plugin.json
 - Missing orchestration agents in plugin.json
-- Namespace inconsistencies (`/multi-agent:` → `/devteam:`)
+- Namespace inconsistencies (`/devteam:` → `/devteam:`)
 
 ---
 
