@@ -58,7 +58,7 @@ Before creating an agent, ask:
 
 ```bash
 # Create from template
-cp agents/templates/agent-template.md agents/specialized/my-agent.md
+cp agents/templates/base-agent.md agents/specialized/my-agent.md
 ```
 
 ### Step 4: Define the Agent
@@ -394,9 +394,9 @@ Check the current phase before acting:
 ## Examples of Good Agents
 
 Study these well-designed agents:
-- `agents/core/ralph.md` - Orchestration example
+- `agents/orchestration/ralph-orchestrator.md` - Orchestration example
 - `agents/quality/test-writer.md` - Testing example
-- `agents/specialized/security-auditor.md` - Security example
+- `agents/security/penetration-tester.md` - Security example
 
 ## Getting Help
 

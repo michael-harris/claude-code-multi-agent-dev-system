@@ -123,7 +123,7 @@ Agents are the core of DevTeam. Here's how to create a new one:
 
 ```bash
 # Copy the template
-cp agents/templates/agent-template.md agents/specialized/my-new-agent.md
+cp agents/templates/base-agent.md agents/specialized/my-new-agent.md
 ```
 
 ### 3. Agent Structure
@@ -161,17 +161,26 @@ Add your agent to `plugin.json`:
 {
   "agents": [
     {
-      "id": "my-new-agent",
+      "id": "specialized:my-new-agent",
       "name": "My New Agent",
-      "path": "agents/specialized/my-new-agent.md",
-      "category": "specialized",
-      "tier": "T2",
-      "triggers": ["keyword1", "keyword2"],
-      "weight": 50
+      "description": "Brief description of what this agent does",
+      "file": "agents/specialized/my-new-agent.md",
+      "model": "sonnet",
+      "category": "specialized"
     }
   ]
 }
 ```
+
+**Agent schema fields:**
+| Field | Required | Description |
+|-------|----------|-------------|
+| `id` | Yes | Unique identifier (format: `category:name`) |
+| `name` | Yes | Human-readable name |
+| `description` | Yes | Brief description of capabilities |
+| `file` | Yes | Path to agent markdown file |
+| `model` | No | Model tier: `opus`, `sonnet`, or `haiku` (default: sonnet) |
+| `category` | Yes | Agent category for organization |
 
 ### 5. Test Your Agent
 

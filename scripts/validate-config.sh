@@ -120,8 +120,8 @@ validate_agents() {
             continue
         fi
 
-        # Required agent fields
-        local required=("name" "path" "category" "tier" "weight" "triggers")
+        # Required agent fields (v3.1 schema: file instead of path, model instead of tier)
+        local required=("name" "category")
         for field in "${required[@]}"; do
             local value
             value=$(jq -r ".agents[$i].$field // empty" "$PLUGIN_JSON")
@@ -130,38 +130,26 @@ validate_agents() {
             fi
         done
 
-        # Validate path exists
-        local path
-        path=$(jq -r ".agents[$i].path // empty" "$PLUGIN_JSON")
-        if [ -n "$path" ] && [ ! -f "$PROJECT_ROOT/$path" ]; then
-            report_error "plugin.json" "Agent '$agent_id' path not found: $path"
+        # Validate file path exists (supports both "file" and "path" for backwards compatibility)
+        local file_path
+        file_path=$(jq -r ".agents[$i].file // .agents[$i].path // empty" "$PLUGIN_JSON")
+        if [ -z "$file_path" ]; then
+            report_error "plugin.json" "Agent '$agent_id' missing field: file (or path)"
+        elif [ ! -f "$PROJECT_ROOT/$file_path" ]; then
+            report_error "plugin.json" "Agent '$agent_id' file not found: $file_path"
         fi
 
-        # Validate tier
-        local tier
-        tier=$(jq -r ".agents[$i].tier // empty" "$PLUGIN_JSON")
-        if [ -n "$tier" ] && [ "$tier" != "T1" ] && [ "$tier" != "T2" ]; then
-            report_error "plugin.json" "Agent '$agent_id' invalid tier: $tier (must be T1 or T2)"
-        fi
-
-        # Validate weight range
-        local weight
-        weight=$(jq -r ".agents[$i].weight // 0" "$PLUGIN_JSON")
-        if [ "$weight" -lt 1 ] || [ "$weight" -gt 100 ]; then
-            report_warning "plugin.json" "Agent '$agent_id' weight out of range: $weight (should be 1-100)"
-        fi
-
-        # Validate triggers is non-empty array
-        local trigger_count
-        trigger_count=$(jq ".agents[$i].triggers | length" "$PLUGIN_JSON")
-        if [ "$trigger_count" -eq 0 ]; then
-            report_warning "plugin.json" "Agent '$agent_id' has no triggers"
+        # Validate model (optional, defaults to sonnet)
+        local model
+        model=$(jq -r ".agents[$i].model // empty" "$PLUGIN_JSON")
+        if [ -n "$model" ] && [ "$model" != "opus" ] && [ "$model" != "sonnet" ] && [ "$model" != "haiku" ]; then
+            report_error "plugin.json" "Agent '$agent_id' invalid model: $model (must be opus, sonnet, or haiku)"
         fi
 
         # Validate category
         local category
         category=$(jq -r ".agents[$i].category // empty" "$PLUGIN_JSON")
-        local valid_categories=("core" "specialized" "quality" "language" "framework" "bug-council" "workflow" "documentation" "testing" "security")
+        local valid_categories=("planning" "research" "orchestration" "python" "typescript" "javascript" "go" "rust" "java" "frontend" "backend" "database" "quality" "security" "bug-council" "documentation" "devops" "workflow" "mobile" "specialized")
         local category_valid=false
         for valid_cat in "${valid_categories[@]}"; do
             if [ "$category" = "$valid_cat" ]; then
@@ -317,13 +305,13 @@ validate_cross_references() {
         return 0
     fi
 
-    # Check that all agent files exist
-    local agent_paths
-    agent_paths=$(jq -r '.agents[].path' "$PLUGIN_JSON")
+    # Check that all agent files exist (supports both "file" and "path" fields)
+    local agent_files
+    agent_files=$(jq -r '.agents[] | .file // .path' "$PLUGIN_JSON")
 
-    for path in $agent_paths; do
-        if [ ! -f "$PROJECT_ROOT/$path" ]; then
-            report_error "cross-check" "Agent file not found: $path"
+    for file_path in $agent_files; do
+        if [ -n "$file_path" ] && [ ! -f "$PROJECT_ROOT/$file_path" ]; then
+            report_error "cross-check" "Agent file not found: $file_path"
         fi
     done
 
@@ -332,14 +320,14 @@ validate_cross_references() {
     cmd_paths=$(jq -r '.commands[].path' "$PLUGIN_JSON")
 
     for path in $cmd_paths; do
-        if [ ! -f "$PROJECT_ROOT/$path" ]; then
+        if [ -n "$path" ] && [ ! -f "$PROJECT_ROOT/$path" ]; then
             report_error "cross-check" "Command file not found: $path"
         fi
     done
 
     # Check for orphaned agent files
     local registered_agents
-    registered_agents=$(jq -r '.agents[].path' "$PLUGIN_JSON" | sort)
+    registered_agents=$(jq -r '.agents[] | .file // .path' "$PLUGIN_JSON" | sort)
 
     local all_agents
     all_agents=$(find "$PROJECT_ROOT/agents" -name "*.md" -type f | \
