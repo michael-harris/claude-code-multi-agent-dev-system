@@ -9,8 +9,25 @@ These hooks integrate with Claude Code's hook system to provide:
 - Session memory persistence
 - State preservation across context compaction
 - Automatic project language detection
+- Anti-abandonment enforcement
+- Scope validation
+
+## Cross-Platform Support
+
+All hooks are available in both Bash (Linux/macOS) and PowerShell (Windows) versions:
+
+| Hook | Linux/macOS | Windows |
+|------|-------------|---------|
+| Stop Hook | `stop-hook.sh` | `stop-hook.ps1` |
+| Persistence Hook | `persistence-hook.sh` | `persistence-hook.ps1` |
+| Scope Check | `scope-check.sh` | `scope-check.ps1` |
+| Session Start | `session-start.sh` | (coming soon) |
+| Session End | `session-end.sh` | (coming soon) |
+| Pre-Compact | `pre-compact.sh` | (coming soon) |
 
 ## Installation
+
+### Linux / macOS
 
 Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
 
@@ -28,24 +45,13 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
         ]
       }
     ],
-    "PreToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/path/to/project/hooks/session-start.sh"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "/path/to/project/hooks/session-end.sh"
+            "command": "/path/to/project/hooks/persistence-hook.sh"
           }
         ]
       }
@@ -65,9 +71,73 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
 }
 ```
 
+Make hooks executable:
+```bash
+chmod +x hooks/*.sh
+```
+
+### Windows (PowerShell)
+
+Add to your `%USERPROFILE%\.claude\settings.json` or project `.claude\settings.json`:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -ExecutionPolicy Bypass -File C:\\path\\to\\project\\hooks\\stop-hook.ps1"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell.exe -ExecutionPolicy Bypass -File C:\\path\\to\\project\\hooks\\persistence-hook.ps1"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Important Windows Notes:**
+- Use full absolute paths with backslashes
+- Include `-ExecutionPolicy Bypass` to allow script execution
+- PowerShell 5.1+ or PowerShell Core 7+ required
+
+### WSL (Windows Subsystem for Linux)
+
+If using WSL, you can use the Bash scripts directly:
+```json
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "wsl /path/to/project/hooks/stop-hook.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ## Hook Descriptions
 
-### persistence-hook.sh
+### persistence-hook.sh / persistence-hook.ps1
 
 **Purpose**: Detects and prevents premature task abandonment.
 
@@ -93,7 +163,7 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
 
 **Configuration**: See `.devteam/persistence-config.yaml`
 
-### stop-hook.sh
+### stop-hook.sh / stop-hook.ps1
 
 **Purpose**: Implements Ralph-style autonomous execution loop.
 
@@ -108,9 +178,19 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
 - `2`: Block exit and continue (re-inject prompt)
 
 **Autonomous Mode Activation**:
+
+Linux/macOS:
 ```bash
 # Create marker file to enable
 touch .devteam/autonomous-mode
+
+# Or use /devteam:auto command which creates it automatically
+```
+
+Windows PowerShell:
+```powershell
+# Create marker file to enable
+New-Item -ItemType File -Path .devteam\autonomous-mode -Force
 
 # Or use /devteam:auto command which creates it automatically
 ```
@@ -148,7 +228,7 @@ touch .devteam/autonomous-mode
 3. Captures circuit breaker state
 4. Outputs recovery instructions
 
-### scope-check.sh
+### scope-check.sh / scope-check.ps1
 
 **Purpose**: Enforce strict scope compliance at commit time.
 
@@ -163,10 +243,18 @@ touch .devteam/autonomous-mode
 - `1`: Scope violation detected, commit blocked
 
 **Usage as pre-commit hook**:
+
+Linux/macOS:
 ```bash
 # In project .git/hooks/pre-commit
 #!/bin/bash
 ./hooks/scope-check.sh
+```
+
+Windows:
+```powershell
+# In project .git/hooks/pre-commit
+powershell.exe -ExecutionPolicy Bypass -File .\hooks\scope-check.ps1
 ```
 
 **Or via Claude Code hooks**:
@@ -213,6 +301,9 @@ The hooks read/write these files:
 | `.devteam/autonomous-mode` | Autonomous mode marker |
 | `.devteam/circuit-breaker.json` | Failure tracking |
 | `.devteam/memory/*.md` | Session memory files |
+| `.devteam/current-task.txt` | Active task ID |
+| `.devteam/abandonment-attempts.log` | Abandonment tracking |
+| `.devteam/escalation-trigger` | Model escalation signals |
 
 ## Circuit Breaker
 
@@ -234,7 +325,7 @@ The circuit breaker prevents infinite loops:
 
 ## Troubleshooting
 
-### Hooks not executing
+### Hooks not executing (Linux/macOS)
 
 1. Verify hooks are executable:
 ```bash
@@ -245,19 +336,35 @@ chmod +x hooks/*.sh
 
 3. Verify Claude Code version supports hooks
 
-### Autonomous mode not working
+### Hooks not executing (Windows)
 
-1. Ensure marker file exists:
-```bash
-ls -la .devteam/autonomous-mode
+1. Verify PowerShell execution policy allows scripts:
+```powershell
+Get-ExecutionPolicy
+# If "Restricted", the hooks need -ExecutionPolicy Bypass flag
 ```
 
-2. Check circuit breaker isn't open:
+2. Check paths use backslashes and are absolute
+
+3. Verify PowerShell version:
+```powershell
+$PSVersionTable.PSVersion
+# Should be 5.1+ or 7+
+```
+
+### Autonomous mode not working
+
+Linux/macOS:
 ```bash
+ls -la .devteam/autonomous-mode
 cat .devteam/circuit-breaker.json
 ```
 
-3. Verify max iterations not exceeded
+Windows:
+```powershell
+Get-Item .devteam\autonomous-mode
+Get-Content .devteam\circuit-breaker.json
+```
 
 ### Memory not persisting
 
@@ -267,13 +374,19 @@ cat .devteam/circuit-breaker.json
 
 ## Dependencies
 
+### Linux/macOS
 - `bash` (4.0+)
 - `yq` (optional, for YAML parsing - falls back to grep)
 - `jq` (optional, for JSON parsing - falls back to grep)
 - `date`, `mkdir`, `cat`, `grep` (standard Unix tools)
+
+### Windows
+- PowerShell 5.1+ or PowerShell Core 7+
+- No additional dependencies (uses built-in cmdlets)
 
 ## Security Notes
 
 - Hooks run with user permissions
 - State files may contain project details
 - Add `.devteam/` to `.gitignore` for sensitive projects
+- On Windows, `-ExecutionPolicy Bypass` only affects the specific script execution

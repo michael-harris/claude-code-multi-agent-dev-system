@@ -289,18 +289,20 @@ categories:
 
 ## Hooks System
 
-The system uses Claude Code hooks for autonomous execution:
+The system uses Claude Code hooks for autonomous execution. **All hooks support both Linux/macOS (Bash) and Windows (PowerShell).**
 
-| Hook | Purpose |
-|------|---------|
-| `stop-hook.sh` | Blocks exit without `EXIT_SIGNAL: true` |
-| `persistence-hook.sh` | Detects and prevents abandonment |
-| `scope-check.sh` | Validates commits stay in scope |
-| `pre-compact.sh` | Preserves state before context compaction |
+| Hook | Linux/macOS | Windows | Purpose |
+|------|-------------|---------|---------|
+| Stop Hook | `stop-hook.sh` | `stop-hook.ps1` | Blocks exit without `EXIT_SIGNAL: true` |
+| Persistence Hook | `persistence-hook.sh` | `persistence-hook.ps1` | Detects and prevents abandonment |
+| Scope Check | `scope-check.sh` | `scope-check.ps1` | Validates commits stay in scope |
+| Pre-Compact | `pre-compact.sh` | (coming soon) | Preserves state before context compaction |
 
-### Installation
+See [hooks/README.md](hooks/README.md) for detailed cross-platform installation instructions.
 
-Add to `.claude/settings.json`:
+### Installation (Linux/macOS)
+
+Add to `~/.claude/settings.json`:
 
 ```json
 {
@@ -446,10 +448,13 @@ agents/
     └── base-agent.md        # Persistence rules all inherit
 
 hooks/
-├── stop-hook.sh             # Exit control
-├── persistence-hook.sh      # Abandonment detection
-├── scope-check.sh           # Commit validation
-└── README.md                # Hook documentation
+├── stop-hook.sh             # Exit control (Linux/macOS)
+├── stop-hook.ps1            # Exit control (Windows)
+├── persistence-hook.sh      # Abandonment detection (Linux/macOS)
+├── persistence-hook.ps1     # Abandonment detection (Windows)
+├── scope-check.sh           # Commit validation (Linux/macOS)
+├── scope-check.ps1          # Commit validation (Windows)
+└── README.md                # Hook documentation (cross-platform)
 ```
 
 ---
@@ -591,6 +596,49 @@ Contributions welcome! Areas of interest:
 - New enterprise agent roles
 - Improved selection algorithms
 - Integration with more tools
+
+---
+
+## Credits & Acknowledgments
+
+This project draws inspiration from several pioneering projects in the AI-assisted development space:
+
+### Conceptual Inspirations
+
+| Project | Inspiration | Link |
+|---------|-------------|------|
+| **Aider** | Iterative code refinement loops and autonomous coding patterns | [github.com/paul-gauthier/aider](https://github.com/paul-gauthier/aider) |
+| **Claude Code** | Hooks system, tool use patterns, and agent architecture | [Anthropic Claude Code](https://docs.anthropic.com/en/docs/claude-code) |
+| **AutoGPT** | Multi-agent orchestration and task decomposition patterns | [github.com/Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) |
+| **GPT-Engineer** | PRD-to-code workflows and specification-driven development | [github.com/gpt-engineer-org/gpt-engineer](https://github.com/gpt-engineer-org/gpt-engineer) |
+| **MetaGPT** | Multi-agent software company simulation and role-based agents | [github.com/geekan/MetaGPT](https://github.com/geekan/MetaGPT) |
+| **Sweep AI** | Automated bug fixing and PR generation patterns | [github.com/sweepai/sweep](https://github.com/sweepai/sweep) |
+| **Devin** | The vision of autonomous software engineering agents | [Cognition AI](https://www.cognition-labs.com/devin) |
+| **OpenHands** | Agent-computer interfaces and tool use patterns | [github.com/All-Hands-AI/OpenHands](https://github.com/All-Hands-AI/OpenHands) |
+| **SWE-agent** | Software engineering agent architectures | [github.com/princeton-nlp/SWE-agent](https://github.com/princeton-nlp/SWE-agent) |
+
+### Specific Feature Inspirations
+
+- **Ralph (Quality Loop)**: Inspired by Aider's iterative refinement approach and "linting loops" in CI/CD
+- **Bug Council**: Inspired by ensemble methods in ML and the "committee of experts" pattern from MetaGPT
+- **Scope Enforcement**: Inspired by principle of least privilege and sandboxing patterns in security
+- **Model Escalation**: Inspired by tiered support systems and auto-scaling in cloud architecture
+- **Anti-Abandonment**: Inspired by process supervision and watchdog patterns in distributed systems
+
+### Standards & Frameworks Referenced
+
+- **OWASP Top 10** - Security testing methodology
+- **WCAG 2.1** - Accessibility compliance standards
+- **SOC2/HIPAA/GDPR/PCI-DSS** - Compliance frameworks
+- **Google SRE** - Site Reliability Engineering practices
+- **The Twelve-Factor App** - Modern application design principles
+
+### Community
+
+Special thanks to:
+- The Claude Code community for hooks system documentation and patterns
+- Open source contributors pioneering multi-agent development patterns
+- The AI safety community for guidance on agent constraints and guardrails
 
 ---
 
