@@ -1,89 +1,172 @@
 #!/bin/bash
 # DevTeam State Management Functions
-# Source this file to use state functions in hooks and commands
+# Provides secure session and state management for DevTeam hooks and commands
+#
+# SECURITY: All SQL queries use proper escaping and input validation
+# ERROR HANDLING: Uses set -euo pipefail and validates all inputs
+#
+# Usage: source this file in hooks and commands
+#   source "$(dirname "$0")/../scripts/state.sh"
 
-# Configuration
-DEVTEAM_DIR="${DEVTEAM_DIR:-.devteam}"
-DB_FILE="${DEVTEAM_DIR}/devteam.db"
+set -euo pipefail
 
-# Ensure database exists
-_ensure_db() {
-    if [ ! -f "$DB_FILE" ]; then
-        local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-        bash "${script_dir}/db-init.sh"
-    fi
-}
+# Get script directory and source common library
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/common.sh"
 
 # ============================================================================
 # SESSION MANAGEMENT
 # ============================================================================
 
 # Generate a unique session ID
+# Returns: session-YYYYMMDD-HHMMSS-hexstring
 generate_session_id() {
-    echo "session-$(date +%Y%m%d-%H%M%S)-$(head -c 4 /dev/urandom | xxd -p)"
+    generate_id "session"
 }
 
 # Start a new session
+# Args: command, command_type, [execution_mode]
+# Returns: session_id on success, exits on failure
 start_session() {
     local command="$1"
     local command_type="$2"
     local execution_mode="${3:-normal}"
 
-    _ensure_db
+    # Validate inputs
+    if [ -z "$command" ]; then
+        log_error "Command cannot be empty" "session"
+        return 1
+    fi
+
+    ensure_db || return 1
 
     local session_id
     session_id=$(generate_session_id)
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO sessions (id, command, command_type, execution_mode, status, current_phase)
-        VALUES ('$session_id', '$command', '$command_type', '$execution_mode', 'running', 'initializing');
-    "
+    # Escape values for safe SQL
+    local esc_command esc_type esc_mode
+    esc_command=$(sql_escape "$command")
+    esc_type=$(sql_escape "$command_type")
+    esc_mode=$(sql_escape "$execution_mode")
 
+    local query="INSERT INTO sessions (id, command, command_type, execution_mode, status, current_phase)
+        VALUES ('$session_id', '$esc_command', '$esc_type', '$esc_mode', 'running', 'initializing');"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to create session" "session"
+        return 1
+    fi
+
+    log_info "Session started: $session_id" "session"
     echo "$session_id"
 }
 
 # End the current session
+# Args: [status], [exit_reason]
 end_session() {
     local status="${1:-completed}"
     local exit_reason="${2:-Success}"
 
-    sqlite3 "$DB_FILE" "
-        UPDATE sessions
-        SET status = '$status',
-            exit_reason = '$exit_reason',
+    # Validate status
+    if ! validate_status "$status"; then
+        status="completed"  # Default to safe value
+    fi
+
+    local esc_status esc_reason
+    esc_status=$(sql_escape "$status")
+    esc_reason=$(sql_escape "$exit_reason")
+
+    local query="UPDATE sessions
+        SET status = '$esc_status',
+            exit_reason = '$esc_reason',
             ended_at = CURRENT_TIMESTAMP
-        WHERE status = 'running';
-    "
+        WHERE status = 'running';"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to end session" "session"
+        return 1
+    fi
+
+    log_info "Session ended: $status - $exit_reason" "session"
 }
 
 # Get current session ID
+# Returns: session_id or empty string if none running
 get_current_session_id() {
-    _ensure_db
-    sqlite3 "$DB_FILE" "SELECT id FROM sessions WHERE status = 'running' ORDER BY started_at DESC LIMIT 1;"
+    ensure_db || return 1
+
+    local result
+    result=$(sql_exec "SELECT id FROM sessions WHERE status = 'running' ORDER BY started_at DESC LIMIT 1;")
+    echo "$result"
 }
 
 # Check if a session is running
+# Returns: 0 if running, 1 otherwise
 is_session_running() {
     local count
-    count=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM sessions WHERE status = 'running';")
-    [ "$count" -gt 0 ]
+    count=$(sql_exec "SELECT COUNT(*) FROM sessions WHERE status = 'running';")
+    [ "${count:-0}" -gt 0 ]
 }
 
 # Get session as JSON
+# Args: [session_id]
 get_session_json() {
-    local session_id="${1:-$(get_current_session_id)}"
-    sqlite3 -json "$DB_FILE" "SELECT * FROM sessions WHERE id = '$session_id';"
+    local session_id="${1:-}"
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_warn "No session ID provided or found" "session"
+        echo "[]"
+        return 0
+    fi
+
+    # Validate session ID format
+    if ! validate_session_id "$session_id"; then
+        echo "[]"
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+    sql_exec_json "SELECT * FROM sessions WHERE id = '$esc_id';"
 }
 
 # ============================================================================
-# STATE GETTERS
+# STATE GETTERS (with validation)
 # ============================================================================
 
 # Get a specific session field
+# Args: field, [session_id]
+# SECURITY: Field name is validated against whitelist
 get_state() {
     local field="$1"
-    local session_id="${2:-$(get_current_session_id)}"
-    sqlite3 "$DB_FILE" "SELECT $field FROM sessions WHERE id = '$session_id';"
+    local session_id="${2:-}"
+
+    # Validate field name against whitelist
+    if ! validate_field_name "$field"; then
+        return 1
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_debug "No active session" "state"
+        return 0
+    fi
+
+    # Validate session ID
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+    sql_exec "SELECT $field FROM sessions WHERE id = '$esc_id';"
 }
 
 # Get current phase
@@ -103,12 +186,16 @@ get_current_model() {
 
 # Get current iteration
 get_current_iteration() {
-    get_state "current_iteration"
+    local result
+    result=$(get_state "current_iteration")
+    echo "${result:-0}"
 }
 
 # Get consecutive failures
 get_consecutive_failures() {
-    get_state "consecutive_failures"
+    local result
+    result=$(get_state "consecutive_failures")
+    echo "${result:-0}"
 }
 
 # Get execution mode
@@ -131,77 +218,211 @@ is_bug_council_active() {
 }
 
 # ============================================================================
-# STATE SETTERS
+# STATE SETTERS (with validation)
 # ============================================================================
 
 # Set a specific session field
+# Args: field, value, [session_id]
+# SECURITY: Field name is validated, value is escaped
 set_state() {
     local field="$1"
     local value="$2"
-    local session_id="${3:-$(get_current_session_id)}"
+    local session_id="${3:-}"
 
-    sqlite3 "$DB_FILE" "
-        UPDATE sessions
-        SET $field = '$value'
-        WHERE id = '$session_id';
-    "
+    # Validate field name
+    if ! validate_field_name "$field"; then
+        return 1
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "state"
+        return 1
+    fi
+
+    # Validate session ID
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_value esc_id
+    esc_value=$(sql_escape "$value")
+    esc_id=$(sql_escape "$session_id")
+
+    local query="UPDATE sessions SET $field = '$esc_value' WHERE id = '$esc_id';"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to set state: $field" "state"
+        return 1
+    fi
+
+    log_debug "Set $field = $value" "state"
 }
 
-# Set current phase
+# Set current phase (with validation)
 set_phase() {
-    set_state "current_phase" "$1"
+    local phase="$1"
+
+    if ! validate_phase "$phase"; then
+        return 1
+    fi
+
+    set_state "current_phase" "$phase"
 }
 
 # Set current agent
 set_current_agent() {
-    set_state "current_agent" "$1"
+    local agent="$1"
+
+    if [ -z "$agent" ]; then
+        log_error "Agent name cannot be empty" "state"
+        return 1
+    fi
+
+    set_state "current_agent" "$agent"
 }
 
-# Set current model
+# Set current model (with validation)
 set_current_model() {
-    set_state "current_model" "$1"
+    local model="$1"
+
+    if ! validate_model "$model"; then
+        return 1
+    fi
+
+    set_state "current_model" "$model"
 }
 
 # Increment iteration
+# Args: [session_id]
 increment_iteration() {
-    local session_id="${1:-$(get_current_session_id)}"
-    sqlite3 "$DB_FILE" "
-        UPDATE sessions
-        SET current_iteration = current_iteration + 1
-        WHERE id = '$session_id';
-    "
+    local session_id="${1:-}"
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "state"
+        return 1
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+
+    local query="UPDATE sessions SET current_iteration = current_iteration + 1 WHERE id = '$esc_id';"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to increment iteration" "state"
+        return 1
+    fi
+
+    log_debug "Iteration incremented" "state"
 }
 
 # Increment consecutive failures
 increment_failures() {
-    local session_id="${1:-$(get_current_session_id)}"
-    sqlite3 "$DB_FILE" "
-        UPDATE sessions
-        SET consecutive_failures = consecutive_failures + 1
-        WHERE id = '$session_id';
-    "
+    local session_id="${1:-}"
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "state"
+        return 1
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+
+    local query="UPDATE sessions SET consecutive_failures = consecutive_failures + 1 WHERE id = '$esc_id';"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to increment failures" "state"
+        return 1
+    fi
+
+    log_debug "Consecutive failures incremented" "state"
 }
 
 # Reset consecutive failures
 reset_failures() {
-    local session_id="${1:-$(get_current_session_id)}"
-    sqlite3 "$DB_FILE" "
-        UPDATE sessions
-        SET consecutive_failures = 0
-        WHERE id = '$session_id';
-    "
+    local session_id="${1:-}"
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "state"
+        return 1
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+
+    local query="UPDATE sessions SET consecutive_failures = 0 WHERE id = '$esc_id';"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to reset failures" "state"
+        return 1
+    fi
+
+    log_debug "Consecutive failures reset" "state"
 }
 
 # Activate bug council
+# Args: reason, [session_id]
 activate_bug_council() {
     local reason="$1"
-    local session_id="${2:-$(get_current_session_id)}"
-    sqlite3 "$DB_FILE" "
-        UPDATE sessions
-        SET bug_council_activated = TRUE,
-            bug_council_reason = '$reason'
-        WHERE id = '$session_id';
-    "
+    local session_id="${2:-}"
+
+    if [ -z "$reason" ]; then
+        log_error "Bug council reason cannot be empty" "state"
+        return 1
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "state"
+        return 1
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_reason esc_id
+    esc_reason=$(sql_escape "$reason")
+    esc_id=$(sql_escape "$session_id")
+
+    local query="UPDATE sessions SET bug_council_activated = TRUE, bug_council_reason = '$esc_reason' WHERE id = '$esc_id';"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to activate bug council" "state"
+        return 1
+    fi
+
+    log_info "Bug council activated: $reason" "state"
 }
 
 # ============================================================================
@@ -209,29 +430,112 @@ activate_bug_council() {
 # ============================================================================
 
 # Set a key-value pair
+# Args: key, value, [session_id]
 set_kv_state() {
     local key="$1"
     local value="$2"
-    local session_id="${3:-$(get_current_session_id)}"
+    local session_id="${3:-}"
 
-    sqlite3 "$DB_FILE" "
-        INSERT OR REPLACE INTO session_state (session_id, key, value, updated_at)
-        VALUES ('$session_id', '$key', '$value', CURRENT_TIMESTAMP);
-    "
+    if [ -z "$key" ]; then
+        log_error "Key cannot be empty" "kv"
+        return 1
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "kv"
+        return 1
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_key esc_value esc_id
+    esc_key=$(sql_escape "$key")
+    esc_value=$(sql_escape "$value")
+    esc_id=$(sql_escape "$session_id")
+
+    local query="INSERT OR REPLACE INTO session_state (session_id, key, value, updated_at)
+        VALUES ('$esc_id', '$esc_key', '$esc_value', CURRENT_TIMESTAMP);"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to set KV state: $key" "kv"
+        return 1
+    fi
+
+    log_debug "KV set: $key" "kv"
 }
 
 # Get a key-value pair
+# Args: key, [session_id]
 get_kv_state() {
     local key="$1"
-    local session_id="${2:-$(get_current_session_id)}"
-    sqlite3 "$DB_FILE" "SELECT value FROM session_state WHERE session_id = '$session_id' AND key = '$key';"
+    local session_id="${2:-}"
+
+    if [ -z "$key" ]; then
+        log_error "Key cannot be empty" "kv"
+        return 1
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        return 0  # No session, return empty
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_key esc_id
+    esc_key=$(sql_escape "$key")
+    esc_id=$(sql_escape "$session_id")
+
+    sql_exec "SELECT value FROM session_state WHERE session_id = '$esc_id' AND key = '$esc_key';"
 }
 
 # Delete a key-value pair
+# Args: key, [session_id]
 delete_kv_state() {
     local key="$1"
-    local session_id="${2:-$(get_current_session_id)}"
-    sqlite3 "$DB_FILE" "DELETE FROM session_state WHERE session_id = '$session_id' AND key = '$key';"
+    local session_id="${2:-}"
+
+    if [ -z "$key" ]; then
+        log_error "Key cannot be empty" "kv"
+        return 1
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "kv"
+        return 1
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_key esc_id
+    esc_key=$(sql_escape "$key")
+    esc_id=$(sql_escape "$session_id")
+
+    local query="DELETE FROM session_state WHERE session_id = '$esc_id' AND key = '$esc_key';"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to delete KV state: $key" "kv"
+        return 1
+    fi
+
+    log_debug "KV deleted: $key" "kv"
 }
 
 # ============================================================================
@@ -239,32 +543,87 @@ delete_kv_state() {
 # ============================================================================
 
 # Add tokens to session total
+# Args: tokens_input, tokens_output, cost_cents, [session_id]
 add_tokens() {
     local tokens_input="$1"
     local tokens_output="$2"
     local cost_cents="$3"
-    local session_id="${4:-$(get_current_session_id)}"
+    local session_id="${4:-}"
 
-    sqlite3 "$DB_FILE" "
-        UPDATE sessions
+    # Validate numeric inputs
+    if ! validate_numeric "$tokens_input" "tokens_input"; then
+        return 1
+    fi
+    if ! validate_numeric "$tokens_output" "tokens_output"; then
+        return 1
+    fi
+    if ! validate_decimal "$cost_cents" "cost_cents"; then
+        return 1
+    fi
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "cost"
+        return 1
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+
+    local query="UPDATE sessions
         SET total_tokens_input = total_tokens_input + $tokens_input,
             total_tokens_output = total_tokens_output + $tokens_output,
             total_cost_cents = total_cost_cents + $cost_cents
-        WHERE id = '$session_id';
-    "
+        WHERE id = '$esc_id';"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to add tokens" "cost"
+        return 1
+    fi
+
+    log_debug "Added tokens: +$tokens_input input, +$tokens_output output, +$cost_cents cents" "cost"
 }
 
 # Get total cost in dollars
+# Args: [session_id]
 get_total_cost_dollars() {
-    local session_id="${1:-$(get_current_session_id)}"
-    sqlite3 "$DB_FILE" "SELECT ROUND(total_cost_cents / 100.0, 4) FROM sessions WHERE id = '$session_id';"
+    local session_id="${1:-}"
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        echo "0.0000"
+        return 0
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        echo "0.0000"
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+    sql_exec "SELECT ROUND(total_cost_cents / 100.0, 4) FROM sessions WHERE id = '$esc_id';"
 }
 
 # ============================================================================
 # CIRCUIT BREAKER
 # ============================================================================
 
+# Circuit breaker threshold constant
+readonly CIRCUIT_BREAKER_DEFAULT_THRESHOLD=5
+
 # Check if circuit breaker should trip
+# Returns: 0 if should trip, 1 otherwise
 should_trip_circuit_breaker() {
     local failures
     local max_failures
@@ -272,18 +631,23 @@ should_trip_circuit_breaker() {
     failures=$(get_consecutive_failures)
     max_failures=$(get_state "max_consecutive_failures")
 
-    [ "$failures" -ge "$max_failures" ]
+    # Use default if not set
+    max_failures="${max_failures:-$CIRCUIT_BREAKER_DEFAULT_THRESHOLD}"
+
+    [ "${failures:-0}" -ge "${max_failures:-$CIRCUIT_BREAKER_DEFAULT_THRESHOLD}" ]
 }
 
 # Trip the circuit breaker
 trip_circuit_breaker() {
     set_state "circuit_breaker_state" "open"
+    log_warn "Circuit breaker tripped!" "circuit"
 }
 
 # Reset the circuit breaker
 reset_circuit_breaker() {
     set_state "circuit_breaker_state" "closed"
     reset_failures
+    log_info "Circuit breaker reset" "circuit"
 }
 
 # ============================================================================
@@ -291,34 +655,74 @@ reset_circuit_breaker() {
 # ============================================================================
 
 # Get next model tier
+# Args: current_model
+# Returns: next model in escalation chain
 get_next_model() {
     local current="$1"
     case "$current" in
         haiku)  echo "sonnet" ;;
         sonnet) echo "opus" ;;
         opus)   echo "bug_council" ;;
-        *)      echo "sonnet" ;;
+        *)      echo "sonnet" ;;  # Default fallback
+    esac
+}
+
+# Get previous model tier (for de-escalation)
+# Args: current_model
+get_previous_model() {
+    local current="$1"
+    case "$current" in
+        opus)        echo "sonnet" ;;
+        sonnet)      echo "haiku" ;;
+        bug_council) echo "opus" ;;
+        *)           echo "haiku" ;;  # Default fallback
     esac
 }
 
 # Record escalation
+# Args: from_model, to_model, reason, [agent], [session_id]
 record_escalation() {
     local from_model="$1"
     local to_model="$2"
     local reason="$3"
     local agent="${4:-}"
-    local session_id="${5:-$(get_current_session_id)}"
+    local session_id="${5:-}"
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        log_error "No active session" "escalation"
+        return 1
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
 
     local iteration
     iteration=$(get_current_iteration)
 
-    sqlite3 "$DB_FILE" "
-        INSERT INTO escalations (session_id, from_model, to_model, reason, agent, iteration)
-        VALUES ('$session_id', '$from_model', '$to_model', '$reason', '$agent', $iteration);
-    "
+    local esc_from esc_to esc_reason esc_agent esc_id
+    esc_from=$(sql_escape "$from_model")
+    esc_to=$(sql_escape "$to_model")
+    esc_reason=$(sql_escape "$reason")
+    esc_agent=$(sql_escape "$agent")
+    esc_id=$(sql_escape "$session_id")
+
+    local query="INSERT INTO escalations (session_id, from_model, to_model, reason, agent, iteration)
+        VALUES ('$esc_id', '$esc_from', '$esc_to', '$esc_reason', '$esc_agent', ${iteration:-0});"
+
+    if ! sql_exec "$query" > /dev/null; then
+        log_error "Failed to record escalation" "escalation"
+        return 1
+    fi
 
     # Update current model
     set_current_model "$to_model"
+
+    log_info "Escalated: $from_model -> $to_model ($reason)" "escalation"
 }
 
 # ============================================================================
@@ -326,17 +730,33 @@ record_escalation() {
 # ============================================================================
 
 # Set active plan
+# Args: plan_id, [session_id]
 set_active_plan() {
     local plan_id="$1"
-    local session_id="${2:-$(get_current_session_id)}"
+    local session_id="${2:-}"
+
+    if [ -z "$plan_id" ]; then
+        log_error "Plan ID cannot be empty" "plan"
+        return 1
+    fi
+
     set_state "plan_id" "$plan_id" "$session_id"
+    log_info "Active plan set: $plan_id" "plan"
 }
 
 # Set active sprint
+# Args: sprint_id, [session_id]
 set_active_sprint() {
     local sprint_id="$1"
-    local session_id="${2:-$(get_current_session_id)}"
+    local session_id="${2:-}"
+
+    if [ -z "$sprint_id" ]; then
+        log_error "Sprint ID cannot be empty" "plan"
+        return 1
+    fi
+
     set_state "sprint_id" "$sprint_id" "$session_id"
+    log_info "Active sprint set: $sprint_id" "plan"
 }
 
 # ============================================================================
@@ -344,28 +764,79 @@ set_active_sprint() {
 # ============================================================================
 
 # Get session summary (for status display)
+# Args: [session_id]
 get_session_summary() {
-    local session_id="${1:-$(get_current_session_id)}"
-    sqlite3 -json "$DB_FILE" "SELECT * FROM v_session_summary WHERE id = '$session_id';"
+    local session_id="${1:-}"
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        echo "[]"
+        return 0
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        echo "[]"
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+    sql_exec_json "SELECT * FROM v_session_summary WHERE id = '$esc_id';"
 }
 
 # Get model usage for session
+# Args: [session_id]
 get_model_usage() {
-    local session_id="${1:-$(get_current_session_id)}"
-    sqlite3 -column -header "$DB_FILE" "SELECT * FROM v_model_usage WHERE session_id = '$session_id';"
+    local session_id="${1:-}"
+
+    if [ -z "$session_id" ]; then
+        session_id=$(get_current_session_id)
+    fi
+
+    if [ -z "$session_id" ]; then
+        return 0
+    fi
+
+    if ! validate_session_id "$session_id"; then
+        return 1
+    fi
+
+    local esc_id
+    esc_id=$(sql_escape "$session_id")
+    sql_exec_table "SELECT * FROM v_model_usage WHERE session_id = '$esc_id';"
 }
 
 # Abort current session
+# Args: [reason]
 abort_session() {
     local reason="${1:-User aborted}"
     end_session "aborted" "$reason"
 }
 
 # Check max iterations
+# Returns: 0 if max reached, 1 otherwise
 is_max_iterations_reached() {
     local current
     local max
+
     current=$(get_current_iteration)
     max=$(get_state "max_iterations")
-    [ "$current" -ge "$max" ]
+
+    # Use reasonable default
+    max="${max:-50}"
+
+    [ "${current:-0}" -ge "${max:-50}" ]
 }
+
+# ============================================================================
+# INITIALIZATION
+# ============================================================================
+
+# Set up error handling when script is sourced
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    # Script is being sourced, set up error trap
+    setup_error_trap
+fi

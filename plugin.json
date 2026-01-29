@@ -1,7 +1,7 @@
 {
   "name": "devteam",
-  "version": "3.0.0",
-  "description": "89-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
+  "version": "3.1.0",
+  "description": "91-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [
@@ -70,6 +70,46 @@
       "category": "orchestration"
     },
     {
+      "id": "orchestration:sprint-orchestrator",
+      "name": "Sprint Orchestrator",
+      "description": "Manages entire sprint execution and coordinates task orchestrator",
+      "file": "agents/orchestration/sprint-orchestrator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:task-orchestrator",
+      "name": "Task Orchestrator",
+      "description": "Coordinates specialized agents for single task execution",
+      "file": "agents/orchestration/task-orchestrator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:requirements-validator",
+      "name": "Requirements Validator",
+      "description": "Quality gate with strict acceptance criteria validation",
+      "file": "agents/orchestration/requirements-validator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:track-merger",
+      "name": "Track Merger",
+      "description": "Intelligently merges parallel development tracks using git worktrees",
+      "file": "agents/orchestration/track-merger.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:workflow-compliance",
+      "name": "Workflow Compliance",
+      "description": "Validates that orchestrators followed their required workflows and generated all mandatory artifacts",
+      "file": "agents/orchestration/workflow-compliance.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
       "id": "diagnosis:root-cause-analyst",
       "name": "Root Cause Analyst",
       "description": "Bug Council member - Error analysis, hypothesis generation, causal chains",
@@ -110,54 +150,6 @@
       "category": "diagnosis"
     },
     {
-      "id": "quality:refactoring-agent",
-      "name": "Refactoring Agent",
-      "description": "Dedicated code restructuring, technical debt reduction, and codebase improvements",
-      "file": "agents/quality/refactoring-agent.md",
-      "model": "sonnet",
-      "category": "quality"
-    },
-    {
-      "id": "orchestration:sprint-orchestrator",
-      "name": "Sprint Orchestrator",
-      "description": "Manages entire sprint execution and coordinates task orchestrator",
-      "file": "agents/orchestration/sprint-orchestrator.md",
-      "model": "opus",
-      "category": "orchestration"
-    },
-    {
-      "id": "orchestration:task-orchestrator",
-      "name": "Task Orchestrator",
-      "description": "Coordinates specialized agents for single task with T1/T2 escalation",
-      "file": "agents/orchestration/task-orchestrator.md",
-      "model": "opus",
-      "category": "orchestration"
-    },
-    {
-      "id": "orchestration:requirements-validator",
-      "name": "Requirements Validator",
-      "description": "Quality gate with strict acceptance criteria validation",
-      "file": "agents/orchestration/requirements-validator.md",
-      "model": "opus",
-      "category": "orchestration"
-    },
-    {
-      "id": "orchestration:track-merger",
-      "name": "Track Merger",
-      "description": "Intelligently merges parallel development tracks using git worktrees",
-      "file": "agents/orchestration/track-merger.md",
-      "model": "opus",
-      "category": "orchestration"
-    },
-    {
-      "id": "orchestration:workflow-compliance",
-      "name": "Workflow Compliance",
-      "description": "Validates that orchestrators followed their required workflows and generated all mandatory artifacts",
-      "file": "agents/orchestration/workflow-compliance.md",
-      "model": "opus",
-      "category": "orchestration"
-    },
-    {
       "id": "database:designer",
       "name": "Database Designer",
       "description": "Designs normalized database schemas (language-agnostic)",
@@ -166,130 +158,60 @@
       "category": "database"
     },
     {
-      "id": "database:developer-python-t1",
-      "name": "Database Developer Python T1",
-      "description": "Implements SQLAlchemy models and Alembic migrations (cost-optimized)",
-      "file": "agents/database/database-developer-python-t1.md",
+      "id": "database:developer-python",
+      "name": "Database Developer Python",
+      "description": "Implements SQLAlchemy models and Alembic migrations",
+      "file": "agents/database/database-developer-python.md",
       "model": "sonnet",
-      "category": "database",
-      "tier": "t1"
+      "category": "database"
     },
     {
-      "id": "database:developer-python-t2",
-      "name": "Database Developer Python T2",
-      "description": "Implements SQLAlchemy models and Alembic migrations (enhanced quality)",
-      "file": "agents/database/database-developer-python-t2.md",
-      "model": "opus",
-      "category": "database",
-      "tier": "t2"
-    },
-    {
-      "id": "database:developer-typescript-t1",
-      "name": "Database Developer TypeScript T1",
-      "description": "Implements Prisma/TypeORM models and migrations (cost-optimized)",
-      "file": "agents/database/database-developer-typescript-t1.md",
+      "id": "database:developer-typescript",
+      "name": "Database Developer TypeScript",
+      "description": "Implements Prisma/TypeORM models and migrations",
+      "file": "agents/database/database-developer-typescript.md",
       "model": "sonnet",
-      "category": "database",
-      "tier": "t1"
+      "category": "database"
     },
     {
-      "id": "database:developer-typescript-t2",
-      "name": "Database Developer TypeScript T2",
-      "description": "Implements Prisma/TypeORM models and migrations (enhanced quality)",
-      "file": "agents/database/database-developer-typescript-t2.md",
-      "model": "opus",
-      "category": "database",
-      "tier": "t2"
-    },
-    {
-      "id": "database:developer-java-t1",
-      "name": "Database Developer Java T1",
-      "description": "Implements JPA/Hibernate models and Flyway migrations (cost-optimized)",
-      "file": "agents/database/database-developer-java-t1.md",
+      "id": "database:developer-java",
+      "name": "Database Developer Java",
+      "description": "Implements JPA/Hibernate models and Flyway migrations",
+      "file": "agents/database/database-developer-java.md",
       "model": "sonnet",
-      "category": "database",
-      "tier": "t1"
+      "category": "database"
     },
     {
-      "id": "database:developer-java-t2",
-      "name": "Database Developer Java T2",
-      "description": "Implements JPA/Hibernate models and Flyway migrations (enhanced quality)",
-      "file": "agents/database/database-developer-java-t2.md",
-      "model": "opus",
-      "category": "database",
-      "tier": "t2"
-    },
-    {
-      "id": "database:developer-csharp-t1",
-      "name": "Database Developer C# T1",
-      "description": "Implements Entity Framework models and migrations (cost-optimized)",
-      "file": "agents/database/database-developer-csharp-t1.md",
+      "id": "database:developer-csharp",
+      "name": "Database Developer C#",
+      "description": "Implements Entity Framework models and migrations",
+      "file": "agents/database/database-developer-csharp.md",
       "model": "sonnet",
-      "category": "database",
-      "tier": "t1"
+      "category": "database"
     },
     {
-      "id": "database:developer-csharp-t2",
-      "name": "Database Developer C# T2",
-      "description": "Implements Entity Framework models and migrations (enhanced quality)",
-      "file": "agents/database/database-developer-csharp-t2.md",
-      "model": "opus",
-      "category": "database",
-      "tier": "t2"
-    },
-    {
-      "id": "database:developer-go-t1",
-      "name": "Database Developer Go T1",
-      "description": "Implements GORM models and migrations (cost-optimized)",
-      "file": "agents/database/database-developer-go-t1.md",
+      "id": "database:developer-go",
+      "name": "Database Developer Go",
+      "description": "Implements GORM models and migrations",
+      "file": "agents/database/database-developer-go.md",
       "model": "sonnet",
-      "category": "database",
-      "tier": "t1"
+      "category": "database"
     },
     {
-      "id": "database:developer-go-t2",
-      "name": "Database Developer Go T2",
-      "description": "Implements GORM models and migrations (enhanced quality)",
-      "file": "agents/database/database-developer-go-t2.md",
-      "model": "opus",
-      "category": "database",
-      "tier": "t2"
-    },
-    {
-      "id": "database:developer-ruby-t1",
-      "name": "Database Developer Ruby T1",
-      "description": "Implements ActiveRecord models and migrations (cost-optimized)",
-      "file": "agents/database/database-developer-ruby-t1.md",
+      "id": "database:developer-ruby",
+      "name": "Database Developer Ruby",
+      "description": "Implements ActiveRecord models and migrations",
+      "file": "agents/database/database-developer-ruby.md",
       "model": "sonnet",
-      "category": "database",
-      "tier": "t1"
+      "category": "database"
     },
     {
-      "id": "database:developer-ruby-t2",
-      "name": "Database Developer Ruby T2",
-      "description": "Implements ActiveRecord models and migrations (enhanced quality)",
-      "file": "agents/database/database-developer-ruby-t2.md",
-      "model": "opus",
-      "category": "database",
-      "tier": "t2"
-    },
-    {
-      "id": "database:developer-php-t1",
-      "name": "Database Developer PHP T1",
-      "description": "Implements Doctrine/Eloquent models and migrations (cost-optimized)",
-      "file": "agents/database/database-developer-php-t1.md",
+      "id": "database:developer-php",
+      "name": "Database Developer PHP",
+      "description": "Implements Doctrine/Eloquent models and migrations",
+      "file": "agents/database/database-developer-php.md",
       "model": "sonnet",
-      "category": "database",
-      "tier": "t1"
-    },
-    {
-      "id": "database:developer-php-t2",
-      "name": "Database Developer PHP T2",
-      "description": "Implements Doctrine/Eloquent models and migrations (enhanced quality)",
-      "file": "agents/database/database-developer-php-t2.md",
-      "model": "opus",
-      "category": "database",
-      "tier": "t2"
+      "category": "database"
     },
     {
       "id": "backend:api-designer",
@@ -300,40 +222,60 @@
       "category": "backend"
     },
     {
-      "id": "backend:api-developer-python-t1",
-      "name": "API Developer Python T1",
-      "description": "Implements FastAPI/Django endpoints (cost-optimized)",
-      "file": "agents/backend/api-developer-python-t1.md",
+      "id": "backend:api-developer-python",
+      "name": "API Developer Python",
+      "description": "Implements FastAPI/Django endpoints",
+      "file": "agents/backend/api-developer-python.md",
       "model": "sonnet",
-      "category": "backend",
-      "tier": "t1"
+      "category": "backend"
     },
     {
-      "id": "backend:api-developer-python-t2",
-      "name": "API Developer Python T2",
-      "description": "Implements FastAPI/Django endpoints (enhanced quality)",
-      "file": "agents/backend/api-developer-python-t2.md",
-      "model": "opus",
-      "category": "backend",
-      "tier": "t2"
-    },
-    {
-      "id": "backend:api-developer-typescript-t1",
-      "name": "API Developer TypeScript T1",
-      "description": "Implements Express/NestJS endpoints (cost-optimized)",
-      "file": "agents/backend/api-developer-typescript-t1.md",
+      "id": "backend:api-developer-typescript",
+      "name": "API Developer TypeScript",
+      "description": "Implements Express/NestJS endpoints",
+      "file": "agents/backend/api-developer-typescript.md",
       "model": "sonnet",
-      "category": "backend",
-      "tier": "t1"
+      "category": "backend"
     },
     {
-      "id": "backend:api-developer-typescript-t2",
-      "name": "API Developer TypeScript T2",
-      "description": "Implements Express/NestJS endpoints (enhanced quality)",
-      "file": "agents/backend/api-developer-typescript-t2.md",
-      "model": "opus",
-      "category": "backend",
-      "tier": "t2"
+      "id": "backend:api-developer-java",
+      "name": "API Developer Java",
+      "description": "Implements Spring Boot REST APIs",
+      "file": "agents/backend/api-developer-java.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-csharp",
+      "name": "API Developer C#",
+      "description": "Implements ASP.NET Core REST APIs",
+      "file": "agents/backend/api-developer-csharp.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-go",
+      "name": "API Developer Go",
+      "description": "Implements Go REST APIs with Gin/Echo",
+      "file": "agents/backend/api-developer-go.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-ruby",
+      "name": "API Developer Ruby",
+      "description": "Implements Ruby on Rails REST APIs",
+      "file": "agents/backend/api-developer-ruby.md",
+      "model": "sonnet",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-developer-php",
+      "name": "API Developer PHP",
+      "description": "Implements Laravel/Symfony REST APIs",
+      "file": "agents/backend/api-developer-php.md",
+      "model": "sonnet",
+      "category": "backend"
     },
     {
       "id": "backend:code-reviewer-python",
@@ -352,48 +294,12 @@
       "category": "backend"
     },
     {
-      "id": "backend:api-developer-java-t1",
-      "name": "API Developer Java T1",
-      "description": "Implements Spring Boot REST APIs (cost-optimized)",
-      "file": "agents/backend/api-developer-java-t1.md",
-      "model": "sonnet",
-      "category": "backend",
-      "tier": "t1"
-    },
-    {
-      "id": "backend:api-developer-java-t2",
-      "name": "API Developer Java T2",
-      "description": "Implements Spring Boot REST APIs (enhanced quality)",
-      "file": "agents/backend/api-developer-java-t2.md",
-      "model": "opus",
-      "category": "backend",
-      "tier": "t2"
-    },
-    {
       "id": "backend:code-reviewer-java",
       "name": "Backend Code Reviewer Java",
       "description": "Reviews Java backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-java.md",
       "model": "opus",
       "category": "backend"
-    },
-    {
-      "id": "backend:api-developer-csharp-t1",
-      "name": "API Developer C# T1",
-      "description": "Implements ASP.NET Core REST APIs (cost-optimized)",
-      "file": "agents/backend/api-developer-csharp-t1.md",
-      "model": "sonnet",
-      "category": "backend",
-      "tier": "t1"
-    },
-    {
-      "id": "backend:api-developer-csharp-t2",
-      "name": "API Developer C# T2",
-      "description": "Implements ASP.NET Core REST APIs (enhanced quality)",
-      "file": "agents/backend/api-developer-csharp-t2.md",
-      "model": "opus",
-      "category": "backend",
-      "tier": "t2"
     },
     {
       "id": "backend:code-reviewer-csharp",
@@ -404,24 +310,6 @@
       "category": "backend"
     },
     {
-      "id": "backend:api-developer-go-t1",
-      "name": "API Developer Go T1",
-      "description": "Implements Go REST APIs with Gin/Echo (cost-optimized)",
-      "file": "agents/backend/api-developer-go-t1.md",
-      "model": "sonnet",
-      "category": "backend",
-      "tier": "t1"
-    },
-    {
-      "id": "backend:api-developer-go-t2",
-      "name": "API Developer Go T2",
-      "description": "Implements Go REST APIs with Gin/Echo (enhanced quality)",
-      "file": "agents/backend/api-developer-go-t2.md",
-      "model": "opus",
-      "category": "backend",
-      "tier": "t2"
-    },
-    {
       "id": "backend:code-reviewer-go",
       "name": "Backend Code Reviewer Go",
       "description": "Reviews Go backend code for quality and security",
@@ -430,48 +318,12 @@
       "category": "backend"
     },
     {
-      "id": "backend:api-developer-ruby-t1",
-      "name": "API Developer Ruby T1",
-      "description": "Implements Ruby on Rails REST APIs (cost-optimized)",
-      "file": "agents/backend/api-developer-ruby-t1.md",
-      "model": "sonnet",
-      "category": "backend",
-      "tier": "t1"
-    },
-    {
-      "id": "backend:api-developer-ruby-t2",
-      "name": "API Developer Ruby T2",
-      "description": "Implements Ruby on Rails REST APIs (enhanced quality)",
-      "file": "agents/backend/api-developer-ruby-t2.md",
-      "model": "opus",
-      "category": "backend",
-      "tier": "t2"
-    },
-    {
       "id": "backend:code-reviewer-ruby",
       "name": "Backend Code Reviewer Ruby",
       "description": "Reviews Ruby backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-ruby.md",
       "model": "opus",
       "category": "backend"
-    },
-    {
-      "id": "backend:api-developer-php-t1",
-      "name": "API Developer PHP T1",
-      "description": "Implements Laravel/Symfony REST APIs (cost-optimized)",
-      "file": "agents/backend/api-developer-php-t1.md",
-      "model": "sonnet",
-      "category": "backend",
-      "tier": "t1"
-    },
-    {
-      "id": "backend:api-developer-php-t2",
-      "name": "API Developer PHP T2",
-      "description": "Implements Laravel/Symfony REST APIs (enhanced quality)",
-      "file": "agents/backend/api-developer-php-t2.md",
-      "model": "opus",
-      "category": "backend",
-      "tier": "t2"
     },
     {
       "id": "backend:code-reviewer-php",
@@ -490,22 +342,12 @@
       "category": "frontend"
     },
     {
-      "id": "frontend:developer-t1",
-      "name": "Frontend Developer T1",
-      "description": "Implements React/Vue components (cost-optimized)",
-      "file": "agents/frontend/frontend-developer-t1.md",
+      "id": "frontend:developer",
+      "name": "Frontend Developer",
+      "description": "Implements React/Vue components",
+      "file": "agents/frontend/frontend-developer.md",
       "model": "sonnet",
-      "category": "frontend",
-      "tier": "t1"
-    },
-    {
-      "id": "frontend:developer-t2",
-      "name": "Frontend Developer T2",
-      "description": "Implements React/Vue components (enhanced quality)",
-      "file": "agents/frontend/frontend-developer-t2.md",
-      "model": "opus",
-      "category": "frontend",
-      "tier": "t2"
+      "category": "frontend"
     },
     {
       "id": "frontend:code-reviewer",
@@ -516,90 +358,52 @@
       "category": "frontend"
     },
     {
-      "id": "python:developer-generic-t1",
-      "name": "Python Developer Generic T1",
-      "description": "Implements Python utilities, scripts, CLI tools (cost-optimized)",
-      "file": "agents/python/python-developer-generic-t1.md",
+      "id": "python:developer-generic",
+      "name": "Python Developer Generic",
+      "description": "Implements Python utilities, scripts, CLI tools",
+      "file": "agents/python/python-developer-generic.md",
       "model": "sonnet",
-      "category": "python",
-      "tier": "t1"
+      "category": "python"
     },
     {
-      "id": "python:developer-generic-t2",
-      "name": "Python Developer Generic T2",
-      "description": "Implements Python utilities, scripts, CLI tools (enhanced quality)",
-      "file": "agents/python/python-developer-generic-t2.md",
-      "model": "opus",
-      "category": "python",
-      "tier": "t2"
-    },
-    {
-      "id": "quality:test-writer",
-      "name": "Test Writer",
-      "description": "Creates comprehensive test suites (unit, integration, e2e)",
-      "file": "agents/quality/test-writer.md",
-      "model": "opus",
-      "category": "quality"
-    },
-    {
-      "id": "quality:security-auditor",
-      "name": "Security Auditor",
-      "description": "Performs security audits and vulnerability scanning",
-      "file": "agents/quality/security-auditor.md",
-      "model": "opus",
-      "category": "quality"
-    },
-    {
-      "id": "quality:documentation-coordinator",
-      "name": "Documentation Coordinator",
-      "description": "Creates and maintains technical documentation",
-      "file": "agents/quality/documentation-coordinator.md",
-      "model": "opus",
-      "category": "quality"
-    },
-    {
-      "id": "quality:runtime-verifier",
-      "name": "Runtime Verifier",
-      "description": "Verifies applications launch successfully and documents manual runtime testing steps",
-      "file": "agents/quality/runtime-verifier.md",
-      "model": "opus",
-      "category": "quality"
-    },
-    {
-      "id": "scripting:powershell-developer-t1",
-      "name": "PowerShell Developer T1",
-      "description": "Implements PowerShell scripts and automation (cost-optimized)",
-      "file": "agents/scripting/powershell-developer-t1.md",
+      "id": "scripting:powershell-developer",
+      "name": "PowerShell Developer",
+      "description": "Implements PowerShell scripts and automation",
+      "file": "agents/scripting/powershell-developer.md",
       "model": "sonnet",
-      "category": "scripting",
-      "tier": "t1"
+      "category": "scripting"
     },
     {
-      "id": "scripting:powershell-developer-t2",
-      "name": "PowerShell Developer T2",
-      "description": "Implements PowerShell scripts and automation (enhanced quality)",
-      "file": "agents/scripting/powershell-developer-t2.md",
-      "model": "opus",
-      "category": "scripting",
-      "tier": "t2"
-    },
-    {
-      "id": "scripting:shell-developer-t1",
-      "name": "Shell Developer T1",
-      "description": "Implements Bash/shell scripts and automation (cost-optimized)",
-      "file": "agents/scripting/shell-developer-t1.md",
+      "id": "scripting:shell-developer",
+      "name": "Shell Developer",
+      "description": "Implements Bash/shell scripts and automation",
+      "file": "agents/scripting/shell-developer.md",
       "model": "sonnet",
-      "category": "scripting",
-      "tier": "t1"
+      "category": "scripting"
     },
     {
-      "id": "scripting:shell-developer-t2",
-      "name": "Shell Developer T2",
-      "description": "Implements Bash/shell scripts and automation (enhanced quality)",
-      "file": "agents/scripting/shell-developer-t2.md",
-      "model": "opus",
-      "category": "scripting",
-      "tier": "t2"
+      "id": "infrastructure:configuration-manager",
+      "name": "Configuration Manager",
+      "description": "Manages configuration files and environment setup",
+      "file": "agents/infrastructure/configuration-manager.md",
+      "model": "sonnet",
+      "category": "infrastructure"
+    },
+    {
+      "id": "mobile:ios-developer",
+      "name": "iOS Developer",
+      "description": "Implements iOS apps with Swift/SwiftUI",
+      "file": "agents/mobile/ios-developer.md",
+      "model": "sonnet",
+      "category": "mobile"
+    },
+    {
+      "id": "mobile:android-developer",
+      "name": "Android Developer",
+      "description": "Implements Android apps with Kotlin/Jetpack Compose",
+      "file": "agents/mobile/android-developer.md",
+      "model": "sonnet",
+      "category": "mobile"
     },
     {
       "id": "devops:docker-specialist",
@@ -634,58 +438,52 @@
       "category": "devops"
     },
     {
-      "id": "infrastructure:configuration-manager-t1",
-      "name": "Configuration Manager T1",
-      "description": "Manages configuration files and environment setup (cost-optimized)",
-      "file": "agents/infrastructure/configuration-manager-t1.md",
+      "id": "quality:refactoring-agent",
+      "name": "Refactoring Agent",
+      "description": "Dedicated code restructuring, technical debt reduction, and codebase improvements",
+      "file": "agents/quality/refactoring-agent.md",
       "model": "sonnet",
-      "category": "infrastructure",
-      "tier": "t1"
+      "category": "quality"
     },
     {
-      "id": "infrastructure:configuration-manager-t2",
-      "name": "Configuration Manager T2",
-      "description": "Manages configuration files and environment setup (enhanced quality)",
-      "file": "agents/infrastructure/configuration-manager-t2.md",
+      "id": "quality:test-writer",
+      "name": "Test Writer",
+      "description": "Creates comprehensive test suites (unit, integration, e2e)",
+      "file": "agents/quality/test-writer.md",
       "model": "opus",
-      "category": "infrastructure",
-      "tier": "t2"
+      "category": "quality"
     },
     {
-      "id": "mobile:ios-developer-t1",
-      "name": "iOS Developer T1",
-      "description": "Implements iOS apps with Swift/SwiftUI (cost-optimized)",
-      "file": "agents/mobile/ios-developer-t1.md",
-      "model": "sonnet",
-      "category": "mobile",
-      "tier": "t1"
-    },
-    {
-      "id": "mobile:ios-developer-t2",
-      "name": "iOS Developer T2",
-      "description": "Implements iOS apps with Swift/SwiftUI (enhanced quality)",
-      "file": "agents/mobile/ios-developer-t2.md",
+      "id": "quality:security-auditor",
+      "name": "Security Auditor",
+      "description": "Performs security audits and vulnerability scanning",
+      "file": "agents/quality/security-auditor.md",
       "model": "opus",
-      "category": "mobile",
-      "tier": "t2"
+      "category": "quality"
     },
     {
-      "id": "mobile:android-developer-t1",
-      "name": "Android Developer T1",
-      "description": "Implements Android apps with Kotlin/Jetpack Compose (cost-optimized)",
-      "file": "agents/mobile/android-developer-t1.md",
-      "model": "sonnet",
-      "category": "mobile",
-      "tier": "t1"
-    },
-    {
-      "id": "mobile:android-developer-t2",
-      "name": "Android Developer T2",
-      "description": "Implements Android apps with Kotlin/Jetpack Compose (enhanced quality)",
-      "file": "agents/mobile/android-developer-t2.md",
+      "id": "quality:documentation-coordinator",
+      "name": "Documentation Coordinator",
+      "description": "Creates and maintains technical documentation",
+      "file": "agents/quality/documentation-coordinator.md",
       "model": "opus",
-      "category": "mobile",
-      "tier": "t2"
+      "category": "quality"
+    },
+    {
+      "id": "quality:runtime-verifier",
+      "name": "Runtime Verifier",
+      "description": "Verifies applications launch successfully and documents manual runtime testing steps",
+      "file": "agents/quality/runtime-verifier.md",
+      "model": "opus",
+      "category": "quality"
+    },
+    {
+      "id": "quality:e2e-tester",
+      "name": "E2E Tester",
+      "description": "End-to-end testing with browser automation and comprehensive UI coverage",
+      "file": "agents/quality/e2e-tester.md",
+      "model": "opus",
+      "category": "quality"
     },
     {
       "id": "quality:performance-auditor-python",
@@ -742,6 +540,182 @@
       "file": "agents/quality/performance-auditor-php.md",
       "model": "opus",
       "category": "quality"
+    },
+    {
+      "id": "architecture:architect",
+      "name": "Architect",
+      "description": "High-level system architecture and design decisions",
+      "file": "agents/architecture/architect.md",
+      "model": "opus",
+      "category": "architecture"
+    },
+    {
+      "id": "architecture:tech-lead",
+      "name": "Tech Lead",
+      "description": "Technical leadership, code standards, and team guidance",
+      "file": "agents/architecture/tech-lead.md",
+      "model": "opus",
+      "category": "architecture"
+    },
+    {
+      "id": "data-ai:data-engineer",
+      "name": "Data Engineer",
+      "description": "Data pipelines, ETL processes, and data architecture",
+      "file": "agents/data-ai/data-engineer.md",
+      "model": "opus",
+      "category": "data-ai"
+    },
+    {
+      "id": "data-ai:ml-engineer",
+      "name": "ML Engineer",
+      "description": "Machine learning models, training pipelines, and ML infrastructure",
+      "file": "agents/data-ai/ml-engineer.md",
+      "model": "opus",
+      "category": "data-ai"
+    },
+    {
+      "id": "security:compliance-engineer",
+      "name": "Compliance Engineer",
+      "description": "Security compliance, auditing, and regulatory requirements",
+      "file": "agents/security/compliance-engineer.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "security:penetration-tester",
+      "name": "Penetration Tester",
+      "description": "Security testing, vulnerability assessment, and ethical hacking",
+      "file": "agents/security/penetration-tester.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "sre:site-reliability-engineer",
+      "name": "Site Reliability Engineer",
+      "description": "System reliability, monitoring, and incident response",
+      "file": "agents/sre/site-reliability-engineer.md",
+      "model": "opus",
+      "category": "sre"
+    },
+    {
+      "id": "sre:platform-engineer",
+      "name": "Platform Engineer",
+      "description": "Platform infrastructure, developer experience, and tooling",
+      "file": "agents/sre/platform-engineer.md",
+      "model": "opus",
+      "category": "sre"
+    },
+    {
+      "id": "specialized:observability-engineer",
+      "name": "Observability Engineer",
+      "description": "Logging, monitoring, tracing, and observability infrastructure",
+      "file": "agents/specialized/observability-engineer.md",
+      "model": "opus",
+      "category": "specialized"
+    },
+    {
+      "id": "accessibility:accessibility-specialist",
+      "name": "Accessibility Specialist",
+      "description": "WCAG compliance, accessibility auditing, and inclusive design",
+      "file": "agents/accessibility/accessibility-specialist.md",
+      "model": "opus",
+      "category": "accessibility"
+    },
+    {
+      "id": "product:product-manager",
+      "name": "Product Manager",
+      "description": "Product strategy, requirements gathering, and stakeholder communication",
+      "file": "agents/product/product-manager.md",
+      "model": "opus",
+      "category": "product"
+    },
+    {
+      "id": "devrel:developer-advocate",
+      "name": "Developer Advocate",
+      "description": "Developer documentation, tutorials, and community engagement",
+      "file": "agents/devrel/developer-advocate.md",
+      "model": "opus",
+      "category": "devrel"
+    },
+    {
+      "id": "support:refactoring-specialist",
+      "name": "Refactoring Specialist",
+      "description": "Large-scale refactoring, code modernization, and technical debt reduction",
+      "file": "agents/support/refactoring-specialist.md",
+      "model": "opus",
+      "category": "support"
+    },
+    {
+      "id": "support:dependency-manager",
+      "name": "Dependency Manager",
+      "description": "Dependency updates, security patches, and version management",
+      "file": "agents/support/dependency-manager.md",
+      "model": "sonnet",
+      "category": "support"
+    },
+    {
+      "id": "ux:design-system-orchestrator",
+      "name": "Design System Orchestrator",
+      "description": "Coordinates design system implementation and consistency",
+      "file": "agents/ux/design-system-orchestrator.md",
+      "model": "opus",
+      "category": "ux"
+    },
+    {
+      "id": "ux:design-system-architect",
+      "name": "Design System Architect",
+      "description": "Designs scalable design system architecture and token systems",
+      "file": "agents/ux/design-system-architect.md",
+      "model": "opus",
+      "category": "ux"
+    },
+    {
+      "id": "ux:data-visualization-designer",
+      "name": "Data Visualization Designer",
+      "description": "Charts, graphs, and data visualization components",
+      "file": "agents/ux/data-visualization-designer.md",
+      "model": "opus",
+      "category": "ux"
+    },
+    {
+      "id": "ux:color-palette-specialist",
+      "name": "Color Palette Specialist",
+      "description": "Color theory, palette generation, and accessibility compliance",
+      "file": "agents/ux/color-palette-specialist.md",
+      "model": "sonnet",
+      "category": "ux"
+    },
+    {
+      "id": "ux:typography-specialist",
+      "name": "Typography Specialist",
+      "description": "Typography systems, font selection, and type hierarchy",
+      "file": "agents/ux/typography-specialist.md",
+      "model": "sonnet",
+      "category": "ux"
+    },
+    {
+      "id": "ux:ui-style-curator",
+      "name": "UI Style Curator",
+      "description": "UI component styling and visual consistency",
+      "file": "agents/ux/ui-style-curator.md",
+      "model": "sonnet",
+      "category": "ux"
+    },
+    {
+      "id": "ux:design-drift-detector",
+      "name": "Design Drift Detector",
+      "description": "Detects design inconsistencies and drift from design system",
+      "file": "agents/ux/design-drift-detector.md",
+      "model": "sonnet",
+      "category": "ux"
+    },
+    {
+      "id": "ux:design-compliance-validator",
+      "name": "Design Compliance Validator",
+      "description": "Validates design system compliance and brand guidelines",
+      "file": "agents/ux/design-compliance-validator.md",
+      "model": "opus",
+      "category": "ux"
     }
   ],
   "commands": [

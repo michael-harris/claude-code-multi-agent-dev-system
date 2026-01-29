@@ -2,13 +2,16 @@
 # DevTeam Database Initialization
 # Creates and initializes the SQLite database if it doesn't exist
 
-set -e
+set -euo pipefail
 
 # Configuration
 DEVTEAM_DIR="${DEVTEAM_DIR:-.devteam}"
 DB_FILE="${DEVTEAM_DIR}/devteam.db"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCHEMA_FILE="${SCRIPT_DIR}/schema.sql"
+
+# Current schema version - increment when schema changes
+SCHEMA_VERSION="1"
 
 # Colors for output
 RED='\033[0;31m'
@@ -47,8 +50,38 @@ ensure_devteam_dir() {
     fi
 }
 
+# Execute SQL with foreign keys enabled
+sql_exec() {
+    sqlite3 "$DB_FILE" "PRAGMA foreign_keys = ON; $1"
+}
+
+# Get current schema version from database
+get_db_schema_version() {
+    if [ ! -f "$DB_FILE" ]; then
+        echo "0"
+        return
+    fi
+
+    # Check if schema_version table exists
+    local table_exists
+    table_exists=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='schema_version';" 2>/dev/null || echo "0")
+
+    if [ "$table_exists" = "0" ]; then
+        echo "0"
+        return
+    fi
+
+    # Get the version
+    local version
+    version=$(sqlite3 "$DB_FILE" "SELECT version FROM schema_version ORDER BY applied_at DESC LIMIT 1;" 2>/dev/null || echo "0")
+    echo "${version:-0}"
+}
+
 # Initialize database
 init_database() {
+    local current_version
+    current_version=$(get_db_schema_version)
+
     if [ ! -f "$DB_FILE" ]; then
         log_info "Initializing DevTeam database..."
 
@@ -57,19 +90,53 @@ init_database() {
             exit 1
         fi
 
-        sqlite3 "$DB_FILE" < "$SCHEMA_FILE"
-        log_info "Database created: $DB_FILE"
-    else
-        # Check if we need to run migrations
-        local current_version
-        current_version=$(sqlite3 "$DB_FILE" "SELECT value FROM session_state WHERE key='schema_version' LIMIT 1" 2>/dev/null || echo "0")
-
-        if [ "$current_version" = "0" ]; then
-            log_info "Database exists, checking schema..."
-            # Re-run schema to add any missing tables (IF NOT EXISTS handles this safely)
-            sqlite3 "$DB_FILE" < "$SCHEMA_FILE" 2>/dev/null || true
+        # Create database with schema
+        if ! sqlite3 "$DB_FILE" < "$SCHEMA_FILE"; then
+            log_error "Failed to create database schema"
+            exit 1
         fi
+
+        # Enable foreign keys and set schema version
+        sql_exec "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+        sql_exec "INSERT INTO schema_version (version) VALUES ($SCHEMA_VERSION);"
+
+        log_info "Database created: $DB_FILE (schema v$SCHEMA_VERSION)"
+    elif [ "$current_version" = "0" ]; then
+        log_info "Database exists but no schema version, updating..."
+
+        # Create schema version table
+        sql_exec "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+
+        # Re-run schema to add any missing tables (IF NOT EXISTS handles this safely)
+        if ! sqlite3 "$DB_FILE" < "$SCHEMA_FILE"; then
+            log_error "Failed to update database schema"
+            exit 1
+        fi
+
+        sql_exec "INSERT OR REPLACE INTO schema_version (version) VALUES ($SCHEMA_VERSION);"
+        log_info "Schema updated to v$SCHEMA_VERSION"
+    elif [ "$current_version" -lt "$SCHEMA_VERSION" ]; then
+        log_info "Database schema upgrade needed: v$current_version → v$SCHEMA_VERSION"
+        run_migrations "$current_version"
+    else
+        log_info "Database schema is current (v$current_version)"
     fi
+}
+
+# Run migrations from current version to target version
+run_migrations() {
+    local from_version="$1"
+
+    # Add migration scripts here as needed
+    # Example:
+    # if [ "$from_version" -lt 2 ]; then
+    #     log_info "Running migration v1 → v2..."
+    #     sql_exec "ALTER TABLE sessions ADD COLUMN new_field TEXT;"
+    # fi
+
+    # Update schema version
+    sql_exec "INSERT OR REPLACE INTO schema_version (version) VALUES ($SCHEMA_VERSION);"
+    log_info "Migrations complete, now at v$SCHEMA_VERSION"
 }
 
 # Verify database integrity
