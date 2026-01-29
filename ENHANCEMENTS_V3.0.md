@@ -208,6 +208,21 @@ After (clear):
 - Escalation history
 - Quality gate results
 
+### Automatic Worktree Management
+
+Git worktrees for parallel track isolation are now **fully automatic**:
+
+- **Auto-create**: Worktrees are created when executing multi-track plans
+- **Auto-merge**: When all tracks complete, merges happen automatically
+- **Auto-cleanup**: Worktrees are removed after successful merge
+- **Hidden from users**: Users never need to interact with worktrees directly
+
+For debugging, use `--show-worktrees` flag or debug commands:
+```bash
+/devteam:implement --sprint 1 --show-worktrees  # See worktree operations
+/devteam:worktree-status                        # Debug: View worktree state
+```
+
 ### Cross-Platform Support
 
 All scripts now support both Linux/macOS (Bash) and Windows (PowerShell):
@@ -319,6 +334,8 @@ New configuration sections in `.devteam/ralph-config.yaml`:
 - Cross-platform PowerShell support
 - Cost tracking and analytics
 - Session history and queryable events
+- **Automatic worktree management** - Worktrees are created, merged, and cleaned up automatically
+- `--show-worktrees` debug flag for viewing worktree operations
 
 ### Changed
 - `/devteam:auto` → `/devteam:implement`
@@ -326,6 +343,7 @@ New configuration sections in `.devteam/ralph-config.yaml`:
 - State management from YAML to SQLite
 - Plugin version 2.5.0 → 3.0.0
 - Agent count 76 → 89
+- Worktree commands moved to debug category (auto-managed by default)
 
 ### Removed
 - `/devteam:auto` command (use `/devteam:implement`)

@@ -792,23 +792,27 @@
     },
     {
       "name": "/devteam:merge-tracks",
-      "description": "Merge parallel development tracks back to main branch",
-      "file": "commands/merge-tracks.md"
+      "description": "[Debug] Manually merge parallel tracks (auto-merge is default)",
+      "file": "commands/merge-tracks.md",
+      "category": "debug"
     },
     {
       "name": "/devteam:worktree-status",
-      "description": "Show detailed status of all development track worktrees",
-      "file": "commands/worktree-status.md"
+      "description": "[Debug] Show worktree status for troubleshooting",
+      "file": "commands/worktree-status.md",
+      "category": "debug"
     },
     {
       "name": "/devteam:worktree-cleanup",
-      "description": "Manually clean up development track worktrees",
-      "file": "commands/worktree-cleanup.md"
+      "description": "[Debug] Manually clean up worktrees if auto-cleanup failed",
+      "file": "commands/worktree-cleanup.md",
+      "category": "debug"
     },
     {
       "name": "/devteam:worktree-list",
-      "description": "List all git worktrees with track information",
-      "file": "commands/worktree-list.md"
+      "description": "[Debug] List all git worktrees for troubleshooting",
+      "file": "commands/worktree-list.md",
+      "category": "debug"
     }
   ]
 }

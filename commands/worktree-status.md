@@ -1,12 +1,14 @@
 # Worktree Status Command
 
-**Expert Command** - Shows detailed status of all development track worktrees.
+**Debug/Expert Command** - Shows detailed status of all development track worktrees.
+
+> **Note:** This command is rarely needed. Worktrees are managed automatically by `/devteam:implement`. Use this only for debugging worktree issues.
 
 ## Command Usage
 
 ```bash
-/multi-agent:worktree status         # Show all worktree status
-/multi-agent:worktree status 01      # Show status for specific track
+/devteam:worktree status         # Show all worktree status
+/devteam:worktree status 01      # Show status for specific track
 ```
 
 ## Your Process
@@ -119,9 +121,9 @@ Warnings:
 ⚠️  Track 2: Uncommitted changes (commit before merge)
 
 Next steps:
-  Track 2: /multi-agent:sprint all 02
-  Track 3: /multi-agent:sprint all 03
-  After all complete: /multi-agent:merge-tracks
+  Track 2: /devteam:implement --sprint all 02
+  Track 3: /devteam:implement --sprint all 03
+  After all complete: /devteam:merge-tracks
 ```
 
 **For specific track:**
@@ -177,7 +179,7 @@ Ready for merge:
 ⚠️  Not pushed (recommended before merge)
 
 When ready:
-  /multi-agent:merge-tracks
+  /devteam:merge-tracks
 ```
 
 ## Error Handling

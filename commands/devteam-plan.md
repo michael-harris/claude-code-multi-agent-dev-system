@@ -662,6 +662,40 @@ Next steps:
   3. Or run /devteam:implement --sprint 1 for first sprint only
 ```
 
+## Parallel Track Planning
+
+When a project has independent feature areas that can be developed in parallel, the planner automatically organizes work into **parallel tracks**.
+
+### Automatic Worktree Configuration
+
+When multiple tracks are planned, worktrees are configured automatically in the state:
+
+```yaml
+# In state database
+parallel_tracks:
+  mode: worktrees  # Automatically set for multi-track plans
+  track_info:
+    01:
+      name: "Backend API"
+      sprints: [SPRINT-001, SPRINT-002]
+      status: pending
+    02:
+      name: "Frontend"
+      sprints: [SPRINT-003, SPRINT-004]
+      status: pending
+```
+
+**Note:** Users never need to interact with worktrees directly. The system handles:
+- Creation of worktrees when execution begins
+- Isolation of track work in separate directories
+- Automatic merging when all tracks complete
+- Cleanup of worktrees after merge
+
+For debugging worktree issues, advanced users can use:
+- `/devteam:worktree status` - View worktree state
+- `/devteam:worktree list` - List all worktrees
+- `/devteam:implement --show-worktrees` - See worktree operations during execution
+
 ## Important Notes
 
 - Ask ONE question at a time
@@ -670,6 +704,7 @@ Next steps:
 - Don't generate files until you have all required information
 - Initialize state in database for progress tracking
 - Research phase prevents costly discoveries during implementation
+- Parallel tracks are automatically managed with git worktrees (hidden from users)
 
 ## See Also
 

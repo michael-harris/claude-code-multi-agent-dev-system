@@ -1,15 +1,19 @@
 # Merge Tracks Command
 
+**Debug/Expert Command** - Manually merge parallel development tracks.
+
+> **Note:** This command is rarely needed. Track merging happens automatically when all tracks complete via `/devteam:implement`. Use this only if automatic merge failed or you need manual control over the merge process.
+
 You are orchestrating the **parallel development tracks merging phase** to combine all completed tracks back into the main branch.
 
 ## Command Usage
 
 ```bash
-/multi-agent:merge-tracks                      # Merge all tracks, create PR, cleanup worktrees (default)
-/multi-agent:merge-tracks --manual-merge       # Merge all tracks, skip PR, cleanup worktrees
-/multi-agent:merge-tracks --keep-worktrees     # Merge, create PR, keep worktrees
-/multi-agent:merge-tracks --delete-branches    # Merge, create PR, cleanup worktrees & branches
-/multi-agent:merge-tracks --dry-run            # Show what would be merged without doing it
+/devteam:merge-tracks                      # Merge all tracks, create PR, cleanup worktrees (default)
+/devteam:merge-tracks --manual-merge       # Merge all tracks, skip PR, cleanup worktrees
+/devteam:merge-tracks --keep-worktrees     # Merge, create PR, keep worktrees
+/devteam:merge-tracks --delete-branches    # Merge, create PR, cleanup worktrees & branches
+/devteam:merge-tracks --dry-run            # Show what would be merged without doing it
 ```
 
 **Flags:**
@@ -46,7 +50,7 @@ Extract flags from command:
    ```python
    if state.parallel_tracks.mode != "worktrees":
        error("This project was not planned with worktrees. Nothing to merge.")
-       suggest("/multi-agent:sprint all  # All work already in main branch")
+       suggest("/devteam:implement --sprint all  # All work already in main branch")
        exit(1)
    ```
 
@@ -60,7 +64,7 @@ Extract flags from command:
 
    if incomplete_tracks:
        error(f"Cannot merge: Tracks {incomplete_tracks} not complete")
-       suggest(f"/multi-agent:sprint all {incomplete_tracks[0]:02d}  # Complete remaining tracks")
+       suggest(f"/devteam:implement --sprint all {incomplete_tracks[0]:02d}  # Complete remaining tracks")
        exit(1)
    ```
 
@@ -123,7 +127,7 @@ After merge:
 - Delete branches: NO (use --delete-branches to enable)
 
 To proceed with merge:
-/multi-agent:merge-tracks
+/devteam:merge-tracks
 ```
 
 Exit without merging.
@@ -261,7 +265,7 @@ To resolve:
 1. Edit the conflicted files manually
 2. Run tests to verify
 3. Commit the resolution: git commit
-4. Re-run: /multi-agent:merge-tracks
+4. Re-run: /devteam:merge-tracks
 
 Backup available: pre-merge-backup-20251103-153000
 ```
@@ -276,10 +280,10 @@ Track 2 status: 1/2 sprints complete
 Track 3 status: 0/2 sprints complete
 
 Complete all tracks before merging:
-/multi-agent:sprint all 02
-/multi-agent:sprint all 03
+/devteam:implement --sprint all 02
+/devteam:implement --sprint all 03
 
-Then retry: /multi-agent:merge-tracks
+Then retry: /devteam:merge-tracks
 ```
 
 **Not worktree mode:**
@@ -290,7 +294,7 @@ Your project uses state-only mode for track separation.
 All work is already in the main branch - no merge needed.
 
 Project is complete! Run final review if needed:
-/multi-agent:sprint all
+/devteam:implement --sprint all
 ```
 
 **Uncommitted changes:**
@@ -303,7 +307,7 @@ git status
 git add .
 git commit -m "Final changes before merge"
 
-Then retry: /multi-agent:merge-tracks
+Then retry: /devteam:merge-tracks
 ```
 
 ## Important Notes

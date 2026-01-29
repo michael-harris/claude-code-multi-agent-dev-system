@@ -47,6 +47,7 @@ Execute implementation work - plans, sprints, tasks, or ad-hoc work.
 | `--type <type>` | Specify task type: feature, bug, security, refactor, docs |
 | `--model <model>` | Force starting model: haiku, sonnet, opus |
 | `--max-iterations <n>` | Override max iterations (default: 10) |
+| `--show-worktrees` | Debug: Show worktree operations (normally hidden) |
 
 ## Your Process
 
@@ -298,6 +299,157 @@ Recommendation: Review the issues above and either:
 EXIT_SIGNAL: true
 `)
 ```
+
+## Automatic Worktree Management
+
+**Worktrees are fully automatic.** Users never need to interact with worktrees directly - the system creates, uses, merges, and cleans them up transparently.
+
+### When Worktrees Are Created
+
+Worktrees are automatically created when:
+- A plan has multiple parallel tracks (detected from state file)
+- The plan was designed with `parallel_tracks.mode: "worktrees"` in state
+
+```javascript
+// Auto-detect and create worktrees at execution start
+async function initializeExecution(plan) {
+    const parallelTracks = plan.parallel_tracks?.track_info
+
+    if (parallelTracks && Object.keys(parallelTracks).length > 1) {
+        // Multiple tracks - use worktrees for isolation
+        for (const [trackId, trackInfo] of Object.entries(parallelTracks)) {
+            const worktreePath = `.multi-agent/track-${trackId}`
+            const branchName = `dev-track-${trackId}`
+
+            if (!existsSync(worktreePath)) {
+                // Create worktree silently
+                await exec(`git worktree add ${worktreePath} -b ${branchName}`)
+                log_event('worktree_created', { track: trackId, path: worktreePath })
+            }
+        }
+    }
+}
+```
+
+### Worktree Isolation During Execution
+
+Each track's sprints execute in their isolated worktree:
+
+```javascript
+async function executeTrackSprint(trackId, sprintId) {
+    const worktreePath = `.multi-agent/track-${trackId}`
+
+    // Change to worktree directory for all operations
+    process.chdir(worktreePath)
+
+    try {
+        await executeSprint(sprintId)
+
+        // Auto-commit progress
+        await exec('git add -A')
+        await exec(`git commit -m "Complete ${sprintId} in track ${trackId}"`)
+
+        // Auto-push for backup (silent failure ok)
+        await exec(`git push -u origin dev-track-${trackId}`)
+    } finally {
+        // Return to main repo
+        process.chdir(mainRepoPath)
+    }
+}
+```
+
+### Automatic Merge on Completion
+
+When all tracks are complete, auto-merge occurs:
+
+```javascript
+async function checkAndAutoMerge() {
+    const state = loadState()
+    const tracks = state.parallel_tracks?.track_info
+
+    if (!tracks) return  // Single track, no merge needed
+
+    // Check if all tracks complete
+    const allComplete = Object.values(tracks).every(t => t.status === 'completed')
+
+    if (allComplete) {
+        console.log('All tracks complete - auto-merging...')
+
+        // Merge each track sequentially
+        for (const trackId of Object.keys(tracks).sort()) {
+            const branchName = `dev-track-${trackId}`
+
+            // Merge with descriptive commit
+            await exec(`git merge ${branchName} -m "Merge track ${trackId}: ${tracks[trackId].name}"`)
+
+            log_event('track_merged', { track: trackId })
+        }
+
+        // Auto-cleanup worktrees
+        await cleanupWorktrees()
+
+        log_event('all_tracks_merged', { count: Object.keys(tracks).length })
+    }
+}
+```
+
+### Automatic Cleanup
+
+After successful merge, worktrees are removed automatically:
+
+```javascript
+async function cleanupWorktrees() {
+    const worktreeDir = '.multi-agent'
+
+    // Get all worktrees
+    const worktrees = await exec('git worktree list --porcelain')
+
+    for (const worktree of parseWorktrees(worktrees)) {
+        if (worktree.path.includes('.multi-agent')) {
+            // Remove worktree (keeps branch for history)
+            await exec(`git worktree remove ${worktree.path}`)
+            log_event('worktree_removed', { path: worktree.path })
+        }
+    }
+
+    // Remove .multi-agent directory if empty
+    if (existsSync(worktreeDir) && readdirSync(worktreeDir).length === 0) {
+        rmdirSync(worktreeDir)
+    }
+}
+```
+
+### Debug Flag
+
+For advanced users who want to see worktree operations:
+
+```bash
+/devteam:implement --sprint 1 --show-worktrees
+```
+
+This displays:
+```
+═══════════════════════════════════════════════════
+ Worktree Operations (debug mode)
+═══════════════════════════════════════════════════
+
+Track 01: .multi-agent/track-01 (dev-track-01)
+  ✅ Worktree exists
+  📍 Current commit: abc123
+
+Track 02: .multi-agent/track-02 (dev-track-02)
+  ✅ Worktree exists
+  📍 Current commit: def456
+
+Executing in: .multi-agent/track-01
+```
+
+### Important Notes
+
+- **Users never need to run worktree commands** - everything is automatic
+- Worktrees are created in `.multi-agent/` (gitignored)
+- Branches are kept after merge for history (use `--delete-branches` in debug commands to remove)
+- If something goes wrong, use `/devteam:worktree status` for diagnostics
 
 ## Sprint Execution
 
