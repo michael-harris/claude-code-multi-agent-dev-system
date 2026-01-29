@@ -24,43 +24,90 @@ plan_selection:
   if_explicit_plan:
     action: use_specified_plan
 
-  # Check active plan pointer
-  if_active_plan_set:
-    action: use_active_plan
+  # Single plan exists → execute automatically
+  if_single_plan:
+    action: execute_immediately
+    message: "Executing: {plan_name}"
 
-  # Auto-select if only one actionable plan
-  if_one_actionable_plan:
-    # Actionable = status in [planned, in_progress]
-    action: auto_select_and_notify
-    message: "Auto-selected: {plan_name} (only actionable plan)"
+  # Multiple plans exist → list and let user choose
+  if_multiple_plans:
+    action: list_plans_and_prompt
+    display: detailed_plan_list
+    message: "Multiple plans exist. Select one to execute:"
 
-  # Multiple actionable plans - prompt user
-  if_multiple_actionable:
-    action: prompt_user
-    display: plan_selection_table
-    message: "Multiple plans available. Please select one:"
-
-  # No actionable plans
-  if_no_actionable:
+  # No plans exist
+  if_no_plans:
     action: error
     message: "No plans to execute. Create one with /devteam:plan"
 ```
 
-### User Prompt for Multiple Plans
+### Single Plan → Auto-Execute
 
 ```
-⚠️  Multiple plans available. Please select one:
+/devteam:auto
 
-┌──────────────────────────────────────────────────────────────┐
-│ #  │ Name                 │ Type    │ Status      │ Progress │
-├──────────────────────────────────────────────────────────────┤
-│ 1  │ Task Manager App     │ project │ ✅ complete │ 5/5      │
-│ 2  │ Push Notifications   │ feature │ 🔄 active   │ 1/2      │
-│ 3  │ Dark Mode Support    │ feature │ 📋 planned  │ 0/1      │
-└──────────────────────────────────────────────────────────────┘
+✅ Executing: Task Manager App
 
-Enter number to execute, or use: /devteam:auto --plan <name>
->
+🚀 Autonomous Mode Activated
+...
+```
+
+### Multiple Plans → List and Choose
+
+When multiple plans exist, display detailed information:
+
+```
+/devteam:auto
+
+📋 Multiple plans exist. Select one to execute:
+
+═══════════════════════════════════════════════════════════════
+ 1. Task Manager App (project)
+═══════════════════════════════════════════════════════════════
+    Status: ✅ Complete
+    Progress: 5/5 sprints, 23/23 tasks
+    Created: 2025-01-20
+    Description: Full-stack task management application with
+                 user auth, task CRUD, and team collaboration.
+
+═══════════════════════════════════════════════════════════════
+ 2. Push Notifications (feature)
+═══════════════════════════════════════════════════════════════
+    Status: 🔄 In Progress
+    Progress: 1/2 sprints, 4/8 tasks
+    Created: 2025-01-25
+    Current: SPRINT-002, TASK-005 (FCM integration)
+    Description: Add push notification support for task
+                 reminders and team mentions.
+
+═══════════════════════════════════════════════════════════════
+ 3. Dark Mode Support (feature)
+═══════════════════════════════════════════════════════════════
+    Status: 📋 Planned
+    Progress: 0/1 sprints, 0/4 tasks
+    Created: 2025-01-28
+    Description: Add dark mode theme with system preference
+                 detection and manual toggle.
+
+───────────────────────────────────────────────────────────────
+Enter number to execute (1-3): _
+
+Or use: /devteam:auto --plan <name>
+```
+
+### After Selection
+
+Once user selects a plan:
+
+```
+Enter number to execute (1-3): 2
+
+✅ Selected: Push Notifications
+
+Resuming from: SPRINT-002, TASK-005 (FCM integration)
+
+🚀 Autonomous Mode Activated
+...
 ```
 
 ## Parallel Instance Handling
