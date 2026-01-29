@@ -1,0 +1,420 @@
+# Ralph Configuration
+# Iterative Quality Refinement Loop with Model Escalation
+
+version: "1.0"
+name: "Ralph - Recursive Agent Loop for Polished Handling"
+
+# =============================================================================
+# CORE LOOP SETTINGS
+# =============================================================================
+
+loop_settings:
+  max_iterations: 10
+  iteration_timeout_minutes: 15
+  total_timeout_minutes: 120
+
+# =============================================================================
+# RATE LIMITING (inspired by ralph-claude-code)
+# =============================================================================
+
+rate_limiting:
+  enabled: true
+
+  # API call limits
+  api_limits:
+    calls_per_hour: 100           # Max API calls per hour
+    calls_per_minute: 10          # Burst limit
+    tokens_per_hour: 500000       # Token budget per hour
+
+  # When limits are approached
+  on_approaching_limit:
+    warn_at_percentage: 80        # Warn at 80% of limit
+    throttle_at_percentage: 90    # Slow down at 90%
+    pause_at_percentage: 100      # Pause and wait at 100%
+
+  # Wait behavior when limit hit
+  on_limit_reached:
+    action: wait_and_retry        # Options: wait_and_retry, prompt_user, halt
+    wait_minutes: 5               # Wait time before retry
+    max_waits: 3                  # Max consecutive waits before prompting user
+
+  # Tracking
+  tracking:
+    file: ".devteam/rate-limit-state.json"
+    reset_interval: hourly
+
+  # When to notify user during long-running loops
+  notifications:
+    iteration_warning: 5      # Notify at iteration 5
+    iteration_critical: 8     # Strongly warn at iteration 8
+
+  # Halt conditions
+  halt_conditions:
+    - max_iterations_reached
+    - total_timeout_exceeded
+    - user_interrupt
+    - unrecoverable_error
+    - same_error_3x_consecutive   # Stuck in loop detection
+
+# =============================================================================
+# MODEL ESCALATION RULES
+# =============================================================================
+
+model_escalation:
+  enabled: true
+
+  # Starting model selection based on initial complexity
+  initial_selection:
+    complexity_1_to_4: haiku
+    complexity_5_to_8: sonnet
+    complexity_9_to_14: opus
+
+  # Escalation triggers
+  escalation_rules:
+
+    # Escalate after N consecutive failures by same agent
+    consecutive_failures:
+      haiku_to_sonnet: 2      # After 2 failures, upgrade haiku → sonnet
+      sonnet_to_opus: 2       # After 2 failures, upgrade sonnet → opus
+      opus_max_failures: 3    # After 3 opus failures, halt and report
+
+    # Escalate based on error type
+    error_based_escalation:
+      # Complex reasoning failures
+      - trigger: "logic_error"
+        action: escalate_one_tier
+
+      # Architecture/design issues
+      - trigger: "design_flaw_detected"
+        action: escalate_to_opus
+
+      # Security vulnerabilities keep appearing
+      - trigger: "security_finding_repeat"
+        action: escalate_to_opus
+
+      # Test failures that seem integration-related
+      - trigger: "integration_test_failure"
+        after_iterations: 2
+        action: escalate_one_tier
+
+    # Escalate based on task complexity increase
+    complexity_reassessment:
+      enabled: true
+      check_every_iteration: true
+      # If we discover the task is more complex than initially thought
+      triggers:
+        - files_modified: "> 10"        # More files than expected
+        - cross_boundary: true          # Crosses frontend/backend
+        - new_dependencies: "> 3"       # Lots of new deps needed
+
+  # Escalation tiers
+  tiers:
+    - name: haiku
+      cost_multiplier: 1x
+      best_for: [simple_fixes, documentation, formatting, simple_tests]
+
+    - name: sonnet
+      cost_multiplier: 3x
+      best_for: [standard_features, bug_fixes, refactoring, most_tasks]
+
+    - name: opus
+      cost_multiplier: 15x
+      best_for: [complex_architecture, security_critical, multi_system, debugging_hard_bugs]
+
+  # Track escalation history for reporting
+  tracking:
+    log_all_escalations: true
+    include_in_final_report: true
+    format: |
+      Escalation: {agent} upgraded {from_model} → {to_model}
+      Reason: {reason}
+      Iteration: {iteration}
+
+# =============================================================================
+# QUALITY GATES
+# =============================================================================
+
+quality_gates:
+
+  # Required gates - must pass to complete
+  required:
+    tests_passing:
+      enabled: true
+      threshold: 100%           # All tests must pass
+      on_failure: create_fix_task
+
+    type_check:
+      enabled: true
+      tools: [mypy, tsc, pyright]
+      on_failure: create_fix_task
+
+    lint:
+      enabled: true
+      tools: [eslint, ruff, black]
+      on_failure: create_fix_task
+      # Minor lint issues don't block
+      allow_warnings: true
+      block_on_errors: true
+
+  # Security gates - findings create new iterations
+  security:
+    enabled: true
+
+    vulnerability_scan:
+      on_critical: halt_and_report     # Stop immediately
+      on_high: create_fix_task_priority_1
+      on_medium: create_fix_task
+      on_low: log_to_observations
+
+    security_audit:
+      on_finding: create_fix_task
+      on_recommendation: create_improvement_task
+      # Escalate model if security issues persist
+      escalate_after_iterations: 2
+      escalate_to: opus
+
+  # Optional gates - improve quality but don't block
+  optional:
+    code_coverage:
+      enabled: true
+      threshold: 80%
+      on_below_threshold: create_test_task
+      # Don't iterate forever on coverage
+      max_coverage_iterations: 2
+
+    performance:
+      enabled: false              # Enable per-project
+      threshold_ms: 200
+      on_slow: create_optimization_task
+
+    accessibility:
+      enabled: false              # Enable for frontend projects
+      standard: WCAG_2.1_AA
+      on_violation: create_fix_task
+
+  # Design System Compliance - Auto-enabled when design system exists
+  design_compliance:
+    enabled: auto                   # Enabled when design-system/ detected
+    trigger: "when design_system_exists"
+    priority: high                  # Run before other quality gates
+
+    detection:
+      locations:
+        - "design-system/"
+        - ".design-system/"
+        - "src/design-system/"
+        - "styles/design-system/"
+      required_files:
+        - "MASTER.md"               # Minimum required for design system
+
+    checks:
+      - id: no_hardcoded_colors
+        description: "Detect hardcoded hex colors in frontend code"
+        patterns:
+          - "#[0-9A-Fa-f]{3,8}"
+          - "rgb\\(|rgba\\(|hsl\\("
+        except_in: ["design-system/", "*.config.*", "theme.*", "tailwind.*"]
+        severity: error
+        auto_fix: false
+
+      - id: no_hardcoded_fonts
+        description: "Detect hardcoded font families"
+        patterns:
+          - "font-family:\\s*['\"](?!var)"
+        severity: error
+        auto_fix: false
+
+      - id: no_arbitrary_spacing
+        description: "Detect Tailwind arbitrary spacing values"
+        patterns:
+          - "p-\\[\\d+px\\]|m-\\[\\d+px\\]"
+          - "(padding|margin|gap):\\s*\\d+px"
+        except_values: [0, 1]       # 0 and 1px are acceptable
+        severity: warning
+        auto_fix: true
+        fix_action: "suggest_nearest_scale_value"
+
+      - id: component_spec_match
+        description: "Verify components match design system specs"
+        check_against: "design-system/components/"
+        severity: error
+        auto_fix: false
+
+    on_violation:
+      error:
+        action: block_completion
+        create_fix_task: true
+        assign_to: frontend_developer
+        message: "Design system violations must be fixed before completion"
+
+      warning:
+        action: log_and_suggest
+        create_fix_task: false
+        message: "Consider using design system value"
+
+    in_report:
+      show_violations: true
+      show_suggestions: true
+      link_to_design_docs: true
+
+# =============================================================================
+# AGENT FAILURE HANDLING
+# =============================================================================
+
+failure_handling:
+
+  # What counts as a "failure" for escalation purposes
+  failure_definitions:
+    - tests_still_failing_after_fix
+    - same_error_reoccurs
+    - new_errors_introduced
+    - security_finding_not_resolved
+    - type_errors_remain
+    - agent_reports_stuck
+
+  # Retry strategies before escalation
+  retry_strategies:
+
+    # First retry: Same model, more context
+    retry_1:
+      action: retry_with_more_context
+      additional_context:
+        - include_error_details
+        - include_related_files
+        - include_test_output
+      model: same
+
+    # Second retry: Same model, different approach prompt
+    retry_2:
+      action: retry_with_alternative_approach
+      prompt_modifier: |
+        The previous approach didn't work. Consider:
+        - A different algorithm or pattern
+        - Breaking the problem into smaller pieces
+        - Checking assumptions about the codebase
+      model: same
+
+    # Third retry: Escalate model
+    retry_3:
+      action: escalate_model
+
+    # Fourth retry: Escalate + add supporting agent
+    retry_4:
+      action: escalate_and_add_support
+      support_agents:
+        - systems_thinker       # For architectural issues
+        - root_cause_analyst    # For debugging
+
+  # Stuck loop detection
+  stuck_detection:
+    enabled: true
+    indicators:
+      - same_files_modified_3x
+      - same_test_failing_3x
+      - error_message_unchanged_3x
+    action_on_stuck:
+      - escalate_to_opus
+      - activate_bug_council
+      - notify_user
+
+# =============================================================================
+# MODEL ESCALATION EXAMPLES
+# =============================================================================
+
+# Example escalation scenarios (for documentation)
+escalation_examples:
+
+  scenario_1:
+    description: "Simple test failure escalates after retries"
+    flow:
+      - iteration_1: { agent: test_writer, model: haiku, result: fail }
+      - iteration_2: { agent: test_writer, model: haiku, result: fail }
+      - iteration_3: { agent: test_writer, model: sonnet, result: pass }
+    total_cost: "2x haiku + 1x sonnet"
+
+  scenario_2:
+    description: "Security issue requires opus-level reasoning"
+    flow:
+      - iteration_1: { agent: api_developer_python, model: sonnet, result: complete }
+      - iteration_1: { agent: security_auditor, model: opus, finding: "SQL injection" }
+      - iteration_2: { agent: api_developer_python, model: sonnet, result: incomplete_fix }
+      - iteration_3: { agent: api_developer_python, model: opus, result: complete }
+      - iteration_3: { agent: security_auditor, model: opus, finding: none }
+    escalation_reason: "Security fix required deeper reasoning"
+
+  scenario_3:
+    description: "Bug Council activated after stuck loop"
+    flow:
+      - iteration_1: { agent: api_developer_python, model: sonnet, result: fail }
+      - iteration_2: { agent: api_developer_python, model: sonnet, result: fail }
+      - iteration_3: { agent: api_developer_python, model: opus, result: fail }
+      - iteration_4: { action: activate_bug_council, model: opus }
+      - iteration_5: { agent: bug_council, result: root_cause_found }
+      - iteration_6: { agent: api_developer_python, model: opus, result: pass }
+    escalation_reason: "Stuck loop detected, Bug Council identified architectural issue"
+
+# =============================================================================
+# COST OPTIMIZATION
+# =============================================================================
+
+cost_optimization:
+
+  # Prefer cheaper models when possible
+  default_to_cheapest: true
+
+  # But don't be penny-wise pound-foolish
+  escalate_early_for:
+    - security_tasks
+    - architecture_tasks
+    - tasks_marked_complex
+
+  # De-escalate after success (for subsequent similar tasks)
+  de_escalation:
+    enabled: true
+    after_consecutive_successes: 3
+
+  # Budget awareness
+  budget_tracking:
+    enabled: true
+    warn_at_percentage: 80
+    halt_at_percentage: 100
+
+  # Parallel execution savings
+  parallel_execution:
+    enabled: true
+    # Run cheap validations in parallel
+    parallel_candidates:
+      - [lint, type_check]
+      - [test_writer, security_auditor]
+
+# =============================================================================
+# REPORTING
+# =============================================================================
+
+reporting:
+
+  iteration_summary:
+    show_model_used: true
+    show_escalations: true
+    show_cost_estimate: true
+
+  final_report:
+    include:
+      - total_iterations
+      - model_usage_breakdown
+      - escalation_history
+      - quality_gate_results
+      - files_changed
+      - estimated_cost
+
+  escalation_report_format: |
+    ## Model Escalation Summary
+
+    | Iteration | Agent | Model | Reason | Result |
+    |-----------|-------|-------|--------|--------|
+    {{#each escalations}}
+    | {{iteration}} | {{agent}} | {{from}} → {{to}} | {{reason}} | {{result}} |
+    {{/each}}
+
+    **Total Escalations:** {{escalation_count}}
+    **Cost Impact:** {{cost_impact}}

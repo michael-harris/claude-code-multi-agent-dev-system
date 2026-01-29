@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Optional MCP servers for specific deployment targets and integrations",
+
+  "mcpServers": {
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com",
+      "metadata": {
+        "purpose": "Vercel deployment management",
+        "use_when": "Project deploys to Vercel",
+        "requires": "Vercel account and project"
+      }
+    },
+
+    "railway": {
+      "command": "npx",
+      "args": ["-y", "@railway/mcp-server"],
+      "metadata": {
+        "purpose": "Railway deployment management",
+        "use_when": "Project deploys to Railway",
+        "requires": "Railway account and project"
+      }
+    },
+
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest", "--project-ref", "${SUPABASE_PROJECT_REF}"],
+      "metadata": {
+        "purpose": "Supabase database and auth operations",
+        "use_when": "Project uses Supabase",
+        "requires": "SUPABASE_PROJECT_REF environment variable"
+      }
+    },
+
+    "cloudflare-docs": {
+      "type": "http",
+      "url": "https://docs.mcp.cloudflare.com/mcp",
+      "metadata": {
+        "purpose": "Cloudflare documentation search",
+        "use_when": "Using Cloudflare Workers or Pages"
+      }
+    },
+
+    "cloudflare-workers": {
+      "type": "http",
+      "url": "https://builds.mcp.cloudflare.com/mcp",
+      "metadata": {
+        "purpose": "Cloudflare Workers build management",
+        "use_when": "Deploying to Cloudflare Workers"
+      }
+    },
+
+    "firecrawl": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "metadata": {
+        "purpose": "Web scraping and research",
+        "use_when": "Need to crawl documentation or research websites",
+        "requires": "Firecrawl API key"
+      }
+    },
+
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@context7/mcp-server"],
+      "metadata": {
+        "purpose": "Live documentation lookup",
+        "use_when": "Working with libraries that have Context7 support",
+        "benefits": "Real-time access to latest documentation"
+      }
+    }
+  },
+
+  "deployment_presets": {
+    "vercel_nextjs": {
+      "description": "Next.js app deploying to Vercel",
+      "enable": ["vercel", "lsp-typescript"]
+    },
+    "railway_python": {
+      "description": "Python app deploying to Railway",
+      "enable": ["railway", "lsp-python"]
+    },
+    "supabase_fullstack": {
+      "description": "Full-stack app with Supabase backend",
+      "enable": ["supabase", "lsp-typescript", "lsp-python"]
+    },
+    "cloudflare_workers": {
+      "description": "Cloudflare Workers project",
+      "enable": ["cloudflare-docs", "cloudflare-workers", "lsp-typescript"]
+    }
+  },
+
+  "context_budget": {
+    "warning": "Each MCP server consumes context window tokens",
+    "recommendations": {
+      "max_total_mcps": 10,
+      "max_active_tools": 80,
+      "baseline_cost": "GitHub + Memory ≈ 15k tokens",
+      "lsp_cost_per_language": "5-10k tokens"
+    }
+  }
+}

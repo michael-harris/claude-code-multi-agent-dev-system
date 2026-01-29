@@ -1,0 +1,425 @@
+# DevTeam State File Schema v3.0
+# This file documents the schema for .devteam/state.yaml
+# The actual state file is created per-project
+
+version: "3.0"
+
+# ===========================================
+# METADATA
+# ===========================================
+metadata:
+  type: object
+  required: true
+  properties:
+    created_at:
+      type: string
+      format: iso8601
+      description: When state file was created
+    updated_at:
+      type: string
+      format: iso8601
+      description: Last modification timestamp
+    project_name:
+      type: string
+      description: Name of the project
+    project_type:
+      type: string
+      enum: [project, feature, issue]
+      description: Type of work being tracked
+
+# ===========================================
+# AUTONOMOUS MODE (Ralph Functionality)
+# ===========================================
+autonomous_mode:
+  type: object
+  required: false
+  description: Controls autonomous execution behavior
+  properties:
+    enabled:
+      type: boolean
+      default: false
+      description: Whether autonomous mode is active
+    started_at:
+      type: string
+      format: iso8601
+    max_iterations:
+      type: integer
+      default: 50
+      description: Maximum autonomous loop iterations
+    current_iteration:
+      type: integer
+      default: 0
+
+    circuit_breaker:
+      type: object
+      properties:
+        consecutive_failures:
+          type: integer
+          default: 0
+        max_failures:
+          type: integer
+          default: 5
+        last_failure_point:
+          type: string
+          nullable: true
+          description: Task/sprint where last failure occurred
+        state:
+          type: string
+          enum: [closed, open, half-open]
+          default: closed
+
+    session:
+      type: object
+      properties:
+        memory_file:
+          type: string
+          description: Path to current session memory
+        last_checkpoint:
+          type: string
+          format: iso8601
+
+# ===========================================
+# MODEL SELECTION
+# ===========================================
+model_selection:
+  type: object
+  properties:
+    strategy:
+      type: string
+      enum: [dynamic, fixed]
+      default: dynamic
+      description: How models are selected for tasks
+
+# ===========================================
+# TASKS
+# ===========================================
+tasks:
+  type: object
+  additionalProperties:
+    type: object
+    description: Task ID as key (e.g., TASK-001)
+    properties:
+      status:
+        type: string
+        enum: [pending, in_progress, completed, failed, blocked]
+      started_at:
+        type: string
+        format: iso8601
+      completed_at:
+        type: string
+        format: iso8601
+
+      # Complexity assessment (new)
+      complexity:
+        type: object
+        properties:
+          score:
+            type: integer
+            minimum: 0
+            maximum: 14
+            description: Calculated complexity score
+          tier:
+            type: string
+            enum: [simple, moderate, complex]
+            description: Derived from score (0-4=simple, 5-8=moderate, 9+=complex)
+          factors:
+            type: object
+            properties:
+              files_affected:
+                type: integer
+              estimated_lines:
+                type: integer
+              new_dependencies:
+                type: integer
+              task_type:
+                type: string
+              risk_flags:
+                type: array
+                items:
+                  type: string
+
+      # Model history (replaces tier_used)
+      model_history:
+        type: array
+        items:
+          type: object
+          properties:
+            iteration:
+              type: integer
+            model:
+              type: string
+              enum: [haiku, sonnet, opus]
+            reason:
+              type: string
+            result:
+              type: string
+              enum: [pass, fail]
+
+      # Existing fields
+      iterations:
+        type: integer
+        description: Total iterations attempted
+      validation_result:
+        type: string
+        enum: [PASS, FAIL]
+      acceptance_criteria_met:
+        type: integer
+      acceptance_criteria_total:
+        type: integer
+
+      # Parallel execution
+      parallel_eligible:
+        type: boolean
+        default: false
+      parallel_group:
+        type: integer
+        nullable: true
+
+# ===========================================
+# PARALLEL EXECUTION
+# ===========================================
+parallel_execution:
+  type: object
+  properties:
+    enabled:
+      type: boolean
+      default: true
+    max_concurrent:
+      type: integer
+      default: 3
+
+    active_slots:
+      type: array
+      items:
+        type: object
+        properties:
+          slot:
+            type: integer
+          task:
+            type: string
+          started_at:
+            type: string
+            format: iso8601
+          status:
+            type: string
+            enum: [running, complete, failed]
+
+    queue:
+      type: array
+      items:
+        type: string
+      description: Task IDs waiting for execution
+
+# ===========================================
+# SPRINTS
+# ===========================================
+sprints:
+  type: object
+  additionalProperties:
+    type: object
+    description: Sprint ID as key (e.g., SPRINT-001)
+    properties:
+      status:
+        type: string
+        enum: [pending, in_progress, completed, failed]
+      started_at:
+        type: string
+        format: iso8601
+      completed_at:
+        type: string
+        format: iso8601
+      tasks_completed:
+        type: integer
+      tasks_total:
+        type: integer
+      quality_gates_passed:
+        type: boolean
+
+# ===========================================
+# BUG COUNCIL
+# ===========================================
+bug_council:
+  type: object
+  description: Ensemble diagnosis for complex bugs
+  properties:
+    activated:
+      type: boolean
+      default: false
+    issue_number:
+      type: integer
+
+    agents:
+      type: object
+      properties:
+        root_cause_analyst:
+          $ref: "#/definitions/council_agent"
+        code_archaeologist:
+          $ref: "#/definitions/council_agent"
+        pattern_matcher:
+          $ref: "#/definitions/council_agent"
+        systems_thinker:
+          $ref: "#/definitions/council_agent"
+        adversarial_tester:
+          $ref: "#/definitions/council_agent"
+
+    voting:
+      type: object
+      properties:
+        results:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              total:
+                type: integer
+              ranks:
+                type: array
+                items:
+                  type: integer
+        winner:
+          type: string
+        runner_up:
+          type: string
+        consensus_notes:
+          type: string
+
+# ===========================================
+# LSP CONFIGURATION
+# ===========================================
+lsp_config:
+  type: object
+  properties:
+    auto_detect:
+      type: boolean
+      default: true
+    active_servers:
+      type: array
+      items:
+        type: object
+        properties:
+          language:
+            type: string
+          server:
+            type: string
+          status:
+            type: string
+            enum: [running, stopped, error]
+          workspace:
+            type: string
+
+# ===========================================
+# MEMORY & LEARNING
+# ===========================================
+memory:
+  type: object
+  properties:
+    last_session_file:
+      type: string
+      description: Path to most recent session memory
+
+    checkpoints:
+      type: array
+      items:
+        type: object
+        properties:
+          name:
+            type: string
+          timestamp:
+            type: string
+            format: iso8601
+          commit_sha:
+            type: string
+          verification:
+            type: object
+            properties:
+              tests_passing:
+                type: integer
+              coverage:
+                type: number
+              build_status:
+                type: string
+
+learned_patterns:
+  type: array
+  items:
+    type: object
+    properties:
+      id:
+        type: string
+      confidence:
+        type: number
+        minimum: 0
+        maximum: 1
+      pattern:
+        type: string
+      context:
+        type: string
+      learned_from:
+        type: array
+        items:
+          type: string
+
+# ===========================================
+# CURRENT EXECUTION
+# ===========================================
+current_execution:
+  type: object
+  properties:
+    command:
+      type: string
+      description: Currently executing command
+    current_sprint:
+      type: string
+    current_task:
+      type: string
+    phase:
+      type: string
+      enum: [planning, execution, testing, complete]
+
+# ===========================================
+# STATISTICS
+# ===========================================
+statistics:
+  type: object
+  properties:
+    total_tasks:
+      type: integer
+    completed_tasks:
+      type: integer
+    failed_tasks:
+      type: integer
+    total_sprints:
+      type: integer
+    completed_sprints:
+      type: integer
+    haiku_tasks:
+      type: integer
+    sonnet_tasks:
+      type: integer
+    opus_tasks:
+      type: integer
+    parallel_tasks_run:
+      type: integer
+    bug_councils_convened:
+      type: integer
+
+# ===========================================
+# DEFINITIONS
+# ===========================================
+definitions:
+  council_agent:
+    type: object
+    properties:
+      status:
+        type: string
+        enum: [pending, running, complete, failed]
+      proposal:
+        type: string
+        description: Proposal identifier (A, B, C, D, E)
+      summary:
+        type: string
+        description: Brief summary of diagnosis and fix
+      confidence:
+        type: number
+        minimum: 0
+        maximum: 1

@@ -357,3 +357,46 @@ local.properties
 .env.local
 .env.*.local
 docker-compose.*.local.yml
+
+# ============================================
+# DevTeam Runtime Files
+# ============================================
+# These are generated during DevTeam operation
+# and should not be committed to version control
+
+# State and runtime files (in user projects)
+# Note: The template files in .devteam/ ARE committed
+# but runtime state in user projects should be ignored
+.devteam/state.yaml
+.devteam/autonomous-mode
+.devteam/circuit-breaker.json
+
+# Session memory files
+.devteam/memory/
+
+# Runtime logs
+.devteam/logs/
+.devteam/*.log
+
+# Temporary planning files
+.devteam/tmp/
+.devteam/scratch/
+
+# MCP server runtime data
+.devteam/mcp-cache/
+
+# LSP runtime files
+.devteam/lsp-logs/
+.devteam/lsp-*.log
+
+# Bug council deliberation files (may contain sensitive info)
+.devteam/bug-council-sessions/
+
+# Checkpoint files (can be large)
+.devteam/checkpoints/
+
+# Keep configuration templates
+!.devteam/config.yaml
+!.devteam/agent-capabilities.yaml
+!.devteam/state-schema.yaml
+!.devteam/state-example.yaml
