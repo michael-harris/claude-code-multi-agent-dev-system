@@ -148,7 +148,7 @@ Sprint is **ONLY complete** when:
 
 ---
 
-## 4. New Command: `/multi-agent:sprint all`
+## 4. New Command: `/devteam:sprint all`
 
 ### What It Does
 
@@ -165,7 +165,7 @@ Executes **all sprints sequentially** with comprehensive project-level review at
 ### Workflow
 
 ```bash
-/multi-agent:sprint all
+/devteam:sprint all
 ```
 
 ```
@@ -194,9 +194,9 @@ PROJECT-LEVEL FINAL REVIEW
 ✅ PROJECT COMPLETE!
 ```
 
-### vs `/multi-agent:sprint SPRINT-001`
+### vs `/devteam:sprint SPRINT-001`
 
-| Feature | `/multi-agent:sprint SPRINT-001` | `/multi-agent:sprint all` |
+| Feature | `/devteam:sprint SPRINT-001` | `/devteam:sprint all` |
 |---------|---------------------|----------------|
 | Executes | One sprint | All sprints |
 | Review | Sprint-level | Sprint-level + Project-level |
@@ -205,7 +205,7 @@ PROJECT-LEVEL FINAL REVIEW
 
 ---
 
-## 5. New Command: `/multi-agent:feature`
+## 5. New Command: `/devteam:feature`
 
 ### What It Does
 
@@ -214,13 +214,13 @@ PROJECT-LEVEL FINAL REVIEW
 ### Workflow Macro
 
 ```bash
-/multi-agent:feature Add real-time notifications using WebSockets
+/devteam:feature Add real-time notifications using WebSockets
 ```
 
 Automatically executes:
 1. **PRD Generation** (interactive)
 2. **Planning** (task breakdown + sprints)
-3. **Implementation** (/multi-agent:sprint all)
+3. **Implementation** (/devteam:sprint all)
 4. **Integration verification**
 5. **Documentation update**
 
@@ -228,17 +228,17 @@ Automatically executes:
 
 **Add to existing project:**
 ```bash
-/multi-agent:feature Add OAuth authentication with Google and GitHub
+/devteam:feature Add OAuth authentication with Google and GitHub
 ```
 
 **New feature from scratch:**
 ```bash
-/multi-agent:feature Build analytics dashboard with charts and export
+/devteam:feature Build analytics dashboard with charts and export
 ```
 
 **Technical feature:**
 ```bash
-/multi-agent:feature Implement caching layer using Redis with 5min TTL
+/devteam:feature Implement caching layer using Redis with 5min TTL
 ```
 
 ### Cost Estimation
@@ -251,7 +251,7 @@ Automatically executes:
 
 ---
 
-## 6. New Command: `/multi-agent:issue`
+## 6. New Command: `/devteam:issue`
 
 ### What It Does
 
@@ -260,12 +260,12 @@ Automatically executes:
 ### Workflow Macro
 
 ```bash
-/multi-agent:issue Fix memory leak in WebSocket handler
+/devteam:issue Fix memory leak in WebSocket handler
 ```
 
 Or with GitHub integration:
 ```bash
-/multi-agent:issue https://github.com/user/repo/issues/123
+/devteam:issue https://github.com/user/repo/issues/123
 ```
 
 Automatically executes:
@@ -347,8 +347,8 @@ Now **11 quality checks** (was 4):
 
 | Version | Commands | New in Version |
 |---------|----------|----------------|
-| v1.0-2.0 | 3 | /multi-agent:prd, /multi-agent:planning, /multi-agent:sprint |
-| v2.1 | **6** | **+3 (/multi-agent:sprint all, /multi-agent:feature, /multi-agent:issue)** |
+| v1.0-2.0 | 3 | /devteam:prd, /devteam:planning, /devteam:sprint |
+| v2.1 | **6** | **+3 (/devteam:sprint all, /devteam:feature, /devteam:issue)** |
 
 ### Quality Gate Enhancements
 
@@ -359,7 +359,7 @@ Now **11 quality checks** (was 4):
 **After (v2.1):**
 - Individual task validation
 - Sprint-level comprehensive review (code, security, performance)
-- Project-level comprehensive review (for /multi-agent:sprint all)
+- Project-level comprehensive review (for /devteam:sprint all)
 - Language-specific auditing
 - Mandatory documentation updates
 - Max iteration limits with escalation
@@ -381,25 +381,25 @@ Now **11 quality checks** (was 4):
 
 **Instead of:**
 ```bash
-/multi-agent:prd
-/multi-agent:planning
-/multi-agent:sprint SPRINT-001
-/multi-agent:sprint SPRINT-002
-/multi-agent:sprint SPRINT-003
+/devteam:prd
+/devteam:planning
+/devteam:sprint SPRINT-001
+/devteam:sprint SPRINT-002
+/devteam:sprint SPRINT-003
 ```
 
 **You can now:**
 ```bash
-/multi-agent:feature Add user authentication
+/devteam:feature Add user authentication
 # (Does everything automatically)
 ```
 
 or
 
 ```bash
-/multi-agent:prd
-/multi-agent:planning
-/multi-agent:sprint all
+/devteam:prd
+/devteam:planning
+/devteam:sprint all
 # (Executes all sprints automatically)
 ```
 
@@ -474,7 +474,7 @@ Agents will use these tools automatically if available.
 ### What's New in v2.1.0
 
 - ✅ **7 new performance auditor agents** (language-specific)
-- ✅ **3 new workflow commands** (/multi-agent:sprint all, /multi-agent:feature, /multi-agent:issue)
+- ✅ **3 new workflow commands** (/devteam:sprint all, /devteam:feature, /devteam:issue)
 - ✅ **Python tooling standardization** (UV + Ruff mandatory)
 - ✅ **Comprehensive sprint-level review** (7-step process)
 - ✅ **Automatic documentation updates** (end of every sprint)
@@ -495,7 +495,7 @@ Agents will use these tools automatically if available.
 **From v2.0 → v2.1:**
 1. Pull latest version
 2. Install UV + Ruff (for Python projects)
-3. Try new commands (/multi-agent:feature, /multi-agent:issue, /multi-agent:sprint all)
+3. Try new commands (/devteam:feature, /devteam:issue, /devteam:sprint all)
 4. Enjoy enhanced quality gates automatically
 
 **No breaking changes. All existing workflows continue to work.**

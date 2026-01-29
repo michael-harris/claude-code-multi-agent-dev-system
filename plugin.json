@@ -658,54 +658,74 @@
   ],
   "commands": [
     {
-      "name": "/prd",
-      "description": "Generate comprehensive PRD from project idea",
-      "file": "commands/prd.md"
+      "name": "/devteam:auto",
+      "description": "Autonomous execution with agent selection until completion",
+      "file": "commands/devteam-auto.md"
     },
     {
-      "name": "/planning",
-      "description": "Break down PRD into tasks and sprints",
-      "file": "commands/planning.md"
+      "name": "/devteam:plan",
+      "description": "Interactive planning - creates PRD, tasks, and sprints",
+      "file": "commands/devteam-plan.md"
     },
     {
-      "name": "/sprint",
-      "description": "Execute a sprint with full agent orchestration",
-      "file": "commands/sprint.md"
+      "name": "/devteam:sprint",
+      "description": "Execute a specific sprint or all sprints",
+      "file": "commands/devteam-sprint.md"
     },
     {
-      "name": "/sprint all",
-      "description": "Execute all sprints sequentially with comprehensive final review",
-      "file": "commands/sprint-all.md"
+      "name": "/devteam:list",
+      "description": "List all plans and their status",
+      "file": "commands/devteam-list.md"
     },
     {
-      "name": "/feature",
-      "description": "Complete feature workflow: PRD → Planning → Implementation",
-      "file": "commands/feature.md"
+      "name": "/devteam:select",
+      "description": "Select a plan to work on",
+      "file": "commands/devteam-select.md"
     },
     {
-      "name": "/issue",
-      "description": "Complete bug fix workflow from issue to resolution",
-      "file": "commands/issue.md"
+      "name": "/devteam:issue",
+      "description": "Fix a GitHub issue by number with Bug Council if needed",
+      "file": "commands/devteam-issue.md"
     },
     {
-      "name": "/merge-tracks",
+      "name": "/devteam:issue-new",
+      "description": "Create a new GitHub issue",
+      "file": "commands/devteam-issue-new.md"
+    },
+    {
+      "name": "/devteam:merge-tracks",
       "description": "Merge parallel development tracks back to main branch",
       "file": "commands/merge-tracks.md"
     },
     {
-      "name": "/worktree status",
+      "name": "/devteam:worktree-status",
       "description": "Show detailed status of all development track worktrees",
       "file": "commands/worktree-status.md"
     },
     {
-      "name": "/worktree cleanup",
+      "name": "/devteam:worktree-cleanup",
       "description": "Manually clean up development track worktrees",
       "file": "commands/worktree-cleanup.md"
     },
     {
-      "name": "/worktree list",
+      "name": "/devteam:worktree-list",
       "description": "List all git worktrees with track information",
       "file": "commands/worktree-list.md"
+    },
+    {
+      "name": "/devteam:prd",
+      "description": "Generate comprehensive PRD (legacy - use /devteam:plan)",
+      "file": "commands/prd.md"
+    },
+    {
+      "name": "/devteam:planning",
+      "description": "Break down PRD into tasks and sprints (legacy - use /devteam:plan)",
+      "file": "commands/planning.md"
+    },
+    {
+      "name": "/devteam:feature",
+      "description": "Complete feature workflow (legacy - use /devteam:plan)",
+      "file": "commands/feature.md"
     }
   ]
 }
