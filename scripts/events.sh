@@ -165,9 +165,9 @@ log_session_started() {
     local command="$1"
     local command_type="$2"
 
-    local esc_type
-    esc_type=$(sql_escape "$command_type")
-    log_event "session_started" "session" "Session started: $command" "{\"command_type\": \"$esc_type\"}"
+    local json_data
+    json_data=$(json_object "command_type" "$command_type")
+    log_event "session_started" "session" "Session started: $command" "$json_data"
 }
 
 # Log session ended event
@@ -176,10 +176,9 @@ log_session_ended() {
     local status="$1"
     local reason="$2"
 
-    local esc_status esc_reason
-    esc_status=$(sql_escape "$status")
-    esc_reason=$(sql_escape "$reason")
-    log_event "session_ended" "session" "Session ended: $status" "{\"status\": \"$esc_status\", \"reason\": \"$esc_reason\"}"
+    local json_data
+    json_data=$(json_object "status" "$status" "reason" "$reason")
+    log_event "session_ended" "session" "Session ended: $status" "$json_data"
 }
 
 # ============================================================================
@@ -192,10 +191,9 @@ log_phase_changed() {
     local new_phase="$1"
     local previous_phase="${2:-}"
 
-    local esc_prev esc_new
-    esc_prev=$(sql_escape "$previous_phase")
-    esc_new=$(sql_escape "$new_phase")
-    log_event "phase_changed" "phase" "Phase: $new_phase" "{\"previous\": \"$esc_prev\", \"current\": \"$esc_new\"}"
+    local json_data
+    json_data=$(json_object "previous" "$previous_phase" "current" "$new_phase")
+    log_event "phase_changed" "phase" "Phase: $new_phase" "$json_data"
 }
 
 # ============================================================================
@@ -214,10 +212,10 @@ log_agent_started() {
         return 1
     fi
 
-    local esc_task_id
-    esc_task_id=$(sql_escape "$task_id")
+    local json_data
+    json_data=$(json_object "task_id" "$task_id")
     log_event "agent_started" "agent" "Agent started: $agent ($model)" \
-        "{\"task_id\": \"$esc_task_id\"}" "$agent" "$model"
+        "$json_data" "$agent" "$model"
 
     # Also insert into agent_runs table
     local session_id
@@ -317,10 +315,10 @@ log_agent_failed() {
         return 1
     fi
 
-    local esc_error_type
-    esc_error_type=$(sql_escape "$error_type")
+    local json_data
+    json_data=$(json_object "error_type" "$error_type")
     log_event "agent_failed" "agent" "Agent failed: $agent - $error_message" \
-        "{\"error_type\": \"$esc_error_type\"}" "$agent" "$model"
+        "$json_data" "$agent" "$model"
 
     # Update agent_runs table
     local session_id

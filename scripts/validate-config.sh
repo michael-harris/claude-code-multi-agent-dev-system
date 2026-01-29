@@ -182,8 +182,8 @@ validate_commands() {
             continue
         fi
 
-        # Required command fields
-        local required=("description" "path")
+        # Required command fields (v3.1 schema: uses "file" instead of "path")
+        local required=("description")
         for field in "${required[@]}"; do
             local value
             value=$(jq -r ".commands[$i].$field // empty" "$PLUGIN_JSON")
@@ -192,11 +192,13 @@ validate_commands() {
             fi
         done
 
-        # Validate path exists
-        local path
-        path=$(jq -r ".commands[$i].path // empty" "$PLUGIN_JSON")
-        if [ -n "$path" ] && [ ! -f "$PROJECT_ROOT/$path" ]; then
-            report_error "plugin.json" "Command '$cmd_name' path not found: $path"
+        # Validate file path exists (supports both "file" and "path" for backwards compatibility)
+        local file_path
+        file_path=$(jq -r ".commands[$i].file // .commands[$i].path // empty" "$PLUGIN_JSON")
+        if [ -z "$file_path" ]; then
+            report_error "plugin.json" "Command '$cmd_name' missing field: file (or path)"
+        elif [ ! -f "$PROJECT_ROOT/$file_path" ]; then
+            report_error "plugin.json" "Command '$cmd_name' file not found: $file_path"
         fi
 
         ((i++))
@@ -315,13 +317,13 @@ validate_cross_references() {
         fi
     done
 
-    # Check that all command files exist
-    local cmd_paths
-    cmd_paths=$(jq -r '.commands[].path' "$PLUGIN_JSON")
+    # Check that all command files exist (supports both "file" and "path" fields)
+    local cmd_files
+    cmd_files=$(jq -r '.commands[] | .file // .path' "$PLUGIN_JSON")
 
-    for path in $cmd_paths; do
-        if [ -n "$path" ] && [ ! -f "$PROJECT_ROOT/$path" ]; then
-            report_error "cross-check" "Command file not found: $path"
+    for file_path in $cmd_files; do
+        if [ -n "$file_path" ] && [ ! -f "$PROJECT_ROOT/$file_path" ]; then
+            report_error "cross-check" "Command file not found: $file_path"
         fi
     done
 

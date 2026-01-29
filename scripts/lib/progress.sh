@@ -123,11 +123,23 @@ _render_progress_bar() {
     local current="$1"
     local message="${2:-}"
 
+    # Guard against division by zero
+    if [ "$_PROGRESS_TOTAL" -le 0 ]; then
+        _PROGRESS_TOTAL=100
+    fi
+
+    # Clamp current to valid range
+    if [ "$current" -lt 0 ]; then
+        current=0
+    elif [ "$current" -gt "$_PROGRESS_TOTAL" ]; then
+        current="$_PROGRESS_TOTAL"
+    fi
+
     local percent=$((current * 100 / _PROGRESS_TOTAL))
     local filled=$((current * PROGRESS_WIDTH / _PROGRESS_TOTAL))
     local empty=$((PROGRESS_WIDTH - filled))
 
-    # Build the bar
+    # Build the bar (no ANSI codes in bar itself)
     local bar="${PROGRESS_START_CHAR}"
     for ((i=0; i<filled; i++)); do
         bar+="${PROGRESS_CHAR}"
@@ -141,21 +153,29 @@ _render_progress_bar() {
     local pct_str
     printf -v pct_str "%3d%%" "$percent"
 
-    # Build status line
-    local status_line="$bar $pct_str"
+    # Build status line (calculate display width without ANSI codes)
+    local base_line="$bar $pct_str"
+    local display_width=${#base_line}
     if [ -n "$message" ]; then
+        display_width=$((display_width + 3 + ${#message}))  # " - " + message
+    fi
+
+    # Get terminal width
+    local term_width
+    term_width=$(tput cols 2>/dev/null || echo 80)
+
+    # Build final line, truncating message if needed
+    local status_line="$base_line"
+    if [ -n "$message" ]; then
+        local max_msg_len=$((term_width - ${#base_line} - 6))  # Leave room for " - " and "..."
+        if [ "$max_msg_len" -gt 0 ] && [ ${#message} -gt "$max_msg_len" ]; then
+            message="${message:0:$max_msg_len}..."
+        fi
         status_line+=" - $message"
     fi
 
     # Print with carriage return for same-line update
     echo -en "\r${status_line}"
-
-    # Truncate if too long
-    local term_width
-    term_width=$(tput cols 2>/dev/null || echo 80)
-    if [ ${#status_line} -gt "$term_width" ]; then
-        echo -en "\r${status_line:0:$((term_width-3))}..."
-    fi
 }
 
 # ============================================================================
@@ -165,6 +185,16 @@ _render_progress_bar() {
 # Spinner characters
 _SPINNER_CHARS='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
 _SPINNER_PID=""
+_SPINNER_CLEANUP_SET=false
+
+# Internal: Cleanup spinner on exit
+_spinner_cleanup() {
+    if [ -n "$_SPINNER_PID" ]; then
+        kill "$_SPINNER_PID" 2>/dev/null || true
+        wait "$_SPINNER_PID" 2>/dev/null || true
+        _SPINNER_PID=""
+    fi
+}
 
 # Start a spinner for indeterminate progress
 # Args: label
@@ -176,8 +206,21 @@ spinner_start() {
         return
     fi
 
-    # Start spinner in background
+    # Stop any existing spinner first
+    if [ -n "$_SPINNER_PID" ]; then
+        spinner_stop "Interrupted"
+    fi
+
+    # Set up cleanup trap once (on EXIT, INT, TERM)
+    if [ "$_SPINNER_CLEANUP_SET" = false ]; then
+        trap '_spinner_cleanup' EXIT INT TERM
+        _SPINNER_CLEANUP_SET=true
+    fi
+
+    # Start spinner in background subshell
     (
+        # Ignore signals in subshell - parent will kill us
+        trap '' INT TERM
         local i=0
         while true; do
             local char="${_SPINNER_CHARS:i:1}"
@@ -188,7 +231,6 @@ spinner_start() {
     ) &
 
     _SPINNER_PID=$!
-    disown $_SPINNER_PID 2>/dev/null || true
 }
 
 # Stop the spinner
@@ -198,11 +240,14 @@ spinner_stop() {
 
     if [ -n "$_SPINNER_PID" ]; then
         kill "$_SPINNER_PID" 2>/dev/null || true
+        wait "$_SPINNER_PID" 2>/dev/null || true
         _SPINNER_PID=""
     fi
 
     if [ "$_PROGRESS_ENABLED" = true ]; then
-        echo -e "\r${PROG_GREEN}✓${PROG_NC} $message"
+        # Clear the line before printing completion
+        echo -en "\r\033[K"
+        echo -e "${PROG_GREEN}✓${PROG_NC} $message"
     else
         echo "Completed: $message"
     fi

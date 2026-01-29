@@ -138,15 +138,18 @@ cmd_backup() {
 
     log_info "Backup created: $backup_file" "maintenance"
 
-    # Rotate old backups
+    # Rotate old backups (POSIX-compliant approach)
     local backup_count
-    backup_count=$(find "$BACKUP_DIR" -name "devteam-*.db" | wc -l)
+    backup_count=$(find "$BACKUP_DIR" -name "devteam-*.db" -type f | wc -l)
+    backup_count=$((backup_count))  # Trim whitespace
 
     if [ "$backup_count" -gt "$MAX_BACKUPS" ]; then
         log_info "Rotating old backups (keeping $MAX_BACKUPS)..." "maintenance"
+        local to_delete=$((backup_count - MAX_BACKUPS))
+        # Sort by name (oldest first due to timestamp format) and delete oldest
         find "$BACKUP_DIR" -name "devteam-*.db" -type f | \
             sort | \
-            head -n -"$MAX_BACKUPS" | \
+            head -n "$to_delete" | \
             xargs rm -f
     fi
 
