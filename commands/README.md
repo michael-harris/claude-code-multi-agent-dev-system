@@ -7,7 +7,9 @@ Slash commands for the DevTeam multi-agent development system.
 | Command | Description |
 |---------|-------------|
 | `/devteam:plan` | Interactive planning - creates PRD, tasks, and sprints |
-| `/devteam:auto` | Autonomous execution until project complete |
+| `/devteam:auto` | Autonomous execution until project/feature complete |
+| `/devteam:list` | List all plans and their status |
+| `/devteam:select` | Select a plan to work on |
 | `/devteam:sprint <id>` | Execute a specific sprint |
 | `/devteam:issue <#>` | Fix a GitHub issue by number |
 | `/devteam:issue-new "<desc>"` | Create a new GitHub issue |
@@ -18,10 +20,45 @@ Slash commands for the DevTeam multi-agent development system.
 
 ```bash
 # 1. Plan your project (interactive)
-/devteam:plan
+/devteam:plan "Build a task manager"
 
 # 2. Execute autonomously
 /devteam:auto
+```
+
+### Add a Feature (to existing project)
+
+```bash
+# 1. Create feature plan
+/devteam:plan --feature "Add dark mode support"
+
+# 2. Execute the feature
+/devteam:auto
+```
+
+### Multiple Features
+
+```bash
+# Plan several features
+/devteam:plan --feature "Add notifications"
+/devteam:plan --feature "Add dark mode"
+
+# List all plans
+/devteam:list
+
+# Select which one to work on
+/devteam:select notifications
+
+# Execute selected plan
+/devteam:auto
+```
+
+### From Spec File
+
+```bash
+# Plan from existing specification
+/devteam:plan --from project-spec.md
+/devteam:plan --from specs/              # Folder of specs
 ```
 
 ### Fix a Bug
@@ -85,13 +122,59 @@ Create GitHub issues:
 - Well-formatted issue template
 - Suggests next steps
 
+### /devteam:list
+
+View all development plans:
+- Shows active plan indicator
+- Status and progress for each plan
+- Filter by type (`--type feature`)
+- Include archived (`--all`)
+
+### /devteam:select
+
+Select a plan to work on:
+- By number: `/devteam:select 2`
+- By name: `/devteam:select dark-mode`
+- Partial match supported
+- Shows plan details after selection
+
+## Plan Management
+
+DevTeam supports multiple concurrent plans:
+
+```
+.devteam/plans/
+├── index.yaml                    # Master plan index
+├── project-taskmanager/          # Original project
+├── feature-notifications/        # Feature 1
+└── feature-dark-mode/            # Feature 2
+```
+
+### Plan Types
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `project` | Full new project | Starting from scratch |
+| `feature` | Addition to existing | New functionality |
+| `enhancement` | Improvement | Optimization/refactor |
+
+### Plan Lifecycle
+
+```
+planned → in_progress → complete → (archive)
+                    ↘ failed → (retry/abandon)
+```
+
 ## State Management
 
-All commands use `.devteam/state.yaml` for:
-- Progress tracking
-- Resume capability
+Each plan has its own state file:
+- `.devteam/plans/<plan-id>/state.yaml`
+
+State tracks:
+- Progress (sprints, tasks)
 - Model selection history
-- Sprint/task status
+- Circuit breaker status
+- Session memory references
 
 ## Migration from /multi-agent
 

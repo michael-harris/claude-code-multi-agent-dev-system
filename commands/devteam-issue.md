@@ -13,6 +13,39 @@ Fix a GitHub issue by number. Automatically fetches details and implements a fix
 
 ## Your Process
 
+### Phase 0: Initialize State Tracking
+
+Before starting, create/update `.devteam/state.yaml`:
+
+```yaml
+version: "3.0"
+
+metadata:
+  created_at: "[timestamp]"
+  project_name: "Issue #123 Fix"
+  project_type: issue
+
+issue:
+  number: 123
+  title: "[from GitHub]"
+  type: bug | security | performance | enhancement
+  severity: critical | high | medium | low
+  complexity: simple | moderate | complex
+
+current_execution:
+  command: "/devteam:issue 123"
+  phase: diagnosis
+
+autonomous_mode:
+  enabled: true
+  max_iterations: 20            # Lower for issues
+  current_iteration: 0
+  circuit_breaker:
+    consecutive_failures: 0
+    max_failures: 3             # Lower tolerance for issues
+    state: closed
+```
+
 ### Phase 1: Fetch Issue Details
 
 ```bash
@@ -185,6 +218,43 @@ Task({
 
     Follow council recommendations exactly.`
 })
+```
+
+### Phase 4.5: Model Escalation (on failure)
+
+If fix attempt fails:
+
+```yaml
+model_escalation:
+  # Issue-specific escalation (faster than project work)
+  consecutive_failures:
+    simple_issue:
+      haiku_to_sonnet: 1      # Escalate quickly
+      sonnet_to_opus: 1
+      opus_to_council: 2      # Activate Bug Council
+    moderate_issue:
+      sonnet_to_opus: 1
+      opus_to_council: 2
+    complex_issue:
+      # Already at opus, go to council after 2 failures
+      opus_to_council: 2
+```
+
+**Update state on escalation:**
+```yaml
+issue:
+  fix_attempts:
+    - attempt: 1
+      model: haiku
+      result: fail
+      reason: "Test still failing"
+    - attempt: 2
+      model: sonnet
+      result: fail
+      reason: "Introduced regression"
+    - attempt: 3
+      model: opus
+      result: pass
 ```
 
 ### Phase 5: Verify & Document
