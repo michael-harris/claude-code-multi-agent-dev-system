@@ -1,0 +1,259 @@
+# DevTeam Interview Question Templates
+# Used by commands that need to clarify ambiguous requests
+
+version: "1.0"
+
+# =============================================================================
+# BUG REPORT INTERVIEW
+# =============================================================================
+
+bug_report:
+  description: "Questions to clarify bug reports"
+
+  required:
+    - key: expected_behavior
+      question: "What is the expected behavior?"
+      skip_if_contains: ["should", "expected", "supposed to"]
+      example: "Users should be able to log in with their email"
+
+    - key: actual_behavior
+      question: "What is the actual behavior?"
+      skip_if_contains: ["but", "instead", "actually", "however"]
+      example: "The login button does nothing when clicked"
+
+  conditional:
+    - key: repro_steps
+      condition: "description lacks numbered steps or 'when' clause"
+      question: "What steps reproduce this issue?"
+      format: numbered_list
+      example: |
+        1. Go to login page
+        2. Enter email and password
+        3. Click login button
+        4. Nothing happens
+
+    - key: environment
+      condition: "could be environment-specific (browser, mobile, OS mentioned)"
+      question: "What environment does this occur in? (browser, OS, device)"
+      example: "Chrome 120 on macOS Sonoma"
+
+    - key: frequency
+      condition: "not clear if consistent"
+      question: "Does this happen every time, or only sometimes?"
+      options: ["Every time", "Sometimes (about X%)", "Only once so far"]
+
+    - key: recent_changes
+      condition: "could be a regression"
+      question: "Did this work before? Any recent changes that might be related?"
+      example: "It worked until yesterday. We deployed a new auth service."
+
+    - key: error_message
+      condition: "no error mentioned"
+      question: "Are there any error messages in the console or logs?"
+      example: "Console shows: TypeError: Cannot read property 'id' of undefined"
+
+    - key: affected_users
+      condition: "severity unclear"
+      question: "How many users are affected? Is there a workaround?"
+      example: "All users on mobile. Workaround: use desktop."
+
+# =============================================================================
+# FEATURE REQUEST INTERVIEW
+# =============================================================================
+
+feature_request:
+  description: "Questions to clarify feature requests"
+
+  required:
+    - key: target_user
+      question: "Who is the target user for this feature?"
+      skip_if_contains: ["user", "users", "customer", "admin"]
+      example: "Admin users who manage team permissions"
+
+    - key: problem_statement
+      question: "What problem does this solve? Why is it needed?"
+      skip_if_contains: ["because", "need", "want to", "so that"]
+      example: "Users can't currently export their data, which is required for compliance"
+
+  conditional:
+    - key: scope
+      condition: "scope unclear or very broad"
+      question: "What should be OUT of scope for this feature?"
+      example: "Mobile support is out of scope for v1"
+
+    - key: existing_alternatives
+      condition: "might duplicate existing functionality"
+      question: "Are there existing features that partially solve this?"
+      example: "Users can manually copy data, but it's tedious"
+
+    - key: priority
+      condition: "priority not specified"
+      question: "How urgent is this? Is it blocking other work?"
+      options: ["Critical - blocking", "High - needed soon", "Medium - nice to have", "Low - whenever"]
+
+    - key: success_criteria
+      condition: "no acceptance criteria provided"
+      question: "How will we know when this is complete? What's the success criteria?"
+      example: "Users can export all their data as CSV with one click"
+
+# =============================================================================
+# AD-HOC TASK INTERVIEW
+# =============================================================================
+
+adhoc_task:
+  description: "Questions for ambiguous ad-hoc tasks"
+
+  triggers:
+    # Redirect to bug interview if task looks like a bug
+    - pattern: "fix|broken|doesn't work|bug|error|crash|fail"
+      redirect: bug_report
+      message: "This looks like a bug report. Let me ask a few clarifying questions."
+
+    # Redirect to feature interview if task looks like a feature
+    - pattern: "add|create|implement|build|new feature"
+      action: check_scope
+      questions:
+        - key: task_scope
+          question: "Should this be a full feature (with planning) or a quick addition?"
+          options:
+            - "Full feature - needs planning (/devteam:plan)"
+            - "Quick addition - implement directly"
+
+  required:
+    - key: location
+      question: "Where in the codebase should this change be made?"
+      skip_if_contains: ["in", "file", "component", "service", "module"]
+      example: "In the UserService class"
+
+  conditional:
+    - key: context
+      condition: "task description under 10 words"
+      question: "Can you provide more context about what you need?"
+
+    - key: dependencies
+      condition: "might affect other parts"
+      question: "Are there other parts of the system this might affect?"
+
+    - key: testing
+      condition: "testing not mentioned"
+      question: "How should this be tested?"
+      options: ["Unit tests", "Integration tests", "Manual testing", "No testing needed"]
+
+# =============================================================================
+# SECURITY TASK INTERVIEW
+# =============================================================================
+
+security_task:
+  description: "Questions for security-related tasks"
+
+  required:
+    - key: security_scope
+      question: "What specific security concern are you addressing?"
+      options:
+        - "Authentication/Authorization"
+        - "Data protection/encryption"
+        - "Input validation/injection"
+        - "API security"
+        - "General audit"
+        - "Compliance (SOC2, HIPAA, etc.)"
+
+  conditional:
+    - key: compliance_requirements
+      condition: "compliance mentioned or enterprise context"
+      question: "Are there specific compliance requirements? (SOC2, HIPAA, GDPR, PCI-DSS)"
+
+    - key: threat_model
+      condition: "specific threat mentioned"
+      question: "What threat or attack vector are you concerned about?"
+
+    - key: affected_data
+      condition: "data handling involved"
+      question: "What sensitive data is involved? (PII, credentials, financial)"
+
+# =============================================================================
+# REFACTORING TASK INTERVIEW
+# =============================================================================
+
+refactoring_task:
+  description: "Questions for refactoring tasks"
+
+  required:
+    - key: refactor_goal
+      question: "What's the goal of this refactoring?"
+      options:
+        - "Improve performance"
+        - "Improve readability/maintainability"
+        - "Reduce duplication"
+        - "Prepare for new feature"
+        - "Fix technical debt"
+        - "Update to new patterns/libraries"
+
+  conditional:
+    - key: scope_limit
+      condition: "could be broad refactoring"
+      question: "How much of the codebase should be affected?"
+      options:
+        - "Single file/function"
+        - "Single module/component"
+        - "Multiple related files"
+        - "Codebase-wide"
+
+    - key: breaking_changes
+      condition: "could have breaking changes"
+      question: "Are breaking changes to APIs/interfaces acceptable?"
+
+    - key: test_coverage
+      condition: "existing tests might need updates"
+      question: "Should existing tests be updated to match new patterns?"
+
+# =============================================================================
+# GITHUB ISSUE SUPPLEMENT
+# =============================================================================
+
+github_issue_supplement:
+  description: "Additional questions when GitHub issue lacks detail"
+
+  conditional:
+    - key: missing_repro
+      condition: "issue has no reproduction steps"
+      question: "The issue doesn't have reproduction steps. Can you provide them?"
+
+    - key: missing_expected
+      condition: "issue doesn't describe expected behavior"
+      question: "What should the expected behavior be?"
+
+    - key: clarify_scope
+      condition: "issue scope is ambiguous"
+      question: "The issue could be interpreted multiple ways. Which interpretation is correct?"
+
+    - key: acceptance_criteria
+      condition: "issue has no acceptance criteria"
+      question: "What would make this issue 'done'?"
+
+# =============================================================================
+# INTERVIEW SETTINGS
+# =============================================================================
+
+settings:
+  # Maximum questions to ask before proceeding
+  max_questions: 5
+
+  # Skip interview entirely if description confidence is high
+  auto_skip_threshold: 0.85
+
+  # Allow user to skip remaining questions
+  allow_skip: true
+  skip_command: "skip"
+
+  # Store responses in database
+  persist_responses: true
+
+  # Format for asking questions
+  question_format: |
+    Q{number}: {question}
+    {options_if_any}
+    >
+
+  # Format for showing skipped questions
+  skipped_format: |
+    [Skipped: {question} - inferred from description]

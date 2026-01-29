@@ -1,18 +1,29 @@
 # DevTeam Plan Command
 
-**Command:** `/devteam:plan`
+**Command:** `/devteam:plan [options]`
 
-You conduct interactive requirements gathering, create a PRD, and generate a development plan with tasks and sprints.
+Conduct interactive requirements gathering, research the codebase, create a PRD, and generate a development plan with tasks and sprints.
 
 ## Usage
 
 ```bash
 /devteam:plan                                # Start interactive planning
 /devteam:plan "Build a task manager"         # Start with description
+/devteam:plan --feature "Add dark mode"      # Plan a feature for existing project
 /devteam:plan --from spec.md                 # Load from single spec file
 /devteam:plan --from specs/                  # Load from folder of spec files
 /devteam:plan --from existing                # Auto-detect existing docs in project
+/devteam:plan --skip-research                # Skip research phase
 ```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--feature "<desc>"` | Plan a feature for existing project |
+| `--from <path>` | Load from spec file or folder |
+| `--skip-research` | Skip codebase research phase |
+| `--skip-interview` | Skip interview (use with --from) |
 
 ## File-Based Specification Support
 
@@ -251,6 +262,8 @@ echo "✅ Changes committed"
 
 ### Phase 1: Requirements Interview
 
+**Skip if:** `--from` flag provided with comprehensive spec and `--skip-interview` flag.
+
 **Technology Stack Selection (FIRST):**
 1. Ask: "What external services, APIs, or integrations will you need?"
 2. Based on answer, recommend Python or TypeScript with reasoning:
@@ -270,7 +283,180 @@ echo "✅ Changes committed"
 
 **Be efficient:** If user provides comprehensive initial description, skip questions already answered.
 
-### Phase 2: Generate PRD
+### Phase 2: Research Phase
+
+**Skip if:** `--skip-research` flag provided.
+
+**Purpose:** Investigate the codebase and technologies before planning to:
+- Identify existing patterns to follow
+- Find potential blockers early
+- Make informed technology recommendations
+- Prevent "discover problems during implementation" scenarios
+
+**Research Agent Tasks:**
+
+```javascript
+// Spawn Research Agent
+const researchResults = await Task({
+    subagent_type: "research",
+    agent: "research-agent",
+    model: "sonnet",
+    prompt: `Research for: ${projectDescription}
+
+        Investigate:
+        1. CODEBASE ANALYSIS
+           - Existing project structure
+           - Current tech stack in use
+           - Coding patterns and conventions
+           - Related existing features
+
+        2. TECHNOLOGY EVALUATION
+           - Recommended libraries/frameworks
+           - Compatibility with existing stack
+           - Community support and maintenance status
+           - Security considerations
+
+        3. IMPLEMENTATION PATTERNS
+           - Similar features in codebase
+           - Patterns to follow
+           - Anti-patterns to avoid
+
+        4. POTENTIAL BLOCKERS
+           - Technical debt that might interfere
+           - Missing dependencies
+           - Breaking changes required
+           - Integration challenges
+
+        5. RECOMMENDATIONS
+           - Suggested approach
+           - Alternative approaches considered
+           - Risk assessment
+
+        Output structured findings with evidence.`
+})
+```
+
+**Research Output Format:**
+
+```yaml
+research_findings:
+  codebase_analysis:
+    project_structure: "monorepo with packages/"
+    existing_stack:
+      backend: "FastAPI"
+      frontend: "React + TypeScript"
+      database: "PostgreSQL with SQLAlchemy"
+    patterns_identified:
+      - "Repository pattern for data access"
+      - "React Query for server state"
+      - "Tailwind for styling"
+
+  technology_evaluation:
+    recommended:
+      - name: "Zod"
+        reason: "Schema validation, already used in 3 places"
+        confidence: high
+    alternatives_considered:
+      - name: "Yup"
+        reason: "More verbose, different pattern than existing"
+        rejected: true
+
+  implementation_patterns:
+    follow:
+      - pattern: "Use existing AuthContext for user state"
+        location: "src/contexts/AuthContext.tsx"
+      - pattern: "API routes follow RESTful conventions"
+        location: "src/api/routes/"
+    avoid:
+      - pattern: "Direct database access in components"
+        reason: "Violates existing architecture"
+
+  potential_blockers:
+    - blocker: "User table lacks 'preferences' column"
+      severity: medium
+      resolution: "Migration required before feature"
+    - blocker: "Current auth doesn't support OAuth"
+      severity: high
+      resolution: "Auth refactor needed first"
+
+  recommendations:
+    primary_approach: "Extend existing UserService with preferences"
+    estimated_complexity: 7
+    risks:
+      - "OAuth integration more complex than expected"
+    prerequisites:
+      - "Database migration for user preferences"
+```
+
+**Display Research Progress:**
+
+```
+═══════════════════════════════════════════════════════════════════
+ Research Phase
+═══════════════════════════════════════════════════════════════════
+
+Analyzing codebase and technologies...
+
+  ✅ Project structure analyzed
+  ✅ Existing patterns identified (5 found)
+  ✅ Technology compatibility checked
+  ⚠️  2 potential blockers identified
+  ✅ Recommendations generated
+
+Research Summary:
+  • Existing stack: FastAPI + React + PostgreSQL
+  • Patterns to follow: Repository pattern, React Query
+  • Blockers found: 2 (1 high, 1 medium severity)
+  • Recommended approach: Extend existing UserService
+
+Proceeding to follow-up questions...
+```
+
+### Phase 3: Follow-up Questions (Research-Informed)
+
+Based on research findings, ask clarifying questions:
+
+```yaml
+follow_up_triggers:
+  - condition: blocker_found
+    question: "Research found {blocker}. Should we address this first, or work around it?"
+
+  - condition: multiple_approaches
+    question: "There are two ways to implement this: {approach_a} or {approach_b}. Which do you prefer?"
+
+  - condition: prerequisites_needed
+    question: "This feature requires {prerequisite} first. Should we include that in the plan?"
+
+  - condition: technology_choice
+    question: "Research suggests using {recommended} because {reason}. Does that work for you?"
+```
+
+**Example Follow-up:**
+
+```
+═══════════════════════════════════════════════════════════════════
+ Follow-up Questions (from Research)
+═══════════════════════════════════════════════════════════════════
+
+Research identified some items that need your input:
+
+Q1: A database migration is needed to add user preferences.
+    Should we include this in Sprint 1? (yes/no/skip feature)
+
+Q2: Two implementation approaches are possible:
+    A) Extend existing UserService (recommended, lower risk)
+    B) Create new PreferencesService (cleaner, more work)
+    Which approach do you prefer? (a/b)
+
+Q3: OAuth integration is more complex than a simple feature.
+    Should we:
+    A) Include OAuth in this plan (adds ~2 sprints)
+    B) Use existing auth, add OAuth later
+    C) Descope to just username/password
+    Select option (a/b/c):
+```
+
+### Phase 4: Generate PRD
 
 Create `docs/planning/PROJECT_PRD.yaml`:
 
@@ -332,7 +518,7 @@ success_metrics:
   - "[Metric 2]"
 ```
 
-### Phase 3: Task Breakdown
+### Phase 5: Task Breakdown
 
 Generate tasks in `docs/planning/tasks/`:
 
@@ -370,7 +556,7 @@ acceptance_criteria:
 suggested_agent: backend_developer | frontend_developer | ...
 ```
 
-### Phase 4: Sprint Planning
+### Phase 6: Sprint Planning
 
 Organize tasks into sprints in `docs/sprints/`:
 
@@ -402,9 +588,9 @@ quality_gates:
   - Code review complete
 ```
 
-### Phase 5: Initialize State File
+### Phase 7: Initialize State
 
-Create `.devteam/state.yaml`:
+Initialize session in SQLite database:
 
 ```yaml
 version: "3.0"
@@ -465,10 +651,15 @@ Files created:
   • docs/sprints/SPRINT-*.yaml ([M] files)
   • .devteam/state.yaml
 
+Research Findings:
+  • Patterns to follow: [N] identified
+  • Blockers addressed: [N]
+  • Approach: [Recommended approach]
+
 Next steps:
   1. Review the PRD and tasks
-  2. Run /devteam:auto to execute autonomously
-  3. Or run /devteam:sprint SPRINT-001 for first sprint only
+  2. Run /devteam:implement to start implementation
+  3. Or run /devteam:implement --sprint 1 for first sprint only
 ```
 
 ## Important Notes
@@ -477,4 +668,11 @@ Next steps:
 - Be conversational but efficient
 - Provide technology recommendations with reasoning
 - Don't generate files until you have all required information
-- Initialize state file for progress tracking
+- Initialize state in database for progress tracking
+- Research phase prevents costly discoveries during implementation
+
+## See Also
+
+- `/devteam:implement` - Execute the plan
+- `/devteam:list` - List available plans
+- `/devteam:status` - Check planning status

@@ -1,7 +1,7 @@
 {
-  "name": "multi-agent",
-  "version": "2.5.0",
-  "description": "76-agent automated development system with PR-based workflow, git worktree-based parallel development, runtime testing verification, workflow compliance validation, comprehensive summaries, and quality gates",
+  "name": "devteam",
+  "version": "3.0.0",
+  "description": "89-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [
@@ -28,6 +28,94 @@
       "file": "agents/planning/sprint-planner.md",
       "model": "opus",
       "category": "planning"
+    },
+    {
+      "id": "research:research-agent",
+      "name": "Research Agent",
+      "description": "Investigates codebase, technologies, and implementation approaches before planning",
+      "file": "agents/research/research-agent.md",
+      "model": "sonnet",
+      "category": "research"
+    },
+    {
+      "id": "orchestration:ralph-orchestrator",
+      "name": "Ralph Orchestrator",
+      "description": "Manages iterative refinement loop, model escalation, and quality gates",
+      "file": "agents/orchestration/ralph-orchestrator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:autonomous-controller",
+      "name": "Autonomous Controller",
+      "description": "Controls autonomous execution mode with stop hooks and persistence",
+      "file": "agents/orchestration/autonomous-controller.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:bug-council-orchestrator",
+      "name": "Bug Council Orchestrator",
+      "description": "Activates and coordinates 5-member bug diagnosis team for complex issues",
+      "file": "agents/orchestration/bug-council-orchestrator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:scope-validator",
+      "name": "Scope Validator",
+      "description": "Enforces 6-layer scope compliance with VETO power",
+      "file": "agents/orchestration/scope-validator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "diagnosis:root-cause-analyst",
+      "name": "Root Cause Analyst",
+      "description": "Bug Council member - Error analysis, hypothesis generation, causal chains",
+      "file": "agents/diagnosis/root-cause-analyst.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "diagnosis:code-archaeologist",
+      "name": "Code Archaeologist",
+      "description": "Bug Council member - Git history, regression detection, blame analysis",
+      "file": "agents/diagnosis/code-archaeologist.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "diagnosis:pattern-matcher",
+      "name": "Pattern Matcher",
+      "description": "Bug Council member - Similar bugs, anti-pattern identification, codebase search",
+      "file": "agents/diagnosis/pattern-matcher.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "diagnosis:systems-thinker",
+      "name": "Systems Thinker",
+      "description": "Bug Council member - Dependencies, architectural issues, integration problems",
+      "file": "agents/diagnosis/systems-thinker.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "diagnosis:adversarial-tester",
+      "name": "Adversarial Tester",
+      "description": "Bug Council member - Edge cases, security vulnerabilities, attack vectors",
+      "file": "agents/diagnosis/adversarial-tester.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "quality:refactoring-agent",
+      "name": "Refactoring Agent",
+      "description": "Dedicated code restructuring, technical debt reduction, and codebase improvements",
+      "file": "agents/quality/refactoring-agent.md",
+      "model": "sonnet",
+      "category": "quality"
     },
     {
       "id": "orchestration:sprint-orchestrator",
@@ -658,23 +746,33 @@
   ],
   "commands": [
     {
-      "name": "/devteam:auto",
-      "description": "Autonomous execution with agent selection until completion",
-      "file": "commands/devteam-auto.md"
-    },
-    {
       "name": "/devteam:plan",
-      "description": "Interactive planning - creates PRD, tasks, and sprints",
+      "description": "Interactive planning with interview, research, PRD generation, and sprint planning",
       "file": "commands/devteam-plan.md"
     },
     {
-      "name": "/devteam:sprint",
-      "description": "Execute a specific sprint or all sprints",
-      "file": "commands/devteam-sprint.md"
+      "name": "/devteam:implement",
+      "description": "Execute implementation - plans, sprints, tasks, or ad-hoc work with Ralph quality loop",
+      "file": "commands/devteam-implement.md"
+    },
+    {
+      "name": "/devteam:bug",
+      "description": "Fix a bug with structured diagnostic workflow and Bug Council if needed",
+      "file": "commands/devteam-bug.md"
+    },
+    {
+      "name": "/devteam:issue",
+      "description": "Fix a GitHub issue by number with interview and Bug Council if needed",
+      "file": "commands/devteam-issue.md"
+    },
+    {
+      "name": "/devteam:issue-new",
+      "description": "Create a new GitHub issue",
+      "file": "commands/devteam-issue-new.md"
     },
     {
       "name": "/devteam:list",
-      "description": "List all plans and their status",
+      "description": "List all plans, sprints, and tasks with status",
       "file": "commands/devteam-list.md"
     },
     {
@@ -683,14 +781,14 @@
       "file": "commands/devteam-select.md"
     },
     {
-      "name": "/devteam:issue",
-      "description": "Fix a GitHub issue by number with Bug Council if needed",
-      "file": "commands/devteam-issue.md"
+      "name": "/devteam:status",
+      "description": "Display system health, progress, costs, and execution history",
+      "file": "commands/devteam-status.md"
     },
     {
-      "name": "/devteam:issue-new",
-      "description": "Create a new GitHub issue",
-      "file": "commands/devteam-issue-new.md"
+      "name": "/devteam:reset",
+      "description": "Reset state, clear stuck sessions, and recover from errors",
+      "file": "commands/devteam-reset.md"
     },
     {
       "name": "/devteam:merge-tracks",
@@ -711,21 +809,6 @@
       "name": "/devteam:worktree-list",
       "description": "List all git worktrees with track information",
       "file": "commands/worktree-list.md"
-    },
-    {
-      "name": "/devteam:prd",
-      "description": "Generate comprehensive PRD (legacy - use /devteam:plan)",
-      "file": "commands/prd.md"
-    },
-    {
-      "name": "/devteam:planning",
-      "description": "Break down PRD into tasks and sprints (legacy - use /devteam:plan)",
-      "file": "commands/planning.md"
-    },
-    {
-      "name": "/devteam:feature",
-      "description": "Complete feature workflow (legacy - use /devteam:plan)",
-      "file": "commands/feature.md"
     }
   ]
 }

@@ -388,6 +388,72 @@ cost_optimization:
       - [test_writer, security_auditor]
 
 # =============================================================================
+# EXECUTION MODES
+# =============================================================================
+
+execution_modes:
+  # Default execution mode
+  default: normal
+
+  # Normal mode - standard escalation
+  normal:
+    initial_model: complexity_based    # Use complexity scoring
+    escalation_threshold: 2            # Failures before escalation
+    context_strategy: full             # Full context between agents
+    parallel_gates: true               # Run quality gates in parallel
+
+    escalation_rules:
+      haiku_to_sonnet: 2               # After 2 failures
+      sonnet_to_opus: 2                # After 2 failures
+      opus_to_council: 3               # After 3 failures
+
+  # Eco mode - cost-optimized (30-50% savings)
+  eco:
+    initial_model: haiku               # Always start with haiku
+    escalation_threshold: 4            # More patient - 4 failures before escalate
+    context_strategy: summarized       # Summarize context between agents
+    parallel_gates: false              # Sequential to reduce API calls
+
+    # Exceptions - these still get appropriate model
+    exceptions:
+      - task_type: security
+        initial_model: sonnet
+        reason: "Security tasks need careful analysis"
+      - task_type: architecture
+        initial_model: sonnet
+        reason: "Architecture decisions are costly to redo"
+      - complexity_threshold: 10
+        initial_model: sonnet
+        reason: "High complexity tasks need more capability"
+
+    escalation_rules:
+      haiku_to_sonnet: 4               # After 4 failures
+      sonnet_to_opus: 4                # After 4 failures
+      opus_to_council: 4               # After 4 failures
+
+    # Context summarization settings
+    summarization:
+      enabled: true
+      between_agents: true             # Summarize when handing off
+      max_context_tokens: 8000         # Target context size
+      preserve:                        # Always include in summary
+        - error_messages
+        - file_paths
+        - test_results
+        - quality_gate_outputs
+        - current_task_requirements
+      compress:                        # Can be summarized
+        - conversation_history
+        - research_findings
+        - previous_attempts_detail
+
+    # Cost tracking
+    cost_tracking:
+      show_realtime: true              # Display cost as we go
+      warn_threshold_dollars: 5        # Warn if cost exceeds
+      target_savings_percent: 30       # Target vs normal mode
+
+# =============================================================================
 # REPORTING
 # =============================================================================
 

@@ -1,6 +1,13 @@
 # DevTeam: Multi-Agent Autonomous Development System
 
-An enterprise-grade Claude Code plugin providing **76+ specialized AI agents** with autonomous orchestration, intelligent agent selection, iterative quality refinement (Ralph), multi-perspective debugging (Bug Council), and comprehensive support for the entire software development lifecycle.
+An enterprise-grade Claude Code plugin providing **89 specialized AI agents** with:
+- **Interview-driven planning** - Clarify requirements before work begins
+- **Codebase research** - Investigate patterns and blockers before implementation
+- **SQLite state management** - Reliable session tracking and cost analytics
+- **Model escalation** - Automatic haiku → sonnet → opus progression
+- **Bug Council** - 5-agent diagnostic team for complex issues
+- **Eco mode** - 30-50% cost reduction for routine tasks
+- **Quality gates** - Tests, types, lint, security, coverage enforcement
 
 ---
 
@@ -191,45 +198,58 @@ Abandonment Attempt → Detected → Re-engagement Prompt
 
 ## Quick Start
 
-### Autonomous Mode (Recommended)
+### Planning + Implementation (Recommended)
 
 ```bash
-# Let the system handle everything
-/devteam:auto "Build a REST API for user management with authentication"
+# Plan a new feature (interview → research → PRD → tasks → sprints)
+/devteam:plan --feature "Add user authentication with OAuth"
+
+# Execute the plan
+/devteam:implement
+
+# Or execute specific sprint
+/devteam:implement --sprint 1
 ```
 
 The system will:
-1. Analyze your codebase (languages, frameworks)
-2. Select appropriate agents automatically
-3. Execute with Ralph quality loop
-4. Escalate models if needed
-5. Activate Bug Council for hard problems
-6. Continue until all quality gates pass
+1. **Interview** - Clarify requirements with targeted questions
+2. **Research** - Analyze codebase, identify patterns and blockers
+3. **Plan** - Generate PRD, tasks, and sprints
+4. **Execute** - Run with Ralph quality loop and model escalation
+5. **Verify** - Pass all quality gates before completion
 
-### Manual Agent Selection
+### Bug Fixing
 
 ```bash
-# Specific task types
-/devteam:feature "Add dark mode toggle"
-/devteam:bug "Fix login timeout issue"
-/devteam:security "Audit authentication flow"
-/devteam:refactor "Optimize database queries"
+# Fix a local bug (interview → diagnose → fix → verify)
+/devteam:bug "Login fails for guest users"
+
+# Fix a GitHub issue
+/devteam:issue 123
+
+# Force Bug Council for complex issues
+/devteam:bug "Memory leak in image processor" --council
 ```
 
-### Full Workflow
+### Cost-Optimized Mode
 
 ```bash
-# 1. Generate PRD
-/devteam:prd
+# Use eco mode for 30-50% cost savings
+/devteam:implement --eco
+/devteam:bug "Minor CSS issue" --eco
+```
 
-# 2. Create tasks and sprints
-/devteam:planning
+### Monitoring
 
-# 3. Execute sprints
-/devteam:sprint SPRINT-001
+```bash
+# Check status, costs, progress
+/devteam:status
 
-# Or execute all
-/devteam:sprint all
+# List plans and tasks
+/devteam:list
+
+# Reset stuck sessions
+/devteam:reset
 ```
 
 ---
@@ -490,42 +510,64 @@ mcp-configs/                 # MCP server configurations
 
 ## Commands Reference
 
-### Primary Commands (Recommended)
+### Core Commands
 
 | Command | Description |
 |---------|-------------|
-| `/devteam:auto <task>` | Autonomous execution with agent selection |
-| `/devteam:plan [description]` | Interactive planning - creates PRD, tasks, and sprints |
-| `/devteam:plan --feature "<desc>"` | Plan a new feature for existing project |
-| `/devteam:plan --from <file>` | Generate plan from spec file or folder |
-| `/devteam:sprint <id>` | Execute specific sprint |
-| `/devteam:sprint all` | Execute all sprints sequentially |
-| `/devteam:list [--type] [--all]` | List all plans and their status |
-| `/devteam:select <name\|#>` | Select a plan to work on |
-| `/devteam:issue <#>` | Fix a GitHub issue by number |
-| `/devteam:issue-new "<desc>"` | Create a new GitHub issue |
+| `/devteam:plan` | Interactive planning with interview, research, and sprint generation |
+| `/devteam:implement` | Execute plans, sprints, tasks, or ad-hoc work |
+| `/devteam:bug "<desc>"` | Fix bugs with diagnostic workflow and Bug Council |
+| `/devteam:issue <#>` | Fix GitHub issues with interview if needed |
+| `/devteam:status` | Display system health, progress, and costs |
+| `/devteam:reset` | Reset stuck sessions and recover from errors |
 
-### Worktree Management
+### Planning Options
+
+```bash
+/devteam:plan                      # Interactive planning
+/devteam:plan --feature "desc"     # Plan specific feature
+/devteam:plan --from spec.md       # Plan from spec file
+/devteam:plan --skip-research      # Skip research phase
+```
+
+### Implementation Options
+
+```bash
+/devteam:implement                 # Execute current plan
+/devteam:implement --sprint 1      # Execute specific sprint
+/devteam:implement --all           # Execute all sprints
+/devteam:implement --task TASK-001 # Execute specific task
+/devteam:implement "ad-hoc task"   # One-off task with interview
+/devteam:implement --eco           # Cost-optimized mode
+```
+
+### Bug Fixing Options
+
+```bash
+/devteam:bug "description"         # Fix with interview
+/devteam:bug "desc" --council      # Force Bug Council
+/devteam:bug "desc" --severity critical
+/devteam:bug "desc" --eco          # Cost-optimized
+```
+
+### Management Commands
 
 | Command | Description |
 |---------|-------------|
-| `/devteam:worktree status` | Show detailed status of all worktrees |
-| `/devteam:worktree list` | List all git worktrees |
-| `/devteam:worktree cleanup` | Clean up development worktrees |
-| `/devteam:merge-tracks` | Merge parallel development tracks |
+| `/devteam:list` | List plans, sprints, and tasks |
+| `/devteam:select <plan>` | Select active plan |
+| `/devteam:issue-new "<desc>"` | Create new GitHub issue |
 
-### Legacy Commands (Still Supported)
+### Worktree Commands
 
 | Command | Description |
 |---------|-------------|
-| `/devteam:prd` | Generate Product Requirements Document |
-| `/devteam:planning` | Create tasks and sprints from PRD |
-| `/devteam:feature <desc>` | Complete feature workflow |
-| `/devteam:bug <desc>` | Bug fix with Bug Council if needed |
-| `/devteam:security` | Security audit and remediation |
-| `/devteam:refactor` | Code refactoring workflow |
+| `/devteam:worktree-status` | Show worktree status |
+| `/devteam:worktree-list` | List all worktrees |
+| `/devteam:worktree-cleanup` | Clean up worktrees |
+| `/devteam:merge-tracks` | Merge parallel tracks |
 
-See [commands/README.md](commands/README.md) for detailed command documentation and migration guide.
+See [commands/README.md](commands/README.md) for detailed documentation.
 
 ---
 
