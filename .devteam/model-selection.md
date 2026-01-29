@@ -139,6 +139,56 @@ def calculate_complexity(task):
     return min(score, 14)
 ```
 
+## Ralph Integration
+
+Model selection integrates with the Ralph quality loop:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 RALPH MODEL ESCALATION                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Initial: Complexity-based selection                        │
+│      │                                                       │
+│      ▼                                                       │
+│  Attempt fails                                               │
+│      │                                                       │
+│      ├─── 1st failure: Retry with more context (same model) │
+│      │                                                       │
+│      ├─── 2nd failure: Retry with alt approach (same model) │
+│      │                                                       │
+│      └─── 3rd failure: ESCALATE MODEL                       │
+│               │                                              │
+│               ├─── haiku → sonnet                           │
+│               ├─── sonnet → opus                            │
+│               └─── opus → Bug Council activation            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Escalation Thresholds
+
+Configured in `.devteam/ralph-config.yaml`:
+
+```yaml
+model_escalation:
+  consecutive_failures:
+    haiku_to_sonnet: 2    # After 2 haiku failures → sonnet
+    sonnet_to_opus: 2     # After 2 sonnet failures → opus
+    opus_max_failures: 3  # After 3 opus failures → Bug Council
+```
+
+### Bug Council Activation
+
+When opus-level reasoning fails repeatedly:
+
+1. Bug Council convenes (5 specialist agents)
+2. Each analyzes from their perspective
+3. Solutions are synthesized
+4. Implementation continues with opus
+
+This ensures no task is abandoned - only escalated.
+
 ## Recording Model History
 
 Track model usage in state file:
