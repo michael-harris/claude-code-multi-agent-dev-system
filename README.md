@@ -601,29 +601,45 @@ Contributions welcome! Areas of interest:
 
 ## Credits & Acknowledgments
 
-This project draws inspiration from several pioneering projects in the AI-assisted development space:
+This project draws inspiration from and builds upon several pioneering projects in the AI-assisted development space.
 
-### Conceptual Inspirations
+### Direct Inspirations (Claude Code Ecosystem)
+
+These projects directly influenced our design and implementation:
+
+| Project | What We Learned | Link |
+|---------|-----------------|------|
+| **ralph-claude-code** | The Ralph autonomous loop concept, EXIT_SIGNAL pattern, circuit breaker for stagnation detection, dual-condition exit gates, `.ralph/` directory structure pattern | [github.com/frankbria/ralph-claude-code](https://github.com/frankbria/ralph-claude-code) |
+| **everything-claude-code** | Specialized agent delegation pattern, cross-platform hook architecture, subagent orchestration strategies, skill/agent separation | [github.com/affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code) |
+| **awesome-claude-skills** | Skill organization patterns, YAML frontmatter structure, category-based skill taxonomy | [github.com/ComposioHQ/awesome-claude-skills](https://github.com/ComposioHQ/awesome-claude-skills) |
+| **wshobson/agents** | Tiered model assignment (Opus/Sonnet/Haiku), plugin architecture patterns, token efficiency strategies, 72-plugin modular design | [github.com/wshobson/agents](https://github.com/wshobson/agents) |
+| **ui-ux-pro-max-skill** | Design system generation patterns, industry-specific rule sets, Master+Overrides architecture concept | [github.com/nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) |
+
+### What We Built Upon (Our Additions)
+
+While inspired by these projects, we developed original implementations:
+
+| Feature | Inspiration Source | Our Original Addition |
+|---------|-------------------|----------------------|
+| **Ralph Quality Loop** | ralph-claude-code's autonomous loop | Added model escalation (haiku→sonnet→opus), Bug Council activation, quality gates integration |
+| **Model Escalation** | wshobson/agents tier concept | Automatic escalation after consecutive failures, complexity-based initial selection, de-escalation after success |
+| **Bug Council** | Original concept | 5-agent multi-perspective debugging system with synthesized solutions |
+| **Scope Enforcement** | Original concept | 6-layer enforcement with VETO power, out-of-scope observations logging |
+| **Anti-Abandonment** | Original concept | Persistence hooks detecting "give up" patterns, escalating re-engagement prompts |
+| **Agent Selection** | everything-claude-code delegation | Weighted scoring algorithm (keywords 40%, files 30%, task type 20%, language 10%) |
+| **Enterprise Agents** | wshobson/agents categories | SRE, Platform Engineer, Compliance Engineer, Penetration Tester, and 8 other enterprise roles |
+
+### Broader Ecosystem Inspirations
 
 | Project | Inspiration | Link |
 |---------|-------------|------|
-| **Aider** | Iterative code refinement loops and autonomous coding patterns | [github.com/paul-gauthier/aider](https://github.com/paul-gauthier/aider) |
-| **Claude Code** | Hooks system, tool use patterns, and agent architecture | [Anthropic Claude Code](https://docs.anthropic.com/en/docs/claude-code) |
-| **AutoGPT** | Multi-agent orchestration and task decomposition patterns | [github.com/Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) |
-| **GPT-Engineer** | PRD-to-code workflows and specification-driven development | [github.com/gpt-engineer-org/gpt-engineer](https://github.com/gpt-engineer-org/gpt-engineer) |
-| **MetaGPT** | Multi-agent software company simulation and role-based agents | [github.com/geekan/MetaGPT](https://github.com/geekan/MetaGPT) |
-| **Sweep AI** | Automated bug fixing and PR generation patterns | [github.com/sweepai/sweep](https://github.com/sweepai/sweep) |
-| **Devin** | The vision of autonomous software engineering agents | [Cognition AI](https://www.cognition-labs.com/devin) |
-| **OpenHands** | Agent-computer interfaces and tool use patterns | [github.com/All-Hands-AI/OpenHands](https://github.com/All-Hands-AI/OpenHands) |
-| **SWE-agent** | Software engineering agent architectures | [github.com/princeton-nlp/SWE-agent](https://github.com/princeton-nlp/SWE-agent) |
-
-### Specific Feature Inspirations
-
-- **Ralph (Quality Loop)**: Inspired by Aider's iterative refinement approach and "linting loops" in CI/CD
-- **Bug Council**: Inspired by ensemble methods in ML and the "committee of experts" pattern from MetaGPT
-- **Scope Enforcement**: Inspired by principle of least privilege and sandboxing patterns in security
-- **Model Escalation**: Inspired by tiered support systems and auto-scaling in cloud architecture
-- **Anti-Abandonment**: Inspired by process supervision and watchdog patterns in distributed systems
+| **Aider** | Iterative code refinement and "linting loops" | [github.com/paul-gauthier/aider](https://github.com/paul-gauthier/aider) |
+| **AutoGPT** | Multi-agent orchestration patterns | [github.com/Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) |
+| **MetaGPT** | Role-based agents, "committee of experts" | [github.com/geekan/MetaGPT](https://github.com/geekan/MetaGPT) |
+| **GPT-Engineer** | PRD-to-code workflows | [github.com/gpt-engineer-org/gpt-engineer](https://github.com/gpt-engineer-org/gpt-engineer) |
+| **Sweep AI** | Automated bug fixing patterns | [github.com/sweepai/sweep](https://github.com/sweepai/sweep) |
+| **OpenHands** | Agent-computer interfaces | [github.com/All-Hands-AI/OpenHands](https://github.com/All-Hands-AI/OpenHands) |
+| **SWE-agent** | Software engineering agent design | [github.com/princeton-nlp/SWE-agent](https://github.com/princeton-nlp/SWE-agent) |
 
 ### Standards & Frameworks Referenced
 
@@ -633,12 +649,16 @@ This project draws inspiration from several pioneering projects in the AI-assist
 - **Google SRE** - Site Reliability Engineering practices
 - **The Twelve-Factor App** - Modern application design principles
 
-### Community
+### Originality Statement
 
-Special thanks to:
-- The Claude Code community for hooks system documentation and patterns
-- Open source contributors pioneering multi-agent development patterns
-- The AI safety community for guidance on agent constraints and guardrails
+All code in this repository was written from scratch. While we adopted concepts and patterns from the above projects (particularly the Ralph loop concept from frankbria/ralph-claude-code), our implementations are original:
+
+- Our hooks use different file structures (`.devteam/` vs `.ralph/`)
+- Our Ralph config uses YAML with model escalation (original uses INI without escalation)
+- Our agent definitions follow a different structure
+- Bug Council, scope enforcement, and anti-abandonment are entirely original systems
+
+We believe in standing on the shoulders of giants while contributing our own innovations back to the community.
 
 ---
 

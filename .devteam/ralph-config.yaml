@@ -13,6 +13,36 @@ loop_settings:
   iteration_timeout_minutes: 15
   total_timeout_minutes: 120
 
+# =============================================================================
+# RATE LIMITING (inspired by ralph-claude-code)
+# =============================================================================
+
+rate_limiting:
+  enabled: true
+
+  # API call limits
+  api_limits:
+    calls_per_hour: 100           # Max API calls per hour
+    calls_per_minute: 10          # Burst limit
+    tokens_per_hour: 500000       # Token budget per hour
+
+  # When limits are approached
+  on_approaching_limit:
+    warn_at_percentage: 80        # Warn at 80% of limit
+    throttle_at_percentage: 90    # Slow down at 90%
+    pause_at_percentage: 100      # Pause and wait at 100%
+
+  # Wait behavior when limit hit
+  on_limit_reached:
+    action: wait_and_retry        # Options: wait_and_retry, prompt_user, halt
+    wait_minutes: 5               # Wait time before retry
+    max_waits: 3                  # Max consecutive waits before prompting user
+
+  # Tracking
+  tracking:
+    file: ".devteam/rate-limit-state.json"
+    reset_interval: hourly
+
   # When to notify user during long-running loops
   notifications:
     iteration_warning: 5      # Notify at iteration 5
