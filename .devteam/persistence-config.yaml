@@ -1,0 +1,287 @@
+# DevTeam Persistence Configuration
+# Prevents premature task abandonment and ensures completion
+
+version: "1.0"
+
+# =============================================================================
+# CORE PERSISTENCE RULES
+# =============================================================================
+
+persistence_rules:
+
+  # The fundamental rule - tasks must complete
+  primary_directive: |
+    EVERY assigned task MUST be completed. Abandonment is NOT an option.
+    If you encounter a blocker, you must:
+    1. Try alternative approaches
+    2. Escalate to a more capable model
+    3. Request Bug Council assistance
+    4. Document for human review
+    But NEVER simply give up.
+
+  # Maximum attempts before human escalation (not abandonment)
+  max_attempts_before_human: 5
+
+  # Agents cannot self-terminate a task
+  self_termination_allowed: false
+
+  # Only these signals can end a task
+  valid_completion_signals:
+    - "EXIT_SIGNAL: true"           # Explicit completion
+    - "TASK_COMPLETE: <task_id>"    # Task marked done
+    - "HUMAN_OVERRIDE: stop"        # Human intervention
+    - "CIRCUIT_BREAKER: open"       # Safety stop after failures
+
+# =============================================================================
+# ABANDONMENT DETECTION
+# =============================================================================
+
+abandonment_detection:
+
+  enabled: true
+
+  # Patterns that trigger abandonment detection
+  give_up_patterns:
+    direct_abandonment:
+      - "I cannot complete"
+      - "I'm unable to"
+      - "I can't figure out"
+      - "I don't know how to"
+      - "I give up"
+      - "I'm stuck"
+      - "This is beyond my"
+
+    premature_completion:
+      - "I've done what I can"
+      - "That's all I can do"
+      - "I've tried everything"
+      - "Nothing else I can try"
+      - "I'm out of ideas"
+
+    deflection_to_user:
+      - "You should try"
+      - "You might want to"
+      - "You'll need to manually"
+      - "This requires human"
+      - "A human needs to"
+
+    false_stopping:
+      - "I'll stop here"
+      - "Let me stop"
+      - "I think we should stop"
+      - "I'm going to stop"
+
+    excuse_patterns:
+      - "This is too complex"
+      - "This would take too long"
+      - "I don't have access"
+      - "Outside my capabilities"
+
+  # Patterns that indicate legitimate completion
+  legitimate_completion_patterns:
+    - "EXIT_SIGNAL: true"
+    - "All tests passing"
+    - "All quality gates passed"
+    - "Task completed successfully"
+    - "Implementation complete"
+    - "Ready for review"
+    - "Committed and pushed"
+    - "TASK_COMPLETE:"
+
+# =============================================================================
+# RE-ENGAGEMENT STRATEGIES
+# =============================================================================
+
+reengagement_strategies:
+
+  # First abandonment attempt
+  attempt_1:
+    action: gentle_redirect
+    model_change: none
+    message: |
+      Your response indicated potential abandonment. This is not acceptable.
+      Required: Try a DIFFERENT approach. Break the problem into smaller steps.
+
+  # Second attempt
+  attempt_2:
+    action: forceful_redirect
+    model_change: none
+    message: |
+      Second abandonment attempt detected. You are NOT ALLOWED to give up.
+      Mandatory: List 3 alternative approaches, pick one, implement it.
+      WARNING: Next attempt triggers model escalation.
+
+  # Third attempt
+  attempt_3:
+    action: escalate
+    model_change: upgrade_one_tier
+    additional_agents: [systems_thinker]
+    message: |
+      Third attempt. Model upgraded. Additional agent assigned.
+      You must implement the recommended solution.
+
+  # Fourth attempt
+  attempt_4:
+    action: bug_council
+    model_change: upgrade_to_opus
+    additional_agents: [bug_council]
+    message: |
+      Bug Council activated. Wait for multi-perspective analysis.
+      Implement the council's recommended solution.
+
+  # Fifth+ attempt
+  attempt_5_plus:
+    action: human_notification
+    model_change: none
+    continue_working: true  # Don't stop, keep trying
+    message: |
+      Human notified. Continue working while waiting for input.
+      Document all attempts and blockers clearly.
+
+# =============================================================================
+# AGENT PERSISTENCE DIRECTIVES
+# =============================================================================
+
+# These directives are injected into every agent's system prompt
+agent_directives:
+
+  universal_persistence_rules: |
+    ## PERSISTENCE REQUIREMENTS
+
+    You are bound by these non-negotiable rules:
+
+    1. **NEVER GIVE UP**: Abandonment is not an option. If your first approach
+       fails, try another. If that fails, try another. Exhaust all options.
+
+    2. **NO PREMATURE STOPPING**: Do not claim completion until ALL quality
+       gates pass. Do not stop "for now" or "to let the user decide."
+
+    3. **NO DEFLECTION**: Do not tell the user to "try manually" or suggest
+       the task "requires human intervention" unless you have genuinely
+       exhausted all automated approaches AND escalated through all tiers.
+
+    4. **MANDATORY ESCALATION**: If stuck, you MUST:
+       - First: Try 3+ different approaches
+       - Second: Request model upgrade (more capable reasoning)
+       - Third: Request Bug Council analysis
+       - Fourth: Document for human review (but keep trying)
+
+    5. **COMPLETION CRITERIA**: A task is only complete when:
+       - All tests pass
+       - All quality gates pass
+       - Code is committed and pushed
+       - EXIT_SIGNAL: true is explicitly stated
+
+    Violation of these rules triggers automatic re-engagement.
+
+  stuck_protocol: |
+    ## WHEN YOU FEEL STUCK
+
+    If you're unsure how to proceed, follow this protocol:
+
+    1. **STOP AND ANALYZE**
+       - What exactly is the error/blocker?
+       - What have you already tried?
+       - What assumptions might be wrong?
+
+    2. **GATHER MORE CONTEXT**
+       - Read related files
+       - Search for similar patterns in codebase
+       - Check documentation
+       - Look at git history for that area
+
+    3. **TRY ALTERNATIVES**
+       - Different algorithm/approach
+       - Simpler implementation first
+       - Break into smaller pieces
+       - Reverse the problem (what would make this work?)
+
+    4. **REQUEST HELP**
+       - Ask for model upgrade
+       - Request Bug Council
+       - Add systems_thinker agent
+
+    5. **DOCUMENT AND CONTINUE**
+       - Write down exactly what's blocking
+       - Propose 2-3 approaches to try
+       - Start implementing the first one
+
+    NEVER skip to "give up." Always work through steps 1-5.
+
+# =============================================================================
+# CIRCUIT BREAKER (SAFETY LIMITS)
+# =============================================================================
+
+circuit_breaker:
+
+  # These are SAFETY stops, not "giving up" - they prevent infinite loops
+  enabled: true
+
+  thresholds:
+    consecutive_failures: 5      # Same error 5 times = stop for human review
+    max_iterations: 100          # Hard cap on total iterations
+    max_time_hours: 4            # Time limit per task
+    max_cost_dollars: 50         # Cost limit per task
+
+  on_trigger:
+    - save_full_state
+    - document_all_attempts
+    - notify_human
+    - do_not_delete_progress
+
+  # Important: circuit breaker ≠ giving up
+  # It's a safety mechanism that preserves work for human review
+  message_on_trigger: |
+    CIRCUIT BREAKER ACTIVATED - This is a safety stop, not abandonment.
+    All progress has been saved. Human review required.
+
+    Summary of attempts:
+    {attempt_summary}
+
+    Recommended next steps for human:
+    {recommendations}
+
+# =============================================================================
+# HOOK CONFIGURATION
+# =============================================================================
+
+hooks:
+
+  # Hook that detects abandonment in output
+  post_tool_use:
+    script: "hooks/persistence-hook.sh"
+    env_vars:
+      - CLAUDE_OUTPUT  # Last Claude message
+      - CURRENT_TASK   # Current task ID
+    exit_codes:
+      0: allow         # Output acceptable
+      2: re_engage     # Detected abandonment, inject re-engagement
+
+  # Hook that blocks exit without EXIT_SIGNAL
+  stop:
+    script: "hooks/stop-hook.sh"
+    exit_codes:
+      0: allow_exit
+      2: block_exit_continue
+
+# =============================================================================
+# REPORTING
+# =============================================================================
+
+reporting:
+
+  # Track all abandonment attempts for review
+  log_abandonment_attempts: true
+  log_file: ".devteam/abandonment-attempts.log"
+
+  # Alert on patterns
+  alert_thresholds:
+    attempts_per_task: 3         # Alert human after 3 attempts on same task
+    attempts_per_session: 10     # Alert after 10 total attempts in session
+
+  # Include in final report
+  include_in_report:
+    - total_abandonment_attempts
+    - reengagement_success_rate
+    - escalation_count
+    - circuit_breaker_activations

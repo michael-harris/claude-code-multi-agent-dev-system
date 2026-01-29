@@ -67,6 +67,32 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
 
 ## Hook Descriptions
 
+### persistence-hook.sh
+
+**Purpose**: Detects and prevents premature task abandonment.
+
+**Behavior**:
+1. Analyzes Claude's output for "give up" patterns
+2. Detects phrases like "I cannot", "I give up", "You should manually"
+3. Blocks abandonment and injects re-engagement prompts
+4. Escalates model tier after repeated attempts
+5. Activates Bug Council if agent remains stuck
+
+**Exit Codes**:
+- `0`: Allow (output acceptable, no abandonment detected)
+- `2`: Block and re-engage (detected abandonment attempt)
+
+**Abandonment Response Escalation**:
+| Attempt | Response |
+|---------|----------|
+| 1st | Gentle redirect - try different approach |
+| 2nd | Forceful redirect - list 3 alternatives, warning |
+| 3rd | Model upgrade + additional agent |
+| 4th | Bug Council activation |
+| 5th+ | Human notification (but keep trying) |
+
+**Configuration**: See `.devteam/persistence-config.yaml`
+
 ### stop-hook.sh
 
 **Purpose**: Implements Ralph-style autonomous execution loop.
