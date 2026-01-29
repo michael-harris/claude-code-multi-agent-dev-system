@@ -1,7 +1,7 @@
 # DevTeam Agent Capabilities Index
 # Used for dynamic agent selection based on task requirements
 
-version: "1.0"
+version: "2.0"
 
 # Agent categories and their capabilities
 # This index helps the orchestrator select appropriate agents
@@ -17,8 +17,14 @@ categories:
           - database_schema
           - microservices
           - scalability
+          - distributed_systems
+          - technology_selection
+          - tradeoff_analysis
         complexity_range: [6, 14]
         default_model: opus
+        triggers:
+          keywords: [architecture, system design, scalability, design decision, microservices]
+          task_types: [architecture, design_review]
 
       - id: tech_lead
         capabilities:
@@ -26,17 +32,37 @@ categories:
           - standards_enforcement
           - mentoring
           - technical_decisions
+          - team_coordination
+          - best_practices
         complexity_range: [4, 12]
         default_model: sonnet
+        triggers:
+          keywords: [review, standards, best practices, technical decision]
+          task_types: [code_review, technical_guidance]
+
+      - id: api_designer
+        capabilities:
+          - api_design
+          - openapi_specification
+          - rest_design
+          - graphql_schema
+          - api_versioning
+          - backwards_compatibility
+        complexity_range: [4, 10]
+        default_model: sonnet
+        triggers:
+          keywords: [api design, endpoint design, api spec, openapi, swagger]
+          task_types: [design, api_design]
 
   diagnosis:
-    description: "Bug analysis and debugging"
+    description: "Bug analysis and debugging (Bug Council)"
     agents:
       - id: root_cause_analyst
         capabilities:
           - error_analysis
           - stack_trace_interpretation
           - hypothesis_generation
+          - debugging_strategy
         complexity_range: [5, 14]
         default_model: opus
         bug_council_role: true
@@ -46,6 +72,7 @@ categories:
           - git_history_analysis
           - regression_detection
           - blame_analysis
+          - change_correlation
         complexity_range: [5, 14]
         default_model: opus
         bug_council_role: true
@@ -55,6 +82,7 @@ categories:
           - codebase_search
           - similar_bug_detection
           - anti_pattern_identification
+          - code_pattern_recognition
         complexity_range: [5, 14]
         default_model: opus
         bug_council_role: true
@@ -64,6 +92,7 @@ categories:
           - dependency_analysis
           - integration_issues
           - architectural_bugs
+          - system_interactions
         complexity_range: [5, 14]
         default_model: opus
         bug_council_role: true
@@ -73,6 +102,7 @@ categories:
           - edge_case_discovery
           - stress_testing
           - security_vulnerabilities
+          - failure_mode_analysis
         complexity_range: [5, 14]
         default_model: opus
         bug_council_role: true
@@ -80,103 +110,366 @@ categories:
   implementation:
     description: "Code writing and feature development"
     agents:
-      - id: backend_developer
+      - id: api_developer_python
         capabilities:
           - api_implementation
+          - python_development
+          - fastapi
+          - django
+          - flask
           - database_operations
-          - business_logic
-          - server_configuration
         complexity_range: [2, 12]
-        languages: [python, javascript, typescript, go, rust, java]
+        languages: [python]
+        frameworks: [fastapi, django, flask]
+        triggers:
+          files: ["*.py"]
+          keywords: [python, fastapi, django, flask]
+
+      - id: api_developer_typescript
+        capabilities:
+          - api_implementation
+          - typescript_development
+          - node
+          - express
+          - nestjs
+        complexity_range: [2, 12]
+        languages: [typescript, javascript]
+        frameworks: [express, nestjs, next]
+        triggers:
+          files: ["*.ts", "*.js"]
+          keywords: [typescript, node, express, nestjs]
+
+      - id: api_developer_go
+        capabilities:
+          - api_implementation
+          - go_development
+          - gin
+          - echo
+          - fiber
+        complexity_range: [2, 12]
+        languages: [go]
+        frameworks: [gin, echo, fiber]
+        triggers:
+          files: ["*.go"]
+          keywords: [go, golang, gin]
+
+      - id: api_developer_java
+        capabilities:
+          - api_implementation
+          - java_development
+          - spring
+          - spring_boot
+        complexity_range: [2, 12]
+        languages: [java]
+        frameworks: [spring, spring_boot]
+        triggers:
+          files: ["*.java"]
+          keywords: [java, spring, spring boot]
+
+      - id: api_developer_rust
+        capabilities:
+          - api_implementation
+          - rust_development
+          - actix
+          - axum
+          - tokio
+        complexity_range: [2, 12]
+        languages: [rust]
+        frameworks: [actix, axum]
+        triggers:
+          files: ["*.rs"]
+          keywords: [rust, actix, axum]
 
       - id: frontend_developer
         capabilities:
           - ui_implementation
           - state_management
           - styling
-          - accessibility
+          - component_design
+          - responsive_design
         complexity_range: [2, 12]
         languages: [javascript, typescript]
         frameworks: [react, vue, svelte, angular]
+        triggers:
+          files: ["*.tsx", "*.jsx", "*.vue", "*.svelte"]
+          keywords: [frontend, ui, react, vue, component]
 
       - id: fullstack_developer
         capabilities:
           - api_implementation
           - ui_implementation
           - integration
+          - database_operations
         complexity_range: [3, 10]
 
-      - id: database_engineer
+      - id: database_developer
         capabilities:
           - schema_design
           - query_optimization
           - migrations
           - indexing
+          - stored_procedures
+          - orm_usage
         complexity_range: [3, 12]
+        triggers:
+          files: ["*.sql"]
+          keywords: [database, sql, query, migration, schema]
 
-      - id: devops_engineer
+      - id: ios_developer
         capabilities:
-          - ci_cd
-          - containerization
-          - infrastructure
-          - monitoring
+          - swift_development
+          - ios_ui
+          - core_data
+          - app_store_guidelines
+        complexity_range: [3, 12]
+        languages: [swift]
+        triggers:
+          files: ["*.swift"]
+          keywords: [ios, swift, xcode, uikit, swiftui]
+
+      - id: android_developer
+        capabilities:
+          - kotlin_development
+          - android_ui
+          - room_database
+          - play_store_guidelines
+        complexity_range: [3, 12]
+        languages: [kotlin, java]
+        triggers:
+          files: ["*.kt"]
+          keywords: [android, kotlin, jetpack, compose]
+
+  sre:
+    description: "Site Reliability Engineering and Platform"
+    agents:
+      - id: site_reliability_engineer
+        capabilities:
+          - slo_definition
+          - sli_implementation
+          - error_budgets
+          - incident_response
+          - capacity_planning
+          - chaos_engineering
+          - disaster_recovery
+          - runbook_creation
+        complexity_range: [6, 14]
+        default_model: opus
+        triggers:
+          keywords: [reliability, sre, incident, availability, slo, sli, uptime]
+          task_types: [operations, incident_response, reliability]
+
+      - id: platform_engineer
+        capabilities:
+          - internal_developer_platform
+          - golden_paths
+          - self_service
+          - platform_apis
+          - developer_experience
+          - service_catalog
+        complexity_range: [5, 12]
+        default_model: sonnet
+        triggers:
+          keywords: [platform, idp, developer experience, self-service, golden path]
+          task_types: [platform, tooling]
+
+      - id: observability_engineer
+        capabilities:
+          - metrics_design
+          - logging_strategy
+          - distributed_tracing
+          - alerting
+          - dashboard_creation
+          - apm_implementation
         complexity_range: [4, 12]
+        default_model: sonnet
+        triggers:
+          keywords: [monitoring, observability, metrics, logging, tracing, alerting]
+          task_types: [monitoring, observability]
+
+  devops:
+    description: "DevOps and Infrastructure"
+    agents:
+      - id: cicd_specialist
+        capabilities:
+          - pipeline_design
+          - github_actions
+          - jenkins
+          - deployment_automation
+          - release_management
+        complexity_range: [3, 10]
+        default_model: sonnet
+        triggers:
+          files: [".github/workflows/*", "Jenkinsfile", ".gitlab-ci.yml"]
+          keywords: [ci/cd, pipeline, github actions, deployment]
+
+      - id: docker_specialist
+        capabilities:
+          - dockerfile_creation
+          - container_optimization
+          - docker_compose
+          - multi_stage_builds
+        complexity_range: [2, 8]
+        default_model: haiku
+        triggers:
+          files: ["Dockerfile", "docker-compose.yml"]
+          keywords: [docker, container, dockerfile]
+
+      - id: kubernetes_specialist
+        capabilities:
+          - kubernetes_deployment
+          - helm_charts
+          - operators
+          - cluster_management
+          - service_mesh
+        complexity_range: [5, 12]
+        default_model: sonnet
+        triggers:
+          files: ["*.yaml"]
+          keywords: [kubernetes, k8s, helm, kubectl, pod]
+
+      - id: terraform_specialist
+        capabilities:
+          - infrastructure_as_code
+          - terraform_modules
+          - state_management
+          - cloud_provisioning
+        complexity_range: [4, 12]
+        default_model: sonnet
+        triggers:
+          files: ["*.tf"]
+          keywords: [terraform, iac, infrastructure]
+
+  security:
+    description: "Security and Compliance"
+    agents:
+      - id: security_auditor
+        capabilities:
+          - vulnerability_scanning
+          - code_review_security
+          - owasp_compliance
+          - secure_coding_review
+          - threat_modeling
+        complexity_range: [6, 14]
+        default_model: opus
+        triggers:
+          keywords: [security, vulnerability, secure, audit, owasp]
+          task_types: [security_review]
+
+      - id: penetration_tester
+        capabilities:
+          - web_application_testing
+          - api_security_testing
+          - infrastructure_testing
+          - vulnerability_exploitation
+          - security_reporting
+        complexity_range: [7, 14]
+        default_model: opus
+        triggers:
+          keywords: [pentest, penetration test, ethical hacking, security testing]
+          task_types: [security_testing]
+
+      - id: compliance_engineer
+        capabilities:
+          - soc2_compliance
+          - hipaa_compliance
+          - gdpr_compliance
+          - pci_dss_compliance
+          - iso27001
+          - audit_preparation
+          - policy_documentation
+        complexity_range: [6, 14]
+        default_model: opus
+        triggers:
+          keywords: [compliance, soc2, hipaa, gdpr, pci, audit, regulatory]
+          task_types: [compliance]
 
   quality:
     description: "Testing and quality assurance"
     agents:
-      - id: test_engineer
+      - id: test_writer
         capabilities:
           - unit_testing
           - integration_testing
           - test_strategy
           - mocking
+          - test_coverage
         complexity_range: [2, 10]
+        default_model: sonnet
+        triggers:
+          keywords: [test, unit test, integration test, coverage]
+          task_types: [testing]
 
       - id: e2e_tester
         capabilities:
           - browser_testing
           - user_flow_testing
           - visual_regression
+          - playwright
+          - cypress
         complexity_range: [3, 10]
         tools: [playwright, cypress, selenium]
+        triggers:
+          keywords: [e2e, end to end, playwright, cypress, browser test]
+          task_types: [e2e_testing]
 
-      - id: security_auditor
+      - id: accessibility_specialist
         capabilities:
-          - vulnerability_scanning
-          - code_review_security
-          - owasp_compliance
-          - penetration_testing
-        complexity_range: [6, 14]
-        default_model: opus
+          - wcag_compliance
+          - screen_reader_testing
+          - keyboard_navigation
+          - color_contrast
+          - aria_implementation
+          - inclusive_design
+        complexity_range: [4, 10]
+        default_model: sonnet
+        triggers:
+          keywords: [accessibility, a11y, wcag, screen reader, aria]
+          task_types: [accessibility]
 
-      - id: performance_engineer
+      - id: performance_auditor
         capabilities:
           - profiling
           - optimization
           - load_testing
           - caching
+          - memory_analysis
+          - latency_reduction
         complexity_range: [5, 12]
+        default_model: sonnet
+        triggers:
+          keywords: [performance, optimization, profiling, latency, throughput]
+          task_types: [performance]
 
-  documentation:
-    description: "Documentation and communication"
+  product:
+    description: "Product management and planning"
     agents:
-      - id: technical_writer
+      - id: product_manager
         capabilities:
-          - api_documentation
-          - readme_creation
-          - architecture_docs
-          - user_guides
-        complexity_range: [1, 6]
-        default_model: haiku
+          - product_strategy
+          - prd_creation
+          - roadmap_planning
+          - user_research
+          - prioritization
+          - stakeholder_management
+          - competitive_analysis
+        complexity_range: [5, 12]
+        default_model: opus
+        triggers:
+          keywords: [product, roadmap, user research, prioritization, strategy, prd]
+          task_types: [product_planning]
 
-      - id: code_commenter
+      - id: sprint_planner
         capabilities:
-          - inline_comments
-          - jsdoc
-          - docstrings
-        complexity_range: [1, 4]
-        default_model: haiku
+          - sprint_planning
+          - task_breakdown
+          - estimation
+          - backlog_grooming
+          - velocity_tracking
+        complexity_range: [3, 8]
+        default_model: sonnet
+        triggers:
+          keywords: [sprint, planning, backlog, estimation]
+          task_types: [planning]
 
   data_ai:
     description: "Data and AI/ML tasks"
@@ -186,7 +479,14 @@ categories:
           - etl_pipelines
           - data_modeling
           - data_validation
+          - spark
+          - airflow
+          - data_warehousing
         complexity_range: [4, 12]
+        default_model: sonnet
+        triggers:
+          keywords: [data pipeline, etl, data warehouse, spark]
+          task_types: [data_engineering]
 
       - id: ml_engineer
         capabilities:
@@ -194,8 +494,54 @@ categories:
           - feature_engineering
           - model_deployment
           - evaluation
+          - mlops
         complexity_range: [6, 14]
         default_model: opus
+        triggers:
+          keywords: [machine learning, ml, model, training, inference]
+          task_types: [ml_engineering]
+
+      - id: data_scientist
+        capabilities:
+          - statistical_analysis
+          - data_visualization
+          - experiment_design
+          - hypothesis_testing
+        complexity_range: [5, 12]
+        default_model: sonnet
+        triggers:
+          keywords: [analytics, metrics, dashboard, reporting]
+          task_types: [analytics]
+
+  documentation:
+    description: "Documentation and developer relations"
+    agents:
+      - id: technical_writer
+        capabilities:
+          - api_documentation
+          - readme_creation
+          - architecture_docs
+          - user_guides
+          - tutorial_writing
+        complexity_range: [1, 6]
+        default_model: haiku
+        triggers:
+          keywords: [documentation, docs, readme, api docs, tutorial]
+          task_types: [documentation]
+
+      - id: developer_advocate
+        capabilities:
+          - technical_content
+          - community_engagement
+          - developer_experience
+          - tutorials
+          - workshops
+          - event_speaking
+        complexity_range: [4, 10]
+        default_model: sonnet
+        triggers:
+          keywords: [developer experience, community, tutorial, documentation, devrel]
+          task_types: [devrel, documentation]
 
   support:
     description: "Support and utility functions"
@@ -222,23 +568,63 @@ categories:
         complexity_range: [6, 14]
         default_model: opus
 
+  orchestration:
+    description: "Task orchestration and coordination"
+    agents:
+      - id: task_orchestrator
+        capabilities:
+          - task_decomposition
+          - agent_coordination
+          - parallel_execution
+          - result_synthesis
+        complexity_range: [5, 14]
+        default_model: opus
+
+      - id: bug_council_orchestrator
+        capabilities:
+          - bug_triage
+          - multi_perspective_analysis
+          - consensus_building
+          - solution_synthesis
+        complexity_range: [8, 14]
+        default_model: opus
+
+      - id: scope_validator
+        capabilities:
+          - scope_enforcement
+          - file_validation
+          - change_review
+        complexity_range: [1, 5]
+        default_model: haiku
+
 # Capability to agent mapping for quick lookup
 capability_index:
   # Architecture
   system_design: [architect]
-  api_design: [architect, backend_developer]
-  database_schema: [architect, database_engineer]
+  api_design: [architect, api_designer]
+  database_schema: [architect, database_developer]
 
   # Implementation
-  api_implementation: [backend_developer, fullstack_developer]
-  ui_implementation: [frontend_developer, fullstack_developer]
-  database_operations: [backend_developer, database_engineer]
+  api_implementation: [api_developer_python, api_developer_typescript, api_developer_go, api_developer_java, api_developer_rust]
+  ui_implementation: [frontend_developer]
+  database_operations: [database_developer]
+
+  # SRE & Platform
+  reliability: [site_reliability_engineer]
+  incident_response: [site_reliability_engineer]
+  observability: [observability_engineer]
+  platform: [platform_engineer]
+
+  # Security
+  security_review: [security_auditor]
+  penetration_testing: [penetration_tester]
+  compliance: [compliance_engineer]
 
   # Quality
-  unit_testing: [test_engineer]
-  integration_testing: [test_engineer, e2e_tester]
-  security_review: [security_auditor]
-  performance_optimization: [performance_engineer]
+  unit_testing: [test_writer]
+  e2e_testing: [e2e_tester]
+  accessibility: [accessibility_specialist]
+  performance_optimization: [performance_auditor]
 
   # Bug diagnosis
   error_analysis: [root_cause_analyst]
@@ -247,45 +633,90 @@ capability_index:
   architectural_bugs: [systems_thinker]
   edge_case_discovery: [adversarial_tester]
 
+  # Product
+  product_strategy: [product_manager]
+  sprint_planning: [sprint_planner]
+
+  # Data & AI
+  data_engineering: [data_engineer]
+  machine_learning: [ml_engineer]
+
   # Documentation
-  documentation: [technical_writer]
-  code_comments: [code_commenter]
+  documentation: [technical_writer, developer_advocate]
 
 # Task type to agent recommendations
 task_type_agents:
   feature:
-    primary: [backend_developer, frontend_developer, fullstack_developer]
-    support: [test_engineer, technical_writer]
+    primary: [api_developer_python, api_developer_typescript, frontend_developer]
+    support: [test_writer, technical_writer]
     review: [tech_lead]
 
   bug:
     diagnosis: [root_cause_analyst, code_archaeologist, pattern_matcher, systems_thinker, adversarial_tester]
-    fix: [backend_developer, frontend_developer]
-    verify: [test_engineer]
+    fix: [api_developer_python, api_developer_typescript, frontend_developer]
+    verify: [test_writer]
 
   refactor:
     primary: [refactoring_specialist]
     review: [tech_lead, architect]
-    verify: [test_engineer]
+    verify: [test_writer]
 
   security:
-    primary: [security_auditor]
-    fix: [backend_developer]
+    primary: [security_auditor, penetration_tester]
+    compliance: [compliance_engineer]
+    fix: [api_developer_python, api_developer_typescript]
     review: [tech_lead]
 
   performance:
-    primary: [performance_engineer]
-    fix: [backend_developer, database_engineer]
+    primary: [performance_auditor]
+    fix: [api_developer_python, api_developer_typescript, database_developer]
     verify: [e2e_tester]
 
-  documentation:
-    primary: [technical_writer]
-    review: [tech_lead]
-
-  infrastructure:
-    primary: [devops_engineer]
+  reliability:
+    primary: [site_reliability_engineer]
+    support: [observability_engineer]
     review: [architect]
 
+  infrastructure:
+    primary: [terraform_specialist, kubernetes_specialist]
+    support: [docker_specialist, cicd_specialist]
+    review: [site_reliability_engineer]
+
+  documentation:
+    primary: [technical_writer, developer_advocate]
+    review: [tech_lead]
+
+  accessibility:
+    primary: [accessibility_specialist]
+    review: [frontend_developer]
+
+  product:
+    primary: [product_manager]
+    support: [sprint_planner]
+
   database:
-    primary: [database_engineer]
-    review: [architect, backend_developer]
+    primary: [database_developer]
+    review: [architect, api_developer_python]
+
+# Selection rules
+selection_rules:
+  # Bug Council activation conditions
+  bug_council_activation:
+    conditions:
+      - severity: [critical, high]
+      - affected_components_count: "> 2"
+      - previous_attempts: ">= 2"
+      - complexity_score: ">= 10"
+      - explicit_flag: "bug_council: true"
+
+  # Model escalation
+  model_selection:
+    complexity_thresholds:
+      haiku: [1, 4]      # Simple tasks
+      sonnet: [4, 8]     # Standard tasks
+      opus: [8, 14]      # Complex tasks
+
+  # Parallel execution candidates
+  parallel_agents:
+    - [test_writer, security_auditor]    # Can run in parallel after implementation
+    - [accessibility_specialist, performance_auditor]  # Can audit in parallel
