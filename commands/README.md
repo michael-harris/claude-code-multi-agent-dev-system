@@ -180,12 +180,12 @@ State tracks:
 
 | Old Command | New Command |
 |-------------|-------------|
-| `/multi-agent:prd` | `/devteam:plan` |
-| `/multi-agent:planning` | `/devteam:plan` |
-| `/multi-agent:sprint all` | `/devteam:auto` |
-| `/multi-agent:sprint <id>` | `/devteam:sprint <id>` |
-| `/multi-agent:issue` | `/devteam:issue` |
-| `/multi-agent:feature` | `/devteam:plan` (then auto) |
+| `/devteam:prd` | `/devteam:plan` |
+| `/devteam:planning` | `/devteam:plan` |
+| `/devteam:sprint all` | `/devteam:auto` |
+| `/devteam:sprint <id>` | `/devteam:sprint <id>` |
+| `/devteam:issue` | `/devteam:issue` |
+| `/devteam:feature` | `/devteam:plan` (then auto) |
 
 ## Legacy Commands
 

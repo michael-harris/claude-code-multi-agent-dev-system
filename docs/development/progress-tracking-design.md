@@ -133,9 +133,9 @@ Sprint planner distributes tasks across tracks:
 
 ### Command Behavior
 
-**`/multi-agent:sprint all`** - Resume from last completed sprint (all tracks)
-**`/multi-agent:sprint all 01`** - Resume track 1 from last completed sprint in track 1
-**`/multi-agent:sprint all 02`** - Resume track 2 from last completed sprint in track 2
+**`/devteam:sprint all`** - Resume from last completed sprint (all tracks)
+**`/devteam:sprint all 01`** - Resume track 1 from last completed sprint in track 1
+**`/devteam:sprint all 02`** - Resume track 2 from last completed sprint in track 2
 
 ### Resume Logic
 
@@ -147,7 +147,7 @@ Sprint planner distributes tasks across tracks:
 
 **Example:**
 ```yaml
-# User runs: /multi-agent:sprint all 01
+# User runs: /devteam:sprint all 01
 
 # State shows:
 sprints:
@@ -198,12 +198,12 @@ calculate_max_parallel_tracks(dependency_graph: dict) -> int
 ### Phase 2: Planning Updates
 - Update task-graph-analyzer to calculate max tracks
 - Update sprint-planner to assign tasks to tracks
-- Modify /multi-agent:planning, /multi-agent:feature, /multi-agent:issue commands
+- Modify /devteam:planning, /devteam:feature, /devteam:issue commands
 
 ### Phase 3: Execution Updates
 - Update sprint-orchestrator to use state
 - Update task-orchestrator to record progress
-- Modify /multi-agent:sprint and /multi-agent:sprint-all commands
+- Modify /devteam:sprint and /devteam:sprint-all commands
 
 ### Phase 4: Documentation
 - Update README with new features
@@ -222,35 +222,35 @@ calculate_max_parallel_tracks(dependency_graph: dict) -> int
 
 ### Workflow 1: Single Track (Traditional)
 ```bash
-/multi-agent:prd
-/multi-agent:planning          # No tracks specified = single track
-/multi-agent:sprint all        # Execute all sprints sequentially
+/devteam:prd
+/devteam:planning          # No tracks specified = single track
+/devteam:sprint all        # Execute all sprints sequentially
 ```
 
 ### Workflow 2: Parallel Tracks
 ```bash
-/multi-agent:prd
-/multi-agent:planning 3        # Request 3 parallel tracks
+/devteam:prd
+/devteam:planning 3        # Request 3 parallel tracks
 # System: "Created 3 development tracks (max possible: 5)"
 
 # Run tracks in parallel (in separate sessions)
-/multi-agent:sprint all 01     # Terminal 1: Track 1
-/multi-agent:sprint all 02     # Terminal 2: Track 2
-/multi-agent:sprint all 03     # Terminal 3: Track 3
+/devteam:sprint all 01     # Terminal 1: Track 1
+/devteam:sprint all 02     # Terminal 2: Track 2
+/devteam:sprint all 03     # Terminal 3: Track 3
 ```
 
 ### Workflow 3: Resume After Interruption
 ```bash
-/multi-agent:sprint all 01     # Starts executing track 1
+/devteam:sprint all 01     # Starts executing track 1
 # ... system crashes at SPRINT-003-01 ...
 
-/multi-agent:sprint all 01     # Resume
+/devteam:sprint all 01     # Resume
 # System: "Resuming from SPRINT-003-01 (SPRINT-001-01, SPRINT-002-01 already complete)"
 ```
 
 ### Workflow 4: Feature with Tracks
 ```bash
-/multi-agent:feature Add user authentication system
+/devteam:feature Add user authentication system
 # Prompt: "How many parallel development tracks? (default: 1)"
 # User: "2"
 

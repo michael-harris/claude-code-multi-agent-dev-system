@@ -97,12 +97,12 @@ This was an attempt to DRY up T1/T2 agent definitions but made files invalid for
 
 ## 3. Command Structure Analysis
 
-### `/multi-agent:prd` Command
+### `/devteam:prd` Command
 **Purpose:** Generate comprehensive PRD through interactive interview
 **Architecture:** Direct invocation of `prd-generator` agent
 **Flow:**
 ```
-User: /multi-agent:prd
+User: /devteam:prd
   ↓
 Main Claude → prd-generator agent (Sonnet)
   ↓
@@ -111,25 +111,25 @@ Output: docs/planning/PROJECT_PRD.yaml
 
 **Key Feature:** Technology stack selection FIRST (based on integrations)
 
-### `/multi-agent:planning` Command
+### `/devteam:planning` Command
 **Purpose:** Break PRD into tasks and organize into sprints
 **Architecture:** Sequential orchestration of 2 agents
 **Flow:**
 ```
-User: /multi-agent:planning
+User: /devteam:planning
   ↓
 Main Claude orchestrates:
   1. task-graph-analyzer (Sonnet) → Creates TASK-XXX.yaml files
   2. sprint-planner (Sonnet) → Creates SPRINT-XXX.yaml files
 ```
 
-### `/multi-agent:sprint` Command ⚠️ **IMPORTANT ARCHITECTURAL FINDING**
+### `/devteam:sprint` Command ⚠️ **IMPORTANT ARCHITECTURAL FINDING**
 **Purpose:** Execute complete sprint with quality loops
 **Architecture:** **Manual orchestration by main Claude instance**
 
 **Current Implementation:**
 ```
-User: /multi-agent:sprint SPRINT-001
+User: /devteam:sprint SPRINT-001
   ↓
 Main Claude reads sprint definition
   ↓
@@ -143,16 +143,16 @@ Main Claude calls requirements-validator as quality gate
 
 **⚠️ Architectural Note:**
 - The `sprint-orchestrator.md` agent file EXISTS but is NOT launched
-- The `/multi-agent:sprint` command contains the orchestration instructions
+- The `/devteam:sprint` command contains the orchestration instructions
 - This is the "pragmatic orchestration" approach mentioned in the system
-- `sprint-orchestrator.md` has commands (`/multi-agent:sprint execute`, `/multi-agent:sprint status`) that don't match actual usage
+- `sprint-orchestrator.md` has commands (`/devteam:sprint execute`, `/devteam:sprint status`) that don't match actual usage
 
 **Decision Needed for Plugin:**
-1. **Option A:** Keep sprint-orchestrator as a launchable agent (requires updating /multi-agent:sprint command to launch it)
+1. **Option A:** Keep sprint-orchestrator as a launchable agent (requires updating /devteam:sprint command to launch it)
 2. **Option B:** Remove sprint-orchestrator.md from plugin since it's not actually used
 3. **Option C:** Document it as "reference architecture" but not as a launchable agent
 
-**Recommendation:** Option A - Update `/multi-agent:sprint` to actually launch sprint-orchestrator agent for consistency
+**Recommendation:** Option A - Update `/devteam:sprint` to actually launch sprint-orchestrator agent for consistency
 
 ---
 
@@ -232,9 +232,9 @@ Every agent has:
 - **No change recommended**
 
 **3. Sprint Orchestrator Status**
-- **Current:** Defined but not launched by `/multi-agent:sprint` command
+- **Current:** Defined but not launched by `/devteam:sprint` command
 - **Issue:** Mismatch between agent definition and actual usage
-- **Recommendation:** Update `/multi-agent:sprint` command to launch the agent for architectural consistency
+- **Recommendation:** Update `/devteam:sprint` command to launch the agent for architectural consistency
 
 **4. Task Orchestrator vs Sprint Orchestrator**
 - **task-orchestrator:** Sonnet - Handles single task workflow
@@ -254,7 +254,7 @@ Every agent has:
   "id": "planning:prd-generator",
   "name": "PRD Generator",
   "description": "Interactive PRD creation with technology stack selection",
-  "file": "agents/multi-agent:planning/multi-agent:prd-generator.md",
+  "file": "agents/devteam:planning/devteam:prd-generator.md",
   "model": "sonnet",
   "category": "planning"
 }
@@ -264,7 +264,7 @@ Every agent has:
 **Options:**
 
 **A. Launch as Agent (Recommended)**
-Update `/multi-agent:sprint` command to:
+Update `/devteam:sprint` command to:
 ```javascript
 Task(
   subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
@@ -276,12 +276,12 @@ Task(
 **B. Document as Reference**
 - Keep in plugin as documentation
 - Mark as "reference architecture, not launchable"
-- `/multi-agent:sprint` command continues manual orchestration
+- `/devteam:sprint` command continues manual orchestration
 
 **C. Remove from Plugin**
 - Remove sprint-orchestrator.md
 - Only include task-orchestrator
-- `/multi-agent:sprint` remains command-only (no agent)
+- `/devteam:sprint` remains command-only (no agent)
 
 **RECOMMENDATION: Option A** - Consistency and proper agent-based architecture
 
@@ -338,7 +338,7 @@ claude-code-multi-agent-dev-system/
 
 #### Pending Decisions (Non-Blocking)
 1. ⚠️ **Sprint orchestrator usage** - Decide on Option A, B, or C
-2. ⚠️ **Command integration** - Update `/multi-agent:sprint` command if using Option A
+2. ⚠️ **Command integration** - Update `/devteam:sprint` command if using Option A
 
 #### Recommended Next Steps
 1. **Create plugin repository** structure

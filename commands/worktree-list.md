@@ -1,11 +1,13 @@
 # Worktree List Command
 
-**Expert Command** - List all git worktrees with development track information.
+**Debug/Expert Command** - List all git worktrees with development track information.
+
+> **Note:** This command is rarely needed. Worktrees are managed automatically by `/devteam:implement`. Use this only for debugging worktree issues.
 
 ## Command Usage
 
 ```bash
-/multi-agent:worktree list           # List all worktrees
+/devteam:worktree list           # List all worktrees
 ```
 
 ## Your Process
@@ -69,9 +71,9 @@ Total disk usage: ~135 MB
 Tracks complete: 1/3
 
 Commands:
-  Status: /multi-agent:worktree status
-  Cleanup: /multi-agent:worktree cleanup
-  Merge: /multi-agent:merge-tracks
+  Status: /devteam:worktree status
+  Cleanup: /devteam:worktree cleanup
+  Merge: /devteam:merge-tracks
 ```
 
 ## Alternative: Simple Format
@@ -93,7 +95,7 @@ No development track worktrees found.
 This project is using state-only mode (not git worktrees).
 
 To use worktrees:
-  /multi-agent:planning <tracks> --use-worktrees
+  /devteam:plan (worktrees are auto-configured for multi-track plans)
 ```
 
 **Git command fails:**

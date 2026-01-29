@@ -143,7 +143,7 @@ For each track (01, 02, 03, etc.):
    Branch: dev-track-01
 
    Work in this directory will be committed to the dev-track-01 branch.
-   After completion, use /multi-agent:merge-tracks to merge back to main." > .multi-agent/track-01/README-TRACK.md
+   After completion, use /devteam:merge-tracks to merge back to main." > .multi-agent/track-01/README-TRACK.md
    ```
 
 **Error Handling:**
@@ -250,7 +250,7 @@ Sprints:
 Total: 19 tasks, ~128 hours of development
 
 Ready to execute:
-/multi-agent:sprint all
+/devteam:sprint all
 ```
 
 ### Parallel Track Mode (State-Only)
@@ -284,17 +284,17 @@ State tracking initialized at: docs/planning/.project-state.yaml
 
 Ready to execute:
 Option 1 - All tracks sequentially:
-  /multi-agent:sprint all
+  /devteam:sprint all
 
 Option 2 - Specific track:
-  /multi-agent:sprint all 01    (Track 1 only)
-  /multi-agent:sprint all 02    (Track 2 only)
-  /multi-agent:sprint all 03    (Track 3 only)
+  /devteam:sprint all 01    (Track 1 only)
+  /devteam:sprint all 02    (Track 2 only)
+  /devteam:sprint all 03    (Track 3 only)
 
 Option 3 - Parallel execution (multiple terminals):
-  Terminal 1: /multi-agent:sprint all 01
-  Terminal 2: /multi-agent:sprint all 02
-  Terminal 3: /multi-agent:sprint all 03
+  Terminal 1: /devteam:sprint all 01
+  Terminal 2: /devteam:sprint all 02
+  Terminal 3: /devteam:sprint all 03
 ```
 
 ### Parallel Track Mode (With Worktrees)
@@ -337,17 +337,17 @@ Time savings: 59%
 State tracking initialized at: docs/planning/.project-state.yaml
 
 Ready to execute:
-  /multi-agent:sprint all 01    # Executes in .multi-agent/track-01/ automatically
-  /multi-agent:sprint all 02    # Executes in .multi-agent/track-02/ automatically
-  /multi-agent:sprint all 03    # Executes in .multi-agent/track-03/ automatically
+  /devteam:sprint all 01    # Executes in .multi-agent/track-01/ automatically
+  /devteam:sprint all 02    # Executes in .multi-agent/track-02/ automatically
+  /devteam:sprint all 03    # Executes in .multi-agent/track-03/ automatically
 
 Run in parallel (multiple terminals):
-  Terminal 1: /multi-agent:sprint all 01
-  Terminal 2: /multi-agent:sprint all 02
-  Terminal 3: /multi-agent:sprint all 03
+  Terminal 1: /devteam:sprint all 01
+  Terminal 2: /devteam:sprint all 02
+  Terminal 3: /devteam:sprint all 03
 
 After all tracks complete:
-  /multi-agent:merge-tracks     # Merges all tracks, cleans up worktrees
+  /devteam:merge-tracks     # Merges all tracks, cleans up worktrees
 ```
 
 ## Quality Checks

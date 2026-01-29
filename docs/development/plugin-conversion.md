@@ -14,7 +14,7 @@ You have **28 custom agent definitions** in `.claude/agents/` organized as markd
 **Status:** ✅ All bash template syntax removed from 12 files - agents are now ready for plugin conversion
 **Note:** requirements-validator is in orchestration/ (correct - it's an orchestration quality gate)
 
-⚠️ **Architectural Decision Needed:** sprint-orchestrator agent exists but is not currently launched by `/multi-agent:sprint` command. See "Sprint Orchestrator Decision" section below.
+⚠️ **Architectural Decision Needed:** sprint-orchestrator agent exists but is not currently launched by `/devteam:sprint` command. See "Sprint Orchestrator Decision" section below.
 
 ## Goal
 
@@ -22,7 +22,7 @@ Create a Claude Code plugin named **`multi-agent-dev-system`** that registers al
 - Usage: `Task(subagent_type="multi-agent-dev-system:database:designer", model="opus", ...)`
 - Proper model assignment (Opus for designers, Haiku for T1, Sonnet for T2/quality)
 - Hierarchical namespacing that matches your architecture
-- Commands: `/multi-agent:prd`, `/multi-agent:planning`, `/multi-agent:sprint` for complete workflows
+- Commands: `/devteam:prd`, `/devteam:planning`, `/devteam:sprint` for complete workflows
 
 ## Plugin Structure Analysis
 
@@ -95,7 +95,7 @@ claude-code-multi-agent-dev-system/
       "id": "planning:task-graph-analyzer",
       "name": "Task Graph Analyzer",
       "description": "Analyzes PRD and creates task breakdown with dependency graph",
-      "file": "agents/multi-agent:planning/task-graph-analyzer.md",
+      "file": "agents/devteam:planning/task-graph-analyzer.md",
       "model": "opus",
       "category": "planning"
     },
@@ -103,7 +103,7 @@ claude-code-multi-agent-dev-system/
       "id": "planning:sprint-planner",
       "name": "Sprint Planner",
       "description": "Organizes tasks into sprints based on dependencies and capacity",
-      "file": "agents/multi-agent:planning/multi-agent:sprint-planner.md",
+      "file": "agents/devteam:planning/devteam:sprint-planner.md",
       "model": "opus",
       "category": "planning"
     },
@@ -111,7 +111,7 @@ claude-code-multi-agent-dev-system/
       "id": "orchestration:sprint-orchestrator",
       "name": "Sprint Orchestrator",
       "description": "Manages entire sprint execution and coordinates task orchestrator",
-      "file": "agents/orchestration/multi-agent:sprint-orchestrator.md",
+      "file": "agents/orchestration/devteam:sprint-orchestrator.md",
       "model": "sonnet",
       "category": "orchestration"
     },
@@ -314,19 +314,19 @@ claude-code-multi-agent-dev-system/
   ],
   "commands": [
     {
-      "name": "/multi-agent:prd",
+      "name": "/devteam:prd",
       "description": "Generate comprehensive PRD from project idea",
-      "file": "commands/multi-agent:prd.md"
+      "file": "commands/devteam:prd.md"
     },
     {
-      "name": "/multi-agent:planning",
+      "name": "/devteam:planning",
       "description": "Break down PRD into tasks and sprints",
-      "file": "commands/multi-agent:planning.md"
+      "file": "commands/devteam:planning.md"
     },
     {
-      "name": "/multi-agent:sprint",
+      "name": "/devteam:sprint",
       "description": "Execute a sprint with full agent orchestration",
-      "file": "commands/multi-agent:sprint.md"
+      "file": "commands/devteam:sprint.md"
     }
   ]
 }
@@ -430,9 +430,9 @@ Use the template above, ensuring:
 
 ### Full Workflow
 
-1. Generate PRD: `/multi-agent:prd "Build a task management app"`
-2. Create plan: `/multi-agent:planning`
-3. Execute sprint: `/multi-agent:sprint SPRINT-001`
+1. Generate PRD: `/devteam:prd "Build a task management app"`
+2. Create plan: `/devteam:planning`
+3. Execute sprint: `/devteam:sprint SPRINT-001`
 
 ### Individual Agents
 
@@ -469,25 +469,25 @@ If you want others to use it:
 
 ## Sprint Orchestrator Decision ⚠️
 
-**Issue:** The `sprint-orchestrator` agent is defined but NOT currently launched by the `/multi-agent:sprint` command. The `/multi-agent:sprint` command performs manual orchestration instead.
+**Issue:** The `sprint-orchestrator` agent is defined but NOT currently launched by the `/devteam:sprint` command. The `/devteam:sprint` command performs manual orchestration instead.
 
 **Options:**
 
 ### Option A: Launch as Agent (Recommended for Plugin)
-- Update `/multi-agent:sprint` command to launch sprint-orchestrator agent
+- Update `/devteam:sprint` command to launch sprint-orchestrator agent
 - Provides true agent-based architecture
 - Consistent with other orchestration patterns
 - Enables sprint-orchestrator to be used standalone
 
 ### Option B: Document as Reference Only
 - Keep sprint-orchestrator.md in plugin as "reference architecture"
-- `/multi-agent:sprint` command continues manual orchestration
+- `/devteam:sprint` command continues manual orchestration
 - Mark agent as "not directly launchable"
 
 ### Option C: Remove from Plugin
 - Remove sprint-orchestrator.md entirely
 - Only include task-orchestrator
-- `/multi-agent:sprint` remains pure command
+- `/devteam:sprint` remains pure command
 
 **Recommendation:** **Option A** - Convert to true agent-based orchestration for consistency and plugin reusability.
 
@@ -498,7 +498,7 @@ If you want others to use it:
 - [ ] All 28 agents appear in Task tool subagent_type dropdown
 - [ ] Agent IDs follow `multi-agent-dev-system:category:name` format
 - [ ] Model switching works (haiku for T1, sonnet for T2, opus for designers)
-- [ ] Commands work: `/multi-agent:prd`, `/multi-agent:planning`, `/multi-agent:sprint`
+- [ ] Commands work: `/devteam:prd`, `/devteam:planning`, `/devteam:sprint`
 - [ ] Agent instructions are properly loaded and followed
 - [ ] T1→T2 escalation logic works
 - [ ] prd-generator properly interviews and selects tech stack
@@ -543,7 +543,7 @@ Task(
 2. Test locally with file:// installation
 3. Push to GitHub
 4. Install in cs-archiver project
-5. Re-run `/multi-agent:sprint SPRINT-001` with proper agent invocation
+5. Re-run `/devteam:sprint SPRINT-001` with proper agent invocation
 
 ---
 

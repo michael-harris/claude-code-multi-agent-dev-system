@@ -1,7 +1,7 @@
 {
-  "name": "multi-agent",
-  "version": "2.5.0",
-  "description": "76-agent automated development system with PR-based workflow, git worktree-based parallel development, runtime testing verification, workflow compliance validation, comprehensive summaries, and quality gates",
+  "name": "devteam",
+  "version": "3.0.0",
+  "description": "89-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
   "agents": [
@@ -28,6 +28,94 @@
       "file": "agents/planning/sprint-planner.md",
       "model": "opus",
       "category": "planning"
+    },
+    {
+      "id": "research:research-agent",
+      "name": "Research Agent",
+      "description": "Investigates codebase, technologies, and implementation approaches before planning",
+      "file": "agents/research/research-agent.md",
+      "model": "sonnet",
+      "category": "research"
+    },
+    {
+      "id": "orchestration:ralph-orchestrator",
+      "name": "Ralph Orchestrator",
+      "description": "Manages iterative refinement loop, model escalation, and quality gates",
+      "file": "agents/orchestration/ralph-orchestrator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:autonomous-controller",
+      "name": "Autonomous Controller",
+      "description": "Controls autonomous execution mode with stop hooks and persistence",
+      "file": "agents/orchestration/autonomous-controller.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:bug-council-orchestrator",
+      "name": "Bug Council Orchestrator",
+      "description": "Activates and coordinates 5-member bug diagnosis team for complex issues",
+      "file": "agents/orchestration/bug-council-orchestrator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:scope-validator",
+      "name": "Scope Validator",
+      "description": "Enforces 6-layer scope compliance with VETO power",
+      "file": "agents/orchestration/scope-validator.md",
+      "model": "opus",
+      "category": "orchestration"
+    },
+    {
+      "id": "diagnosis:root-cause-analyst",
+      "name": "Root Cause Analyst",
+      "description": "Bug Council member - Error analysis, hypothesis generation, causal chains",
+      "file": "agents/diagnosis/root-cause-analyst.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "diagnosis:code-archaeologist",
+      "name": "Code Archaeologist",
+      "description": "Bug Council member - Git history, regression detection, blame analysis",
+      "file": "agents/diagnosis/code-archaeologist.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "diagnosis:pattern-matcher",
+      "name": "Pattern Matcher",
+      "description": "Bug Council member - Similar bugs, anti-pattern identification, codebase search",
+      "file": "agents/diagnosis/pattern-matcher.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "diagnosis:systems-thinker",
+      "name": "Systems Thinker",
+      "description": "Bug Council member - Dependencies, architectural issues, integration problems",
+      "file": "agents/diagnosis/systems-thinker.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "diagnosis:adversarial-tester",
+      "name": "Adversarial Tester",
+      "description": "Bug Council member - Edge cases, security vulnerabilities, attack vectors",
+      "file": "agents/diagnosis/adversarial-tester.md",
+      "model": "opus",
+      "category": "diagnosis"
+    },
+    {
+      "id": "quality:refactoring-agent",
+      "name": "Refactoring Agent",
+      "description": "Dedicated code restructuring, technical debt reduction, and codebase improvements",
+      "file": "agents/quality/refactoring-agent.md",
+      "model": "sonnet",
+      "category": "quality"
     },
     {
       "id": "orchestration:sprint-orchestrator",
@@ -658,33 +746,23 @@
   ],
   "commands": [
     {
-      "name": "/devteam:auto",
-      "description": "Autonomous execution with agent selection until completion",
-      "file": "commands/devteam-auto.md"
-    },
-    {
       "name": "/devteam:plan",
-      "description": "Interactive planning - creates PRD, tasks, and sprints",
+      "description": "Interactive planning with interview, research, PRD generation, and sprint planning",
       "file": "commands/devteam-plan.md"
     },
     {
-      "name": "/devteam:sprint",
-      "description": "Execute a specific sprint or all sprints",
-      "file": "commands/devteam-sprint.md"
+      "name": "/devteam:implement",
+      "description": "Execute implementation - plans, sprints, tasks, or ad-hoc work with Ralph quality loop",
+      "file": "commands/devteam-implement.md"
     },
     {
-      "name": "/devteam:list",
-      "description": "List all plans and their status",
-      "file": "commands/devteam-list.md"
-    },
-    {
-      "name": "/devteam:select",
-      "description": "Select a plan to work on",
-      "file": "commands/devteam-select.md"
+      "name": "/devteam:bug",
+      "description": "Fix a bug with structured diagnostic workflow and Bug Council if needed",
+      "file": "commands/devteam-bug.md"
     },
     {
       "name": "/devteam:issue",
-      "description": "Fix a GitHub issue by number with Bug Council if needed",
+      "description": "Fix a GitHub issue by number with interview and Bug Council if needed",
       "file": "commands/devteam-issue.md"
     },
     {
@@ -693,39 +771,201 @@
       "file": "commands/devteam-issue-new.md"
     },
     {
+      "name": "/devteam:list",
+      "description": "List all plans, sprints, and tasks with status",
+      "file": "commands/devteam-list.md"
+    },
+    {
+      "name": "/devteam:select",
+      "description": "Select a plan to work on",
+      "file": "commands/devteam-select.md"
+    },
+    {
+      "name": "/devteam:status",
+      "description": "Display system health, progress, costs, and execution history",
+      "file": "commands/devteam-status.md"
+    },
+    {
+      "name": "/devteam:reset",
+      "description": "Reset state, clear stuck sessions, and recover from errors",
+      "file": "commands/devteam-reset.md"
+    },
+    {
       "name": "/devteam:merge-tracks",
-      "description": "Merge parallel development tracks back to main branch",
-      "file": "commands/merge-tracks.md"
+      "description": "[Debug] Manually merge parallel tracks (auto-merge is default)",
+      "file": "commands/merge-tracks.md",
+      "category": "debug"
     },
     {
       "name": "/devteam:worktree-status",
-      "description": "Show detailed status of all development track worktrees",
-      "file": "commands/worktree-status.md"
+      "description": "[Debug] Show worktree status for troubleshooting",
+      "file": "commands/worktree-status.md",
+      "category": "debug"
     },
     {
       "name": "/devteam:worktree-cleanup",
-      "description": "Manually clean up development track worktrees",
-      "file": "commands/worktree-cleanup.md"
+      "description": "[Debug] Manually clean up worktrees if auto-cleanup failed",
+      "file": "commands/worktree-cleanup.md",
+      "category": "debug"
     },
     {
       "name": "/devteam:worktree-list",
-      "description": "List all git worktrees with track information",
-      "file": "commands/worktree-list.md"
+      "description": "[Debug] List all git worktrees for troubleshooting",
+      "file": "commands/worktree-list.md",
+      "category": "debug"
     },
     {
-      "name": "/devteam:prd",
-      "description": "Generate comprehensive PRD (legacy - use /devteam:plan)",
-      "file": "commands/prd.md"
+      "name": "/devteam:skill",
+      "description": "Execute a specific skill with optional parameters",
+      "file": "commands/devteam-skill.md"
     },
     {
-      "name": "/devteam:planning",
-      "description": "Break down PRD into tasks and sprints (legacy - use /devteam:plan)",
-      "file": "commands/planning.md"
+      "name": "/devteam:skills",
+      "description": "List all available skills organized by category",
+      "file": "commands/devteam-skills.md"
     },
     {
-      "name": "/devteam:feature",
-      "description": "Complete feature workflow (legacy - use /devteam:plan)",
-      "file": "commands/feature.md"
+      "name": "/devteam:config",
+      "description": "View and modify DevTeam configuration settings",
+      "file": "commands/devteam-config.md"
+    },
+    {
+      "name": "/devteam:logs",
+      "description": "View execution logs, events, and history",
+      "file": "commands/devteam-logs.md"
+    },
+    {
+      "name": "/devteam:help",
+      "description": "Get help on commands, concepts, and troubleshooting",
+      "file": "commands/devteam-help.md"
+    }
+  ],
+  "skills": [
+    {
+      "id": "core:code-reviewer",
+      "name": "Code Reviewer",
+      "description": "Comprehensive code review with quality, security, and maintainability analysis",
+      "file": "skills/core/code-reviewer.md",
+      "category": "core"
+    },
+    {
+      "id": "core:debugger",
+      "name": "Debugger",
+      "description": "Systematic debugging and issue diagnosis",
+      "file": "skills/core/debugger.md",
+      "category": "core"
+    },
+    {
+      "id": "core:refactorer",
+      "name": "Refactorer",
+      "description": "Code restructuring and improvement without changing functionality",
+      "file": "skills/core/refactorer.md",
+      "category": "core"
+    },
+    {
+      "id": "testing:test-generator",
+      "name": "Test Generator",
+      "description": "Generate comprehensive test suites for existing code",
+      "file": "skills/testing/test-generator.md",
+      "category": "testing"
+    },
+    {
+      "id": "testing:integration-tester",
+      "name": "Integration Tester",
+      "description": "Create and run integration tests across system components",
+      "file": "skills/testing/integration-tester.md",
+      "category": "testing"
+    },
+    {
+      "id": "testing:e2e-tester",
+      "name": "E2E Tester",
+      "description": "End-to-end testing with browser automation",
+      "file": "skills/testing/e2e-tester.md",
+      "category": "testing"
+    },
+    {
+      "id": "quality:performance-optimizer",
+      "name": "Performance Optimizer",
+      "description": "Identify and fix performance bottlenecks",
+      "file": "skills/quality/performance-optimizer.md",
+      "category": "quality"
+    },
+    {
+      "id": "quality:security-scanner",
+      "name": "Security Scanner",
+      "description": "Scan for security vulnerabilities and OWASP issues",
+      "file": "skills/quality/security-scanner.md",
+      "category": "quality"
+    },
+    {
+      "id": "quality:accessibility-checker",
+      "name": "Accessibility Checker",
+      "description": "WCAG compliance auditing and accessibility improvements",
+      "file": "skills/quality/accessibility-checker.md",
+      "category": "quality"
+    },
+    {
+      "id": "workflow:ci-cd-engineer",
+      "name": "CI/CD Engineer",
+      "description": "Create and optimize CI/CD pipelines",
+      "file": "skills/workflow/ci-cd-engineer.md",
+      "category": "workflow"
+    },
+    {
+      "id": "workflow:git-specialist",
+      "name": "Git Specialist",
+      "description": "Advanced git operations and workflow optimization",
+      "file": "skills/workflow/git-specialist.md",
+      "category": "workflow"
+    },
+    {
+      "id": "workflow:deployment-manager",
+      "name": "Deployment Manager",
+      "description": "Manage deployments across environments with zero-downtime strategies",
+      "file": "skills/workflow/deployment-manager.md",
+      "category": "workflow"
+    },
+    {
+      "id": "frontend:ui-ux-pro-max",
+      "name": "UI/UX Pro Max",
+      "description": "Advanced UI/UX design and implementation",
+      "file": "skills/frontend/ui-ux-pro-max.md",
+      "category": "frontend"
+    },
+    {
+      "id": "frontend:responsive-design",
+      "name": "Responsive Design",
+      "description": "Mobile-first responsive layouts and adaptive design",
+      "file": "skills/frontend/responsive-design.md",
+      "category": "frontend"
+    },
+    {
+      "id": "frontend:accessibility-expert",
+      "name": "Accessibility Expert",
+      "description": "Accessible-first frontend development with ARIA and keyboard navigation",
+      "file": "skills/frontend/accessibility-expert.md",
+      "category": "frontend"
+    },
+    {
+      "id": "meta:prompt-engineer",
+      "name": "Prompt Engineer",
+      "description": "Optimize prompts and agent instructions",
+      "file": "skills/meta/prompt-engineer.md",
+      "category": "meta"
+    },
+    {
+      "id": "meta:context-manager",
+      "name": "Context Manager",
+      "description": "Optimize context usage and manage context windows efficiently",
+      "file": "skills/meta/context-manager.md",
+      "category": "meta"
+    },
+    {
+      "id": "meta:learning-optimizer",
+      "name": "Learning Optimizer",
+      "description": "Learn from execution patterns and optimize future performance",
+      "file": "skills/meta/learning-optimizer.md",
+      "category": "meta"
     }
   ]
 }

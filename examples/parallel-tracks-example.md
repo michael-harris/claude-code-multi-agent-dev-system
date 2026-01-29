@@ -13,7 +13,7 @@ Building a full-stack e-commerce platform with:
 ## Step 1: Generate PRD
 
 ```bash
-/multi-agent:prd
+/devteam:prd
 ```
 
 **System creates:** `docs/planning/PROJECT_PRD.yaml`
@@ -21,7 +21,7 @@ Building a full-stack e-commerce platform with:
 ## Step 2: Planning with Parallel Tracks
 
 ```bash
-/multi-agent:planning 3
+/devteam:planning 3
 ```
 
 **Task Graph Analyzer Output:**
@@ -45,7 +45,7 @@ Reasoning:
 - At peak, 3 tasks can run simultaneously
 - If using 3 tracks, all chains run in parallel with minimal idle time
 
-Recommendation: /multi-agent:planning 3
+Recommendation: /devteam:planning 3
 ```
 
 **Sprint Planner Output:**
@@ -100,17 +100,17 @@ State tracking initialized at: docs/planning/.project-state.yaml
 
 Ready to execute:
 Option 1 - All tracks sequentially:
-  /multi-agent:sprint all
+  /devteam:sprint all
 
 Option 2 - Specific track:
-  /multi-agent:sprint all 01    (Track 1 only)
-  /multi-agent:sprint all 02    (Track 2 only)
-  /multi-agent:sprint all 03    (Track 3 only)
+  /devteam:sprint all 01    (Track 1 only)
+  /devteam:sprint all 02    (Track 2 only)
+  /devteam:sprint all 03    (Track 3 only)
 
 Option 3 - Parallel execution (multiple terminals):
-  Terminal 1: /multi-agent:sprint all 01
-  Terminal 2: /multi-agent:sprint all 02
-  Terminal 3: /multi-agent:sprint all 03
+  Terminal 1: /devteam:sprint all 01
+  Terminal 2: /devteam:sprint all 02
+  Terminal 3: /devteam:sprint all 03
 ```
 
 ## Step 3: Execute Tracks in Parallel
@@ -118,7 +118,7 @@ Option 3 - Parallel execution (multiple terminals):
 ### Terminal 1: Backend Track
 
 ```bash
-/multi-agent:sprint all 01
+/devteam:sprint all 01
 ```
 
 **Output:**
@@ -216,7 +216,7 @@ Next: Wait for other tracks to complete before final project review
 ### Terminal 2: Frontend Track
 
 ```bash
-/multi-agent:sprint all 02
+/devteam:sprint all 02
 ```
 
 **Output:**
@@ -236,7 +236,7 @@ Total cost: ~$2.80
 ### Terminal 3: Infrastructure Track
 
 ```bash
-/multi-agent:sprint all 03
+/devteam:sprint all 03
 ```
 
 **Output:**
@@ -260,7 +260,7 @@ After all tracks complete, run final integration review:
 ```bash
 # Automatically triggered after last track completes
 # Or manually run:
-/multi-agent:sprint all
+/devteam:sprint all
 ```
 
 **Output:**
@@ -439,7 +439,7 @@ If execution is interrupted:
 # Terminal 1 crashes during SPRINT-002-01
 
 # Later, resume:
-/multi-agent:sprint all 01
+/devteam:sprint all 01
 
 # Output:
 Loading state file: docs/planning/.project-state.yaml
@@ -486,6 +486,6 @@ Task 2/4: TASK-016 - Payment integration API
 ## Tips
 
 1. **Max tracks calculation is automatic** - System analyzes dependencies and tells you max possible
-2. **Can run tracks sequentially** - Use `/multi-agent:sprint all` to run all tracks one after another if no parallelization available
+2. **Can run tracks sequentially** - Use `/devteam:sprint all` to run all tracks one after another if no parallelization available
 3. **State files enable coordination** - Multiple developers can work on different tracks, state file coordinates progress
 4. **Resume anytime** - If interrupted, just rerun the command, system picks up where it left off

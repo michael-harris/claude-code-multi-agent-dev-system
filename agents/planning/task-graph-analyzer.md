@@ -106,7 +106,7 @@ Longest chain: Chain 1 (Backend) - 20 hours
 - If using >3 tracks, some tracks will have idle time
 
 **Recommendation:**
-To enable parallel development, use: `/multi-agent:planning 3`
+To enable parallel development, use: `/devteam:planning 3`
 
 This will organize tasks into 3 balanced development tracks that can be executed in parallel.
 ```

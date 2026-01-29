@@ -1,13 +1,15 @@
 # Worktree Cleanup Command
 
-**Expert Command** - Manually clean up development track worktrees.
+**Debug/Expert Command** - Manually clean up development track worktrees.
+
+> **Note:** This command is rarely needed. Worktrees are cleaned up automatically after `/devteam:implement` merges all tracks. Use this only if automatic cleanup failed or you need manual control.
 
 ## Command Usage
 
 ```bash
-/multi-agent:worktree cleanup            # Clean up all worktrees
-/multi-agent:worktree cleanup 01         # Clean up specific track
-/multi-agent:worktree cleanup --all      # Clean up worktrees AND delete branches
+/devteam:worktree cleanup            # Clean up all worktrees
+/devteam:worktree cleanup 01         # Clean up specific track
+/devteam:worktree cleanup --all      # Clean up worktrees AND delete branches
 ```
 
 ## Warning
@@ -194,7 +196,7 @@ Track 3 progress: 0/2 sprints complete (0/5 tasks)
 Are you sure you want to remove these worktrees?
 Work will be lost unless already committed.
 
-To continue: /multi-agent:worktree cleanup --force
+To continue: /devteam:worktree cleanup --force
 ```
 
 ## Safety Notes
