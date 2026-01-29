@@ -192,6 +192,71 @@ quality_gates:
       standard: WCAG_2.1_AA
       on_violation: create_fix_task
 
+  # Design System Compliance - Auto-enabled when design system exists
+  design_compliance:
+    enabled: auto                   # Enabled when design-system/ detected
+    trigger: "when design_system_exists"
+    priority: high                  # Run before other quality gates
+
+    detection:
+      locations:
+        - "design-system/"
+        - ".design-system/"
+        - "src/design-system/"
+        - "styles/design-system/"
+      required_files:
+        - "MASTER.md"               # Minimum required for design system
+
+    checks:
+      - id: no_hardcoded_colors
+        description: "Detect hardcoded hex colors in frontend code"
+        patterns:
+          - "#[0-9A-Fa-f]{3,8}"
+          - "rgb\\(|rgba\\(|hsl\\("
+        except_in: ["design-system/", "*.config.*", "theme.*", "tailwind.*"]
+        severity: error
+        auto_fix: false
+
+      - id: no_hardcoded_fonts
+        description: "Detect hardcoded font families"
+        patterns:
+          - "font-family:\\s*['\"](?!var)"
+        severity: error
+        auto_fix: false
+
+      - id: no_arbitrary_spacing
+        description: "Detect Tailwind arbitrary spacing values"
+        patterns:
+          - "p-\\[\\d+px\\]|m-\\[\\d+px\\]"
+          - "(padding|margin|gap):\\s*\\d+px"
+        except_values: [0, 1]       # 0 and 1px are acceptable
+        severity: warning
+        auto_fix: true
+        fix_action: "suggest_nearest_scale_value"
+
+      - id: component_spec_match
+        description: "Verify components match design system specs"
+        check_against: "design-system/components/"
+        severity: error
+        auto_fix: false
+
+    on_violation:
+      error:
+        action: block_completion
+        create_fix_task: true
+        assign_to: frontend_developer
+        message: "Design system violations must be fixed before completion"
+
+      warning:
+        action: log_and_suggest
+        create_fix_task: false
+        message: "Consider using design system value"
+
+    in_report:
+      show_violations: true
+      show_suggestions: true
+      link_to_design_docs: true
+
 # =============================================================================
 # AGENT FAILURE HANDLING
 # =============================================================================
