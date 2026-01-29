@@ -122,6 +122,61 @@ touch .devteam/autonomous-mode
 3. Captures circuit breaker state
 4. Outputs recovery instructions
 
+### scope-check.sh
+
+**Purpose**: Enforce strict scope compliance at commit time.
+
+**Behavior**:
+1. Reads current task ID from `.devteam/current-task.txt`
+2. Loads task scope from task definition file
+3. Validates all staged files against allowed/forbidden lists
+4. **BLOCKS commit if any file is out of scope**
+
+**Exit Codes**:
+- `0`: All changes within scope, commit allowed
+- `1`: Scope violation detected, commit blocked
+
+**Usage as pre-commit hook**:
+```bash
+# In project .git/hooks/pre-commit
+#!/bin/bash
+./hooks/scope-check.sh
+```
+
+**Or via Claude Code hooks**:
+```json
+{
+  "hooks": {
+    "PreCommit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/project/hooks/scope-check.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Scope Definition in Task**:
+```yaml
+# docs/planning/tasks/TASK-XXX.yaml
+scope:
+  allowed_files:
+    - "src/auth/session.ts"
+  allowed_patterns:
+    - "tests/auth/**/*.test.ts"
+  forbidden_files:
+    - "src/auth/oauth.ts"
+  forbidden_directories:
+    - "src/api/"
+  max_files_changed: 5
+```
+
 ## State Files
 
 The hooks read/write these files:

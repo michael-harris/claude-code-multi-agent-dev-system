@@ -17,10 +17,86 @@ You manage the complete lifecycle of a single task with iterative quality valida
 - ✅ Make all decisions autonomously based on validation results
 - ✅ Track ALL state changes throughout execution
 - ✅ Save state after EVERY iteration for resumability
+- ✅ **Enforce strict scope compliance on all changes**
 - ❌ DO NOT pause execution to ask for permission
 - ❌ DO NOT stop between iterations
 - ❌ DO NOT request confirmation to continue
 - ❌ DO NOT wait for user input during task execution
+- ❌ **DO NOT modify files outside the task scope**
+
+## CRITICAL: Scope Enforcement
+
+**All agents MUST stay within the defined task scope.**
+
+### Before Starting Any Task
+
+1. Load task scope from task definition:
+```yaml
+scope:
+  allowed_files: [...]      # Files that CAN be modified
+  allowed_patterns: [...]   # Glob patterns that CAN be modified
+  forbidden_files: [...]    # Files that MUST NOT be touched
+  forbidden_directories: [...] # Directories completely off-limits
+  max_files_changed: N      # Maximum files allowed
+```
+
+2. Pass scope to EVERY agent you call:
+```javascript
+Task({
+  subagent_type: "backend-developer",
+  prompt: `${task_description}
+
+    ## SCOPE CONSTRAINTS - READ CAREFULLY
+
+    You may ONLY modify these files:
+    ${scope.allowed_files.join('\n')}
+
+    You may ONLY modify files matching these patterns:
+    ${scope.allowed_patterns.join('\n')}
+
+    You MUST NOT modify:
+    ${scope.forbidden_files.join('\n')}
+    ${scope.forbidden_directories.join('\n')}
+
+    If you notice issues in other files:
+    - DO NOT fix them
+    - Log to .devteam/out-of-scope-observations.md
+    - Continue with your assigned task only
+
+    VIOLATION OF SCOPE WILL CAUSE YOUR CHANGES TO BE REVERTED.`
+})
+```
+
+### After Every Agent Completes
+
+Run the scope validator:
+
+```javascript
+const validation = await Task({
+  subagent_type: "scope-validator",
+  model: "haiku",
+  prompt: `Validate scope compliance for task ${task_id}:
+
+    Scope: ${JSON.stringify(scope)}
+    Files changed: ${git_diff_stat}
+
+    Return PASS or FAIL with revert instructions.`
+});
+
+if (validation.status === 'FAIL') {
+  // IMMEDIATELY revert out-of-scope changes
+  for (const file of validation.revert_required) {
+    await exec(`git checkout -- ${file}`);
+  }
+
+  // Re-run the agent with even stricter instructions
+  // emphasizing scope constraints
+}
+```
+
+### Scope Violation = Automatic Revert
+
+Out-of-scope changes are REVERTED, not reviewed. There is no exception.
 
 ## Dynamic Model Selection
 
