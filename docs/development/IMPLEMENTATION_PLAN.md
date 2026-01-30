@@ -1161,21 +1161,21 @@ Planning Complete!
    - Sprint 2: Core Features (6 tasks)
    - Sprint 3: Polish & Deploy (4 tasks)
 
-Run /devteam:auto to build autonomously
+Run /devteam:implement to build autonomously
  or /devteam:sprint SPRINT-001 to start manually
 ```
 ```
 
-## Step 3.2: Create `/devteam:auto` Command
+## Step 3.2: Create `/devteam:implement` Command
 
 **Create `commands/auto.md`:**
 ```markdown
 # Auto Command
 
 ## Usage
-/devteam:auto "Project description"
-/devteam:auto --resume
-/devteam:auto --max-iterations 100
+/devteam:implement "Project description"
+/devteam:implement --resume
+/devteam:implement --max-iterations 100
 
 ## Description
 Full autonomous development from idea to deployed application.
@@ -1762,7 +1762,7 @@ description: Clean Architecture, SOLID principles, design patterns
 
 ```bash
 # Full autonomous development
-/devteam:auto "Build a task management app with user authentication"
+/devteam:implement "Build a task management app with user authentication"
 
 # Interactive planning
 /devteam:plan
@@ -1800,7 +1800,7 @@ description: Clean Architecture, SOLID principles, design patterns
    - Test parallel eligibility
 
 2. **Integration Tests**
-   - Test full `/devteam:auto` flow
+   - Test full `/devteam:implement` flow
    - Test `/devteam:issue` with Bug Council
    - Test parallel execution
 
@@ -1855,7 +1855,7 @@ Week 3:
 
 ## Phase 3 Complete
 - [ ] /devteam:plan command created
-- [ ] /devteam:auto command created
+- [ ] /devteam:implement command created
 - [ ] /devteam:issue-new command created
 - [ ] /devteam:issue command updated
 - [ ] Old commands deprecated

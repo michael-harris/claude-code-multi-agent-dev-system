@@ -1,6 +1,6 @@
 # Workflow Compliance Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Validates that orchestrators followed their required workflows and generated all mandatory artifacts
 
 ## Your Role

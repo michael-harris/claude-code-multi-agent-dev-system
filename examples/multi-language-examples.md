@@ -423,7 +423,7 @@ Task(
 # System breaks down into tasks, identifies optimal languages per component
 
 # 2. Autonomous execution
-/devteam:auto
+/devteam:implement
 # Or execute specific sprint: /devteam:sprint SPRINT-001
 # Orchestrator automatically routes tasks to appropriate language agents
 ```

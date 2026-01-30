@@ -2,7 +2,7 @@
 
 **Command:** `/devteam:select`
 
-Select a plan to work on. The selected plan becomes the active plan for `/devteam:auto`.
+Select a plan to work on. The selected plan becomes the active plan for `/devteam:implement`.
 
 ## Usage
 
@@ -70,7 +70,7 @@ Tasks:
   📋 TASK-004: Add theme toggle UI
 
 Next steps:
-  • /devteam:auto         Execute this plan
+  • /devteam:implement         Execute this plan
   • /devteam:plan --edit  Modify the plan
   • /devteam:list         See all plans
 ```

@@ -1,6 +1,6 @@
 # Mobile E2E Tester Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** End-to-end testing for native mobile apps (iOS/Android) and cross-platform
 
 ## Your Role

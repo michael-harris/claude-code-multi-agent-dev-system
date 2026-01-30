@@ -184,7 +184,7 @@ Linux/macOS:
 # Create marker file to enable
 touch .devteam/autonomous-mode
 
-# Or use /devteam:auto command which creates it automatically
+# Or use /devteam:implement command which creates it automatically
 ```
 
 Windows PowerShell:
@@ -192,7 +192,7 @@ Windows PowerShell:
 # Create marker file to enable
 New-Item -ItemType File -Path .devteam\autonomous-mode -Force
 
-# Or use /devteam:auto command which creates it automatically
+# Or use /devteam:implement command which creates it automatically
 ```
 
 ### session-start.sh

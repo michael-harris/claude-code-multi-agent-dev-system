@@ -2,7 +2,7 @@
 
 **Agent ID:** `orchestration:sprint-loop`
 **Category:** Orchestration
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 6-12
 
 ## Purpose

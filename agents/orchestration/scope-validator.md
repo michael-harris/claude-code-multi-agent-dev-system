@@ -1,6 +1,6 @@
 # Scope Validator Agent
 
-**Model:** haiku
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Enforce strict scope compliance - VETO out-of-scope changes
 
 ## Your Role

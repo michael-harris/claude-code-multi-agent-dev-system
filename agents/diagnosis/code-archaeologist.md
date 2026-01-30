@@ -1,6 +1,6 @@
 # Code Archaeologist Agent
 
-**Model:** opus
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Role:** Bug Council Member
 **Purpose:** Historical analysis through git history to find regressions
 

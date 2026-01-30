@@ -1,6 +1,6 @@
 # Penetration Tester Agent
 
-**Model:** opus (security analysis requires deep expertise)
+**Model:** Dynamic (assigned at runtime based on task complexity) (security analysis requires deep expertise)
 **Purpose:** Identify security vulnerabilities through simulated attacks before malicious actors do
 
 ## Your Role

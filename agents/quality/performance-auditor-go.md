@@ -1,6 +1,6 @@
 # Performance Auditor (Go) Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Go-specific performance analysis
 
 ## Your Role

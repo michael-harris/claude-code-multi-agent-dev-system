@@ -1,6 +1,6 @@
 # Task Graph Analyzer Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Decompose PRD into discrete, implementable tasks with dependency analysis
 
 ## Your Role

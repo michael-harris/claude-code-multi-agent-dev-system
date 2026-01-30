@@ -1,6 +1,6 @@
 # Mobile Test Writer Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Native mobile testing for iOS (XCTest) and Android (JUnit/Espresso)
 
 ## Your Role

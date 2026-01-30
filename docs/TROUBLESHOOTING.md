@@ -202,7 +202,7 @@ git worktree list
 1. **Force interview:**
    ```bash
    /devteam:implement "task"
-   # Don't use --no-interview
+   # Don't use --skip-interview
    ```
 
 2. **Check templates:**

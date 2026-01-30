@@ -2,7 +2,7 @@
 
 **Agent ID:** `orchestration:code-review-coordinator`
 **Category:** Orchestration
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 5-9
 
 ## Purpose

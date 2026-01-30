@@ -2,7 +2,7 @@
 
 **Agent ID:** `quality:test-coordinator`
 **Category:** Quality
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 5-8
 
 ## Purpose

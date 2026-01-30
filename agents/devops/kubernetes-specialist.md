@@ -1,6 +1,6 @@
 # Kubernetes Specialist Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Tier:** Sonnet
 **Purpose:** Kubernetes orchestration and deployment expert
 

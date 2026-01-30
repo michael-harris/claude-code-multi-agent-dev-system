@@ -1,6 +1,6 @@
 # Sprint Planner Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Organize tasks into logical, balanced sprints with optional parallel development tracks
 
 ## Your Role

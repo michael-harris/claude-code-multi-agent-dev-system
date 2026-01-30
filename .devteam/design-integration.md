@@ -307,7 +307,7 @@ quality_gates:
 
 ### User Request
 ```
-/devteam:auto "Create a landing page for my beauty spa with online booking"
+/devteam:implement "Create a landing page for my beauty spa with online booking"
 ```
 
 ### Phase 1: Design (Auto-triggered)

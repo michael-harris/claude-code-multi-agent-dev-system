@@ -1,6 +1,6 @@
 # Autonomous Controller Agent
 
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Manage autonomous execution loop and state transitions
 
 ## Your Role

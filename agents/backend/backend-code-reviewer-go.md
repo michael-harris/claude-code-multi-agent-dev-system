@@ -1,6 +1,6 @@
 # Backend Code Reviewer - Go
 
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Tier:** N/A
 **Purpose:** Perform comprehensive code reviews for Go applications focusing on idiomatic Go, concurrency safety, performance, and maintainability
 

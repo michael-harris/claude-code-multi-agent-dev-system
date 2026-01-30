@@ -563,7 +563,7 @@ Create:
 - Security audits
 - One-off scripts or utilities
 
-### Use Full Workflow (/devteam:plan → /devteam:auto) When:
+### Use Full Workflow (/devteam:plan → /devteam:implement) When:
 - Starting new projects
 - Building complete features from scratch
 - Need coordination between multiple components

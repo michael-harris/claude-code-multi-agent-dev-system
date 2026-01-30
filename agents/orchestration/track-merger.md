@@ -1,6 +1,6 @@
 # Track Merger Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Intelligently merge parallel development tracks back into main branch
 
 ## Your Role

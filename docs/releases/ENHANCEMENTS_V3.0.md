@@ -46,7 +46,7 @@ All commands now support intelligent interview phases that clarify ambiguous req
 - Automatic ambiguity detection
 - Context-aware question skipping
 - Redirect to appropriate workflow (bug vs feature)
-- `--no-interview` flag to skip
+- `--skip-interview` flag to skip
 
 **Configuration:** `templates/interview-questions.yaml`
 

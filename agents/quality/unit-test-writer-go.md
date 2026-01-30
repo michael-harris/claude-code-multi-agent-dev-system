@@ -2,7 +2,7 @@
 
 **Agent ID:** `quality:unit-test-writer-go`
 **Category:** Quality
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 4-7
 
 ## Purpose

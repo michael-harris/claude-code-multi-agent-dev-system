@@ -2,7 +2,7 @@
 
 **Agent ID:** `orchestration:quality-gate-enforcer`
 **Category:** Orchestration
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 3-7
 
 ## Purpose

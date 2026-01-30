@@ -1,6 +1,6 @@
 # Database Developer (iOS) Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Core Data and SwiftData implementation for iOS applications
 
 ## Your Role

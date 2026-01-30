@@ -116,7 +116,8 @@ foreach ($file in $stagedFileList) {
     # Check forbidden directories first
     foreach ($forbiddenDir in $forbiddenDirectories) {
         $normalizedDir = $forbiddenDir.TrimEnd('/\')
-        if ($file -like "$normalizedDir*" -or $file -like "$normalizedDir\*" -or $file -like "$normalizedDir/*") {
+        # Only match files within the directory (require path separator after directory name)
+        if ($file -eq $normalizedDir -or $file -like "$normalizedDir\*" -or $file -like "$normalizedDir/*") {
             $violations += "FORBIDDEN DIRECTORY: $file (in $forbiddenDir)"
             continue
         }

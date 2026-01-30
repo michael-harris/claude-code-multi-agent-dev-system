@@ -1,6 +1,6 @@
 # Android Code Reviewer Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Kotlin/Jetpack Compose code review for Android applications
 
 ## Review Checklist

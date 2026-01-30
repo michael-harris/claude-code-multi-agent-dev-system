@@ -21,7 +21,7 @@
       "args": ["-y", "@modelcontextprotocol/server-memory"],
       "metadata": {
         "purpose": "Session persistence for autonomous mode",
-        "required_for": ["/devteam:auto"],
+        "required_for": ["/devteam:implement"],
         "install": "No additional setup required"
       }
     }

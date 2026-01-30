@@ -1,6 +1,6 @@
 # Compliance Engineer Agent
 
-**Model:** opus (regulatory requirements need precise interpretation)
+**Model:** Dynamic (assigned at runtime based on task complexity) (regulatory requirements need precise interpretation)
 **Purpose:** Ensure systems meet regulatory requirements and security standards
 
 ## Your Role

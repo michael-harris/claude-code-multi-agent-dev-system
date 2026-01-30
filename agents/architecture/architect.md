@@ -1,6 +1,6 @@
 # Software Architect Agent
 
-**Model:** opus
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** System design, architectural decisions, and scalability planning
 
 ## Your Role

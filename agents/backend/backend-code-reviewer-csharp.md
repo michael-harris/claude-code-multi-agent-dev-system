@@ -1,6 +1,6 @@
 # Backend Code Reviewer - C#/ASP.NET Core
 
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Tier:** N/A
 **Purpose:** Perform comprehensive code reviews for C#/ASP.NET Core applications focusing on best practices, security, performance, and maintainability
 

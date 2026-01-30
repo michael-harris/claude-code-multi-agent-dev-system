@@ -10,7 +10,7 @@
       "name": "PRD Generator",
       "description": "Interactive PRD creation through structured Q&A with technology stack selection",
       "file": "agents/planning/prd-generator.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "planning"
     },
     {
@@ -18,7 +18,7 @@
       "name": "Task Graph Analyzer",
       "description": "Analyzes PRD and creates task breakdown with dependency graph",
       "file": "agents/planning/task-graph-analyzer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "planning"
     },
     {
@@ -26,7 +26,7 @@
       "name": "Sprint Planner",
       "description": "Organizes tasks into sprints based on dependencies and capacity",
       "file": "agents/planning/sprint-planner.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "planning"
     },
     {
@@ -34,7 +34,7 @@
       "name": "Research Agent",
       "description": "Investigates codebase, technologies, and implementation approaches before planning",
       "file": "agents/research/research-agent.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "research"
     },
     {
@@ -42,7 +42,7 @@
       "name": "Task Loop",
       "description": "Manages iterative quality loop for single task execution with model escalation",
       "file": "agents/orchestration/task-loop.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -50,7 +50,7 @@
       "name": "Sprint Loop",
       "description": "Sprint-level quality validation after all tasks complete",
       "file": "agents/orchestration/sprint-loop.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -58,7 +58,7 @@
       "name": "Quality Gate Enforcer",
       "description": "Runs all quality gates (tests, lint, types, security) and reports results",
       "file": "agents/orchestration/quality-gate-enforcer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -66,7 +66,7 @@
       "name": "Code Review Coordinator",
       "description": "Coordinates code reviews across language-specific reviewers",
       "file": "agents/orchestration/code-review-coordinator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -130,7 +130,7 @@
       "name": "Root Cause Analyst",
       "description": "Bug Council member - Error analysis, hypothesis generation, causal chains",
       "file": "agents/diagnosis/root-cause-analyst.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "diagnosis"
     },
     {
@@ -138,7 +138,7 @@
       "name": "Code Archaeologist",
       "description": "Bug Council member - Git history, regression detection, blame analysis",
       "file": "agents/diagnosis/code-archaeologist.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "diagnosis"
     },
     {
@@ -146,7 +146,7 @@
       "name": "Pattern Matcher",
       "description": "Bug Council member - Similar bugs, anti-pattern identification, codebase search",
       "file": "agents/diagnosis/pattern-matcher.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "diagnosis"
     },
     {
@@ -154,7 +154,7 @@
       "name": "Systems Thinker",
       "description": "Bug Council member - Dependencies, architectural issues, integration problems",
       "file": "agents/diagnosis/systems-thinker.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "diagnosis"
     },
     {
@@ -162,7 +162,7 @@
       "name": "Adversarial Tester",
       "description": "Bug Council member - Edge cases, security vulnerabilities, attack vectors",
       "file": "agents/diagnosis/adversarial-tester.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "diagnosis"
     },
     {
@@ -170,7 +170,7 @@
       "name": "Database Designer",
       "description": "Designs normalized database schemas (language-agnostic)",
       "file": "agents/database/database-designer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -178,7 +178,7 @@
       "name": "Database Developer Python",
       "description": "Implements SQLAlchemy models and Alembic migrations",
       "file": "agents/database/database-developer-python.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -186,7 +186,7 @@
       "name": "Database Developer TypeScript",
       "description": "Implements Prisma/TypeORM models and migrations",
       "file": "agents/database/database-developer-typescript.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -194,7 +194,7 @@
       "name": "Database Developer Java",
       "description": "Implements JPA/Hibernate models and Flyway migrations",
       "file": "agents/database/database-developer-java.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -202,7 +202,7 @@
       "name": "Database Developer C#",
       "description": "Implements Entity Framework models and migrations",
       "file": "agents/database/database-developer-csharp.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -210,7 +210,7 @@
       "name": "Database Developer Go",
       "description": "Implements GORM models and migrations",
       "file": "agents/database/database-developer-go.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -218,7 +218,7 @@
       "name": "Database Developer Ruby",
       "description": "Implements ActiveRecord models and migrations",
       "file": "agents/database/database-developer-ruby.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -226,7 +226,7 @@
       "name": "Database Developer PHP",
       "description": "Implements Doctrine/Eloquent models and migrations",
       "file": "agents/database/database-developer-php.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -234,7 +234,7 @@
       "name": "Database Developer iOS",
       "description": "Implements Core Data and SwiftData persistence for iOS apps",
       "file": "agents/database/database-developer-ios.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -242,7 +242,7 @@
       "name": "Database Developer Android",
       "description": "Implements Room database persistence for Android apps",
       "file": "agents/database/database-developer-android.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -250,7 +250,7 @@
       "name": "SQL Code Reviewer",
       "description": "Reviews SQL database code for relational databases (PostgreSQL, MySQL, SQLite)",
       "file": "agents/database/sql-code-reviewer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -258,7 +258,7 @@
       "name": "NoSQL Code Reviewer",
       "description": "Reviews NoSQL database code (MongoDB, Redis, DynamoDB, Elasticsearch)",
       "file": "agents/database/nosql-code-reviewer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "database"
     },
     {
@@ -266,7 +266,7 @@
       "name": "API Designer",
       "description": "Designs RESTful API specifications with OpenAPI",
       "file": "agents/backend/api-designer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -274,7 +274,7 @@
       "name": "API Design Reviewer",
       "description": "Reviews API designs for consistency, usability, security, and best practices",
       "file": "agents/backend/api-design-reviewer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -282,7 +282,7 @@
       "name": "API Developer Python",
       "description": "Implements FastAPI/Django endpoints",
       "file": "agents/backend/api-developer-python.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -290,7 +290,7 @@
       "name": "API Developer TypeScript",
       "description": "Implements Express/NestJS endpoints",
       "file": "agents/backend/api-developer-typescript.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -298,7 +298,7 @@
       "name": "API Developer Java",
       "description": "Implements Spring Boot REST APIs",
       "file": "agents/backend/api-developer-java.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -306,7 +306,7 @@
       "name": "API Developer C#",
       "description": "Implements ASP.NET Core REST APIs",
       "file": "agents/backend/api-developer-csharp.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -314,7 +314,7 @@
       "name": "API Developer Go",
       "description": "Implements Go REST APIs with Gin/Echo",
       "file": "agents/backend/api-developer-go.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -322,7 +322,7 @@
       "name": "API Developer Ruby",
       "description": "Implements Ruby on Rails REST APIs",
       "file": "agents/backend/api-developer-ruby.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -330,7 +330,7 @@
       "name": "API Developer PHP",
       "description": "Implements Laravel/Symfony REST APIs",
       "file": "agents/backend/api-developer-php.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -338,7 +338,7 @@
       "name": "Backend Code Reviewer Python",
       "description": "Reviews Python backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-python.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -346,7 +346,7 @@
       "name": "Backend Code Reviewer TypeScript",
       "description": "Reviews TypeScript backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-typescript.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -354,7 +354,7 @@
       "name": "Backend Code Reviewer Java",
       "description": "Reviews Java backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-java.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -362,7 +362,7 @@
       "name": "Backend Code Reviewer C#",
       "description": "Reviews C# backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-csharp.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -370,7 +370,7 @@
       "name": "Backend Code Reviewer Go",
       "description": "Reviews Go backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-go.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -378,7 +378,7 @@
       "name": "Backend Code Reviewer Ruby",
       "description": "Reviews Ruby backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-ruby.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -386,7 +386,7 @@
       "name": "Backend Code Reviewer PHP",
       "description": "Reviews PHP backend code for quality and security",
       "file": "agents/backend/backend-code-reviewer-php.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "backend"
     },
     {
@@ -394,7 +394,7 @@
       "name": "Frontend Designer",
       "description": "Designs UI/UX with component specifications",
       "file": "agents/frontend/frontend-designer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "frontend"
     },
     {
@@ -402,7 +402,7 @@
       "name": "Frontend Developer",
       "description": "Implements React/Vue components",
       "file": "agents/frontend/frontend-developer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "frontend"
     },
     {
@@ -410,7 +410,7 @@
       "name": "Frontend Code Reviewer",
       "description": "Reviews frontend code for quality, accessibility, and performance",
       "file": "agents/frontend/frontend-code-reviewer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "frontend"
     },
     {
@@ -418,7 +418,7 @@
       "name": "Python Developer Generic",
       "description": "Implements Python utilities, scripts, CLI tools",
       "file": "agents/python/python-developer-generic.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "python"
     },
     {
@@ -426,7 +426,7 @@
       "name": "PowerShell Developer",
       "description": "Implements PowerShell scripts and automation",
       "file": "agents/scripting/powershell-developer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "scripting"
     },
     {
@@ -434,7 +434,7 @@
       "name": "Shell Developer",
       "description": "Implements Bash/shell scripts and automation",
       "file": "agents/scripting/shell-developer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "scripting"
     },
     {
@@ -442,7 +442,7 @@
       "name": "Configuration Manager",
       "description": "Manages configuration files and environment setup",
       "file": "agents/infrastructure/configuration-manager.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "infrastructure"
     },
     {
@@ -450,7 +450,7 @@
       "name": "iOS Developer",
       "description": "Implements iOS apps with Swift/SwiftUI",
       "file": "agents/mobile/ios-developer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "mobile"
     },
     {
@@ -458,7 +458,7 @@
       "name": "Android Developer",
       "description": "Implements Android apps with Kotlin/Jetpack Compose",
       "file": "agents/mobile/android-developer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "mobile"
     },
     {
@@ -466,7 +466,7 @@
       "name": "iOS Code Reviewer",
       "description": "Reviews Swift/SwiftUI code for quality, security, and best practices",
       "file": "agents/mobile/ios-code-reviewer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "mobile"
     },
     {
@@ -474,7 +474,7 @@
       "name": "Android Code Reviewer",
       "description": "Reviews Kotlin/Jetpack Compose code for quality, security, and best practices",
       "file": "agents/mobile/android-code-reviewer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "mobile"
     },
     {
@@ -482,7 +482,7 @@
       "name": "iOS Designer",
       "description": "iOS UI/UX design following Apple Human Interface Guidelines",
       "file": "agents/mobile/ios-designer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "mobile"
     },
     {
@@ -490,7 +490,7 @@
       "name": "Android Designer",
       "description": "Android UI/UX design following Material Design 3 guidelines",
       "file": "agents/mobile/android-designer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "mobile"
     },
     {
@@ -498,7 +498,7 @@
       "name": "React Native Developer",
       "description": "Cross-platform mobile development with React Native",
       "file": "agents/mobile/react-native-developer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "mobile"
     },
     {
@@ -506,7 +506,7 @@
       "name": "Flutter Developer",
       "description": "Cross-platform mobile development with Flutter/Dart",
       "file": "agents/mobile/flutter-developer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "mobile"
     },
     {
@@ -514,7 +514,7 @@
       "name": "Docker Specialist",
       "description": "Creates and optimizes Docker containers and compose files",
       "file": "agents/devops/docker-specialist.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "devops"
     },
     {
@@ -522,7 +522,7 @@
       "name": "Kubernetes Specialist",
       "description": "Creates and manages Kubernetes deployments and manifests",
       "file": "agents/devops/kubernetes-specialist.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "devops"
     },
     {
@@ -530,7 +530,7 @@
       "name": "CI/CD Specialist",
       "description": "Creates and optimizes CI/CD pipelines for various platforms",
       "file": "agents/devops/cicd-specialist.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "devops"
     },
     {
@@ -538,7 +538,7 @@
       "name": "Terraform Specialist",
       "description": "Creates and manages infrastructure as code with Terraform",
       "file": "agents/devops/terraform-specialist.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "devops"
     },
     {
@@ -546,7 +546,7 @@
       "name": "Mobile CI/CD Specialist",
       "description": "CI/CD pipelines for iOS and Android (Fastlane, TestFlight, Play Store)",
       "file": "agents/devops/mobile-cicd-specialist.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "devops"
     },
     {
@@ -554,7 +554,7 @@
       "name": "Refactoring Coordinator",
       "description": "Plans and coordinates refactoring activities, delegates to specialists",
       "file": "agents/quality/refactoring-coordinator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -562,7 +562,7 @@
       "name": "Test Coordinator",
       "description": "Coordinates testing activities across language-specific test writers",
       "file": "agents/quality/test-coordinator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -570,7 +570,7 @@
       "name": "Unit Test Writer Python",
       "description": "Writes Python unit tests with pytest, unittest, and mocking",
       "file": "agents/quality/unit-test-writer-python.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -578,7 +578,7 @@
       "name": "Unit Test Writer TypeScript",
       "description": "Writes TypeScript unit tests with Jest, Vitest, and testing-library",
       "file": "agents/quality/unit-test-writer-typescript.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -586,7 +586,7 @@
       "name": "Unit Test Writer Java",
       "description": "Writes Java unit tests with JUnit 5, Mockito, and AssertJ",
       "file": "agents/quality/unit-test-writer-java.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -594,7 +594,7 @@
       "name": "Unit Test Writer Go",
       "description": "Writes Go unit tests with testing package, testify, and gomock",
       "file": "agents/quality/unit-test-writer-go.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -602,7 +602,7 @@
       "name": "Unit Test Writer C#",
       "description": "Writes C# unit tests with xUnit, NUnit, MSTest, and Moq",
       "file": "agents/quality/unit-test-writer-csharp.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -610,7 +610,7 @@
       "name": "Unit Test Writer Ruby",
       "description": "Writes Ruby unit tests with RSpec, Minitest, and mocking",
       "file": "agents/quality/unit-test-writer-ruby.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -618,7 +618,7 @@
       "name": "Unit Test Writer PHP",
       "description": "Writes PHP unit tests with PHPUnit, Mockery, and Pest",
       "file": "agents/quality/unit-test-writer-php.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -626,7 +626,7 @@
       "name": "Test Writer",
       "description": "Creates comprehensive test suites (unit, integration, e2e)",
       "file": "agents/quality/test-writer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -634,7 +634,7 @@
       "name": "Security Auditor",
       "description": "Performs security audits and vulnerability scanning",
       "file": "agents/quality/security-auditor.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -650,7 +650,7 @@
       "name": "Runtime Verifier",
       "description": "Verifies applications launch successfully and documents manual runtime testing steps",
       "file": "agents/quality/runtime-verifier.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -658,7 +658,7 @@
       "name": "E2E Tester",
       "description": "End-to-end testing with browser automation and comprehensive UI coverage",
       "file": "agents/quality/e2e-tester.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -666,7 +666,7 @@
       "name": "Performance Auditor (Python)",
       "description": "Python-specific performance analysis and optimization",
       "file": "agents/quality/performance-auditor-python.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -674,7 +674,7 @@
       "name": "Performance Auditor (TypeScript)",
       "description": "TypeScript/Node.js-specific performance analysis",
       "file": "agents/quality/performance-auditor-typescript.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -682,7 +682,7 @@
       "name": "Performance Auditor (Java)",
       "description": "Java/Spring Boot-specific performance analysis",
       "file": "agents/quality/performance-auditor-java.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -690,7 +690,7 @@
       "name": "Performance Auditor (C#)",
       "description": "C#/.NET-specific performance analysis",
       "file": "agents/quality/performance-auditor-csharp.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -698,7 +698,7 @@
       "name": "Performance Auditor (Go)",
       "description": "Go-specific performance analysis",
       "file": "agents/quality/performance-auditor-go.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -706,7 +706,7 @@
       "name": "Performance Auditor (Ruby)",
       "description": "Ruby/Rails-specific performance analysis",
       "file": "agents/quality/performance-auditor-ruby.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -714,7 +714,7 @@
       "name": "Performance Auditor (PHP)",
       "description": "PHP/Laravel-specific performance analysis",
       "file": "agents/quality/performance-auditor-php.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -722,7 +722,7 @@
       "name": "Performance Auditor (iOS)",
       "description": "iOS-specific performance analysis (memory, battery, animations)",
       "file": "agents/quality/performance-auditor-ios.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -730,7 +730,7 @@
       "name": "Performance Auditor (Android)",
       "description": "Android-specific performance analysis (ANR, memory, battery)",
       "file": "agents/quality/performance-auditor-android.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -738,7 +738,7 @@
       "name": "Mobile Test Writer",
       "description": "Native mobile testing for iOS (XCTest) and Android (JUnit/Espresso)",
       "file": "agents/quality/mobile-test-writer.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -746,7 +746,7 @@
       "name": "Mobile E2E Tester",
       "description": "End-to-end testing for mobile apps (XCUITest, Espresso, Detox, Appium)",
       "file": "agents/quality/mobile-e2e-tester.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "quality"
     },
     {
@@ -754,7 +754,7 @@
       "name": "Architect",
       "description": "High-level system architecture and design decisions",
       "file": "agents/architecture/architect.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "architecture"
     },
     {
@@ -762,7 +762,7 @@
       "name": "Data Engineer",
       "description": "Data pipelines, ETL processes, and data architecture",
       "file": "agents/data-ai/data-engineer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "data-ai"
     },
     {
@@ -770,7 +770,7 @@
       "name": "ML Engineer",
       "description": "Machine learning models, training pipelines, and ML infrastructure",
       "file": "agents/data-ai/ml-engineer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "data-ai"
     },
     {
@@ -778,7 +778,7 @@
       "name": "Compliance Engineer",
       "description": "Security compliance, auditing, and regulatory requirements",
       "file": "agents/security/compliance-engineer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -786,7 +786,7 @@
       "name": "Penetration Tester",
       "description": "Security testing, vulnerability assessment, and ethical hacking",
       "file": "agents/security/penetration-tester.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -794,7 +794,7 @@
       "name": "Mobile Security Auditor",
       "description": "OWASP Mobile Top 10 security auditing for iOS and Android apps",
       "file": "agents/security/mobile-security-auditor.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -802,7 +802,7 @@
       "name": "Security Auditor Python",
       "description": "Python-specific security auditing with Bandit, Safety, and SAST",
       "file": "agents/security/security-auditor-python.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -810,7 +810,7 @@
       "name": "Security Auditor TypeScript",
       "description": "TypeScript/JavaScript security auditing with ESLint security plugins",
       "file": "agents/security/security-auditor-typescript.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -818,7 +818,7 @@
       "name": "Security Auditor Java",
       "description": "Java security auditing with SpotBugs, FindSecBugs, and OWASP checks",
       "file": "agents/security/security-auditor-java.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -826,7 +826,7 @@
       "name": "Security Auditor Go",
       "description": "Go security auditing with gosec and Go-specific vulnerability patterns",
       "file": "agents/security/security-auditor-go.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -834,7 +834,7 @@
       "name": "Security Auditor C#",
       "description": "C#/.NET security auditing with Security Code Scan and Roslyn analyzers",
       "file": "agents/security/security-auditor-csharp.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -842,7 +842,7 @@
       "name": "Security Auditor Ruby",
       "description": "Ruby security auditing with Brakeman and bundler-audit",
       "file": "agents/security/security-auditor-ruby.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -850,7 +850,7 @@
       "name": "Security Auditor PHP",
       "description": "PHP security auditing with Psalm, PHPStan, and RIPS",
       "file": "agents/security/security-auditor-php.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "security"
     },
     {
@@ -858,7 +858,7 @@
       "name": "Site Reliability Engineer",
       "description": "System reliability, monitoring, and incident response",
       "file": "agents/sre/site-reliability-engineer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "sre"
     },
     {
@@ -866,7 +866,7 @@
       "name": "Platform Engineer",
       "description": "Platform infrastructure, developer experience, and tooling",
       "file": "agents/sre/platform-engineer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "sre"
     },
     {
@@ -874,7 +874,7 @@
       "name": "Observability Engineer",
       "description": "Logging, monitoring, tracing, and observability infrastructure",
       "file": "agents/specialized/observability-engineer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "specialized"
     },
     {
@@ -882,7 +882,7 @@
       "name": "Accessibility Specialist",
       "description": "WCAG compliance, accessibility auditing, and inclusive design",
       "file": "agents/accessibility/accessibility-specialist.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "accessibility"
     },
     {
@@ -890,7 +890,7 @@
       "name": "Mobile Accessibility Specialist",
       "description": "VoiceOver, TalkBack, and mobile accessibility auditing",
       "file": "agents/accessibility/mobile-accessibility-specialist.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "accessibility"
     },
     {
@@ -898,7 +898,7 @@
       "name": "Product Manager",
       "description": "Product strategy, requirements gathering, and stakeholder communication",
       "file": "agents/product/product-manager.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "product"
     },
     {
@@ -906,7 +906,7 @@
       "name": "Developer Advocate",
       "description": "Developer documentation, tutorials, and community engagement",
       "file": "agents/devrel/developer-advocate.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "devrel"
     },
     {
@@ -914,7 +914,7 @@
       "name": "Dependency Manager",
       "description": "Dependency updates, security patches, and version management",
       "file": "agents/support/dependency-manager.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "support"
     },
     {
@@ -922,7 +922,7 @@
       "name": "UX System Coordinator",
       "description": "Coordinates UX work across platform-specific specialists",
       "file": "agents/ux/ux-system-coordinator.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "ux"
     },
     {
@@ -930,7 +930,7 @@
       "name": "UX Specialist Web",
       "description": "Specialized UX design for web applications and responsive design",
       "file": "agents/ux/ux-specialist-web.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -938,7 +938,7 @@
       "name": "UX Specialist Mobile",
       "description": "Specialized UX design for iOS and Android applications",
       "file": "agents/ux/ux-specialist-mobile.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -946,7 +946,7 @@
       "name": "UX Specialist Desktop",
       "description": "Specialized UX design for Windows, macOS, and Linux applications",
       "file": "agents/ux/ux-specialist-desktop.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -962,7 +962,7 @@
       "name": "Design System Architect",
       "description": "Designs scalable design system architecture and token systems",
       "file": "agents/ux/design-system-architect.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -970,7 +970,7 @@
       "name": "Data Visualization Designer",
       "description": "Charts, graphs, and data visualization components",
       "file": "agents/ux/data-visualization-designer.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -978,7 +978,7 @@
       "name": "Color Palette Specialist",
       "description": "Color theory, palette generation, and accessibility compliance",
       "file": "agents/ux/color-palette-specialist.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -986,7 +986,7 @@
       "name": "Typography Specialist",
       "description": "Typography systems, font selection, and type hierarchy",
       "file": "agents/ux/typography-specialist.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -994,7 +994,7 @@
       "name": "UI Style Curator",
       "description": "UI component styling and visual consistency",
       "file": "agents/ux/ui-style-curator.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -1002,7 +1002,7 @@
       "name": "Design Drift Detector",
       "description": "Detects design inconsistencies and drift from design system",
       "file": "agents/ux/design-drift-detector.md",
-      "model": "sonnet",
+      "model": "Dynamic",
       "category": "ux"
     },
     {
@@ -1010,7 +1010,7 @@
       "name": "Design Compliance Validator",
       "description": "Validates design system compliance and brand guidelines",
       "file": "agents/ux/design-compliance-validator.md",
-      "model": "opus",
+      "model": "Dynamic",
       "category": "ux"
     }
   ],
@@ -1085,16 +1085,6 @@
       "category": "debug"
     },
     {
-      "name": "/devteam:skill",
-      "description": "Execute a specific skill with optional parameters",
-      "file": "commands/devteam-skill.md"
-    },
-    {
-      "name": "/devteam:skills",
-      "description": "List all available skills organized by category",
-      "file": "commands/devteam-skills.md"
-    },
-    {
       "name": "/devteam:config",
       "description": "View and modify DevTeam configuration settings",
       "file": "commands/devteam-config.md"
@@ -1108,134 +1098,6 @@
       "name": "/devteam:help",
       "description": "Get help on commands, concepts, and troubleshooting",
       "file": "commands/devteam-help.md"
-    }
-  ],
-  "skills": [
-    {
-      "id": "core:code-reviewer",
-      "name": "Code Reviewer",
-      "description": "Comprehensive code review with quality, security, and maintainability analysis",
-      "file": "skills/core/code-reviewer.md",
-      "category": "core"
-    },
-    {
-      "id": "core:debugger",
-      "name": "Debugger",
-      "description": "Systematic debugging and issue diagnosis",
-      "file": "skills/core/debugger.md",
-      "category": "core"
-    },
-    {
-      "id": "core:refactorer",
-      "name": "Refactorer",
-      "description": "Code restructuring and improvement without changing functionality",
-      "file": "skills/core/refactorer.md",
-      "category": "core"
-    },
-    {
-      "id": "testing:test-generator",
-      "name": "Test Generator",
-      "description": "Generate comprehensive test suites for existing code",
-      "file": "skills/testing/test-generator.md",
-      "category": "testing"
-    },
-    {
-      "id": "testing:integration-tester",
-      "name": "Integration Tester",
-      "description": "Create and run integration tests across system components",
-      "file": "skills/testing/integration-tester.md",
-      "category": "testing"
-    },
-    {
-      "id": "testing:e2e-tester",
-      "name": "E2E Tester",
-      "description": "End-to-end testing with browser automation",
-      "file": "skills/testing/e2e-tester.md",
-      "category": "testing"
-    },
-    {
-      "id": "quality:performance-optimizer",
-      "name": "Performance Optimizer",
-      "description": "Identify and fix performance bottlenecks",
-      "file": "skills/quality/performance-optimizer.md",
-      "category": "quality"
-    },
-    {
-      "id": "quality:security-scanner",
-      "name": "Security Scanner",
-      "description": "Scan for security vulnerabilities and OWASP issues",
-      "file": "skills/quality/security-scanner.md",
-      "category": "quality"
-    },
-    {
-      "id": "quality:accessibility-checker",
-      "name": "Accessibility Checker",
-      "description": "WCAG compliance auditing and accessibility improvements",
-      "file": "skills/quality/accessibility-checker.md",
-      "category": "quality"
-    },
-    {
-      "id": "workflow:ci-cd-engineer",
-      "name": "CI/CD Engineer",
-      "description": "Create and optimize CI/CD pipelines",
-      "file": "skills/workflow/ci-cd-engineer.md",
-      "category": "workflow"
-    },
-    {
-      "id": "workflow:git-specialist",
-      "name": "Git Specialist",
-      "description": "Advanced git operations and workflow optimization",
-      "file": "skills/workflow/git-specialist.md",
-      "category": "workflow"
-    },
-    {
-      "id": "workflow:deployment-manager",
-      "name": "Deployment Manager",
-      "description": "Manage deployments across environments with zero-downtime strategies",
-      "file": "skills/workflow/deployment-manager.md",
-      "category": "workflow"
-    },
-    {
-      "id": "frontend:ui-ux-pro-max",
-      "name": "UI/UX Pro Max",
-      "description": "Advanced UI/UX design and implementation",
-      "file": "skills/frontend/ui-ux-pro-max.md",
-      "category": "frontend"
-    },
-    {
-      "id": "frontend:responsive-design",
-      "name": "Responsive Design",
-      "description": "Mobile-first responsive layouts and adaptive design",
-      "file": "skills/frontend/responsive-design.md",
-      "category": "frontend"
-    },
-    {
-      "id": "frontend:accessibility-expert",
-      "name": "Accessibility Expert",
-      "description": "Accessible-first frontend development with ARIA and keyboard navigation",
-      "file": "skills/frontend/accessibility-expert.md",
-      "category": "frontend"
-    },
-    {
-      "id": "meta:prompt-engineer",
-      "name": "Prompt Engineer",
-      "description": "Optimize prompts and agent instructions",
-      "file": "skills/meta/prompt-engineer.md",
-      "category": "meta"
-    },
-    {
-      "id": "meta:context-manager",
-      "name": "Context Manager",
-      "description": "Optimize context usage and manage context windows efficiently",
-      "file": "skills/meta/context-manager.md",
-      "category": "meta"
-    },
-    {
-      "id": "meta:learning-optimizer",
-      "name": "Learning Optimizer",
-      "description": "Learn from execution patterns and optimize future performance",
-      "file": "skills/meta/learning-optimizer.md",
-      "category": "meta"
     }
   ]
 }

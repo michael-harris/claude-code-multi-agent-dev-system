@@ -2,7 +2,7 @@
 
 **Agent ID:** `ux:ux-system-coordinator`
 **Category:** UX
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 6-10
 
 ## Purpose
