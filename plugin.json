@@ -1,7 +1,7 @@
 {
   "name": "devteam",
   "version": "3.1.0",
-  "description": "106-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
+  "description": "126-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-devteam",
   "agents": [
@@ -38,11 +38,35 @@
       "category": "research"
     },
     {
-      "id": "orchestration:ralph-orchestrator",
-      "name": "Ralph Orchestrator",
-      "description": "Manages iterative refinement loop, model escalation, and quality gates",
-      "file": "agents/orchestration/ralph-orchestrator.md",
-      "model": "opus",
+      "id": "orchestration:task-loop",
+      "name": "Task Loop",
+      "description": "Manages iterative quality loop for single task execution with model escalation",
+      "file": "agents/orchestration/task-loop.md",
+      "model": "sonnet",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:sprint-loop",
+      "name": "Sprint Loop",
+      "description": "Sprint-level quality validation after all tasks complete",
+      "file": "agents/orchestration/sprint-loop.md",
+      "model": "sonnet",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:quality-gate-enforcer",
+      "name": "Quality Gate Enforcer",
+      "description": "Runs all quality gates (tests, lint, types, security) and reports results",
+      "file": "agents/orchestration/quality-gate-enforcer.md",
+      "model": "sonnet",
+      "category": "orchestration"
+    },
+    {
+      "id": "orchestration:code-review-coordinator",
+      "name": "Code Review Coordinator",
+      "description": "Coordinates code reviews across language-specific reviewers",
+      "file": "agents/orchestration/code-review-coordinator.md",
+      "model": "sonnet",
       "category": "orchestration"
     },
     {
@@ -74,14 +98,6 @@
       "name": "Sprint Orchestrator",
       "description": "Manages entire sprint execution and coordinates task orchestrator",
       "file": "agents/orchestration/sprint-orchestrator.md",
-      "model": "opus",
-      "category": "orchestration"
-    },
-    {
-      "id": "orchestration:task-orchestrator",
-      "name": "Task Orchestrator",
-      "description": "Coordinates specialized agents for single task execution",
-      "file": "agents/orchestration/task-orchestrator.md",
       "model": "opus",
       "category": "orchestration"
     },
@@ -230,10 +246,34 @@
       "category": "database"
     },
     {
+      "id": "database:sql-code-reviewer",
+      "name": "SQL Code Reviewer",
+      "description": "Reviews SQL database code for relational databases (PostgreSQL, MySQL, SQLite)",
+      "file": "agents/database/sql-code-reviewer.md",
+      "model": "opus",
+      "category": "database"
+    },
+    {
+      "id": "database:nosql-code-reviewer",
+      "name": "NoSQL Code Reviewer",
+      "description": "Reviews NoSQL database code (MongoDB, Redis, DynamoDB, Elasticsearch)",
+      "file": "agents/database/nosql-code-reviewer.md",
+      "model": "opus",
+      "category": "database"
+    },
+    {
       "id": "backend:api-designer",
       "name": "API Designer",
       "description": "Designs RESTful API specifications with OpenAPI",
       "file": "agents/backend/api-designer.md",
+      "model": "opus",
+      "category": "backend"
+    },
+    {
+      "id": "backend:api-design-reviewer",
+      "name": "API Design Reviewer",
+      "description": "Reviews API designs for consistency, usability, security, and best practices",
+      "file": "agents/backend/api-design-reviewer.md",
       "model": "opus",
       "category": "backend"
     },
@@ -510,10 +550,74 @@
       "category": "devops"
     },
     {
-      "id": "quality:refactoring-agent",
-      "name": "Refactoring Agent",
-      "description": "Dedicated code restructuring, technical debt reduction, and codebase improvements",
-      "file": "agents/quality/refactoring-agent.md",
+      "id": "quality:refactoring-coordinator",
+      "name": "Refactoring Coordinator",
+      "description": "Plans and coordinates refactoring activities, delegates to specialists",
+      "file": "agents/quality/refactoring-coordinator.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:test-coordinator",
+      "name": "Test Coordinator",
+      "description": "Coordinates testing activities across language-specific test writers",
+      "file": "agents/quality/test-coordinator.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:unit-test-writer-python",
+      "name": "Unit Test Writer Python",
+      "description": "Writes Python unit tests with pytest, unittest, and mocking",
+      "file": "agents/quality/unit-test-writer-python.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:unit-test-writer-typescript",
+      "name": "Unit Test Writer TypeScript",
+      "description": "Writes TypeScript unit tests with Jest, Vitest, and testing-library",
+      "file": "agents/quality/unit-test-writer-typescript.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:unit-test-writer-java",
+      "name": "Unit Test Writer Java",
+      "description": "Writes Java unit tests with JUnit 5, Mockito, and AssertJ",
+      "file": "agents/quality/unit-test-writer-java.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:unit-test-writer-go",
+      "name": "Unit Test Writer Go",
+      "description": "Writes Go unit tests with testing package, testify, and gomock",
+      "file": "agents/quality/unit-test-writer-go.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:unit-test-writer-csharp",
+      "name": "Unit Test Writer C#",
+      "description": "Writes C# unit tests with xUnit, NUnit, MSTest, and Moq",
+      "file": "agents/quality/unit-test-writer-csharp.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:unit-test-writer-ruby",
+      "name": "Unit Test Writer Ruby",
+      "description": "Writes Ruby unit tests with RSpec, Minitest, and mocking",
+      "file": "agents/quality/unit-test-writer-ruby.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:unit-test-writer-php",
+      "name": "Unit Test Writer PHP",
+      "description": "Writes PHP unit tests with PHPUnit, Mockery, and Pest",
+      "file": "agents/quality/unit-test-writer-php.md",
       "model": "sonnet",
       "category": "quality"
     },
@@ -654,14 +758,6 @@
       "category": "architecture"
     },
     {
-      "id": "architecture:tech-lead",
-      "name": "Tech Lead",
-      "description": "Technical leadership, code standards, and team guidance",
-      "file": "agents/architecture/tech-lead.md",
-      "model": "opus",
-      "category": "architecture"
-    },
-    {
       "id": "data-ai:data-engineer",
       "name": "Data Engineer",
       "description": "Data pipelines, ETL processes, and data architecture",
@@ -698,6 +794,62 @@
       "name": "Mobile Security Auditor",
       "description": "OWASP Mobile Top 10 security auditing for iOS and Android apps",
       "file": "agents/security/mobile-security-auditor.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "security:security-auditor-python",
+      "name": "Security Auditor Python",
+      "description": "Python-specific security auditing with Bandit, Safety, and SAST",
+      "file": "agents/security/security-auditor-python.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "security:security-auditor-typescript",
+      "name": "Security Auditor TypeScript",
+      "description": "TypeScript/JavaScript security auditing with ESLint security plugins",
+      "file": "agents/security/security-auditor-typescript.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "security:security-auditor-java",
+      "name": "Security Auditor Java",
+      "description": "Java security auditing with SpotBugs, FindSecBugs, and OWASP checks",
+      "file": "agents/security/security-auditor-java.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "security:security-auditor-go",
+      "name": "Security Auditor Go",
+      "description": "Go security auditing with gosec and Go-specific vulnerability patterns",
+      "file": "agents/security/security-auditor-go.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "security:security-auditor-csharp",
+      "name": "Security Auditor C#",
+      "description": "C#/.NET security auditing with Security Code Scan and Roslyn analyzers",
+      "file": "agents/security/security-auditor-csharp.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "security:security-auditor-ruby",
+      "name": "Security Auditor Ruby",
+      "description": "Ruby security auditing with Brakeman and bundler-audit",
+      "file": "agents/security/security-auditor-ruby.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
+      "id": "security:security-auditor-php",
+      "name": "Security Auditor PHP",
+      "description": "PHP security auditing with Psalm, PHPStan, and RIPS",
+      "file": "agents/security/security-auditor-php.md",
       "model": "opus",
       "category": "security"
     },
@@ -758,20 +910,44 @@
       "category": "devrel"
     },
     {
-      "id": "support:refactoring-specialist",
-      "name": "Refactoring Specialist",
-      "description": "Large-scale refactoring, code modernization, and technical debt reduction",
-      "file": "agents/support/refactoring-specialist.md",
-      "model": "opus",
-      "category": "support"
-    },
-    {
       "id": "support:dependency-manager",
       "name": "Dependency Manager",
       "description": "Dependency updates, security patches, and version management",
       "file": "agents/support/dependency-manager.md",
       "model": "sonnet",
       "category": "support"
+    },
+    {
+      "id": "ux:ux-system-coordinator",
+      "name": "UX System Coordinator",
+      "description": "Coordinates UX work across platform-specific specialists",
+      "file": "agents/ux/ux-system-coordinator.md",
+      "model": "sonnet",
+      "category": "ux"
+    },
+    {
+      "id": "ux:ux-specialist-web",
+      "name": "UX Specialist Web",
+      "description": "Specialized UX design for web applications and responsive design",
+      "file": "agents/ux/ux-specialist-web.md",
+      "model": "sonnet",
+      "category": "ux"
+    },
+    {
+      "id": "ux:ux-specialist-mobile",
+      "name": "UX Specialist Mobile",
+      "description": "Specialized UX design for iOS and Android applications",
+      "file": "agents/ux/ux-specialist-mobile.md",
+      "model": "sonnet",
+      "category": "ux"
+    },
+    {
+      "id": "ux:ux-specialist-desktop",
+      "name": "UX Specialist Desktop",
+      "description": "Specialized UX design for Windows, macOS, and Linux applications",
+      "file": "agents/ux/ux-specialist-desktop.md",
+      "model": "sonnet",
+      "category": "ux"
     },
     {
       "id": "ux:design-system-orchestrator",
