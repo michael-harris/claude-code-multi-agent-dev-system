@@ -42,7 +42,7 @@
       "name": "Task Loop",
       "description": "Manages iterative quality loop for single task execution with model escalation",
       "file": "agents/orchestration/task-loop.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -50,7 +50,7 @@
       "name": "Sprint Loop",
       "description": "Sprint-level quality validation after all tasks complete",
       "file": "agents/orchestration/sprint-loop.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -58,7 +58,7 @@
       "name": "Quality Gate Enforcer",
       "description": "Runs all quality gates (tests, lint, types, security) and reports results",
       "file": "agents/orchestration/quality-gate-enforcer.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -66,7 +66,7 @@
       "name": "Code Review Coordinator",
       "description": "Coordinates code reviews across language-specific reviewers",
       "file": "agents/orchestration/code-review-coordinator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -74,7 +74,7 @@
       "name": "Autonomous Controller",
       "description": "Controls autonomous execution mode with stop hooks and persistence",
       "file": "agents/orchestration/autonomous-controller.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -82,7 +82,7 @@
       "name": "Bug Council Orchestrator",
       "description": "Activates and coordinates 5-member bug diagnosis team for complex issues",
       "file": "agents/orchestration/bug-council-orchestrator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -90,7 +90,7 @@
       "name": "Scope Validator",
       "description": "Enforces 6-layer scope compliance with VETO power",
       "file": "agents/orchestration/scope-validator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -98,7 +98,7 @@
       "name": "Sprint Orchestrator",
       "description": "Manages entire sprint execution and coordinates task orchestrator",
       "file": "agents/orchestration/sprint-orchestrator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -106,7 +106,7 @@
       "name": "Requirements Validator",
       "description": "Quality gate with strict acceptance criteria validation",
       "file": "agents/orchestration/requirements-validator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -114,7 +114,7 @@
       "name": "Track Merger",
       "description": "Intelligently merges parallel development tracks using git worktrees",
       "file": "agents/orchestration/track-merger.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -122,7 +122,7 @@
       "name": "Workflow Compliance",
       "description": "Validates that orchestrators followed their required workflows and generated all mandatory artifacts",
       "file": "agents/orchestration/workflow-compliance.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "orchestration"
     },
     {
@@ -554,7 +554,7 @@
       "name": "Refactoring Coordinator",
       "description": "Plans and coordinates refactoring activities, delegates to specialists",
       "file": "agents/quality/refactoring-coordinator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -562,7 +562,7 @@
       "name": "Test Coordinator",
       "description": "Coordinates testing activities across language-specific test writers",
       "file": "agents/quality/test-coordinator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -642,7 +642,7 @@
       "name": "Documentation Coordinator",
       "description": "Creates and maintains technical documentation",
       "file": "agents/quality/documentation-coordinator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -922,7 +922,7 @@
       "name": "UX System Coordinator",
       "description": "Coordinates UX work across platform-specific specialists",
       "file": "agents/ux/ux-system-coordinator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "ux"
     },
     {
@@ -954,7 +954,7 @@
       "name": "Design System Orchestrator",
       "description": "Coordinates design system implementation and consistency",
       "file": "agents/ux/design-system-orchestrator.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "ux"
     },
     {
