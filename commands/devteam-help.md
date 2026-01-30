@@ -117,7 +117,7 @@ Get Help on Specific Topics
   /devteam:help ralph        Quality loop details
   /devteam:help troubleshooting  Problem solving
 
-Documentation: https://github.com/repo/claude-code-multi-agent-dev-system
+Documentation: https://github.com/michael-harris/claude-devteam
 ```
 
 **Command Help:**

@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Local Installation Script for multi-agent-dev-system plugin
+# Local Installation Script for claude-devteam plugin
 
-echo "🔧 Installing multi-agent-dev-system plugin locally..."
+echo "🔧 Installing claude-devteam plugin locally..."
 
 PLUGIN_DIR="$(cd "$(dirname "$0")" && pwd)"
 TARGET_PROJECT="${1:-.}"
@@ -26,16 +26,16 @@ fi
 MARKETPLACE_FILE=".claude-plugin/marketplace.json"
 
 # Check if plugin already exists
-if grep -q "multi-agent-dev-system" "$MARKETPLACE_FILE" 2>/dev/null; then
+if grep -q "claude-devteam" "$MARKETPLACE_FILE" 2>/dev/null; then
     echo "⚠️  Plugin already in marketplace, updating..."
     # Remove old entry
-    jq 'del(.plugins[] | select(.name == "multi-agent-dev-system"))' "$MARKETPLACE_FILE" > "$MARKETPLACE_FILE.tmp"
+    jq 'del(.plugins[] | select(.name == "claude-devteam"))' "$MARKETPLACE_FILE" > "$MARKETPLACE_FILE.tmp"
     mv "$MARKETPLACE_FILE.tmp" "$MARKETPLACE_FILE"
 fi
 
 # Add plugin entry
 jq --arg path "$PLUGIN_DIR" '.plugins += [{
-    "name": "multi-agent-dev-system",
+    "name": "claude-devteam",
     "path": $path,
     "type": "local"
 }]' "$MARKETPLACE_FILE" > "$MARKETPLACE_FILE.tmp"

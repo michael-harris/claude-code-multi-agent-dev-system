@@ -5,7 +5,7 @@ This document describes the directory structure of the DevTeam plugin and the fi
 ## Plugin Structure
 
 ```
-claude-code-multi-agent-dev-system/
+claude-devteam/
 ├── plugin.json                 # Plugin manifest
 ├── README.md                   # Main documentation
 ├── ENHANCEMENTS_V3.0.md        # Version 3.0 changelog

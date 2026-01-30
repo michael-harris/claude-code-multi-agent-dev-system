@@ -18,8 +18,8 @@ You have **28 custom agent definitions** in `.claude/agents/` organized as markd
 
 ## Goal
 
-Create a Claude Code plugin named **`multi-agent-dev-system`** that registers all **28 agents** as subagent types, allowing:
-- Usage: `Task(subagent_type="multi-agent-dev-system:database:designer", model="opus", ...)`
+Create a Claude Code plugin named **`claude-devteam`** that registers all **28 agents** as subagent types, allowing:
+- Usage: `Task(subagent_type="claude-devteam:database:designer", model="opus", ...)`
 - Proper model assignment (Opus for designers, Haiku for T1, Sonnet for T2/quality)
 - Hierarchical namespacing that matches your architecture
 - Commands: `/devteam:prd`, `/devteam:planning`, `/devteam:sprint` for complete workflows
@@ -39,7 +39,7 @@ A Claude Code plugin needs:
 ## Required Plugin Structure
 
 ```
-claude-code-multi-agent-dev-system/
+claude-code-claude-devteam/
 ├── plugin.json                          # Plugin manifest
 ├── README.md                            # Plugin documentation
 ├── agents/
@@ -85,11 +85,11 @@ claude-code-multi-agent-dev-system/
 
 ```json
 {
-  "name": "multi-agent-dev-system",
+  "name": "claude-devteam",
   "version": "1.0.0",
   "description": "27-agent automated development system with hierarchical orchestration and T1/T2 quality tiers for full-stack development",
   "author": "Your Name",
-  "repository": "https://github.com/yourusername/claude-code-multi-agent-dev-system",
+  "repository": "https://github.com/yourusername/claude-code-claude-devteam",
   "agents": [
     {
       "id": "planning:task-graph-analyzer",
@@ -377,8 +377,8 @@ Each agent markdown file should follow this structure:
 ### Step 1: Create Plugin Repository
 
 ```bash
-mkdir claude-code-multi-agent-dev-system
-cd claude-code-multi-agent-dev-system
+mkdir claude-code-claude-devteam
+cd claude-code-claude-devteam
 git init
 ```
 
@@ -422,8 +422,8 @@ Use the template above, ensuring:
 ## Installation
 
 \`\`\`bash
-/plugin marketplace add https://github.com/yourusername/claude-code-multi-agent-dev-system
-/plugin install multi-agent-dev-system
+/plugin marketplace add https://github.com/yourusername/claude-code-claude-devteam
+/plugin install claude-devteam
 \`\`\`
 
 ## Usage
@@ -438,7 +438,7 @@ Use the template above, ensuring:
 
 \`\`\`
 Task(
-  subagent_type="multi-agent-dev-system:database:designer",
+  subagent_type="claude-devteam:database:designer",
   prompt="Design database schema for user authentication"
 )
 \`\`\`
@@ -456,8 +456,8 @@ Copy `.claude/commands/*.md` to `commands/` in the plugin repository.
 
 ```bash
 # In the project that needs the agents:
-/plugin marketplace add file:///path/to/claude-code-multi-agent-dev-system
-/plugin install multi-agent-dev-system
+/plugin marketplace add file:///path/to/claude-code-claude-devteam
+/plugin install claude-devteam
 ```
 
 ### Step 7: Publish (Optional)
@@ -496,7 +496,7 @@ If you want others to use it:
 ## Testing Checklist
 
 - [ ] All 28 agents appear in Task tool subagent_type dropdown
-- [ ] Agent IDs follow `multi-agent-dev-system:category:name` format
+- [ ] Agent IDs follow `claude-devteam:category:name` format
 - [ ] Model switching works (haiku for T1, sonnet for T2, opus for designers)
 - [ ] Commands work: `/devteam:prd`, `/devteam:planning`, `/devteam:sprint`
 - [ ] Agent instructions are properly loaded and followed
@@ -509,20 +509,20 @@ If you want others to use it:
 ```javascript
 // Database task
 Task(
-  subagent_type="multi-agent-dev-system:database:designer",
+  subagent_type="claude-devteam:database:designer",
   model="opus",  // Can override, but plugin specifies opus by default
   prompt="Design schema for..."
 )
 
 Task(
-  subagent_type="multi-agent-dev-system:database:developer-python-t1",
+  subagent_type="claude-devteam:database:developer-python-t1",
   model="haiku",  // T1 uses haiku
   prompt="Implement the schema..."
 )
 
 // If T1 fails, escalate to T2
 Task(
-  subagent_type="multi-agent-dev-system:database:developer-python-t2",
+  subagent_type="claude-devteam:database:developer-python-t2",
   model="sonnet",  // T2 uses sonnet
   prompt="Fix the implementation issues..."
 )
@@ -535,7 +535,7 @@ Task(
 3. ✅ **Version controlled** - Track changes to agent instructions
 4. ✅ **Shareable** - Others can use your multi-agent system
 5. ✅ **IDE integration** - Agents appear in Claude Code autocomplete
-6. ✅ **Proper namespacing** - `multi-agent-dev-system:category:agent` prevents conflicts
+6. ✅ **Proper namespacing** - `claude-devteam:category:agent` prevents conflicts
 
 ## Next Steps
 

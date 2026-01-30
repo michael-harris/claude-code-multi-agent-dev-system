@@ -1,6 +1,6 @@
 # DevTeam: Multi-Agent Autonomous Development System
 
-An enterprise-grade Claude Code plugin providing **89 specialized AI agents** with:
+An enterprise-grade Claude Code plugin providing **106 specialized AI agents** with:
 - **Interview-driven planning** - Clarify requirements before work begins
 - **Codebase research** - Investigate patterns and blockers before implementation
 - **SQLite state management** - Reliable session tracking and cost analytics
@@ -638,15 +638,15 @@ System automatically:
 ### From GitHub
 
 ```bash
-/plugin marketplace add https://github.com/michael-harris/claude-code-multi-agent-dev-system
-/plugin install multi-agent-dev-system
+/plugin marketplace add https://github.com/michael-harris/claude-devteam
+/plugin install claude-devteam
 ```
 
 ### Local Development
 
 ```bash
-git clone https://github.com/michael-harris/claude-code-multi-agent-dev-system.git
-cd claude-code-multi-agent-dev-system
+git clone https://github.com/michael-harris/claude-devteam.git
+cd claude-devteam
 ./install-local.sh
 ```
 
