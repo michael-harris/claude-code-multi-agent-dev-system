@@ -1,6 +1,6 @@
 # Bug Council Orchestrator Agent
 
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Coordinate Bug Council ensemble diagnosis and ranked-choice voting
 
 ## Your Role

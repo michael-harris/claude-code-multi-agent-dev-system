@@ -2,7 +2,7 @@
 
 **Agent ID:** `database:sql-code-reviewer`
 **Category:** Database
-**Model:** opus
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 5-9
 
 ## Purpose

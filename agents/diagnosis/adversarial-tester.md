@@ -1,6 +1,6 @@
 # Adversarial Tester Agent
 
-**Model:** opus
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Role:** Bug Council Member
 **Purpose:** Find edge cases and related failure modes
 

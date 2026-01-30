@@ -146,7 +146,7 @@ Options
   --all              Execute all sprints
   --task <id>        Execute specific task
   --eco              Cost-optimized execution
-  --no-interview     Skip ambiguity check
+  --skip-interview     Skip ambiguity check
   --type <type>      Task type: feature, bug, security
   --model <model>    Force model: haiku, sonnet, opus
 

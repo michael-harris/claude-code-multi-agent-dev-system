@@ -28,7 +28,7 @@ Execute implementation work - plans, sprints, tasks, or ad-hoc work.
 /devteam:implement --sprint 1 --eco
 
 # Skip interview for ad-hoc tasks
-/devteam:implement "Fix typo in header" --no-interview
+/devteam:implement "Fix typo in header" --skip-interview
 
 # Specify task type for better agent selection
 /devteam:implement "Audit auth flow" --type security
@@ -43,7 +43,7 @@ Execute implementation work - plans, sprints, tasks, or ad-hoc work.
 | `--all` | Execute all sprints sequentially |
 | `--task <id>` | Execute specific task |
 | `--eco` | Cost-optimized execution (slower escalation, summarized context) |
-| `--no-interview` | Skip ambiguity check for ad-hoc tasks |
+| `--skip-interview` | Skip ambiguity check for ad-hoc tasks |
 | `--type <type>` | Specify task type: feature, bug, security, refactor, docs |
 | `--model <model>` | Force starting model: haiku, sonnet, opus |
 | `--max-iterations <n>` | Override max iterations (default: 10) |
@@ -100,7 +100,7 @@ function determineTarget(args) {
 ### Phase 2: Interview (for ad-hoc tasks)
 
 **Skip if:**
-- `--no-interview` flag present
+- `--skip-interview` flag present
 - Task is from a plan (already has context)
 - Description is clearly unambiguous
 

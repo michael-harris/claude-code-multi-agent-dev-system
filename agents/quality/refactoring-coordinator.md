@@ -2,7 +2,7 @@
 
 **Agent ID:** `quality:refactoring-coordinator`
 **Category:** Quality
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 5-10
 
 ## Purpose

@@ -21,7 +21,7 @@ Fix a bug with structured diagnostic workflow. Uses interview to clarify details
 /devteam:bug "API returns 500" --scope "src/api/"
 
 # Skip interview (if you have all details)
-/devteam:bug "Null pointer in UserService.getProfile() when user.settings is undefined" --no-interview
+/devteam:bug "Null pointer in UserService.getProfile() when user.settings is undefined" --skip-interview
 
 # Cost-optimized
 /devteam:bug "Minor typo in error message" --eco
@@ -34,7 +34,7 @@ Fix a bug with structured diagnostic workflow. Uses interview to clarify details
 | `--council` | Force Bug Council activation |
 | `--severity <level>` | Set severity: critical, high, medium, low |
 | `--scope <path>` | Limit search to specific files/directories |
-| `--no-interview` | Skip clarifying questions |
+| `--skip-interview` | Skip clarifying questions |
 | `--eco` | Cost-optimized execution |
 | `--model <model>` | Force starting model |
 

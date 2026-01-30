@@ -23,7 +23,7 @@ Conduct interactive requirements gathering, research the codebase, create a PRD,
 | `--feature "<desc>"` | Plan a feature for existing project |
 | `--from <path>` | Load from spec file or folder |
 | `--skip-research` | Skip codebase research phase |
-| `--no-interview` | Skip interview (use with --from) |
+| `--skip-interview` | Skip interview (use with --from) |
 
 ## File-Based Specification Support
 
@@ -262,7 +262,7 @@ echo "✅ Changes committed"
 
 ### Phase 1: Requirements Interview
 
-**Skip if:** `--from` flag provided with comprehensive spec and `--no-interview` flag.
+**Skip if:** `--from` flag provided with comprehensive spec and `--skip-interview` flag.
 
 **Technology Stack Selection (FIRST):**
 1. Ask: "What external services, APIs, or integrations will you need?"

@@ -2,7 +2,7 @@
 
 **Agent ID:** `ux:ux-specialist-desktop`
 **Category:** UX
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 5-8
 
 ## Purpose

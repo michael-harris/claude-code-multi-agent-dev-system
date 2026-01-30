@@ -1,6 +1,6 @@
 # Backend Code Reviewer - Java/Spring Boot
 
-**Model:** sonnet
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Tier:** N/A
 **Purpose:** Perform comprehensive code reviews for Java/Spring Boot applications focusing on best practices, security, performance, and maintainability
 

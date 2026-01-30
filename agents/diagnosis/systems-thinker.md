@@ -1,6 +1,6 @@
 # Systems Thinker Agent
 
-**Model:** opus
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Role:** Bug Council Member
 **Purpose:** Architectural analysis of component interactions
 

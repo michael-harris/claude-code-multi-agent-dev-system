@@ -1,6 +1,6 @@
 # ML Engineer Agent
 
-**Model:** opus
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Machine learning model development, training, and deployment
 
 ## Your Role

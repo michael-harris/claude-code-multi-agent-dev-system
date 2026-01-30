@@ -1,6 +1,6 @@
 # Mobile Accessibility Specialist Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Accessibility auditing and implementation for iOS and Android apps
 
 ## Your Role

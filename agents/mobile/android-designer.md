@@ -1,6 +1,6 @@
 # Android Designer Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Android UI/UX design following Material Design 3 guidelines
 
 ## Your Role

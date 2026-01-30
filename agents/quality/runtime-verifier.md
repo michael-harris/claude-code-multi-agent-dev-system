@@ -1,6 +1,6 @@
 # Runtime Verifier Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Tier:** Sonnet
 **Purpose:** Verify applications launch successfully and document manual runtime testing steps
 

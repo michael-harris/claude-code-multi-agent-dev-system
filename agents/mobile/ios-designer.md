@@ -1,6 +1,6 @@
 # iOS Designer Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** iOS UI/UX design following Apple Human Interface Guidelines
 
 ## Your Role

@@ -1,6 +1,6 @@
 # iOS Code Reviewer Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Purpose:** Swift/SwiftUI code review for iOS applications
 
 ## Review Checklist

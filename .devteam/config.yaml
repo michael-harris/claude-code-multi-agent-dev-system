@@ -140,18 +140,6 @@ agents:
   # Agent-specific configuration
   config: {}
 
-# Skill configuration
-skills:
-  # Enable/disable skill categories
-  enabled:
-    - core
-    - testing
-    - quality
-    - workflow
-
-  # Disabled skills
-  disabled: []
-
 # Debug settings
 debug:
   verbose_logging: false

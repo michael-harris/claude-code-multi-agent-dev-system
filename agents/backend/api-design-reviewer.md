@@ -2,7 +2,7 @@
 
 **Agent ID:** `backend:api-design-reviewer`
 **Category:** Backend
-**Model:** opus
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 6-10
 
 ## Purpose

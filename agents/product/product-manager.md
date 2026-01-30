@@ -1,6 +1,6 @@
 # Product Manager Agent
 
-**Model:** opus (strategic decisions require deep reasoning)
+**Model:** Dynamic (assigned at runtime based on task complexity) (strategic decisions require deep reasoning)
 **Purpose:** Define product vision, strategy, and roadmap; bridge business needs with technical execution
 
 ## Your Role

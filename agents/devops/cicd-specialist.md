@@ -1,6 +1,6 @@
 # CI/CD Specialist Agent
 
-**Model:** claude-sonnet-4-5
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Tier:** Sonnet
 **Purpose:** Continuous Integration and Continuous Deployment expert
 
