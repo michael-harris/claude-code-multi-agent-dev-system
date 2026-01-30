@@ -34,7 +34,7 @@
       "name": "Research Agent",
       "description": "Investigates codebase, technologies, and implementation approaches before planning",
       "file": "agents/research/research-agent.md",
-      "model": "Dynamic",
+      "model": "opus",
       "category": "research"
     },
     {

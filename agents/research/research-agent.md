@@ -2,7 +2,7 @@
 
 **Agent ID:** `research_agent`
 **Category:** Research
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** Opus
 **Complexity Range:** 4-8
 
 ## Purpose
