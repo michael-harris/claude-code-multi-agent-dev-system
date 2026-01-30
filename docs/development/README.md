@@ -1,6 +1,6 @@
 # Development History Archive
 
-This directory contains archived development documents from the creation and evolution of the multi-agent-dev-system plugin.
+This directory contains archived development documents from the creation and evolution of the claude-devteam plugin.
 
 ## Purpose
 
@@ -12,7 +12,7 @@ These documents are preserved for:
 ## Important Note
 
 These documents contain references to old paths and repository names from the development process:
-- **Old path**: `../claude-code-multi-agent-dev-system/` (referenced as a separate directory)
+- **Old path**: `../claude-devteam/` (referenced as a separate directory)
 - **Old repository name**: `multi-agent-claude-workflow`
 - **Development context**: These files were created during plugin development when the structure was different
 
@@ -21,7 +21,7 @@ These documents contain references to old paths and repository names from the de
 ## Current State
 
 The plugin is now located in the root directory of this repository:
-- **Current repository**: `claude-code-multi-agent-dev-system`
+- **Current repository**: `claude-devteam`
 - **Plugin location**: Root directory (not a separate folder)
 - **Current documentation**: See `/README.md` for up-to-date information
 

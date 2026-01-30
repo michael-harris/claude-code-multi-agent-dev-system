@@ -3,7 +3,7 @@
   "version": "3.1.0",
   "description": "91-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
   "author": "Multi-Agent Development Team",
-  "repository": "https://github.com/michael-harris/claude-code-multi-agent-dev-system",
+  "repository": "https://github.com/michael-harris/claude-devteam",
   "agents": [
     {
       "id": "planning:prd-generator",

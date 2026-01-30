@@ -267,7 +267,7 @@ Every agent has:
 Update `/devteam:sprint` command to:
 ```javascript
 Task(
-  subagent_type="multi-agent-dev-system:orchestration:sprint-orchestrator",
+  subagent_type="claude-devteam:orchestration:sprint-orchestrator",
   model="opus",
   prompt=`Execute SPRINT-${sprintId} with full quality loops`
 )
@@ -295,7 +295,7 @@ Task(
 ## 7. Plugin Structure (Final)
 
 ```
-claude-code-multi-agent-dev-system/
+claude-devteam/
 ├── plugin.json (28 agents + 3 commands)
 ├── README.md
 ├── agents/
@@ -366,7 +366,7 @@ claude-code-multi-agent-dev-system/
 - ✅ **Proper model switching:** Automatic haiku/sonnet/opus assignment
 - ✅ **Version control:** Track agent instruction changes
 - ✅ **IDE integration:** Autocomplete for agent selection
-- ✅ **Namespace isolation:** `multi-agent-dev-system:*` prevents conflicts
+- ✅ **Namespace isolation:** `claude-devteam:*` prevents conflicts
 - ✅ **Shareable:** Others can use your system
 - ✅ **Maintainable:** Single source of truth for agent definitions
 

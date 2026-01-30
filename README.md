@@ -638,15 +638,15 @@ System automatically:
 ### From GitHub
 
 ```bash
-/plugin marketplace add https://github.com/michael-harris/claude-code-multi-agent-dev-system
-/plugin install multi-agent-dev-system
+/plugin marketplace add https://github.com/michael-harris/claude-devteam
+/plugin install claude-devteam
 ```
 
 ### Local Development
 
 ```bash
-git clone https://github.com/michael-harris/claude-code-multi-agent-dev-system.git
-cd claude-code-multi-agent-dev-system
+git clone https://github.com/michael-harris/claude-devteam.git
+cd claude-devteam
 ./install-local.sh
 ```
 

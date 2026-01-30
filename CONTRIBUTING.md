@@ -32,8 +32,8 @@ Be respectful, inclusive, and constructive. We're all here to build something gr
 
 ```bash
 # Fork the repository on GitHub, then:
-git clone https://github.com/YOUR_USERNAME/claude-code-multi-agent-dev-system.git
-cd claude-code-multi-agent-dev-system
+git clone https://github.com/YOUR_USERNAME/claude-devteam.git
+cd claude-devteam
 ```
 
 ## Development Setup
@@ -69,7 +69,7 @@ generate_session_id  # Should output: session-YYYYMMDD-HHMMSS-hexchars
 ## Project Structure
 
 ```
-claude-code-multi-agent-dev-system/
+claude-devteam/
 ├── agents/                 # AI agent definitions (91 agents)
 │   ├── core/              # Core orchestration agents
 │   ├── specialized/       # Domain-specific agents

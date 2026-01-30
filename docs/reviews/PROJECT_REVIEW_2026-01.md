@@ -100,7 +100,7 @@ DevTeam is an ambitious and well-architected Claude Code plugin providing 89+ sp
 
 #### Well-Organized Codebase
 ```
-claude-code-multi-agent-dev-system/
+claude-devteam/
 ├── agents/       # 91 agent definitions (categorized)
 ├── commands/     # 18 slash commands
 ├── skills/       # 20+ capability modules
