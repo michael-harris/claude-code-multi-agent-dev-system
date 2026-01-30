@@ -168,14 +168,14 @@ Status: in_progress
 Progress: Sprint 1/2 complete, Sprint 2 in progress
 Current task: TASK-003 (Implement FCM integration)
 
-Run /devteam:auto to continue execution.
+Run /devteam:implement to continue execution.
 ```
 
-#### `/devteam:auto` - Updated Behavior
+#### `/devteam:implement` - Updated Behavior
 
 ```bash
-/devteam:auto                 # Execute ACTIVE plan
-/devteam:auto --plan dark     # Execute specific plan
+/devteam:implement                 # Execute ACTIVE plan
+/devteam:implement --plan dark     # Execute specific plan
 ```
 
 If no active plan:
@@ -218,12 +218,12 @@ Files created:
 
 This plan is now ACTIVE.
 
-Run /devteam:auto to execute, or /devteam:list to see all plans.
+Run /devteam:implement to execute, or /devteam:list to see all plans.
 ```
 
 ### Plan Selection Disambiguation
 
-If user runs `/devteam:auto` with multiple in-progress plans:
+If user runs `/devteam:implement` with multiple in-progress plans:
 
 ```
 ⚠️  Multiple plans in progress:
@@ -233,7 +233,7 @@ If user runs `/devteam:auto` with multiple in-progress plans:
 
 Which plan do you want to execute?
   - Enter number (1 or 2)
-  - Or run: /devteam:auto --plan <name>
+  - Or run: /devteam:implement --plan <name>
 
 >
 ```

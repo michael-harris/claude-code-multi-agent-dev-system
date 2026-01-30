@@ -267,7 +267,7 @@ until completion or encounters an unrecoverable error.
 4. **Progress Reporting** - Keep users informed without requiring action
 
 ### User Flow
-1. User runs `/devteam:auto` with task description
+1. User runs `/devteam:implement` with task description
 2. System creates PRD, tasks, and sprints automatically
 3. System executes sprints, handling errors internally
 4. User receives notification on completion or if intervention needed

@@ -1,6 +1,6 @@
 # DevTeam: Multi-Agent Autonomous Development System
 
-An enterprise-grade Claude Code plugin providing **106 specialized AI agents** with:
+An enterprise-grade Claude Code plugin providing **126 specialized AI agents** with:
 - **Interview-driven planning** - Clarify requirements before work begins
 - **Codebase research** - Investigate patterns and blockers before implementation
 - **SQLite state management** - Reliable session tracking and cost analytics
@@ -40,10 +40,10 @@ An enterprise-grade Claude Code plugin providing **106 specialized AI agents** w
 
 ### Intelligent Agent Selection
 
-The `/devteam:auto` command automatically selects the best agents for your task:
+The `/devteam:implement` command automatically selects the best agents for your task:
 
 ```bash
-/devteam:auto "Add user authentication with JWT tokens"
+/devteam:implement "Add user authentication with JWT tokens"
 ```
 
 **Selection Algorithm:**
@@ -395,7 +395,7 @@ User Request
      │
      ▼
 ┌─────────────────┐
-│  /devteam:auto  │ ← Automatic agent selection
+│  /devteam:implement  │ ← Automatic agent selection
 └────────┬────────┘
          │
          ▼
@@ -593,7 +593,7 @@ Every task must pass:
 ### Example 1: Add Feature
 
 ```bash
-/devteam:auto "Add user profile page with avatar upload"
+/devteam:implement "Add user profile page with avatar upload"
 ```
 
 System automatically:
@@ -607,7 +607,7 @@ System automatically:
 ### Example 2: Fix Bug
 
 ```bash
-/devteam:auto "Fix: Users can't login after password reset"
+/devteam:implement "Fix: Users can't login after password reset"
 ```
 
 System automatically:

@@ -466,7 +466,7 @@
       "name": "iOS Code Reviewer",
       "description": "Reviews Swift/SwiftUI code for quality, security, and best practices",
       "file": "agents/mobile/ios-code-reviewer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "mobile"
     },
     {
@@ -474,7 +474,7 @@
       "name": "Android Code Reviewer",
       "description": "Reviews Kotlin/Jetpack Compose code for quality, security, and best practices",
       "file": "agents/mobile/android-code-reviewer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "mobile"
     },
     {
@@ -482,7 +482,7 @@
       "name": "iOS Designer",
       "description": "iOS UI/UX design following Apple Human Interface Guidelines",
       "file": "agents/mobile/ios-designer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "mobile"
     },
     {
@@ -490,7 +490,7 @@
       "name": "Android Designer",
       "description": "Android UI/UX design following Material Design 3 guidelines",
       "file": "agents/mobile/android-designer.md",
-      "model": "sonnet",
+      "model": "opus",
       "category": "mobile"
     },
     {
@@ -1085,16 +1085,6 @@
       "category": "debug"
     },
     {
-      "name": "/devteam:skill",
-      "description": "Execute a specific skill with optional parameters",
-      "file": "commands/devteam-skill.md"
-    },
-    {
-      "name": "/devteam:skills",
-      "description": "List all available skills organized by category",
-      "file": "commands/devteam-skills.md"
-    },
-    {
       "name": "/devteam:config",
       "description": "View and modify DevTeam configuration settings",
       "file": "commands/devteam-config.md"
@@ -1108,134 +1098,6 @@
       "name": "/devteam:help",
       "description": "Get help on commands, concepts, and troubleshooting",
       "file": "commands/devteam-help.md"
-    }
-  ],
-  "skills": [
-    {
-      "id": "core:code-reviewer",
-      "name": "Code Reviewer",
-      "description": "Comprehensive code review with quality, security, and maintainability analysis",
-      "file": "skills/core/code-reviewer.md",
-      "category": "core"
-    },
-    {
-      "id": "core:debugger",
-      "name": "Debugger",
-      "description": "Systematic debugging and issue diagnosis",
-      "file": "skills/core/debugger.md",
-      "category": "core"
-    },
-    {
-      "id": "core:refactorer",
-      "name": "Refactorer",
-      "description": "Code restructuring and improvement without changing functionality",
-      "file": "skills/core/refactorer.md",
-      "category": "core"
-    },
-    {
-      "id": "testing:test-generator",
-      "name": "Test Generator",
-      "description": "Generate comprehensive test suites for existing code",
-      "file": "skills/testing/test-generator.md",
-      "category": "testing"
-    },
-    {
-      "id": "testing:integration-tester",
-      "name": "Integration Tester",
-      "description": "Create and run integration tests across system components",
-      "file": "skills/testing/integration-tester.md",
-      "category": "testing"
-    },
-    {
-      "id": "testing:e2e-tester",
-      "name": "E2E Tester",
-      "description": "End-to-end testing with browser automation",
-      "file": "skills/testing/e2e-tester.md",
-      "category": "testing"
-    },
-    {
-      "id": "quality:performance-optimizer",
-      "name": "Performance Optimizer",
-      "description": "Identify and fix performance bottlenecks",
-      "file": "skills/quality/performance-optimizer.md",
-      "category": "quality"
-    },
-    {
-      "id": "quality:security-scanner",
-      "name": "Security Scanner",
-      "description": "Scan for security vulnerabilities and OWASP issues",
-      "file": "skills/quality/security-scanner.md",
-      "category": "quality"
-    },
-    {
-      "id": "quality:accessibility-checker",
-      "name": "Accessibility Checker",
-      "description": "WCAG compliance auditing and accessibility improvements",
-      "file": "skills/quality/accessibility-checker.md",
-      "category": "quality"
-    },
-    {
-      "id": "workflow:ci-cd-engineer",
-      "name": "CI/CD Engineer",
-      "description": "Create and optimize CI/CD pipelines",
-      "file": "skills/workflow/ci-cd-engineer.md",
-      "category": "workflow"
-    },
-    {
-      "id": "workflow:git-specialist",
-      "name": "Git Specialist",
-      "description": "Advanced git operations and workflow optimization",
-      "file": "skills/workflow/git-specialist.md",
-      "category": "workflow"
-    },
-    {
-      "id": "workflow:deployment-manager",
-      "name": "Deployment Manager",
-      "description": "Manage deployments across environments with zero-downtime strategies",
-      "file": "skills/workflow/deployment-manager.md",
-      "category": "workflow"
-    },
-    {
-      "id": "frontend:ui-ux-pro-max",
-      "name": "UI/UX Pro Max",
-      "description": "Advanced UI/UX design and implementation",
-      "file": "skills/frontend/ui-ux-pro-max.md",
-      "category": "frontend"
-    },
-    {
-      "id": "frontend:responsive-design",
-      "name": "Responsive Design",
-      "description": "Mobile-first responsive layouts and adaptive design",
-      "file": "skills/frontend/responsive-design.md",
-      "category": "frontend"
-    },
-    {
-      "id": "frontend:accessibility-expert",
-      "name": "Accessibility Expert",
-      "description": "Accessible-first frontend development with ARIA and keyboard navigation",
-      "file": "skills/frontend/accessibility-expert.md",
-      "category": "frontend"
-    },
-    {
-      "id": "meta:prompt-engineer",
-      "name": "Prompt Engineer",
-      "description": "Optimize prompts and agent instructions",
-      "file": "skills/meta/prompt-engineer.md",
-      "category": "meta"
-    },
-    {
-      "id": "meta:context-manager",
-      "name": "Context Manager",
-      "description": "Optimize context usage and manage context windows efficiently",
-      "file": "skills/meta/context-manager.md",
-      "category": "meta"
-    },
-    {
-      "id": "meta:learning-optimizer",
-      "name": "Learning Optimizer",
-      "description": "Learn from execution patterns and optimize future performance",
-      "file": "skills/meta/learning-optimizer.md",
-      "category": "meta"
     }
   ]
 }

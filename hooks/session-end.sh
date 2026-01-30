@@ -68,7 +68,7 @@ The full project state is stored in: \`$STATE_FILE\`
 
 To resume this work:
 1. The state file contains all progress information
-2. Run \`/devteam:auto --resume\` to continue autonomous execution
+2. Run \`/devteam:implement --resume\` to continue autonomous execution
 3. Or run \`/devteam:sprint <sprint-id>\` to continue a specific sprint
 
 ## Notes

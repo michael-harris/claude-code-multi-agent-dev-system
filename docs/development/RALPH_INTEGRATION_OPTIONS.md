@@ -237,7 +237,7 @@ Status: CONTINUING | COMPLETE | CIRCUIT_BREAKER
 # Autonomous Execution Command
 
 ## Usage
-/devteam:auto [--max-iterations N]
+/devteam:implement [--max-iterations N]
 
 ## Description
 Launches autonomous controller that runs until project completion.
@@ -389,7 +389,7 @@ After each significant action:
 
 ## Activation
 Autonomous mode is activated by running:
-/devteam:auto
+/devteam:implement
 
 This creates `.multi-agent/autonomous-mode` marker file.
 ```
@@ -399,7 +399,7 @@ This creates `.multi-agent/autonomous-mode` marker file.
 # Autonomous Mode Command
 
 ## Usage
-/devteam:auto [--max-iterations N]
+/devteam:implement [--max-iterations N]
 
 ## Process
 1. Create `.multi-agent/autonomous-mode` marker
@@ -488,7 +488,7 @@ docs/development/
 
 1. Choose implementation option
 2. Create the hook scripts
-3. Add the `/devteam:auto` command
+3. Add the `/devteam:implement` command
 4. Test with a sample project
 5. Document usage for end users
 

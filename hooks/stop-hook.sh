@@ -95,8 +95,12 @@ if command -v jq &> /dev/null; then
     jq ".total_iterations = $ITERATIONS" "$CIRCUIT_BREAKER_FILE" > "${CIRCUIT_BREAKER_FILE}.tmp" && \
         mv "${CIRCUIT_BREAKER_FILE}.tmp" "$CIRCUIT_BREAKER_FILE"
 else
-    # Fallback without jq
-    sed -i "s/\"total_iterations\": [0-9]*/\"total_iterations\": $ITERATIONS/" "$CIRCUIT_BREAKER_FILE"
+    # Fallback without jq - use portable sed syntax for macOS/Linux compatibility
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        sed -i '' "s/\"total_iterations\": [0-9]*/\"total_iterations\": $ITERATIONS/" "$CIRCUIT_BREAKER_FILE"
+    else
+        sed -i "s/\"total_iterations\": [0-9]*/\"total_iterations\": $ITERATIONS/" "$CIRCUIT_BREAKER_FILE"
+    fi
 fi
 
 log "Work in progress (iteration $ITERATIONS/$MAX_ITERATIONS). Continuing..."

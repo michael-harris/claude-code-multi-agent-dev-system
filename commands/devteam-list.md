@@ -51,7 +51,7 @@ Active: feature-notifications
 
 Commands:
   /devteam:select <#>     Select a plan to work on
-  /devteam:auto           Execute the active plan
+  /devteam:implement           Execute the active plan
   /devteam:plan --feature Create new feature plan
   /devteam:archive <#>    Archive a completed plan
 ```
@@ -109,5 +109,5 @@ Tasks:
   🔄 TASK-003: Implement push service
   📋 TASK-004: Add notification preferences UI
 
-Run /devteam:auto to continue execution.
+Run /devteam:implement to continue execution.
 ```

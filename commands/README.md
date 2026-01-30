@@ -7,7 +7,7 @@ Slash commands for the DevTeam multi-agent development system.
 | Command | Description |
 |---------|-------------|
 | `/devteam:plan` | Interactive planning - creates PRD, tasks, and sprints |
-| `/devteam:auto` | Autonomous execution until project/feature complete |
+| `/devteam:implement` | Autonomous execution until project/feature complete |
 | `/devteam:list` | List all plans and their status |
 | `/devteam:select` | Select a plan to work on |
 | `/devteam:sprint <id>` | Execute a specific sprint |
@@ -23,7 +23,7 @@ Slash commands for the DevTeam multi-agent development system.
 /devteam:plan "Build a task manager"
 
 # 2. Execute autonomously
-/devteam:auto
+/devteam:implement
 ```
 
 ### Add a Feature (to existing project)
@@ -33,7 +33,7 @@ Slash commands for the DevTeam multi-agent development system.
 /devteam:plan --feature "Add dark mode support"
 
 # 2. Execute the feature
-/devteam:auto
+/devteam:implement
 ```
 
 ### Multiple Features
@@ -50,7 +50,7 @@ Slash commands for the DevTeam multi-agent development system.
 /devteam:select notifications
 
 # Execute selected plan
-/devteam:auto
+/devteam:implement
 ```
 
 ### From Spec File
@@ -87,7 +87,7 @@ Combines PRD generation and sprint planning:
 5. Sprint organization (`docs/sprints/`)
 6. State file initialization (`.devteam/state.yaml`)
 
-### /devteam:auto
+### /devteam:implement
 
 Autonomous execution mode:
 - Executes all sprints continuously
@@ -182,7 +182,7 @@ State tracks:
 |-------------|-------------|
 | `/devteam:prd` | `/devteam:plan` |
 | `/devteam:planning` | `/devteam:plan` |
-| `/devteam:sprint all` | `/devteam:auto` |
+| `/devteam:sprint all` | `/devteam:implement` |
 | `/devteam:sprint <id>` | `/devteam:sprint <id>` |
 | `/devteam:issue` | `/devteam:issue` |
 | `/devteam:feature` | `/devteam:plan` (then auto) |
@@ -192,5 +192,5 @@ State tracks:
 The following commands are deprecated but still functional:
 - `prd.md` → Use `/devteam:plan`
 - `planning.md` → Use `/devteam:plan`
-- `sprint-all.md` → Use `/devteam:auto`
+- `sprint-all.md` → Use `/devteam:implement`
 - `feature.md` → Use `/devteam:plan`

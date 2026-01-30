@@ -1,9 +1,22 @@
 # DevTeam State Management Functions (PowerShell)
 # Dot-source this file to use state functions in hooks and commands
+#
+# SECURITY: All SQL queries use proper escaping via Invoke-SqlEscape
 
 # Configuration
 $script:DEVTEAM_DIR = if ($env:DEVTEAM_DIR) { $env:DEVTEAM_DIR } else { ".devteam" }
 $script:DB_FILE = Join-Path $script:DEVTEAM_DIR "devteam.db"
+
+# SQL escape function to prevent SQL injection
+function Invoke-SqlEscape {
+    param(
+        [Parameter(Mandatory=$true)]
+        [AllowEmptyString()]
+        [string]$Value
+    )
+    # Escape single quotes by doubling them (SQL standard)
+    return $Value -replace "'", "''"
+}
 
 # Ensure database exists
 function _Ensure-Database {
@@ -53,9 +66,12 @@ function Start-DevTeamSession {
     _Ensure-Database
 
     $sessionId = New-SessionId
+    $escCommand = Invoke-SqlEscape $Command
+    $escCommandType = Invoke-SqlEscape $CommandType
+    $escExecutionMode = Invoke-SqlEscape $ExecutionMode
     $query = @"
         INSERT INTO sessions (id, command, command_type, execution_mode, status, current_phase)
-        VALUES ('$sessionId', '$Command', '$CommandType', '$ExecutionMode', 'running', 'initializing');
+        VALUES ('$sessionId', '$escCommand', '$escCommandType', '$escExecutionMode', 'running', 'initializing');
 "@
 
     Invoke-SQLite -Query $query
@@ -68,10 +84,12 @@ function Stop-DevTeamSession {
         [string]$ExitReason = "Success"
     )
 
+    $escStatus = Invoke-SqlEscape $Status
+    $escExitReason = Invoke-SqlEscape $ExitReason
     $query = @"
         UPDATE sessions
-        SET status = '$Status',
-            exit_reason = '$ExitReason',
+        SET status = '$escStatus',
+            exit_reason = '$escExitReason',
             ended_at = CURRENT_TIMESTAMP
         WHERE status = 'running';
 "@
@@ -96,6 +114,7 @@ function Test-SessionRunning {
 function Get-SessionState {
     param(
         [Parameter(Mandatory=$true)]
+        [ValidatePattern('^[a-z_]+$')]
         [string]$Field,
         [string]$SessionId
     )
@@ -104,7 +123,9 @@ function Get-SessionState {
         $SessionId = Get-CurrentSessionId
     }
 
-    Invoke-SQLite -Query "SELECT $Field FROM sessions WHERE id = '$SessionId';"
+    $escSessionId = Invoke-SqlEscape $SessionId
+    # Field is validated to only contain lowercase letters and underscores
+    Invoke-SQLite -Query "SELECT $Field FROM sessions WHERE id = '$escSessionId';"
 }
 
 function Get-CurrentPhase {
@@ -146,6 +167,7 @@ function Test-BugCouncilActive {
 function Set-SessionState {
     param(
         [Parameter(Mandatory=$true)]
+        [ValidatePattern('^[a-z_]+$')]
         [string]$Field,
         [Parameter(Mandatory=$true)]
         [string]$Value,
@@ -156,10 +178,13 @@ function Set-SessionState {
         $SessionId = Get-CurrentSessionId
     }
 
+    $escValue = Invoke-SqlEscape $Value
+    $escSessionId = Invoke-SqlEscape $SessionId
+    # Field is validated to only contain lowercase letters and underscores
     $query = @"
         UPDATE sessions
-        SET $Field = '$Value'
-        WHERE id = '$SessionId';
+        SET $Field = '$escValue'
+        WHERE id = '$escSessionId';
 "@
 
     Invoke-SQLite -Query $query
@@ -187,10 +212,11 @@ function Add-Iteration {
         $SessionId = Get-CurrentSessionId
     }
 
+    $escSessionId = Invoke-SqlEscape $SessionId
     $query = @"
         UPDATE sessions
         SET current_iteration = current_iteration + 1
-        WHERE id = '$SessionId';
+        WHERE id = '$escSessionId';
 "@
 
     Invoke-SQLite -Query $query
@@ -203,10 +229,11 @@ function Add-Failure {
         $SessionId = Get-CurrentSessionId
     }
 
+    $escSessionId = Invoke-SqlEscape $SessionId
     $query = @"
         UPDATE sessions
         SET consecutive_failures = consecutive_failures + 1
-        WHERE id = '$SessionId';
+        WHERE id = '$escSessionId';
 "@
 
     Invoke-SQLite -Query $query
@@ -219,10 +246,11 @@ function Reset-Failures {
         $SessionId = Get-CurrentSessionId
     }
 
+    $escSessionId = Invoke-SqlEscape $SessionId
     $query = @"
         UPDATE sessions
         SET consecutive_failures = 0
-        WHERE id = '$SessionId';
+        WHERE id = '$escSessionId';
 "@
 
     Invoke-SQLite -Query $query
@@ -239,11 +267,13 @@ function Enable-BugCouncil {
         $SessionId = Get-CurrentSessionId
     }
 
+    $escReason = Invoke-SqlEscape $Reason
+    $escSessionId = Invoke-SqlEscape $SessionId
     $query = @"
         UPDATE sessions
         SET bug_council_activated = TRUE,
-            bug_council_reason = '$Reason'
-        WHERE id = '$SessionId';
+            bug_council_reason = '$escReason'
+        WHERE id = '$escSessionId';
 "@
 
     Invoke-SQLite -Query $query
@@ -265,12 +295,14 @@ function Add-Tokens {
         $SessionId = Get-CurrentSessionId
     }
 
+    $escSessionId = Invoke-SqlEscape $SessionId
+    # Numeric values are validated by [int] type constraint
     $query = @"
         UPDATE sessions
         SET total_tokens_input = total_tokens_input + $TokensInput,
             total_tokens_output = total_tokens_output + $TokensOutput,
             total_cost_cents = total_cost_cents + $CostCents
-        WHERE id = '$SessionId';
+        WHERE id = '$escSessionId';
 "@
 
     Invoke-SQLite -Query $query
@@ -283,7 +315,8 @@ function Get-TotalCostDollars {
         $SessionId = Get-CurrentSessionId
     }
 
-    Invoke-SQLite -Query "SELECT ROUND(total_cost_cents / 100.0, 4) FROM sessions WHERE id = '$SessionId';"
+    $escSessionId = Invoke-SqlEscape $SessionId
+    Invoke-SQLite -Query "SELECT ROUND(total_cost_cents / 100.0, 4) FROM sessions WHERE id = '$escSessionId';"
 }
 
 # ============================================================================
@@ -316,9 +349,14 @@ function Add-Escalation {
 
     $iteration = Get-CurrentIteration
 
+    $escSessionId = Invoke-SqlEscape $SessionId
+    $escFromModel = Invoke-SqlEscape $FromModel
+    $escToModel = Invoke-SqlEscape $ToModel
+    $escReason = Invoke-SqlEscape $Reason
+    $escAgent = Invoke-SqlEscape $Agent
     $query = @"
         INSERT INTO escalations (session_id, from_model, to_model, reason, agent, iteration)
-        VALUES ('$SessionId', '$FromModel', '$ToModel', '$Reason', '$Agent', $iteration);
+        VALUES ('$escSessionId', '$escFromModel', '$escToModel', '$escReason', '$escAgent', $iteration);
 "@
 
     Invoke-SQLite -Query $query
@@ -336,7 +374,8 @@ function Get-SessionSummary {
         $SessionId = Get-CurrentSessionId
     }
 
-    Invoke-SQLite -Query "SELECT * FROM v_session_summary WHERE id = '$SessionId';" -Json
+    $escSessionId = Invoke-SqlEscape $SessionId
+    Invoke-SQLite -Query "SELECT * FROM v_session_summary WHERE id = '$escSessionId';" -Json
 }
 
 function Stop-SessionAbort {

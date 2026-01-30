@@ -1,19 +1,19 @@
 # Parallel Instance & Plan Execution
 
 This document covers:
-1. What happens when `/devteam:auto` runs with multiple plans
+1. What happens when `/devteam:implement` runs with multiple plans
 2. Running multiple Claude Code instances simultaneously
 3. Git repository requirements
 4. Git worktree integration for parallel plan development
 
-## Question 1: `/devteam:auto` with Multiple Plans
+## Question 1: `/devteam:implement` with Multiple Plans
 
 ### Current Behavior
 
-When `/devteam:auto` is run and multiple plans exist:
+When `/devteam:implement` is run and multiple plans exist:
 
 ```
-/devteam:auto
+/devteam:implement
 
 # If no active plan selected:
 ⚠️  Multiple plans available. Please select one:
@@ -28,14 +28,14 @@ When `/devteam:auto` is run and multiple plans exist:
 
 Select a plan to execute (enter number): _
 
-Or use: /devteam:auto --plan <name>
+Or use: /devteam:implement --plan <name>
 ```
 
 ### Smart Auto-Selection
 
 If only ONE plan is `in_progress` or `planned`:
 ```
-/devteam:auto
+/devteam:implement
 
 # Auto-selects the only actionable plan
 ✅ Auto-selected: Dark Mode Support (only pending plan)
@@ -47,15 +47,15 @@ Starting autonomous execution...
 
 Always works:
 ```
-/devteam:auto --plan dark-mode
-/devteam:auto --plan 3
+/devteam:implement --plan dark-mode
+/devteam:implement --plan 3
 ```
 
 ## Question 2: Two Claude Code Instances, Two Plans
 
 ### The Problem
 
-If User A runs `/devteam:auto` on Plan A while User B runs `/devteam:auto` on Plan B:
+If User A runs `/devteam:implement` on Plan A while User B runs `/devteam:implement` on Plan B:
 - Both might modify the same files
 - Git conflicts will occur
 - State files can get corrupted
@@ -90,7 +90,7 @@ When a plan starts execution, it acquires a lock:
 #### Lock Acquisition Process
 
 ```
-/devteam:auto --plan dark-mode
+/devteam:implement --plan dark-mode
 
 Step 1: Check for existing lock
         → If lock.json exists AND not expired AND process alive:
@@ -110,7 +110,7 @@ Step 3: On exit (normal or crash), release lock
 # Instance 1 is running dark-mode plan
 # Instance 2 tries to run the same plan:
 
-/devteam:auto --plan dark-mode
+/devteam:implement --plan dark-mode
 
 🔒 Plan "dark-mode" is locked
 
@@ -124,10 +124,10 @@ Options:
   3. Force unlock (DANGER - may corrupt state)
 
 To execute a different plan:
-  /devteam:auto --plan notifications
+  /devteam:implement --plan notifications
 
 To force (not recommended):
-  /devteam:auto --plan dark-mode --force-unlock
+  /devteam:implement --plan dark-mode --force-unlock
 ```
 
 #### Parallel Plans with Git Worktrees
@@ -224,7 +224,7 @@ worktree_triggers:
   # User can request worktree:
   manual:
     - "/devteam:plan --worktree"
-    - "/devteam:auto --worktree"
+    - "/devteam:implement --worktree"
 ```
 
 ### Behind-the-Scenes Workflow
@@ -233,17 +233,17 @@ worktree_triggers:
 ```bash
 # Terminal 1
 /devteam:plan --feature "Add dark mode"
-/devteam:auto
+/devteam:implement
 
 # Terminal 2 (while Terminal 1 still running)
 /devteam:plan --feature "Add notifications"
-/devteam:auto
+/devteam:implement
 ```
 
 **What happens automatically:**
 
 ```
-Terminal 2 runs /devteam:auto
+Terminal 2 runs /devteam:implement
 
 System detects:
   → Plan "dark-mode" is currently executing in another instance
@@ -390,7 +390,7 @@ worktrees:
 │  .devteam/plans/dark-mode/         .devteam/plans/notifications/ │
 │       │                                  │                       │
 │       ▼                                  ▼                       │
-│  /devteam:auto                     /devteam:auto                 │
+│  /devteam:implement                     /devteam:implement                 │
 │       │                                  │                       │
 │       ▼                                  ▼                       │
 │  Acquires lock                     Detects lock on dark-mode     │
@@ -475,8 +475,8 @@ git:
 
 | Scenario | Behavior |
 |----------|----------|
-| `/devteam:auto` with no plan selected | Prompts user to select |
-| `/devteam:auto` with one actionable plan | Auto-selects it |
+| `/devteam:implement` with no plan selected | Prompts user to select |
+| `/devteam:implement` with one actionable plan | Auto-selects it |
 | Two instances, same plan | Second instance blocked (locked) |
 | Two instances, different plans | Auto-creates worktree for isolation |
 | No git repo | Prompts to initialize |

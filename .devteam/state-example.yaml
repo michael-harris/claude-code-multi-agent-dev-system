@@ -293,7 +293,7 @@ learned_patterns:
 
 # Current execution context
 current_execution:
-  command: "/devteam:auto"
+  command: "/devteam:implement"
   current_sprint: "SPRINT-002"
   current_task: "TASK-004"
   phase: execution

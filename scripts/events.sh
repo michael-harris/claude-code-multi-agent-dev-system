@@ -228,10 +228,11 @@ log_agent_started() {
     local iteration
     iteration=$(get_current_iteration) || iteration=0
 
-    local esc_session_id esc_agent esc_model
+    local esc_session_id esc_agent esc_model esc_task_id
     esc_session_id=$(sql_escape "$session_id")
     esc_agent=$(sql_escape "$agent")
     esc_model=$(sql_escape "$model")
+    esc_task_id=$(sql_escape "$task_id")
 
     local query="INSERT INTO agent_runs (session_id, agent, model, task_id, iteration, status)
         VALUES ('$esc_session_id', '$esc_agent', '$esc_model', '$esc_task_id', ${iteration:-0}, 'running');"
@@ -328,10 +329,11 @@ log_agent_failed() {
         return 0
     fi
 
-    local esc_session_id esc_agent esc_error_message
+    local esc_session_id esc_agent esc_error_message esc_error_type
     esc_session_id=$(sql_escape "$session_id")
     esc_agent=$(sql_escape "$agent")
     esc_error_message=$(sql_escape "$error_message")
+    esc_error_type=$(sql_escape "$error_type")
 
     local query="UPDATE agent_runs
         SET status = 'failed',
