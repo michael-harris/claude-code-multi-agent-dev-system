@@ -1,7 +1,7 @@
 {
   "name": "devteam",
   "version": "3.1.0",
-  "description": "91-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
+  "description": "106-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-devteam",
   "agents": [
@@ -214,6 +214,22 @@
       "category": "database"
     },
     {
+      "id": "database:developer-ios",
+      "name": "Database Developer iOS",
+      "description": "Implements Core Data and SwiftData persistence for iOS apps",
+      "file": "agents/database/database-developer-ios.md",
+      "model": "sonnet",
+      "category": "database"
+    },
+    {
+      "id": "database:developer-android",
+      "name": "Database Developer Android",
+      "description": "Implements Room database persistence for Android apps",
+      "file": "agents/database/database-developer-android.md",
+      "model": "sonnet",
+      "category": "database"
+    },
+    {
       "id": "backend:api-designer",
       "name": "API Designer",
       "description": "Designs RESTful API specifications with OpenAPI",
@@ -406,6 +422,54 @@
       "category": "mobile"
     },
     {
+      "id": "mobile:ios-code-reviewer",
+      "name": "iOS Code Reviewer",
+      "description": "Reviews Swift/SwiftUI code for quality, security, and best practices",
+      "file": "agents/mobile/ios-code-reviewer.md",
+      "model": "sonnet",
+      "category": "mobile"
+    },
+    {
+      "id": "mobile:android-code-reviewer",
+      "name": "Android Code Reviewer",
+      "description": "Reviews Kotlin/Jetpack Compose code for quality, security, and best practices",
+      "file": "agents/mobile/android-code-reviewer.md",
+      "model": "sonnet",
+      "category": "mobile"
+    },
+    {
+      "id": "mobile:ios-designer",
+      "name": "iOS Designer",
+      "description": "iOS UI/UX design following Apple Human Interface Guidelines",
+      "file": "agents/mobile/ios-designer.md",
+      "model": "sonnet",
+      "category": "mobile"
+    },
+    {
+      "id": "mobile:android-designer",
+      "name": "Android Designer",
+      "description": "Android UI/UX design following Material Design 3 guidelines",
+      "file": "agents/mobile/android-designer.md",
+      "model": "sonnet",
+      "category": "mobile"
+    },
+    {
+      "id": "mobile:react-native-developer",
+      "name": "React Native Developer",
+      "description": "Cross-platform mobile development with React Native",
+      "file": "agents/mobile/react-native-developer.md",
+      "model": "sonnet",
+      "category": "mobile"
+    },
+    {
+      "id": "mobile:flutter-developer",
+      "name": "Flutter Developer",
+      "description": "Cross-platform mobile development with Flutter/Dart",
+      "file": "agents/mobile/flutter-developer.md",
+      "model": "sonnet",
+      "category": "mobile"
+    },
+    {
       "id": "devops:docker-specialist",
       "name": "Docker Specialist",
       "description": "Creates and optimizes Docker containers and compose files",
@@ -434,6 +498,14 @@
       "name": "Terraform Specialist",
       "description": "Creates and manages infrastructure as code with Terraform",
       "file": "agents/devops/terraform-specialist.md",
+      "model": "opus",
+      "category": "devops"
+    },
+    {
+      "id": "devops:mobile-cicd-specialist",
+      "name": "Mobile CI/CD Specialist",
+      "description": "CI/CD pipelines for iOS and Android (Fastlane, TestFlight, Play Store)",
+      "file": "agents/devops/mobile-cicd-specialist.md",
       "model": "opus",
       "category": "devops"
     },
@@ -542,6 +614,38 @@
       "category": "quality"
     },
     {
+      "id": "quality:performance-auditor-ios",
+      "name": "Performance Auditor (iOS)",
+      "description": "iOS-specific performance analysis (memory, battery, animations)",
+      "file": "agents/quality/performance-auditor-ios.md",
+      "model": "opus",
+      "category": "quality"
+    },
+    {
+      "id": "quality:performance-auditor-android",
+      "name": "Performance Auditor (Android)",
+      "description": "Android-specific performance analysis (ANR, memory, battery)",
+      "file": "agents/quality/performance-auditor-android.md",
+      "model": "opus",
+      "category": "quality"
+    },
+    {
+      "id": "quality:mobile-test-writer",
+      "name": "Mobile Test Writer",
+      "description": "Native mobile testing for iOS (XCTest) and Android (JUnit/Espresso)",
+      "file": "agents/quality/mobile-test-writer.md",
+      "model": "sonnet",
+      "category": "quality"
+    },
+    {
+      "id": "quality:mobile-e2e-tester",
+      "name": "Mobile E2E Tester",
+      "description": "End-to-end testing for mobile apps (XCUITest, Espresso, Detox, Appium)",
+      "file": "agents/quality/mobile-e2e-tester.md",
+      "model": "opus",
+      "category": "quality"
+    },
+    {
       "id": "architecture:architect",
       "name": "Architect",
       "description": "High-level system architecture and design decisions",
@@ -590,6 +694,14 @@
       "category": "security"
     },
     {
+      "id": "security:mobile-security-auditor",
+      "name": "Mobile Security Auditor",
+      "description": "OWASP Mobile Top 10 security auditing for iOS and Android apps",
+      "file": "agents/security/mobile-security-auditor.md",
+      "model": "opus",
+      "category": "security"
+    },
+    {
       "id": "sre:site-reliability-engineer",
       "name": "Site Reliability Engineer",
       "description": "System reliability, monitoring, and incident response",
@@ -619,6 +731,14 @@
       "description": "WCAG compliance, accessibility auditing, and inclusive design",
       "file": "agents/accessibility/accessibility-specialist.md",
       "model": "opus",
+      "category": "accessibility"
+    },
+    {
+      "id": "accessibility:mobile-accessibility-specialist",
+      "name": "Mobile Accessibility Specialist",
+      "description": "VoiceOver, TalkBack, and mobile accessibility auditing",
+      "file": "agents/accessibility/mobile-accessibility-specialist.md",
+      "model": "sonnet",
       "category": "accessibility"
     },
     {

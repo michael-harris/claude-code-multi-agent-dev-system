@@ -239,6 +239,204 @@ categories:
           files: ["*.kt"]
           keywords: [android, kotlin, jetpack, compose]
 
+      - id: ios_code_reviewer
+        capabilities:
+          - swift_code_review
+          - ios_best_practices
+          - memory_management
+          - swiftui_patterns
+          - security_review
+        complexity_range: [4, 12]
+        languages: [swift]
+        default_model: sonnet
+        triggers:
+          files: ["*.swift"]
+          keywords: [ios review, swift review, code review ios]
+          task_types: [code_review]
+
+      - id: android_code_reviewer
+        capabilities:
+          - kotlin_code_review
+          - android_best_practices
+          - lifecycle_management
+          - compose_patterns
+          - security_review
+        complexity_range: [4, 12]
+        languages: [kotlin, java]
+        default_model: sonnet
+        triggers:
+          files: ["*.kt"]
+          keywords: [android review, kotlin review, code review android]
+          task_types: [code_review]
+
+      - id: ios_designer
+        capabilities:
+          - ios_ui_design
+          - human_interface_guidelines
+          - sf_symbols
+          - dynamic_type
+          - dark_mode
+        complexity_range: [4, 10]
+        default_model: sonnet
+        triggers:
+          keywords: [ios design, hig, ios ui, swiftui design]
+          task_types: [design, mobile_design]
+
+      - id: android_designer
+        capabilities:
+          - android_ui_design
+          - material_design_3
+          - dynamic_color
+          - adaptive_layouts
+          - dark_mode
+        complexity_range: [4, 10]
+        default_model: sonnet
+        triggers:
+          keywords: [android design, material design, android ui, compose design]
+          task_types: [design, mobile_design]
+
+      - id: react_native_developer
+        capabilities:
+          - react_native
+          - cross_platform_mobile
+          - navigation
+          - state_management
+          - native_modules
+        complexity_range: [3, 12]
+        languages: [javascript, typescript]
+        triggers:
+          files: ["*.tsx", "*.jsx"]
+          keywords: [react native, cross platform, expo]
+
+      - id: flutter_developer
+        capabilities:
+          - flutter
+          - dart
+          - cross_platform_mobile
+          - riverpod
+          - bloc
+        complexity_range: [3, 12]
+        languages: [dart]
+        triggers:
+          files: ["*.dart"]
+          keywords: [flutter, dart, cross platform]
+
+      - id: ios_database_developer
+        capabilities:
+          - core_data
+          - swift_data
+          - ios_persistence
+          - migrations
+          - cloudkit
+        complexity_range: [4, 12]
+        languages: [swift]
+        default_model: sonnet
+        triggers:
+          keywords: [core data, swiftdata, ios database, cloudkit]
+
+      - id: android_database_developer
+        capabilities:
+          - room_database
+          - android_persistence
+          - migrations
+          - paging
+        complexity_range: [4, 12]
+        languages: [kotlin]
+        default_model: sonnet
+        triggers:
+          keywords: [room, android database, room database]
+
+      - id: mobile_security_auditor
+        capabilities:
+          - owasp_mobile_top_10
+          - ios_security
+          - android_security
+          - secure_storage
+          - certificate_pinning
+        complexity_range: [6, 14]
+        default_model: opus
+        triggers:
+          keywords: [mobile security, ios security, android security, owasp mobile]
+          task_types: [security_review, mobile_security]
+
+      - id: mobile_accessibility_specialist
+        capabilities:
+          - voiceover
+          - talkback
+          - wcag_mobile
+          - dynamic_type
+          - touch_accessibility
+        complexity_range: [4, 10]
+        default_model: sonnet
+        triggers:
+          keywords: [mobile accessibility, voiceover, talkback, ios accessibility, android accessibility]
+          task_types: [accessibility]
+
+      - id: mobile_cicd_specialist
+        capabilities:
+          - fastlane
+          - xcode_cloud
+          - app_store_deployment
+          - play_store_deployment
+          - mobile_pipeline
+        complexity_range: [5, 12]
+        default_model: opus
+        triggers:
+          keywords: [fastlane, testflight, app store, play store, mobile ci]
+          task_types: [devops, mobile_deployment]
+
+      - id: ios_performance_auditor
+        capabilities:
+          - ios_profiling
+          - instruments
+          - memory_optimization
+          - battery_optimization
+          - animation_performance
+        complexity_range: [5, 12]
+        default_model: sonnet
+        triggers:
+          keywords: [ios performance, instruments, ios profiling, ios optimization]
+          task_types: [performance]
+
+      - id: android_performance_auditor
+        capabilities:
+          - android_profiling
+          - anr_prevention
+          - memory_optimization
+          - battery_optimization
+          - baseline_profiles
+        complexity_range: [5, 12]
+        default_model: sonnet
+        triggers:
+          keywords: [android performance, android profiling, anr, android optimization]
+          task_types: [performance]
+
+      - id: mobile_test_writer
+        capabilities:
+          - xctest
+          - espresso
+          - junit
+          - mobile_unit_testing
+          - mobile_ui_testing
+        complexity_range: [4, 10]
+        default_model: sonnet
+        triggers:
+          keywords: [mobile test, xctest, espresso, ios test, android test]
+          task_types: [testing]
+
+      - id: mobile_e2e_tester
+        capabilities:
+          - xcuitest
+          - espresso_e2e
+          - detox
+          - appium
+          - mobile_automation
+        complexity_range: [5, 12]
+        default_model: opus
+        triggers:
+          keywords: [mobile e2e, xcuitest, detox, appium, mobile automation]
+          task_types: [e2e_testing]
+
   sre:
     description: "Site Reliability Engineering and Platform"
     agents:
@@ -712,6 +910,17 @@ capability_index:
   ui_implementation: [frontend_developer]
   database_operations: [database_developer]
 
+  # Mobile
+  ios_development: [ios_developer, ios_code_reviewer, ios_designer]
+  android_development: [android_developer, android_code_reviewer, android_designer]
+  cross_platform_mobile: [react_native_developer, flutter_developer]
+  mobile_testing: [mobile_test_writer, mobile_e2e_tester]
+  mobile_performance: [ios_performance_auditor, android_performance_auditor]
+  mobile_security: [mobile_security_auditor]
+  mobile_accessibility: [mobile_accessibility_specialist]
+  mobile_cicd: [mobile_cicd_specialist]
+  mobile_database: [ios_database_developer, android_database_developer]
+
   # SRE & Platform
   reliability: [site_reliability_engineer]
   incident_response: [site_reliability_engineer]
@@ -812,6 +1021,45 @@ task_type_agents:
     design: [design_system_orchestrator, design_system_architect]
     implementation: [frontend_developer]
     validation: [design_compliance_validator, accessibility_specialist]
+
+  # Mobile task types
+  ios_feature:
+    design: [ios_designer]
+    implementation: [ios_developer]
+    database: [ios_database_developer]
+    review: [ios_code_reviewer]
+    testing: [mobile_test_writer, mobile_e2e_tester]
+    performance: [ios_performance_auditor]
+    accessibility: [mobile_accessibility_specialist]
+
+  android_feature:
+    design: [android_designer]
+    implementation: [android_developer]
+    database: [android_database_developer]
+    review: [android_code_reviewer]
+    testing: [mobile_test_writer, mobile_e2e_tester]
+    performance: [android_performance_auditor]
+    accessibility: [mobile_accessibility_specialist]
+
+  cross_platform_mobile:
+    implementation: [react_native_developer, flutter_developer]
+    testing: [mobile_test_writer, mobile_e2e_tester]
+    security: [mobile_security_auditor]
+    cicd: [mobile_cicd_specialist]
+
+  mobile_security:
+    primary: [mobile_security_auditor]
+    fix: [ios_developer, android_developer]
+    review: [ios_code_reviewer, android_code_reviewer]
+
+  mobile_performance:
+    ios: [ios_performance_auditor]
+    android: [android_performance_auditor]
+    fix: [ios_developer, android_developer]
+
+  mobile_deployment:
+    cicd: [mobile_cicd_specialist]
+    testing: [mobile_e2e_tester]
 
 # Selection rules
 selection_rules:

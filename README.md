@@ -1,6 +1,6 @@
 # DevTeam: Multi-Agent Autonomous Development System
 
-An enterprise-grade Claude Code plugin providing **89 specialized AI agents** with:
+An enterprise-grade Claude Code plugin providing **106 specialized AI agents** with:
 - **Interview-driven planning** - Clarify requirements before work begins
 - **Codebase research** - Investigate patterns and blockers before implementation
 - **SQLite state management** - Reliable session tracking and cost analytics
