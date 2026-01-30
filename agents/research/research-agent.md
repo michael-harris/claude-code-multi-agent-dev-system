@@ -2,7 +2,7 @@
 
 **Agent ID:** `research_agent`
 **Category:** Research
-**Default Model:** `sonnet`
+**Model:** Dynamic (assigned at runtime based on task complexity)
 **Complexity Range:** 4-8
 
 ## Purpose

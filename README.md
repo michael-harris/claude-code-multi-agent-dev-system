@@ -121,7 +121,7 @@ Abandonment Attempt → Detected → Re-engagement Prompt
 
 ---
 
-## 76+ Specialized Agents
+## 126 Specialized Agents
 
 ### Enterprise Roles (NEW)
 
@@ -492,13 +492,6 @@ hooks/                       # Cross-platform hooks
 ├── persistence-hook.sh / .ps1
 ├── scope-check.sh / .ps1
 └── README.md
-
-skills/                      # Specialized capabilities
-├── core/
-├── testing/
-├── quality/
-├── workflow/
-└── frontend/
 
 mcp-configs/                 # MCP server configurations
 ├── required.json

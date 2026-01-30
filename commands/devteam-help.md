@@ -9,8 +9,8 @@ Get help on DevTeam commands, concepts, and troubleshooting.
 ```bash
 /devteam:help                    # Show command overview
 /devteam:help implement          # Help for specific command
-/devteam:help skills             # Help on skills system
 /devteam:help eco                # Help on eco mode
+/devteam:help agents             # Help on agent system
 /devteam:help troubleshooting    # Troubleshooting guide
 ```
 
@@ -27,8 +27,6 @@ Get help on DevTeam commands, concepts, and troubleshooting.
 | `reset` | Reset and recovery |
 | `config` | Configuration management |
 | `logs` | Log viewing |
-| `skill` | Skill execution |
-| `skills` | Skills listing |
 
 ### Concepts
 | Topic | Description |
@@ -41,7 +39,6 @@ Get help on DevTeam commands, concepts, and troubleshooting.
 | `gates` | Quality gates |
 | `council` | Bug Council |
 | `agents` | Agent system |
-| `skills` | Skills system |
 | `worktrees` | Git worktree automation |
 
 ### Guides
@@ -105,10 +102,6 @@ Common Commands
     /devteam:status          System health and costs
     /devteam:list            List plans and tasks
     /devteam:reset           Reset stuck sessions
-
-  Skills
-    /devteam:skills          List available skills
-    /devteam:skill <name>    Execute specific skill
 
 Get Help on Specific Topics
 ───────────────────────────────────────────────────────────────

@@ -22,8 +22,6 @@ claude-devteam/
 │   ├── devteam-help.md         # /devteam:help
 │   ├── devteam-list.md         # /devteam:list
 │   ├── devteam-select.md       # /devteam:select
-│   ├── devteam-skill.md        # /devteam:skill
-│   ├── devteam-skills.md       # /devteam:skills
 │   ├── devteam-issue-new.md    # /devteam:issue-new
 │   ├── merge-tracks.md         # [Debug] /devteam:merge-tracks
 │   ├── worktree-status.md      # [Debug] /devteam:worktree-status

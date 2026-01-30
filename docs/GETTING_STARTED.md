@@ -1,6 +1,6 @@
 # Getting Started with DevTeam
 
-Welcome to DevTeam, an 89-agent automated development system for Claude Code. This guide will help you get started quickly.
+Welcome to DevTeam, a 126-agent automated development system for Claude Code. This guide will help you get started quickly.
 
 ## Quick Start (5 minutes)
 
@@ -143,26 +143,19 @@ DevTeam uses an iterative quality loop:
 └─────────────────────────────────────────────┘
 ```
 
-## Agents and Skills
+## Specialized Agents
 
-DevTeam has 89 specialized agents across categories:
+DevTeam has 126 specialized agents across categories:
 
 - **Planning**: PRD generation, task breakdown, sprint planning
+- **Orchestration**: Task coordination, quality loops, scope validation
 - **Backend**: API development (Python, TypeScript, Java, C#, Go, Ruby, PHP)
 - **Frontend**: React/Vue components, UI/UX design
 - **Database**: Schema design, migrations, queries
 - **Quality**: Testing, security, performance
 - **DevOps**: Docker, Kubernetes, CI/CD, Terraform
-
-List available skills:
-```bash
-/devteam:skills
-```
-
-Run a specific skill:
-```bash
-/devteam:skill accessibility-checker
-```
+- **SRE**: Site reliability, observability, platform engineering
+- **Security**: Penetration testing, compliance engineering
 
 ## Project Structure
 
@@ -250,7 +243,7 @@ For large projects, DevTeam uses git worktrees automatically:
 ## Next Steps
 
 1. **Read the full documentation**: Check `docs/` for detailed guides
-2. **Explore skills**: Run `/devteam:skills` to see available capabilities
+2. **Explore agents**: Run `/devteam:help agents` to see available capabilities
 3. **Configure settings**: Run `/devteam:config` to customize behavior
 4. **Join the community**: Report issues at GitHub
 
@@ -280,5 +273,4 @@ UTILITIES
   /devteam:config              Configuration
   /devteam:reset               Reset state
   /devteam:help <topic>        Get help
-  /devteam:skills              List skills
 ```
