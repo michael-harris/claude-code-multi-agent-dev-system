@@ -1,7 +1,7 @@
 {
   "name": "devteam",
-  "version": "3.3.0",
-  "description": "127-agent automated development system with two-phase architecture (initializer/coding), JSON feature tracking with explicit passes boolean, context window management, progress.txt generation, hybrid testing (Playwright + Puppeteer MCP + Claude Computer Use), SQLite state management, Bug Council diagnostics, and comprehensive quality gates",
+  "version": "3.4.0",
+  "description": "127-agent automated development system with two-phase architecture, JSON feature tracking, context window management, progress.txt generation, hybrid testing (Playwright + Puppeteer MCP + Claude Computer Use), SQLite state management, Bug Council diagnostics, baseline commits, checkpoint/restore, error recovery patterns, cost/token tracking, and automated rollback for regression detection",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-devteam",
   "agents": [

@@ -431,6 +431,178 @@ task_loop:
 | Security critical | HALT immediately |
 | Max iterations | HALT, report incomplete |
 
+## Baseline Commits
+
+Create baseline commits at key milestones for easy rollback:
+
+```yaml
+baseline_triggers:
+  automatic:
+    - session_start
+    - sprint_start
+    - sprint_end
+    - all_tests_passing
+    - feature_complete
+
+  commands:
+    create: "./scripts/baseline.sh create <milestone> [description]"
+    list: "./scripts/baseline.sh list"
+    rollback: "./scripts/baseline.sh rollback <baseline>"
+```
+
+## Checkpoints
+
+Save and restore full agent state for resumption after crashes:
+
+```yaml
+checkpoint_protocol:
+  auto_save:
+    interval_minutes: 30
+    on_phase_change: true
+    on_feature_complete: true
+
+  contents:
+    - git_state
+    - database
+    - features.json
+    - progress.txt
+    - session_context
+
+  commands:
+    save: "./scripts/checkpoint.sh save [description]"
+    restore: "./scripts/checkpoint.sh restore <checkpoint-id>"
+    list: "./scripts/checkpoint.sh list"
+```
+
+## Error Recovery
+
+Use structured retry logic with exponential backoff:
+
+```yaml
+error_recovery:
+  config_file: ".devteam/error-recovery.yaml"
+
+  retry_defaults:
+    max_attempts: 3
+    initial_delay_ms: 1000
+    backoff_multiplier: 2.0
+
+  error_classification:
+    transient: retry_with_backoff
+    permanent: fail_fast
+    recoverable: recover_and_retry
+
+  circuit_breaker:
+    enabled: true
+    failure_threshold: 5
+    reset_timeout_seconds: 60
+```
+
+## Cost/Token Tracking
+
+Monitor API costs and token usage:
+
+```yaml
+cost_tracking:
+  enabled: true
+
+  record_on:
+    - every_api_call
+    - agent_completion
+    - iteration_end
+
+  commands:
+    record: "./scripts/cost-tracking.sh record <session> <task> <model> <in> <out>"
+    session: "./scripts/cost-tracking.sh session"
+    daily: "./scripts/cost-tracking.sh daily"
+    budget: "./scripts/cost-tracking.sh budget check"
+
+  alerts:
+    session_budget: 10.00
+    daily_budget: 50.00
+    warn_at_percent: 80
+```
+
+## Automated Rollback
+
+Detect regressions and auto-revert to last known good state:
+
+```yaml
+auto_rollback:
+  enabled: true
+
+  detection:
+    run_on:
+      - after_each_iteration
+      - before_commit
+    checks:
+      - build
+      - test
+      - typecheck
+
+  rollback_strategy:
+    auto_on_regression: true
+    create_backup_branch: true
+    max_commits_to_search: 10
+
+  commands:
+    check: "./scripts/rollback.sh check [type]"
+    auto: "./scripts/rollback.sh auto [type]"
+    smart: "./scripts/rollback.sh smart [type]"
+    undo: "./scripts/rollback.sh undo"
+
+  integration:
+    before_iteration:
+      - check: regression
+        on_fail: auto_rollback
+    after_iteration:
+      - if: tests_failing
+        then: smart_rollback
+```
+
+## Integrated Workflow
+
+```
+Session Start
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│ 1. Initialize                                            │
+│    - Detect phase (initializer vs coding)               │
+│    - Create baseline if first run                       │
+│    - Restore checkpoint if resuming                     │
+│    - Run ./init.sh                                       │
+└─────────────────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│ 2. Per-Iteration Loop                                    │
+│    - Check regression before starting                   │
+│    - Track token usage for cost monitoring              │
+│    - Use error recovery on failures                     │
+│    - Create checkpoint every 30 mins                    │
+│    - Update progress.txt after each iteration           │
+└─────────────────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│ 3. On Failure                                            │
+│    - Classify error (transient/permanent/recoverable)   │
+│    - Apply retry strategy from error-recovery.yaml      │
+│    - If regression detected: auto-rollback              │
+│    - If stuck: escalate model + Bug Council             │
+└─────────────────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│ 4. On Success                                            │
+│    - Create baseline commit                             │
+│    - Update features.json (passes: true)                │
+│    - Generate progress summary                          │
+│    - Log token usage and costs                          │
+└─────────────────────────────────────────────────────────┘
+```
+
 ## See Also
 
 - `orchestration/sprint-loop.md` - Sprint-level quality loop
