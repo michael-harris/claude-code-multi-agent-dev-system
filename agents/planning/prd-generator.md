@@ -146,6 +146,56 @@ Does this work for you?
 - API design preferences
 - Authentication approach
 
+### Phase 8: Feature Enumeration (REQUIRED)
+
+**The 200+ Feature Approach**
+
+After gathering requirements, enumerate ALL features in granular detail. This prevents premature completion and provides clear targets.
+
+**Process:**
+1. Break each requirement into 5-20 granular features
+2. Each feature should be testable in isolation
+3. All features start with `passes: false`
+4. Features are organized by category
+
+**Categories:**
+- `auth` - Authentication and authorization
+- `ui` - User interface components
+- `api` - API endpoints
+- `data` - Data handling and storage
+- `validation` - Input validation
+- `error_handling` - Error states and recovery
+- `edge_cases` - Edge case handling
+- `performance` - Performance requirements
+- `security` - Security features
+- `accessibility` - Accessibility requirements
+
+**Example enumeration:**
+```
+Requirement: "User can log in"
+
+Features:
+- FEAT-001: Login form displays email and password fields
+- FEAT-002: Login form validates email format on blur
+- FEAT-003: Login form shows error for empty email
+- FEAT-004: Login form shows error for empty password
+- FEAT-005: Login form shows loading state during submission
+- FEAT-006: Successful login redirects to dashboard
+- FEAT-007: Failed login shows error message
+- FEAT-008: Failed login preserves email input
+- FEAT-009: Login form has "forgot password" link
+- FEAT-010: Login works with keyboard navigation
+- FEAT-011: Login form is accessible (screen reader)
+- FEAT-012: Login rate limiting prevents brute force
+```
+
+**Granularity guidance:**
+- TOO BROAD: "User authentication" (should be 10-20 features)
+- APPROPRIATE: "Login form shows error for invalid email format"
+
+**Output to features.json:**
+Save enumerated features to `.devteam/features.json` with explicit `passes: false` for each.
+
 ## Output Format
 
 Generate `docs/planning/PROJECT_PRD.yaml`:
@@ -273,24 +323,73 @@ User: "Yes"
 You: "Perfect. Now, what problem are you solving?"
 ```
 
+## Additional Output: Features JSON
+
+Generate `.devteam/features.json` with all enumerated features:
+
+```json
+{
+  "project_name": "[Project Name]",
+  "plan_id": "[Plan ID]",
+  "created_at": "[ISO timestamp]",
+  "updated_at": "[ISO timestamp]",
+  "features": [
+    {
+      "id": "FEAT-001",
+      "category": "auth",
+      "description": "Login form displays email and password fields",
+      "steps": [
+        {"step": "Navigate to login page", "passes": false},
+        {"step": "Verify email field exists", "passes": false},
+        {"step": "Verify password field exists", "passes": false}
+      ],
+      "passes": false,
+      "priority": "critical"
+    },
+    {
+      "id": "FEAT-002",
+      "category": "auth",
+      "description": "Login form validates email format on blur",
+      "steps": [
+        {"step": "Enter invalid email", "passes": false},
+        {"step": "Blur email field", "passes": false},
+        {"step": "Verify validation error appears", "passes": false}
+      ],
+      "passes": false,
+      "priority": "high"
+    }
+  ]
+}
+```
+
+**CRITICAL: All features MUST have `passes: false` initially.**
+
+Features are only marked `passes: true` after actual verification during implementation.
+
 ## After Completion
 
 **Confirm next steps:**
 ```
 PRD saved to docs/planning/PROJECT_PRD.yaml
+Features enumerated to .devteam/features.json
 
 Your technology stack:
 - Backend: [Language + Framework]
 - Frontend: [Framework]
 - Database: [Database + ORM]
 
+Feature Summary:
+- Total features: [X]
+- By category: auth([N]), ui([N]), api([N]), ...
+- All features start as "passes: false"
+
 Next steps:
 1. Review the PRD: docs/planning/PROJECT_PRD.yaml
-2. Run `/devteam:planning analyze` to break into tasks
-3. Run `/devteam:planning sprints` to organize sprints
-4. Run `/devteam:sprint execute SPRINT-001` to start development
+2. Review features: .devteam/features.json
+3. Run `/devteam:implement` to start development
+4. The system will track feature completion automatically
 
-The system will adapt all agents to your chosen stack automatically.
+Progress will be tracked in .devteam/progress.txt
 ```
 
 ## Quality Checks
@@ -302,6 +401,10 @@ Before generating PRD:
 - ✅ Success criteria identified
 - ✅ Constraints documented
 - ✅ Integration requirements clear
+- ✅ **Features enumerated (minimum 20, target 50+)**
+- ✅ **Each feature has explicit steps**
+- ✅ **All features have `passes: false`**
+- ✅ **Features saved to `.devteam/features.json`**
 
 ## Important Notes
 

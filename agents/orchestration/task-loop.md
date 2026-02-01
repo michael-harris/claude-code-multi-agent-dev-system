@@ -162,6 +162,59 @@ def detect_stuck_loop(history: List[IterationResult]) -> bool:
 
 ## Execution Protocol
 
+### Two-Phase Detection (FIRST)
+
+Before any iteration, detect if this is a first run or resume:
+
+```yaml
+phase_detection:
+  check_first_run:
+    - exists: ".devteam/progress.txt"
+    - exists: ".devteam/features.json"
+    - exists: "./init.sh"
+
+  if_first_run:
+    phase: "initializer"
+    actions:
+      - Create init.sh (dev server script)
+      - Enumerate features to .devteam/features.json
+      - Create .devteam/progress.txt
+      - Create baseline commit
+
+  if_resume:
+    phase: "coding"
+    actions:
+      - Read .devteam/progress.txt
+      - Read .devteam/features.json
+      - Run git log --oneline -10
+      - Run ./init.sh (start dev server)
+      - Select highest priority incomplete feature
+```
+
+### Session Startup Routine (Resume Sessions)
+
+```yaml
+startup_routine:
+  - action: pwd
+    purpose: "Confirm working directory"
+
+  - action: read ".devteam/progress.txt"
+    purpose: "Load session context"
+
+  - action: read ".devteam/features.json"
+    purpose: "Load feature status"
+
+  - action: git log --oneline -10
+    purpose: "Review recent work"
+
+  - action: "./init.sh"
+    purpose: "Start development server"
+    background: true
+
+  - action: run tests
+    purpose: "Verify baseline still passes"
+```
+
 ### Iteration Start
 
 ```yaml
@@ -171,6 +224,7 @@ iteration_start:
   - check: not halt_condition
   - select: model based on complexity + failures
   - prepare: context from previous failures
+  - update: ".devteam/progress.txt"
 ```
 
 ### Delegation Calls
