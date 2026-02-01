@@ -1,0 +1,501 @@
+# Hybrid Testing Configuration
+# Combines Playwright E2E, Puppeteer MCP, and Claude Computer Use Visual Verification
+#
+# This configuration enables a three-layer testing pipeline that catches issues
+# at different levels of abstraction:
+# 1. Playwright: Fast, scriptable, CI/CD-native DOM testing
+# 2. Puppeteer MCP: Complex browser interactions and edge cases
+# 3. Visual Verification: Human-like visual inspection via Claude Computer Use
+
+version: "1.0"
+
+# =============================================================================
+# HYBRID TESTING PIPELINE
+# =============================================================================
+
+pipeline:
+  # Enable/disable the hybrid testing pipeline
+  enabled: true
+
+  # Only trigger for projects with web frontends
+  trigger_for:
+    - has_frontend: true
+    - file_patterns:
+        - "*.tsx"
+        - "*.jsx"
+        - "*.vue"
+        - "*.svelte"
+        - "*.html"
+
+  # Pipeline stages (executed in order)
+  stages:
+    - id: playwright_e2e
+      name: "Playwright E2E Tests"
+      agent: "quality:e2e-tester"
+      required: true
+      blocking: true  # Must pass before next stage
+
+    - id: puppeteer_mcp
+      name: "Puppeteer MCP Edge Cases"
+      agent: "quality:e2e-tester"
+      required: false  # Only if complex scenarios defined
+      blocking: true
+      trigger_when:
+        - has_file_downloads: true
+        - has_drag_drop: true
+        - has_browser_extensions: true
+        - has_complex_interactions: true
+
+    - id: visual_verification
+      name: "Visual Verification"
+      agent: "quality:visual-verification"
+      required: true
+      blocking: true
+      model: opus  # Required for Claude Computer Use
+
+# =============================================================================
+# LAYER 1: PLAYWRIGHT CONFIGURATION
+# =============================================================================
+
+playwright:
+  # Base configuration
+  config_file: "playwright.config.ts"
+
+  # Default test directory
+  test_dir: "./e2e"
+
+  # Browsers to test
+  browsers:
+    desktop:
+      - chromium
+      - firefox
+      - webkit
+    mobile:
+      - mobile-chrome
+      - mobile-safari
+
+  # Viewport sizes
+  viewports:
+    mobile:
+      width: 375
+      height: 667
+    tablet:
+      width: 768
+      height: 1024
+    desktop:
+      width: 1280
+      height: 800
+
+  # Test categories
+  test_suites:
+    smoke:
+      description: "Quick sanity checks"
+      timeout: 60s
+      parallel: true
+      files:
+        - "e2e/smoke/**/*.spec.ts"
+
+    functional:
+      description: "Full functional tests"
+      timeout: 300s
+      parallel: true
+      files:
+        - "e2e/functional/**/*.spec.ts"
+
+    visual:
+      description: "Visual regression tests"
+      timeout: 180s
+      parallel: false  # Screenshots need consistent state
+      files:
+        - "e2e/visual/**/*.spec.ts"
+
+    accessibility:
+      description: "Accessibility compliance"
+      timeout: 120s
+      parallel: true
+      files:
+        - "e2e/accessibility/**/*.spec.ts"
+
+  # Visual regression settings
+  visual_regression:
+    enabled: true
+    baseline_dir: "e2e/screenshots/baseline"
+    diff_dir: "e2e/screenshots/diff"
+    threshold: 0.1  # 10% pixel difference allowed
+    max_diff_pixels: 100
+
+  # Accessibility settings
+  accessibility:
+    enabled: true
+    standard: "WCAG21AA"
+    rules:
+      - wcag2a
+      - wcag2aa
+      - wcag21aa
+    fail_on:
+      - critical
+      - serious
+    warn_on:
+      - moderate
+      - minor
+
+  # Retry configuration
+  retries:
+    ci: 2
+    local: 0
+
+  # Artifacts
+  artifacts:
+    screenshots: "on-failure"
+    videos: "on-first-retry"
+    traces: "on-first-retry"
+    report_dir: "playwright-report"
+
+  # Timeouts
+  timeouts:
+    action: 15000      # 15s for clicks, fills, etc.
+    navigation: 30000  # 30s for page loads
+    expect: 10000      # 10s for assertions
+
+# =============================================================================
+# LAYER 2: PUPPETEER MCP CONFIGURATION
+# =============================================================================
+
+puppeteer_mcp:
+  # MCP server configuration
+  server:
+    name: "@anthropic/puppeteer-mcp"
+    version: "latest"
+
+  # When to use Puppeteer MCP instead of/in addition to Playwright
+  use_cases:
+    file_downloads:
+      enabled: true
+      description: "Verify file downloads complete correctly"
+      scenarios:
+        - "PDF report generation"
+        - "CSV export"
+        - "Image download"
+
+    browser_dialogs:
+      enabled: true
+      description: "Handle browser-native dialogs"
+      scenarios:
+        - "Alert boxes"
+        - "Confirm dialogs"
+        - "Prompt inputs"
+        - "beforeunload warnings"
+
+    drag_and_drop:
+      enabled: true
+      description: "Complex drag-and-drop interactions"
+      scenarios:
+        - "Kanban board"
+        - "File upload zones"
+        - "Sortable lists"
+        - "Image cropping"
+
+    network_interception:
+      enabled: true
+      description: "Fine-grained network control"
+      scenarios:
+        - "Mock slow networks"
+        - "Simulate offline"
+        - "Inject responses"
+
+    devtools_protocol:
+      enabled: true
+      description: "Direct CDP access"
+      scenarios:
+        - "Performance profiling"
+        - "Memory snapshots"
+        - "Coverage collection"
+
+  # Capabilities exposed via MCP
+  capabilities:
+    navigation:
+      - navigate: "Navigate to URL"
+      - reload: "Reload current page"
+      - goBack: "Navigate back"
+      - goForward: "Navigate forward"
+
+    interaction:
+      - click: "Click element by selector"
+      - type: "Type text into element"
+      - hover: "Hover over element"
+      - drag: "Drag element to target"
+      - scroll: "Scroll to element or position"
+
+    state:
+      - screenshot: "Capture screenshot"
+      - pdf: "Generate PDF"
+      - evaluate: "Execute JavaScript"
+      - waitFor: "Wait for condition"
+
+    network:
+      - intercept: "Intercept network requests"
+      - mock: "Mock API responses"
+      - throttle: "Simulate network conditions"
+
+  # Timeouts
+  timeouts:
+    navigation: 30000
+    action: 10000
+    screenshot: 5000
+
+# =============================================================================
+# LAYER 3: VISUAL VERIFICATION (CLAUDE COMPUTER USE)
+# =============================================================================
+
+visual_verification:
+  # Enable visual verification
+  enabled: true
+
+  # Model requirement (must use opus for Computer Use)
+  model: opus
+
+  # When to run visual verification
+  trigger:
+    # Run after Playwright passes
+    after_playwright_passes: true
+
+    # Only for frontend changes
+    on_frontend_changes: true
+
+    # Skip for backend-only sprints
+    skip_for_backend_only: true
+
+    # File patterns that trigger visual verification
+    file_patterns:
+      - "*.tsx"
+      - "*.jsx"
+      - "*.css"
+      - "*.scss"
+      - "*.vue"
+      - "*.svelte"
+      - "tailwind.config.*"
+      - "theme.*"
+
+  # Pages to verify (auto-detect or explicit list)
+  pages:
+    auto_detect: true  # Scan routes from app
+    explicit:
+      - path: "/"
+        name: "Homepage"
+        priority: critical
+
+      - path: "/login"
+        name: "Login"
+        priority: critical
+
+      - path: "/signup"
+        name: "Signup"
+        priority: critical
+
+      - path: "/dashboard"
+        name: "Dashboard"
+        priority: high
+
+      - path: "/settings"
+        name: "Settings"
+        priority: medium
+
+  # Viewports to check
+  viewports:
+    - name: mobile
+      width: 375
+      height: 667
+      priority: high
+
+    - name: tablet
+      width: 768
+      height: 1024
+      priority: medium
+
+    - name: desktop
+      width: 1280
+      height: 800
+      priority: high
+
+  # Verification checks
+  checks:
+    layout:
+      enabled: true
+      verify:
+        - "Elements don't overlap"
+        - "Content is visible"
+        - "No horizontal scroll on mobile"
+        - "Footer at bottom of page"
+
+    styling:
+      enabled: true
+      verify:
+        - "Colors match design system"
+        - "Fonts render correctly"
+        - "Images load properly"
+        - "Icons display correctly"
+
+    interactions:
+      enabled: true
+      verify:
+        - "Buttons have hover states"
+        - "Focus indicators visible"
+        - "Transitions smooth"
+        - "Loading states work"
+
+    responsive:
+      enabled: true
+      verify:
+        - "Mobile menu functions"
+        - "Touch targets adequate (48px+)"
+        - "Text readable at all sizes"
+        - "Images scale correctly"
+
+    accessibility_visual:
+      enabled: true
+      verify:
+        - "Sufficient color contrast"
+        - "Focus indicators visible"
+        - "Text not too small"
+        - "Touch targets large enough"
+
+  # Issue severity levels
+  severity:
+    critical:
+      description: "Blocks user from completing task"
+      examples:
+        - "Form submit button not visible"
+        - "Login page completely broken"
+        - "Content overlaps making text unreadable"
+      blocks_completion: true
+
+    major:
+      description: "Significant visual issue"
+      examples:
+        - "Layout broken on mobile"
+        - "Missing images"
+        - "Wrong colors throughout"
+      blocks_completion: true
+
+    minor:
+      description: "Small visual imperfection"
+      examples:
+        - "Slight alignment issue"
+        - "Transition slightly off"
+        - "Minor spacing inconsistency"
+      blocks_completion: false
+
+  # Timeouts
+  timeouts:
+    page_load: 30s
+    element_wait: 10s
+    screenshot: 5s
+    total_verification: 300s  # 5 minutes max
+
+# =============================================================================
+# QUALITY GATE INTEGRATION
+# =============================================================================
+
+quality_gate:
+  name: "hybrid_testing"
+
+  # Gate requirements
+  requirements:
+    playwright:
+      pass_rate: 100%
+      visual_regression: true
+      accessibility: true
+
+    puppeteer_mcp:
+      required_when_applicable: true
+
+    visual_verification:
+      critical_issues: 0
+      major_issues: 0
+
+  # What happens on failure
+  on_failure:
+    playwright_fails:
+      action: return_to_task_loop
+      create_fix_task: true
+      assign_to: e2e-tester
+
+    visual_verification_fails:
+      action: return_to_task_loop
+      create_fix_task: true
+      assign_to: frontend-developer
+      include:
+        - issue_description
+        - reproduction_steps
+        - suggested_fix
+
+  # Reporting
+  report:
+    format: yaml
+    include:
+      - playwright_results
+      - puppeteer_results
+      - visual_verification_results
+      - combined_status
+    output: ".devteam/test-results/hybrid-testing-report.yaml"
+
+# =============================================================================
+# CI/CD INTEGRATION
+# =============================================================================
+
+cicd:
+  # GitHub Actions workflow generation
+  github_actions:
+    generate: true
+    workflow_file: ".github/workflows/hybrid-testing.yml"
+
+    stages:
+      playwright:
+        runs_on: ubuntu-latest
+        parallel: true
+        artifacts: true
+
+      visual_verification:
+        # Visual verification typically runs locally or in special environments
+        # due to Claude Computer Use requirements
+        note: "Typically run locally after CI Playwright passes"
+        trigger: manual
+
+  # Environment requirements
+  environment:
+    node_version: "20"
+    browsers:
+      - chromium
+      - firefox
+      - webkit
+
+# =============================================================================
+# COST OPTIMIZATION
+# =============================================================================
+
+cost_optimization:
+  # Visual verification is expensive (opus + Computer Use)
+  # Only run when necessary
+
+  skip_visual_verification_when:
+    - backend_only_changes: true
+    - documentation_only: true
+    - test_file_changes_only: true
+    - config_changes_only: true
+
+  # Cache visual verification baselines
+  caching:
+    enabled: true
+    duration: "7d"
+    invalidate_on:
+      - design_system_changes
+      - major_layout_changes
+      - theme_changes
+
+  # Reduce scope for minor changes
+  reduced_scope:
+    enabled: true
+    trigger: "small_frontend_change"
+    verify_only:
+      - changed_components
+      - affected_pages

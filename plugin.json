@@ -1,7 +1,7 @@
 {
   "name": "devteam",
-  "version": "3.1.0",
-  "description": "126-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, and comprehensive quality gates",
+  "version": "3.2.0",
+  "description": "127-agent automated development system with interview-driven planning, codebase research, SQLite state management, Bug Council diagnostics, model escalation, eco mode, hybrid testing (Playwright + Puppeteer MCP + Claude Computer Use visual verification), and comprehensive quality gates",
   "author": "Multi-Agent Development Team",
   "repository": "https://github.com/michael-harris/claude-devteam",
   "agents": [
@@ -656,9 +656,17 @@
     {
       "id": "quality:e2e-tester",
       "name": "E2E Tester",
-      "description": "End-to-end testing with browser automation and comprehensive UI coverage",
+      "description": "End-to-end testing with Playwright and Puppeteer MCP for hybrid testing pipeline",
       "file": "agents/quality/e2e-tester.md",
       "model": "Dynamic",
+      "category": "quality"
+    },
+    {
+      "id": "quality:visual-verification",
+      "name": "Visual Verification Agent",
+      "description": "Visual verification using Claude Computer Use for human-like UI inspection",
+      "file": "agents/quality/visual-verification-agent.md",
+      "model": "opus",
       "category": "quality"
     },
     {
@@ -1099,5 +1107,47 @@
       "description": "Get help on commands, concepts, and troubleshooting",
       "file": "commands/devteam-help.md"
     }
-  ]
+  ],
+  "mcp_servers": {
+    "recommended": [
+      {
+        "name": "@anthropic/puppeteer-mcp",
+        "description": "Puppeteer browser automation for E2E testing edge cases",
+        "required_for": ["hybrid_testing", "e2e_testing"],
+        "capabilities": [
+          "navigate",
+          "screenshot",
+          "click",
+          "type",
+          "evaluate",
+          "waitFor",
+          "intercept",
+          "pdf"
+        ],
+        "install": "npm install -g @anthropic/puppeteer-mcp"
+      }
+    ],
+    "optional": [
+      {
+        "name": "@anthropic/browser-mcp",
+        "description": "Alternative browser automation via Chrome DevTools Protocol",
+        "capabilities": ["navigation", "dom_manipulation", "network_interception"]
+      }
+    ]
+  },
+  "computer_use": {
+    "visual_verification": {
+      "description": "Claude Computer Use for visual verification of web applications",
+      "agent": "quality:visual-verification",
+      "model_requirement": "opus",
+      "capabilities": [
+        "visual_inspection",
+        "layout_verification",
+        "responsive_testing",
+        "accessibility_visual",
+        "interaction_verification"
+      ],
+      "triggers": ["after_playwright_passes", "frontend_changes"]
+    }
+  }
 }
