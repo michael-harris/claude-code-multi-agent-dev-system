@@ -9,9 +9,10 @@ DEVTEAM_DIR="${DEVTEAM_DIR:-.devteam}"
 DB_FILE="${DEVTEAM_DIR}/devteam.db"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCHEMA_FILE="${SCRIPT_DIR}/schema.sql"
+SCHEMA_V2_FILE="${SCRIPT_DIR}/schema-v2.sql"
 
 # Current schema version - increment when schema changes
-SCHEMA_VERSION="1"
+SCHEMA_VERSION="2"
 
 # Colors for output
 RED='\033[0;31m'
@@ -96,6 +97,15 @@ init_database() {
             exit 1
         fi
 
+        # Apply schema v2 (acceptance criteria, features, context management)
+        if [ -f "$SCHEMA_V2_FILE" ]; then
+            if ! sqlite3 "$DB_FILE" < "$SCHEMA_V2_FILE"; then
+                log_error "Failed to apply schema v2"
+                exit 1
+            fi
+            log_info "Applied schema v2 (acceptance criteria, features, context management)"
+        fi
+
         # Enable foreign keys and set schema version
         sql_exec "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
         sql_exec "INSERT INTO schema_version (version) VALUES ($SCHEMA_VERSION);"
@@ -127,12 +137,17 @@ init_database() {
 run_migrations() {
     local from_version="$1"
 
-    # Add migration scripts here as needed
-    # Example:
-    # if [ "$from_version" -lt 2 ]; then
-    #     log_info "Running migration v1 → v2..."
-    #     sql_exec "ALTER TABLE sessions ADD COLUMN new_field TEXT;"
-    # fi
+    # Migration v1 → v2: Add acceptance criteria, features, context management
+    if [ "$from_version" -lt 2 ]; then
+        log_info "Running migration v1 → v2..."
+        if [ -f "$SCHEMA_V2_FILE" ]; then
+            if ! sqlite3 "$DB_FILE" < "$SCHEMA_V2_FILE"; then
+                log_error "Failed to apply schema v2 migration"
+                exit 1
+            fi
+            log_info "Applied schema v2: acceptance_criteria, features, context_snapshots, context_budgets, progress_summaries, session_phases"
+        fi
+    fi
 
     # Update schema version
     sql_exec "INSERT OR REPLACE INTO schema_version (version) VALUES ($SCHEMA_VERSION);"

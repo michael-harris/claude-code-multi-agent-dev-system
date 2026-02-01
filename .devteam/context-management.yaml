@@ -1,0 +1,289 @@
+# Context Window Management
+# Automatic summarization and context preservation for long-running sessions
+#
+# Prevents context overflow and maintains critical information across iterations
+
+version: "1.0"
+
+# =============================================================================
+# MODEL CONTEXT LIMITS
+# =============================================================================
+
+model_limits:
+  haiku:
+    context_window: 200000
+    effective_limit: 180000            # Leave buffer for response
+    warn_at: 150000
+    summarize_at: 170000
+
+  sonnet:
+    context_window: 200000
+    effective_limit: 180000
+    warn_at: 150000
+    summarize_at: 170000
+
+  opus:
+    context_window: 200000
+    effective_limit: 180000
+    warn_at: 150000
+    summarize_at: 170000
+
+# =============================================================================
+# AUTOMATIC SUMMARIZATION
+# =============================================================================
+
+auto_summarization:
+  enabled: true
+
+  # When to trigger summarization
+  triggers:
+    - approaching_limit: true          # When nearing context limit
+    - phase_change: true               # Between major phases
+    - iteration_complete: true         # After each iteration (optional)
+    - agent_handoff: true              # When switching agents
+
+  # What to always preserve in full (never summarize)
+  always_preserve:
+    critical:
+      - current_task_requirements      # What we're trying to do
+      - acceptance_criteria            # What success looks like
+      - current_error_messages         # Current blockers
+      - test_results                   # Latest test output
+      - quality_gate_results           # Gate status
+
+    important:
+      - file_paths_modified            # What files are in scope
+      - recent_code_changes            # Last 3 code edits
+      - current_iteration_context      # This iteration's specifics
+
+  # What can be summarized (compressed)
+  can_summarize:
+    conversation_history:
+      strategy: "keep_last_n"
+      n: 5                             # Keep last 5 exchanges
+      summarize_older: true
+
+    research_findings:
+      strategy: "bullet_points"
+      max_bullets: 10
+
+    previous_attempts:
+      strategy: "lessons_learned"
+      keep_failures: true              # Keep what didn't work
+      keep_solutions: true             # Keep what did work
+
+    code_context:
+      strategy: "relevant_only"
+      keep_changed_files: true
+      summarize_unchanged: true
+
+# =============================================================================
+# SUMMARIZATION STRATEGIES
+# =============================================================================
+
+strategies:
+  keep_last_n:
+    description: "Keep the N most recent items, summarize the rest"
+    output_format: |
+      ## Earlier Context (Summarized)
+      ${summary}
+
+      ## Recent Context (Full)
+      ${recent_items}
+
+  bullet_points:
+    description: "Convert detailed content to bullet points"
+    max_bullets: 10
+    output_format: |
+      ## Key Points
+      ${bullets}
+
+  lessons_learned:
+    description: "Extract actionable lessons from attempts"
+    output_format: |
+      ## What We Tried
+      - ${attempts_summary}
+
+      ## What Worked
+      - ${successes}
+
+      ## What Didn't Work (Avoid)
+      - ${failures}
+
+  relevant_only:
+    description: "Keep only context relevant to current task"
+    relevance_signals:
+      - file_in_scope
+      - mentioned_in_error
+      - referenced_in_task
+
+# =============================================================================
+# CONTEXT BUDGET TRACKING
+# =============================================================================
+
+budget_tracking:
+  enabled: true
+
+  # Track in database
+  database_table: "context_budgets"
+
+  # Status levels
+  status_levels:
+    ok:
+      threshold: 0.75                  # Below 75% usage
+      action: "none"
+
+    warning:
+      threshold: 0.85                  # 75-85% usage
+      action: "warn_user"
+      message: "Context at {percent}% - will summarize soon"
+
+    critical:
+      threshold: 0.95                  # 85-95% usage
+      action: "auto_summarize"
+      message: "Context at {percent}% - summarizing now"
+
+    overflow_prevention:
+      threshold: 0.98                  # >95% usage
+      action: "aggressive_summarize"
+      message: "Context near limit - aggressive summarization"
+
+  # Real-time display (for status command)
+  display:
+    show_in_status: true
+    format: |
+      Context: {current}/{limit} tokens ({percent}%) [{status}]
+
+# =============================================================================
+# CHECKPOINT CREATION
+# =============================================================================
+
+checkpoints:
+  # When to create checkpoints
+  auto_create:
+    - on_task_complete: true
+    - on_phase_change: true
+    - on_quality_gate_pass: true
+    - every_n_iterations: 3
+
+  # What to save in checkpoint
+  checkpoint_contents:
+    - session_state
+    - feature_status
+    - git_commit_sha
+    - test_results
+    - context_snapshot
+
+  # Checkpoint naming
+  naming:
+    pattern: "checkpoint-{session_id}-{iteration}-{timestamp}"
+
+  # Retention
+  retention:
+    max_checkpoints: 10
+    delete_on_session_complete: false
+
+# =============================================================================
+# SUMMARIZATION PROMPTS
+# =============================================================================
+
+prompts:
+  general_summarize: |
+    Summarize the following context, preserving:
+    1. Key decisions made
+    2. Problems encountered and solutions found
+    3. Current task requirements
+    4. What has been completed
+    5. What remains to be done
+
+    Be concise but complete. This summary will replace the original.
+
+  code_summarize: |
+    Summarize the code context:
+    1. Files modified and why
+    2. Key changes made
+    3. Dependencies affected
+    4. Tests added/modified
+
+  conversation_summarize: |
+    Summarize this conversation segment:
+    1. Questions asked and answers given
+    2. Decisions made
+    3. Action items identified
+    4. Current status
+
+  research_summarize: |
+    Summarize research findings:
+    1. Key discoveries
+    2. Relevant code patterns found
+    3. Technologies/approaches identified
+    4. Recommendations
+
+# =============================================================================
+# INTEGRATION
+# =============================================================================
+
+integration:
+  # Hook into session management
+  hooks:
+    on_iteration_start:
+      - check_context_budget
+      - warn_if_approaching_limit
+
+    on_iteration_end:
+      - update_context_usage
+      - auto_summarize_if_needed
+      - create_checkpoint_if_needed
+
+    on_agent_handoff:
+      - summarize_for_handoff
+      - preserve_critical_context
+
+  # Database tracking
+  database:
+    track_snapshots: "context_snapshots"
+    track_budgets: "context_budgets"
+
+  # State management integration
+  state:
+    track_in_session: true
+    key: "context_management"
+
+# =============================================================================
+# RECOVERY
+# =============================================================================
+
+recovery:
+  # If context is corrupted or lost
+  on_context_loss:
+    - load_latest_checkpoint
+    - reconstruct_from_git
+    - reconstruct_from_features_json
+
+  # If summarization fails
+  on_summarization_failure:
+    - retry_with_simpler_strategy
+    - fallback_to_aggressive_trim
+    - alert_user
+
+# =============================================================================
+# MONITORING
+# =============================================================================
+
+monitoring:
+  # Log context usage
+  logging:
+    enabled: true
+    log_level: "info"
+    log_events:
+      - context_check
+      - summarization_triggered
+      - checkpoint_created
+
+  # Metrics
+  metrics:
+    track:
+      - tokens_saved_by_summarization
+      - summarization_frequency
+      - checkpoint_count
+      - recovery_events

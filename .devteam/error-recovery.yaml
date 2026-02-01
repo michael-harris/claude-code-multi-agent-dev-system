@@ -1,0 +1,314 @@
+# error-recovery.yaml - Error recovery patterns and retry strategies
+# Based on Anthropic's "Effective Harnesses for Long-Running Agents"
+
+version: "1.0"
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Retry Configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+retry:
+  default:
+    max_attempts: 3
+    initial_delay_ms: 1000
+    max_delay_ms: 30000
+    backoff_multiplier: 2.0
+    jitter: true
+
+  # Per-operation overrides
+  operations:
+    git_push:
+      max_attempts: 4
+      initial_delay_ms: 2000
+      max_delay_ms: 16000
+
+    git_fetch:
+      max_attempts: 4
+      initial_delay_ms: 2000
+      max_delay_ms: 16000
+
+    npm_install:
+      max_attempts: 3
+      initial_delay_ms: 5000
+      max_delay_ms: 60000
+
+    api_call:
+      max_attempts: 5
+      initial_delay_ms: 1000
+      max_delay_ms: 30000
+
+    database_connect:
+      max_attempts: 5
+      initial_delay_ms: 2000
+      max_delay_ms: 30000
+
+    build:
+      max_attempts: 2
+      initial_delay_ms: 0
+      # Builds usually fail for code reasons, not transient issues
+
+    test:
+      max_attempts: 2
+      initial_delay_ms: 0
+      # Tests may be flaky, but 2 attempts is reasonable
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Error Classification
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+error_types:
+  # Transient errors - should retry
+  transient:
+    patterns:
+      - "ECONNRESET"
+      - "ETIMEDOUT"
+      - "ENOTFOUND"
+      - "socket hang up"
+      - "network timeout"
+      - "rate limit"
+      - "429"
+      - "503"
+      - "504"
+      - "Connection refused"
+      - "temporarily unavailable"
+    action: retry_with_backoff
+
+  # Permanent errors - should not retry
+  permanent:
+    patterns:
+      - "401 Unauthorized"
+      - "403 Forbidden"
+      - "404 Not Found"
+      - "Invalid token"
+      - "Permission denied"
+      - "ENOENT"
+      - "syntax error"
+      - "type error"
+      - "compilation failed"
+    action: fail_fast
+
+  # Recoverable errors - try alternative approach
+  recoverable:
+    patterns:
+      - "ENOSPC"           # Disk full
+      - "ENOMEM"           # Out of memory
+      - "port already in use"
+      - "address already in use"
+      - "lock file"
+    action: recover_and_retry
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Recovery Strategies
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+recovery_strategies:
+  disk_full:
+    trigger_patterns:
+      - "ENOSPC"
+      - "No space left"
+      - "disk quota exceeded"
+    actions:
+      - clean_node_modules
+      - clean_build_cache
+      - clean_old_checkpoints
+      - notify_user
+
+  out_of_memory:
+    trigger_patterns:
+      - "ENOMEM"
+      - "JavaScript heap out of memory"
+      - "Cannot allocate memory"
+    actions:
+      - reduce_parallelism
+      - increase_node_memory
+      - restart_process
+      - notify_user
+
+  port_conflict:
+    trigger_patterns:
+      - "EADDRINUSE"
+      - "port already in use"
+      - "address already in use"
+    actions:
+      - find_process_on_port
+      - kill_or_use_alternate_port
+
+  lock_conflict:
+    trigger_patterns:
+      - "ELOCKED"
+      - "lock file exists"
+      - "resource busy"
+    actions:
+      - wait_for_lock
+      - check_stale_lock
+      - force_unlock_if_stale
+
+  git_conflict:
+    trigger_patterns:
+      - "CONFLICT"
+      - "Merge conflict"
+      - "cannot lock ref"
+    actions:
+      - stash_changes
+      - fetch_and_rebase
+      - notify_user_for_resolution
+
+  build_failure:
+    trigger_patterns:
+      - "Build failed"
+      - "Compilation error"
+      - "TypeScript error"
+    actions:
+      - save_error_context
+      - attempt_auto_fix
+      - rollback_if_repeated
+      - notify_user
+
+  test_failure:
+    trigger_patterns:
+      - "Test failed"
+      - "FAIL"
+      - "assertion failed"
+    actions:
+      - capture_test_output
+      - identify_failing_tests
+      - check_for_flaky
+      - notify_user
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Fallback Chains
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+fallback_chains:
+  npm_install:
+    - action: "npm ci"
+      on_fail: next
+    - action: "rm -rf node_modules && npm install"
+      on_fail: next
+    - action: "npm cache clean --force && npm install"
+      on_fail: fail
+
+  git_push:
+    - action: "git push"
+      on_fail: next
+    - action: "git pull --rebase && git push"
+      on_fail: next
+    - action: "notify_conflict"
+      on_fail: fail
+
+  build:
+    - action: "npm run build"
+      on_fail: next
+    - action: "rm -rf dist && npm run build"
+      on_fail: next
+    - action: "npm run build:clean"
+      on_fail: fail
+
+  test:
+    - action: "npm test"
+      on_fail: next
+    - action: "npm test -- --runInBand"  # Run serially
+      on_fail: next
+    - action: "npm test -- --detectOpenHandles"
+      on_fail: fail
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Circuit Breaker
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+circuit_breaker:
+  enabled: true
+
+  # Open circuit after N consecutive failures
+  failure_threshold: 5
+
+  # How long circuit stays open
+  reset_timeout_seconds: 60
+
+  # Half-open: allow 1 request to test
+  half_open_requests: 1
+
+  # Per-operation settings
+  operations:
+    api_call:
+      failure_threshold: 10
+      reset_timeout_seconds: 30
+
+    git_push:
+      failure_threshold: 3
+      reset_timeout_seconds: 120
+
+    build:
+      failure_threshold: 3
+      reset_timeout_seconds: 300
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Dead Letter Queue
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+dead_letter:
+  enabled: true
+
+  # Where to store failed operations for later retry
+  storage: ".devteam/dead-letter/"
+
+  # Max age before auto-delete
+  max_age_hours: 72
+
+  # What to capture
+  capture:
+    - operation_type
+    - error_message
+    - stack_trace
+    - timestamp
+    - attempt_count
+    - context
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Auto-Recovery Actions
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+auto_recovery:
+  # Maximum auto-recovery attempts per session
+  max_attempts_per_session: 10
+
+  # Cool-down between recovery attempts
+  cooldown_seconds: 30
+
+  # Actions that can be taken automatically
+  allowed_actions:
+    - clean_cache
+    - restart_dev_server
+    - reinstall_dependencies
+    - reset_database
+    - create_checkpoint
+
+  # Actions requiring user confirmation
+  requires_confirmation:
+    - rollback_changes
+    - force_push
+    - delete_branch
+    - reset_hard
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Notification Settings
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+notifications:
+  # When to notify
+  notify_on:
+    - circuit_breaker_open
+    - max_retries_exceeded
+    - recovery_failed
+    - dead_letter_added
+
+  # Notification methods (implement as needed)
+  methods:
+    - type: console
+      enabled: true
+    - type: file
+      enabled: true
+      path: ".devteam/error-log.json"
+    - type: webhook
+      enabled: false
+      url: "${ERROR_WEBHOOK_URL}"

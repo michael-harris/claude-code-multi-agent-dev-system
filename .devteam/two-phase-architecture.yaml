@@ -1,0 +1,390 @@
+# Two-Phase Agent Architecture
+# Based on Anthropic's "Effective Harnesses for Long-Running Agents"
+#
+# Phase 1: Initializer - Sets up environment, enumerates features, creates baseline
+# Phase 2: Coding - Incremental feature implementation with structured progress
+
+version: "1.0"
+
+# =============================================================================
+# PHASE DETECTION
+# =============================================================================
+
+phase_detection:
+  # How to detect if this is a first run vs resume
+  first_run_indicators:
+    - no_progress_file: true           # .devteam/progress.txt doesn't exist
+    - no_features_json: true           # .devteam/features.json doesn't exist
+    - no_baseline_commit: true         # No "devteam: baseline" commit exists
+    - session_phases_empty: true       # No session_phases record for this plan
+
+  resume_indicators:
+    - progress_file_exists: true
+    - features_json_exists: true
+    - incomplete_features: true        # Features with passes: false
+
+# =============================================================================
+# PHASE 1: INITIALIZER
+# =============================================================================
+
+initializer_phase:
+  name: "Initializer"
+  description: "First session - establish environment, enumerate features, create baseline"
+
+  # Different prompt for first run
+  prompt_additions: |
+    ## FIRST RUN INITIALIZATION
+
+    This is the FIRST session for this project/feature. Before any coding:
+
+    1. **Create init.sh** - Development server startup script
+       - Detect project type (npm, python, docker, etc.)
+       - Create executable script at ./init.sh
+       - Test that it works
+
+    2. **Enumerate ALL Features** - Create comprehensive feature list
+       - Break down into 50-200+ granular features
+       - Each feature gets explicit steps
+       - All features start with "passes": false
+       - Save to .devteam/features.json
+
+    3. **Create Progress File** - Human-readable progress tracking
+       - Create .devteam/progress.txt
+       - Document session goals and status
+       - Will be updated each session
+
+    4. **Create Baseline Commit**
+       - Commit current state with message "devteam: baseline"
+       - This enables rollback if needed
+
+    5. **Run Initial Tests**
+       - Execute existing test suite
+       - Document baseline test status
+
+    ONLY after completing these 5 steps, proceed to implement the FIRST feature.
+
+  required_artifacts:
+    init_script:
+      path: "./init.sh"
+      executable: true
+      content_requirements:
+        - Starts development server
+        - Works for detected project type
+        - Includes health check
+
+    features_json:
+      path: ".devteam/features.json"
+      format: json
+      schema:
+        type: array
+        items:
+          required: [id, category, description, steps, passes]
+
+    progress_file:
+      path: ".devteam/progress.txt"
+      format: text
+      sections:
+        - "Session Summary"
+        - "Features Status"
+        - "Current Focus"
+        - "Blockers"
+
+    baseline_commit:
+      message_pattern: "devteam: baseline"
+      required: true
+
+  completion_criteria:
+    - init_script_exists: true
+    - init_script_executable: true
+    - features_json_valid: true
+    - features_count: ">= 20"          # Minimum features enumerated
+    - progress_file_exists: true
+    - baseline_commit_created: true
+
+# =============================================================================
+# PHASE 2: CODING
+# =============================================================================
+
+coding_phase:
+  name: "Coding"
+  description: "Subsequent sessions - incremental feature implementation"
+
+  # Different prompt for coding sessions
+  prompt_additions: |
+    ## CODING SESSION
+
+    This is a CONTINUATION session. The project is already initialized.
+
+    **Session Startup Routine:**
+    1. Run `pwd` to confirm working directory
+    2. Read .devteam/progress.txt for context
+    3. Read .devteam/features.json for feature status
+    4. Run `git log --oneline -10` to see recent work
+    5. Run ./init.sh to start development server
+    6. Run existing tests to verify baseline
+
+    **Feature Implementation:**
+    1. Select the HIGHEST PRIORITY incomplete feature (passes: false)
+    2. Implement ONLY that feature this session
+    3. Test thoroughly before marking passes: true
+    4. Update .devteam/progress.txt
+    5. Commit with descriptive message
+
+    **CRITICAL RULES:**
+    - ONE feature per session maximum
+    - NEVER mark passes: true without actual verification
+    - ALWAYS update progress.txt
+    - ALWAYS leave code in clean, working state
+    - If blocked, document in progress.txt and move to next feature
+
+  startup_routine:
+    - action: "pwd"
+      purpose: "Confirm working directory"
+
+    - action: "read .devteam/progress.txt"
+      purpose: "Load session context"
+
+    - action: "read .devteam/features.json"
+      purpose: "Load feature status"
+
+    - action: "git log --oneline -10"
+      purpose: "Review recent work"
+
+    - action: "run ./init.sh"
+      purpose: "Start development server"
+      background: true
+
+    - action: "run tests"
+      purpose: "Verify baseline still passes"
+
+  feature_selection:
+    strategy: "highest_priority_incomplete"
+    priority_order:
+      - critical
+      - high
+      - medium
+      - low
+    max_per_session: 1
+
+  completion_requirements:
+    - feature_tested: true
+    - feature_passes: true
+    - progress_updated: true
+    - code_committed: true
+    - tests_still_pass: true
+
+# =============================================================================
+# FEATURE ENUMERATION (200+ Feature Approach)
+# =============================================================================
+
+feature_enumeration:
+  target_count: 50                      # Minimum features to enumerate
+  recommended_count: 100                # Recommended for complex projects
+  maximum_count: 500                    # Practical upper limit
+
+  # Categories for organization
+  categories:
+    - functional                        # Core functionality
+    - ui                                # User interface
+    - api                               # API endpoints
+    - auth                              # Authentication/authorization
+    - data                              # Data handling
+    - validation                        # Input validation
+    - error_handling                    # Error states
+    - edge_cases                        # Edge case handling
+    - performance                       # Performance requirements
+    - security                          # Security requirements
+    - accessibility                     # Accessibility requirements
+    - responsive                        # Responsive design
+
+  # Template for feature definition
+  feature_template:
+    id: "FEAT-XXX"
+    category: "functional"
+    description: "Clear, specific description"
+    steps:
+      - step: "Step 1 description"
+        passes: false
+      - step: "Step 2 description"
+        passes: false
+    passes: false
+    priority: "medium"
+    verification_method: "automated_test"
+
+  # Granularity guidance
+  granularity:
+    too_broad:
+      - "User authentication"           # Should be 5-10 features
+      - "Dashboard"                      # Should be 10-20 features
+      - "API"                            # Should be many features
+
+    appropriate:
+      - "Login form shows validation error for invalid email"
+      - "Dashboard chart updates when date range changes"
+      - "GET /api/users returns 401 without auth token"
+
+# =============================================================================
+# PROGRESS FILE FORMAT
+# =============================================================================
+
+progress_file:
+  path: ".devteam/progress.txt"
+  update_frequency: "every_session"
+
+  template: |
+    ═══════════════════════════════════════════════════════════════
+    DEVTEAM PROGRESS TRACKER
+    ═══════════════════════════════════════════════════════════════
+
+    Project: ${project_name}
+    Last Updated: ${timestamp}
+    Session: ${session_number}
+
+    ───────────────────────────────────────────────────────────────
+    FEATURE STATUS
+    ───────────────────────────────────────────────────────────────
+    Total Features: ${total_features}
+    Passing: ${passing_features} (${pass_percentage}%)
+    Failing: ${failing_features}
+    Blocked: ${blocked_features}
+
+    ───────────────────────────────────────────────────────────────
+    LAST SESSION SUMMARY
+    ───────────────────────────────────────────────────────────────
+    ${last_session_summary}
+
+    ───────────────────────────────────────────────────────────────
+    CURRENT FOCUS
+    ───────────────────────────────────────────────────────────────
+    Feature: ${current_feature_id}
+    Description: ${current_feature_description}
+    Status: ${current_feature_status}
+
+    ───────────────────────────────────────────────────────────────
+    BLOCKERS
+    ───────────────────────────────────────────────────────────────
+    ${blockers_list}
+
+    ───────────────────────────────────────────────────────────────
+    RECENT COMMITS
+    ───────────────────────────────────────────────────────────────
+    ${recent_commits}
+
+    ═══════════════════════════════════════════════════════════════
+
+# =============================================================================
+# FEATURES.JSON FORMAT
+# =============================================================================
+
+features_json:
+  path: ".devteam/features.json"
+
+  schema:
+    type: object
+    properties:
+      project_name:
+        type: string
+      created_at:
+        type: string
+        format: date-time
+      updated_at:
+        type: string
+        format: date-time
+      features:
+        type: array
+        items:
+          type: object
+          required:
+            - id
+            - category
+            - description
+            - steps
+            - passes
+          properties:
+            id:
+              type: string
+              pattern: "^FEAT-[0-9]{3,4}$"
+            category:
+              type: string
+              enum: [functional, ui, api, auth, data, validation, error_handling, edge_cases, performance, security, accessibility, responsive]
+            description:
+              type: string
+            steps:
+              type: array
+              items:
+                type: object
+                properties:
+                  step:
+                    type: string
+                  passes:
+                    type: boolean
+            passes:
+              type: boolean
+            priority:
+              type: string
+              enum: [critical, high, medium, low]
+            verified_at:
+              type: string
+              format: date-time
+            verified_by:
+              type: string
+
+  example: |
+    {
+      "project_name": "my-app",
+      "created_at": "2025-01-30T10:00:00Z",
+      "updated_at": "2025-01-30T15:30:00Z",
+      "features": [
+        {
+          "id": "FEAT-001",
+          "category": "auth",
+          "description": "Login form validates email format",
+          "steps": [
+            {"step": "Enter invalid email format", "passes": false},
+            {"step": "Submit form", "passes": false},
+            {"step": "See validation error message", "passes": false}
+          ],
+          "passes": false,
+          "priority": "high"
+        },
+        {
+          "id": "FEAT-002",
+          "category": "auth",
+          "description": "Login form shows error for wrong password",
+          "steps": [
+            {"step": "Enter valid email", "passes": false},
+            {"step": "Enter wrong password", "passes": false},
+            {"step": "Submit form", "passes": false},
+            {"step": "See authentication error", "passes": false}
+          ],
+          "passes": false,
+          "priority": "high"
+        }
+      ]
+    }
+
+# =============================================================================
+# INTEGRATION WITH DEVTEAM
+# =============================================================================
+
+integration:
+  # How this integrates with existing DevTeam commands
+  commands:
+    "/devteam:implement":
+      on_first_run: "use_initializer_phase"
+      on_resume: "use_coding_phase"
+
+    "/devteam:plan":
+      after_prd: "enumerate_features"
+      output_features_json: true
+
+  # Database integration
+  database:
+    track_phase: "session_phases"
+    track_features: "features"
+    track_acceptance: "acceptance_criteria"
+
+  # Progress file generation
+  progress_generation:
+    trigger: "session_end"
+    also_on: ["feature_complete", "iteration_complete"]

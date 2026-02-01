@@ -53,7 +53,15 @@ You do NOT:
 │                           │                                  │
 │                           ▼                                  │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │ 3. SPRINT PERFORMANCE AUDIT                          │   │
+│   │ 3. HYBRID TESTING (Web Frontends)                    │   │
+│   │    • Playwright E2E tests                            │   │
+│   │    • Puppeteer MCP edge cases                        │   │
+│   │    • Visual verification (Claude Computer Use)       │   │
+│   └─────────────────────────────────────────────────────┘   │
+│                           │                                  │
+│                           ▼                                  │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │ 4. SPRINT PERFORMANCE AUDIT                          │   │
 │   │    • End-to-end performance testing                  │   │
 │   │    • Resource utilization review                     │   │
 │   │    • Bottleneck identification                       │   │
@@ -61,7 +69,7 @@ You do NOT:
 │                           │                                  │
 │                           ▼                                  │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │ 4. SPRINT REQUIREMENTS VALIDATION                    │   │
+│   │ 5. SPRINT REQUIREMENTS VALIDATION                    │   │
 │   │    • All sprint goals achieved                       │   │
 │   │    • Cross-task acceptance criteria                  │   │
 │   │    • User story completion                           │   │
@@ -69,7 +77,7 @@ You do NOT:
 │                           │                                  │
 │                           ▼                                  │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │ 5. DOCUMENTATION VERIFICATION                        │   │
+│   │ 6. DOCUMENTATION VERIFICATION                        │   │
 │   │    • API docs updated                                │   │
 │   │    • README updated                                  │   │
 │   │    • Architecture docs current                       │   │
@@ -77,7 +85,7 @@ You do NOT:
 │                           │                                  │
 │                           ▼                                  │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │ 6. WORKFLOW COMPLIANCE                               │   │
+│   │ 7. WORKFLOW COMPLIANCE                               │   │
 │   │    • All required steps completed                    │   │
 │   │    • Artifacts generated                             │   │
 │   │    • State file updated                              │   │
@@ -85,7 +93,7 @@ You do NOT:
 │                           │                                  │
 │                           ▼                                  │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │ 7. EVALUATE & ITERATE                                │   │
+│   │ 8. EVALUATE & ITERATE                                │   │
 │   │    • All checks pass → COMPLETE                      │   │
 │   │    • Issues found → Create fix tasks, loop           │   │
 │   │    • Max iterations → HALT                           │   │
@@ -137,7 +145,76 @@ security_audit:
     - Iterate
 ```
 
-### Step 3: Sprint Performance Audit
+### Step 3: Hybrid Testing (Web Frontends)
+
+When the sprint includes frontend changes, run the hybrid testing pipeline:
+
+```yaml
+hybrid_testing:
+  enabled_when:
+    - sprint_has_frontend_tasks: true
+    - file_changes_include: [*.tsx, *.jsx, *.vue, *.svelte, *.css]
+
+  config_file: ".devteam/hybrid-testing-config.yaml"
+
+  pipeline:
+    # Stage 1: Playwright E2E Tests
+    stage_1_playwright:
+      agent: "quality:e2e-tester"
+      checks:
+        - All E2E tests pass (100%)
+        - Visual regression baselines match
+        - Accessibility checks pass (WCAG 2.1 AA)
+        - Cross-browser compatibility verified
+        - Mobile viewports tested
+
+      on_failure:
+        - Create fix tasks for failing tests
+        - Iterate
+
+    # Stage 2: Puppeteer MCP Edge Cases
+    stage_2_puppeteer:
+      agent: "quality:e2e-tester"
+      trigger_when:
+        - has_file_downloads: true
+        - has_drag_drop: true
+        - has_browser_extensions: true
+      checks:
+        - All edge case scenarios pass
+        - Browser dialogs handled correctly
+        - Complex interactions work
+
+      on_failure:
+        - Create fix tasks
+        - Iterate
+
+    # Stage 3: Visual Verification (Claude Computer Use)
+    stage_3_visual:
+      agent: "quality:visual-verification"
+      model: opus  # Required for Computer Use
+      checks:
+        - Pages render correctly at all viewports
+        - No visual regressions
+        - Layout intact on mobile/tablet/desktop
+        - Interactions have visual feedback
+        - No broken images or missing fonts
+
+      pass_criteria:
+        critical_issues: 0
+        major_issues: 0
+        # Minor issues logged but don't block
+
+      on_failure:
+        - Create fix tasks for frontend developer
+        - Include reproduction steps
+        - Iterate
+
+  on_all_pass:
+    - Mark hybrid testing complete
+    - Proceed to performance audit
+```
+
+### Step 4: Sprint Performance Audit
 
 ```yaml
 performance_audit:
@@ -157,7 +234,7 @@ performance_audit:
     memory_growth: 10%
 ```
 
-### Step 4: Sprint Requirements Validation
+### Step 5: Sprint Requirements Validation
 
 ```yaml
 requirements_validation:
@@ -177,7 +254,7 @@ requirements_validation:
     - test_results
 ```
 
-### Step 5: Documentation Verification
+### Step 6: Documentation Verification
 
 ```yaml
 documentation_check:
@@ -195,7 +272,7 @@ documentation_check:
     - Iterate
 ```
 
-### Step 6: Workflow Compliance
+### Step 7: Workflow Compliance
 
 ```yaml
 workflow_compliance:
@@ -221,6 +298,7 @@ Sprint Loop allows up to 3 iterations for sprint-level issues:
 iteration_limits:
   integration_fixes: 2
   security_fixes: 2
+  hybrid_testing_fixes: 2  # Playwright/Visual verification fixes
   performance_fixes: 2
   documentation_fixes: 1
   total_sprint_iterations: 3
@@ -287,6 +365,14 @@ sprint_loop_state:
     security:
       status: PASS
       iteration_passed: 2
+      issues_found: 1
+      issues_fixed: 1
+    hybrid_testing:
+      status: PASS
+      iteration_passed: 2
+      playwright_tests: PASS
+      puppeteer_scenarios: PASS
+      visual_verification: PASS
       issues_found: 1
       issues_fixed: 1
     performance:
@@ -390,12 +476,21 @@ sprint_loop:
   required_checks:
     - integration
     - security
+    - hybrid_testing  # When frontend exists
     - requirements
     - workflow_compliance
 
   optional_checks:
     - performance
     - documentation
+
+  conditional_checks:
+    hybrid_testing:
+      enabled_when: has_frontend
+      includes:
+        - playwright_e2e
+        - puppeteer_mcp  # When applicable
+        - visual_verification
 
   halt_on:
     - security_critical

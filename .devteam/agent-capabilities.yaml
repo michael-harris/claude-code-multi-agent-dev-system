@@ -604,11 +604,31 @@ categories:
           - visual_regression
           - playwright
           - cypress
+          - puppeteer_mcp
         complexity_range: [3, 10]
-        tools: [playwright, cypress, selenium]
+        tools: [playwright, cypress, selenium, puppeteer_mcp]
         triggers:
-          keywords: [e2e, end to end, playwright, cypress, browser test]
-          task_types: [e2e_testing]
+          keywords: [e2e, end to end, playwright, cypress, browser test, puppeteer]
+          task_types: [e2e_testing, hybrid_testing]
+
+      - id: visual_verification
+        capabilities:
+          - visual_inspection
+          - layout_verification
+          - responsive_testing
+          - accessibility_visual
+          - interaction_verification
+          - claude_computer_use
+        complexity_range: [5, 12]
+        default_model: opus  # Required for Computer Use
+        tools: [claude_computer_use, browser]
+        triggers:
+          keywords: [visual verification, visual testing, ui verification, layout check]
+          task_types: [visual_testing, hybrid_testing]
+        notes: |
+          Uses Claude Computer Use for human-like visual inspection.
+          Runs after Playwright E2E tests pass.
+          Catches rendering issues that automated tests miss.
 
       - id: accessibility_specialist
         capabilities:
@@ -935,6 +955,8 @@ capability_index:
   # Quality
   unit_testing: [test_writer]
   e2e_testing: [e2e_tester]
+  visual_testing: [visual_verification]
+  hybrid_testing: [e2e_tester, visual_verification]
   accessibility: [accessibility_specialist]
   performance_optimization: [performance_auditor]
 
@@ -1079,6 +1101,27 @@ selection_rules:
       - files_changed: ["*.tsx", "*.jsx", "*.vue", "*.svelte", "*.css", "*.scss"]
     agents:
       - design_compliance_validator
+
+  # Hybrid testing pipeline activation
+  hybrid_testing_activation:
+    conditions:
+      - has_web_frontend: true
+      - files_changed: ["*.tsx", "*.jsx", "*.vue", "*.svelte", "*.html", "*.css"]
+    pipeline:
+      stage_1:
+        agent: e2e_tester
+        tool: playwright
+        required: true
+      stage_2:
+        agent: e2e_tester
+        tool: puppeteer_mcp
+        required: conditional  # Only when complex interactions needed
+      stage_3:
+        agent: visual_verification
+        tool: claude_computer_use
+        model: opus
+        required: true
+    config_file: ".devteam/hybrid-testing-config.yaml"
 
   # Design system generation
   design_system_generation:

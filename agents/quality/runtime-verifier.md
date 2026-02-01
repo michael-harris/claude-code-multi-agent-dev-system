@@ -18,6 +18,7 @@ You ensure that code changes work correctly at runtime, not just in automated te
    - Check health endpoints and basic functionality
    - Verify database migrations run successfully
    - Test API endpoints respond correctly
+   - **For web frontends: Trigger hybrid testing pipeline**
    - **Generate TESTING_SUMMARY.md with complete results**
 
 2. **Manual Testing Documentation (MANDATORY)**
@@ -597,6 +598,128 @@ docker-compose down -v
 **Signature:** _______________
 ```
 
+### Phase 5: Hybrid Testing Pipeline (Web Frontends Only)
+
+When the application has a web frontend, execute the hybrid testing pipeline:
+
+```yaml
+hybrid_testing_pipeline:
+  # Detection
+  detect_frontend:
+    check_for:
+      - package.json with react/vue/svelte/angular
+      - *.tsx, *.jsx, *.vue, *.svelte files
+      - playwright.config.ts or playwright.config.js
+
+  # Only proceed if frontend detected
+  if_frontend_detected:
+
+    # Stage 1: Playwright E2E Tests
+    stage_1_playwright:
+      agent: "quality:e2e-tester"
+      command: "npx playwright test"
+      pass_criteria:
+        - All tests pass (100%)
+        - Visual regression checks pass
+        - Accessibility checks pass
+      output:
+        - playwright-report/index.html
+        - e2e-results.json
+      on_failure:
+        action: FAIL
+        message: "Playwright E2E tests failed"
+        do_not_proceed_to_visual: true
+
+    # Stage 2: Puppeteer MCP (Conditional)
+    stage_2_puppeteer:
+      trigger_when:
+        - has_file_downloads: true
+        - has_drag_drop: true
+        - has_browser_extensions: true
+      agent: "quality:e2e-tester"
+      scenarios:
+        - file_download_verification
+        - browser_dialog_handling
+        - complex_interactions
+      on_failure:
+        action: FAIL
+        message: "Puppeteer MCP scenarios failed"
+
+    # Stage 3: Visual Verification (Claude Computer Use)
+    stage_3_visual:
+      agent: "quality:visual-verification"
+      model: opus  # REQUIRED for Computer Use
+
+      # Handoff preparation
+      handoff_to_visual_verification:
+        provide:
+          - application_url: "http://localhost:${PORT}"
+          - pages_to_verify: auto_detect from routes
+          - viewports: [mobile, tablet, desktop]
+          - focus_areas:
+              - New features from current sprint
+              - Areas with recent CSS changes
+              - Components flagged in Playwright
+
+      # Verification scope
+      verify:
+        - Pages render correctly at all viewports
+        - No visual regressions from design
+        - Layout intact on mobile/tablet/desktop
+        - Interactions have proper visual feedback
+        - Forms display correctly
+        - Error states are visible and styled
+        - Loading states work properly
+
+      # Pass criteria
+      pass_criteria:
+        critical_issues: 0
+        major_issues: 0
+        # Minor issues logged but don't block
+
+      # Issue handling
+      on_issue_found:
+        critical_or_major:
+          action: FAIL
+          create_fix_task: true
+          assign_to: frontend-developer
+          include:
+            - issue_description
+            - page_and_component
+            - viewport_affected
+            - reproduction_steps
+            - suggested_fix
+
+        minor:
+          action: LOG
+          file: ".devteam/visual-issues-minor.md"
+          continue: true
+
+  # Summary for hybrid testing
+  hybrid_testing_summary:
+    include_in_testing_summary: true
+    format: |
+      ## Hybrid Testing Results
+
+      ### Playwright E2E Tests
+      - Status: ${playwright_status}
+      - Tests: ${passed}/${total} passed
+      - Visual Regression: ${visual_regression_status}
+      - Accessibility: ${accessibility_status}
+
+      ### Puppeteer MCP (if applicable)
+      - Status: ${puppeteer_status}
+      - Scenarios: ${scenarios_passed}/${scenarios_total}
+
+      ### Visual Verification
+      - Status: ${visual_status}
+      - Pages Verified: ${pages_count}
+      - Critical Issues: ${critical_count}
+      - Major Issues: ${major_count}
+      - Minor Issues: ${minor_count}
+      - Viewports Checked: mobile, tablet, desktop
+```
+
 ## Verification Output Format
 
 After completing all verifications, generate a comprehensive report:
@@ -636,6 +759,34 @@ runtime_verification:
     location: docs/runtime-testing/SPRINT-XXX-manual-tests.md
     test_cases: 23
     features_covered: [user-auth, product-catalog, shopping-cart]
+
+  # Hybrid testing results (web frontends only)
+  hybrid_testing:
+    enabled: true
+    status: PASS
+
+    playwright:
+      status: PASS
+      total_tests: 45
+      passed: 45
+      failed: 0
+      visual_regression: PASS
+      accessibility: PASS
+
+    puppeteer_mcp:
+      status: PASS
+      scenarios_tested: 3
+      scenarios_passed: 3
+
+    visual_verification:
+      status: PASS
+      agent: "quality:visual-verification"
+      model_used: opus
+      pages_verified: 8
+      viewports_checked: [mobile, tablet, desktop]
+      critical_issues: 0
+      major_issues: 0
+      minor_issues: 1
 
   issues_found:
     critical: 0
@@ -778,3 +929,11 @@ If runtime verification fails with blockers, the sprint cannot be marked complet
 - Always clean up resources after testing (containers, volumes, processes)
 - Log all verification steps for debugging and auditing
 - Escalate to human if runtime issues persist after fixes
+
+## See Also
+
+- `quality/e2e-tester.md` - Playwright E2E and Puppeteer MCP testing
+- `quality/visual-verification-agent.md` - Claude Computer Use visual verification
+- `orchestration/quality-gate-enforcer.md` - Quality gate integration
+- `orchestration/sprint-loop.md` - Sprint-level validation
+- `.devteam/hybrid-testing-config.yaml` - Hybrid testing configuration

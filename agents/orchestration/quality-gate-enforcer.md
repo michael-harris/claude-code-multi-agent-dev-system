@@ -40,6 +40,49 @@ You execute quality validation checks and report results. You do NOT fix issues 
 | Performance | Project-defined | Report metrics |
 | Accessibility | WCAG 2.1 AA | Report issues |
 
+### Hybrid Testing Gate (For Web Frontends)
+
+When the project has a web frontend, the hybrid testing gate is activated:
+
+| Stage | Tool | Pass Criteria |
+|-------|------|---------------|
+| **E2E Tests** | Playwright | 100% pass rate |
+| **Edge Cases** | Puppeteer MCP | All scenarios pass (when applicable) |
+| **Visual Verification** | Claude Computer Use | 0 critical/major issues |
+
+```yaml
+hybrid_testing_gate:
+  enabled_when:
+    - has_frontend: true
+    - file_types: [tsx, jsx, vue, svelte, html]
+
+  stages:
+    playwright_e2e:
+      agent: "quality:e2e-tester"
+      required: true
+      pass_criteria:
+        - all_tests_pass: true
+        - visual_regression: pass
+        - accessibility: pass
+
+    puppeteer_mcp:
+      agent: "quality:e2e-tester"
+      required: conditional  # Only when complex scenarios exist
+      pass_criteria:
+        - file_downloads: pass
+        - browser_dialogs: pass
+        - drag_drop: pass
+
+    visual_verification:
+      agent: "quality:visual-verification"
+      model: opus  # Required for Claude Computer Use
+      required: true
+      pass_criteria:
+        - critical_issues: 0
+        - major_issues: 0
+        # Minor issues logged but don't block
+```
+
 ## Execution Process
 
 ### Step 1: Detect Project Configuration
@@ -132,6 +175,58 @@ npm test -- --coverage 2>&1
 go test -coverprofile=coverage.out ./... 2>&1
 ```
 
+### Step 7: Hybrid Testing (Web Frontends Only)
+
+When the project has a web frontend, run the hybrid testing pipeline:
+
+```yaml
+hybrid_testing_pipeline:
+  # Check if hybrid testing applies
+  detect_frontend:
+    - Check for: [package.json with react/vue/svelte/angular]
+    - Check for: [*.tsx, *.jsx, *.vue, *.svelte files]
+    - Check for: [playwright.config.ts or similar]
+
+  # Stage 1: Playwright E2E Tests
+  stage_1_playwright:
+    command: "npx playwright test"
+    expected:
+      - All tests pass
+      - Visual regression baselines match
+      - Accessibility checks pass
+    on_failure:
+      - Report failing tests
+      - Return FAIL status
+      - Do not proceed to visual verification
+
+  # Stage 2: Puppeteer MCP (if applicable)
+  stage_2_puppeteer:
+    trigger_when:
+      - has_file_downloads: true
+      - has_drag_drop: true
+      - has_browser_extensions: true
+    agent: "quality:e2e-tester"
+    on_failure:
+      - Report failing scenarios
+      - Return FAIL status
+
+  # Stage 3: Visual Verification (Claude Computer Use)
+  stage_3_visual:
+    agent: "quality:visual-verification"
+    model: opus  # Required for Computer Use
+    input:
+      application_url: "${DEV_SERVER_URL}"
+      pages: auto_detect or from config
+      viewports: [mobile, tablet, desktop]
+    expected:
+      - critical_issues: 0
+      - major_issues: 0
+    on_failure:
+      - Report visual issues with details
+      - Return FAIL status
+      - Create fix task for frontend developer
+```
+
 ## Output Format
 
 ```yaml
@@ -185,6 +280,33 @@ quality_gate_result:
 
     performance:
       metrics: {}
+
+  # Hybrid Testing Results (web frontends only)
+  hybrid_testing:
+    enabled: true
+    status: PASS | FAIL
+
+    playwright:
+      status: PASS
+      total_tests: 45
+      passed: 45
+      failed: 0
+      visual_regression: PASS
+      accessibility: PASS
+      duration: "2m 15s"
+
+    puppeteer_mcp:
+      status: PASS
+      scenarios_tested: 3
+      scenarios_passed: 3
+
+    visual_verification:
+      status: PASS
+      pages_verified: 8
+      critical_issues: 0
+      major_issues: 0
+      minor_issues: 2
+      viewports_checked: [mobile, tablet, desktop]
 
   summary:
     blocking_issues: 0
