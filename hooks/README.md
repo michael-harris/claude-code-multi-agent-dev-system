@@ -354,9 +354,18 @@ cat docs/planning/tasks/TASK-XXX.json
 
 ### Database issues
 
+The database is auto-initialized on first use. To force reinitialize:
+
 ```bash
-# Initialize/reinitialize database
+# Delete and let auto-init recreate it
+rm -f .devteam/devteam.db*
+/devteam:status
+
+# Or manually (local development only):
+# Linux/macOS
 ./scripts/db-init.sh
+# Windows
+# powershell ./scripts/db-init.ps1
 
 # Check database exists
 ls -la .devteam/devteam.db

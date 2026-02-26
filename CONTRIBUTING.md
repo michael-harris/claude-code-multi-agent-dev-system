@@ -44,8 +44,11 @@ cd devteam
 # Create the .devteam directory structure
 mkdir -p .devteam/memory
 
-# Initialize the database
+# Initialize the database (auto-created on first use, or manually):
+# Linux/macOS
 ./scripts/db-init.sh
+# Windows
+# powershell ./scripts/db-init.ps1
 
 # Run the test suite to verify setup
 ./tests/run-tests.sh

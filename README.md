@@ -705,14 +705,11 @@ The easiest way to install DevTeam is directly from within Claude Code:
 # 2. Install the plugin
 /plugin install devteam@devteam-marketplace
 
-# 3. Initialize the database in your project
-bash scripts/db-init.sh
-
-# 4. Verify installation
+# 3. Verify installation
 /devteam:status
 ```
 
-That's it. Hooks, agents, skills, and rules are all configured automatically.
+That's it. The database is auto-initialized on first use. Hooks, agents, skills, and rules are all configured automatically.
 
 ### Install from Local Clone (Development)
 
@@ -725,10 +722,7 @@ git clone https://github.com/michael-harris/devteam.git
 # 2. Install as a local plugin
 /plugin install /path/to/devteam
 
-# 3. Initialize the database in your project
-bash scripts/db-init.sh
-
-# 4. Verify installation
+# 3. Verify installation
 /devteam:status
 ```
 
