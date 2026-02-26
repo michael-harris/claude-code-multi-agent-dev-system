@@ -310,3 +310,34 @@ function Invoke-Escalation {
     $safeReason = $Reason -replace '"', '\"'
     Write-EventToDb "model_escalated" "escalation" "Escalation: $Reason" "{`"reason`":`"$safeReason`"}"
 }
+
+# ============================================================================
+# JSON HELPERS
+# ============================================================================
+
+function ConvertTo-SafeJsonString {
+    param([string]$Value)
+    if (-not $Value) { return "" }
+    return $Value -replace '\\', '\\\\' -replace '"', '\"' -replace "`t", '\t' -replace "`n", '\n' -replace "`r", ''
+}
+
+# ============================================================================
+# SYSTEM MESSAGE (Claude Code hook context injection)
+# ============================================================================
+
+function Get-SystemMessage {
+    param([string]$Id, [string]$Message)
+    $escapedMsg = ConvertTo-SafeJsonString $Message
+    return "{`"id`":`"devteam-${Id}`",`"type`":`"system`",`"message`":`"${escapedMsg}`"}"
+}
+
+# ============================================================================
+# MCP NOTIFICATION (best-effort, non-blocking)
+# ============================================================================
+
+function Send-McpNotification {
+    param([string]$Event, [string]$Data = "{}")
+    # Best-effort notification — silently no-op if unavailable
+    $sock = Join-Path $script:DEVTEAM_DIR "mcp.sock"
+    # Unix sockets not natively supported in Windows PowerShell; skip silently
+}
