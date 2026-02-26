@@ -410,8 +410,9 @@ rm -rf docs/planning/
 rm -rf docs/sprints/
 ```
 
-To reinitialize:
+To reinitialize, simply delete the database and run any DevTeam command — the database is auto-created on first use:
 
 ```bash
-bash scripts/db-init.sh
+rm .devteam/devteam.db*
+/devteam:status
 ```

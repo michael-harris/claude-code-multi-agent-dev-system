@@ -16,7 +16,7 @@ The easiest way to install DevTeam is directly from within Claude Code:
 /plugin install devteam@devteam-marketplace
 ```
 
-All hooks, agents, skills, and rules are configured automatically.
+All hooks, agents, skills, and rules are configured automatically. The SQLite database (`.devteam/devteam.db`) is auto-initialized on first use — no manual setup required.
 
 #### Alternative: Install from Local Clone
 
@@ -27,21 +27,7 @@ git clone https://github.com/michael-harris/devteam.git
 /plugin install /path/to/devteam
 ```
 
-### 2. Initialize the Database
-
-DevTeam uses SQLite for state management. Navigate to your project directory:
-
-```bash
-# Linux/macOS
-bash scripts/db-init.sh
-
-# Windows
-powershell scripts/db-init.ps1
-```
-
-This creates `.devteam/devteam.db` in your project.
-
-### 3. Verify Installation
+### 2. Verify Installation
 
 ```bash
 /devteam:status
@@ -49,7 +35,7 @@ This creates `.devteam/devteam.db` in your project.
 
 You should see system health information.
 
-### 4. Your First Task
+### 3. Your First Task
 
 Try a simple ad-hoc task:
 

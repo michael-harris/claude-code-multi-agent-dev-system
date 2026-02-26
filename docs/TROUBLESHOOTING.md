@@ -52,19 +52,20 @@ This guide helps you diagnose and resolve common issues with DevTeam.
 
 **Solutions:**
 
-```bash
-# Reinitialize database
-bash scripts/db-init.sh
+The database is auto-initialized on first use. To force a reinitialize:
 
-# Or on Windows
-powershell scripts/db-init.ps1
+```bash
+# Delete the database - it will be recreated automatically on next command
+rm .devteam/devteam.db*
+/devteam:status
 ```
 
 **If corruption persists:**
 ```bash
 # Backup and reset
 mv .devteam/devteam.db .devteam/devteam.db.corrupted
-bash scripts/db-init.sh
+# The database will be auto-recreated on next DevTeam command
+/devteam:status
 ```
 
 ---

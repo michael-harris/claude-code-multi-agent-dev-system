@@ -34,6 +34,45 @@ init_hook() {
 
     # Ensure runtime directories exist
     mkdir -p "$DEVTEAM_DIR" 2>/dev/null || true
+
+    # Auto-initialize database if it doesn't exist
+    if [[ ! -f "$DB_FILE" ]] && command -v sqlite3 &>/dev/null; then
+        _auto_init_database
+    fi
+}
+
+# Auto-initialize the SQLite database using schema files from the plugin
+_auto_init_database() {
+    local schema_dir="${PLUGIN_ROOT}/scripts"
+    local schema_file="${schema_dir}/schema.sql"
+    local schema_version=4
+
+    # Need the base schema file at minimum
+    if [[ ! -f "$schema_file" ]]; then
+        return 0
+    fi
+
+    # Create database with base schema
+    if ! sqlite3 "$DB_FILE" < "$schema_file" 2>/dev/null; then
+        return 0
+    fi
+
+    # Create schema_version table
+    sqlite3 "$DB_FILE" "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);" 2>/dev/null || true
+
+    # Apply migrations v2, v3, v4
+    local migration_file
+    for v in 2 3 4; do
+        migration_file="${schema_dir}/schema-v${v}.sql"
+        if [[ -f "$migration_file" ]]; then
+            sqlite3 "$DB_FILE" < "$migration_file" 2>/dev/null || true
+        fi
+    done
+
+    # Record final schema version
+    sqlite3 "$DB_FILE" "INSERT OR REPLACE INTO schema_version (version) VALUES ($schema_version);" 2>/dev/null || true
+
+    log_info "hook-common" "Auto-initialized database: $DB_FILE (schema v${schema_version})" 2>/dev/null || true
 }
 
 # ============================================================================
