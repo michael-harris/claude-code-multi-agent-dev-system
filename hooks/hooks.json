@@ -39,13 +39,6 @@
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.js\" post-tool-use-hook",
             "description": "Detect quality gate results from bash output"
-          },
-          {
-            "type": "agent",
-            "agent": "quality-gate-analyzer",
-            "prompt": "Analyze the bash command output. Determine if this was a test run, lint check, type check, or security scan. Extract structured results: what passed, what failed, error messages. Log results to the database if possible.",
-            "description": "Agent-based quality gate analysis — replaces fragile regex parsing",
-            "tools": ["Read", "Bash", "Grep"]
           }
         ]
       },
