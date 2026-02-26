@@ -12,7 +12,7 @@ Your multi-agent development system has been successfully converted into a profe
 
 ### Plugin Location
 ```
-/home/wburit/claude-devteam/
+/home/wburit/devteam/
 ```
 
 ### Plugin Contents
@@ -73,7 +73,7 @@ Your multi-agent development system has been successfully converted into a profe
 
 ### 4. Proper Plugin Structure
 - Valid plugin.json with all 27 agents
-- Hierarchical namespacing (claude-devteam:category:agent)
+- Hierarchical namespacing (devteam:category:agent)
 - Model assignments (opus/sonnet/haiku)
 - Tier designations (t1/t2)
 
@@ -99,32 +99,32 @@ From the comprehensive agent review:
 
 ```bash
 # From any Claude Code project
-/plugin marketplace add file:///home/wburit/claude-devteam
-/plugin install claude-devteam
+/plugin marketplace add file:///home/wburit/devteam
+/plugin install devteam
 ```
 
 ### Publish to GitHub (Optional)
 
 ```bash
 # 1. Initialize git
-cd /home/wburit/claude-devteam
+cd /home/wburit/devteam
 git init
 git add .
 git commit -m "Initial release: v1.0.0"
 
 # 2. Create GitHub repo (at https://github.com/new)
-# Repository name: claude-devteam
+# Repository name: devteam
 
 # 3. Push to GitHub
-git remote add origin https://github.com/YOUR_USERNAME/claude-devteam.git
+git remote add origin https://github.com/YOUR_USERNAME/devteam.git
 git branch -M main
 git push -u origin main
 
 # 4. Update plugin.json with GitHub URL and commit
 
 # 5. Install from GitHub
-/plugin marketplace add https://github.com/YOUR_USERNAME/claude-devteam
-/plugin install claude-devteam
+/plugin marketplace add https://github.com/YOUR_USERNAME/devteam
+/plugin install devteam
 ```
 
 ---
@@ -134,7 +134,7 @@ git push -u origin main
 ### Test 1: Verify Plugin Structure
 
 ```bash
-cd /home/wburit/claude-devteam
+cd /home/wburit/devteam
 
 # Check file count
 echo "Total files: $(find . -type f | wc -l)"  # Should be 36
@@ -155,15 +155,15 @@ echo "Haiku agents: $(jq -r '.agents[] | select(.model=="haiku") | .id' plugin.j
 
 ```bash
 # Install plugin
-/plugin marketplace add file:///home/wburit/claude-devteam
-/plugin install claude-devteam
+/plugin marketplace add file:///home/wburit/devteam
+/plugin install devteam
 
 # Verify installation
-/plugin list  # Should show claude-devteam
+/plugin list  # Should show devteam
 
 # Test individual agent
 Task(
-  subagent_type="claude-devteam:database:designer",
+  subagent_type="devteam:database:designer",
   model="opus",
   prompt="Design a simple schema for a blog with posts and comments"
 )
@@ -278,7 +278,7 @@ User → Main Claude → sprint-orchestrator → task-loop → specialized agent
 
 ## Files Created
 
-### In Plugin Directory (`/home/wburit/claude-devteam/`)
+### In Plugin Directory (`/home/wburit/devteam/`)
 
 **Configuration:**
 - `plugin.json` - Plugin manifest (27 agents, 3 commands)
@@ -321,8 +321,8 @@ User → Main Claude → sprint-orchestrator → task-loop → specialized agent
 
 ```bash
 cd ~/test-project
-/plugin marketplace add file:///home/wburit/claude-devteam
-/plugin install claude-devteam
+/plugin marketplace add file:///home/wburit/devteam
+/plugin install devteam
 
 # Verify
 /plugin list
@@ -332,7 +332,7 @@ cd ~/test-project
 
 ```javascript
 Task(
-  subagent_type="claude-devteam:database:designer",
+  subagent_type="devteam:database:designer",
   model="opus",
   prompt="Design user authentication schema"
 )
@@ -356,7 +356,7 @@ Follow instructions in INSTALLATION.md
 
 ```bash
 cd ~/your-actual-project
-/plugin install claude-devteam
+/plugin install devteam
 /devteam:prd
 ```
 
@@ -483,7 +483,7 @@ Your multi-agent development system is now a professional, reusable Claude Code 
 
 **Start building:**
 ```bash
-/plugin install claude-devteam
+/plugin install devteam
 /devteam:prd
 ```
 
@@ -491,7 +491,7 @@ Your multi-agent development system is now a professional, reusable Claude Code 
 
 ---
 
-**Plugin Location:** `/home/wburit/claude-devteam/`
+**Plugin Location:** `/home/wburit/devteam/`
 
 **Documentation:**
 - README.md - Plugin overview

@@ -3,7 +3,7 @@
   "version": "4.0.0",
   "description": "127-agent automated development system with Agent Teams support, native subagent configuration (tools/model/memory), Skills-based commands, prompt/agent hooks, native worktree isolation, path-specific CLAUDE.md rules, and split model strategy for dynamic escalation",
   "author": "Multi-Agent Development Team",
-  "repository": "https://github.com/michael-harris/claude-devteam",
+  "repository": "https://github.com/michael-harris/devteam",
   "agents": [
     {
       "id": "planning:prd-generator",

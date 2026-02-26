@@ -13,7 +13,7 @@ Clone or copy DevTeam to your Claude Code custom commands directory:
 cd your-project
 
 # Clone DevTeam
-git clone https://github.com/michael-harris/claude-devteam .devteam-plugin
+git clone https://github.com/michael-harris/devteam .devteam-plugin
 
 # Or copy to Claude Code custom commands location
 # (Varies by OS - check Claude Code documentation)

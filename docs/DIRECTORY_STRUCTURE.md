@@ -5,7 +5,7 @@ This document describes the directory structure of the DevTeam plugin and the fi
 ## Plugin Structure
 
 ```
-claude-devteam/
+devteam/
 ├── plugin.json                 # Plugin manifest
 ├── README.md                   # Main documentation
 │

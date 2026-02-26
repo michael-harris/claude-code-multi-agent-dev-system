@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Local Installation Script for claude-devteam plugin
+# Local Installation Script for devteam plugin
 # Checks prerequisites, installs hooks, and initializes the database.
 
 set -euo pipefail

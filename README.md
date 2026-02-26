@@ -728,8 +728,8 @@ System automatically:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/michael-harris/claude-devteam.git
-cd claude-devteam
+git clone https://github.com/michael-harris/devteam.git
+cd devteam
 
 # 2. Install hooks (configures Claude Code settings)
 bash hooks/install.sh        # Linux/macOS
