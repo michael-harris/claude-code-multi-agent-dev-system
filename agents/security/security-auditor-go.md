@@ -1,8 +1,14 @@
+---
+name: security-auditor-go
+description: "Go security auditing with gosec and Go-specific vulnerability patterns"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Security Auditor - Go
 
 **Agent ID:** `security:security-auditor-go`
 **Category:** Security
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 6-10
 
 ## Purpose
@@ -166,5 +172,5 @@ go test -race ./...
 
 ## See Also
 
-- `security:security-auditor` - General security auditor
+- `quality:security-auditor` - General security auditor
 - `orchestration:sprint-loop` - Calls for sprint security audit

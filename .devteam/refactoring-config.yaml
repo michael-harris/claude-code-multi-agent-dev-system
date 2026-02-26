@@ -1,0 +1,24 @@
+# DevTeam Refactoring Configuration
+# Referenced by: quality/refactoring-coordinator.md
+# Defines refactoring thresholds, priorities, and safety constraints
+
+refactoring:
+  thresholds:
+    complexity_warning: 15
+    complexity_critical: 25
+    duplication_warning: 10%
+    duplication_critical: 20%
+    function_length_warning: 30
+    function_length_critical: 50
+
+  priorities:
+    security_issues: P1
+    bugs: P1
+    performance: P2
+    maintainability: P3
+    style: P4
+
+  safety:
+    require_tests: true
+    require_review: true
+    max_files_per_task: 5

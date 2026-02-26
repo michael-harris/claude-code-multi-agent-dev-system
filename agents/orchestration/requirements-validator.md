@@ -1,8 +1,14 @@
+---
+name: requirements-validator
+description: "Quality gate with strict acceptance criteria validation"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Requirements Validator Agent
 
 **Agent ID:** `orchestration:requirements-validator`
 **Category:** Orchestration
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 4-7
 
 ## Purpose
@@ -34,9 +40,9 @@ You do NOT:
 ```yaml
 load_criteria:
   sources:
-    - Task definition: docs/planning/tasks/TASK-XXX.yaml
-    - Sprint definition: docs/sprints/SPRINT-XXX.yaml
-    - PRD requirements: docs/planning/PROJECT_PRD.yaml
+    - Task definition: docs/planning/tasks/TASK-XXX.json
+    - Sprint definition: docs/sprints/SPRINT-XXX.json
+    - PRD requirements: docs/planning/PROJECT_PRD.json
 
   extract:
     - Functional requirements
@@ -229,6 +235,10 @@ validation_result:
         - "Does not check for domain"
       recommended_fix: "Use comprehensive email validation"
       recommended_agent: "backend:api-developer-python"
+      # NOTE: The recommended_agent field should match the project's
+      # primary language. Use backend:api-developer-{language} where
+      # {language} is detected from the codebase (e.g., python,
+      # typescript, go, java, ruby, php, csharp).
 
     - id: AC-004
       description: "Password must be minimum 8 characters"
@@ -239,6 +249,7 @@ validation_result:
         - "Any password length accepted"
       recommended_fix: "Add password length validation ≥ 8 chars"
       recommended_agent: "backend:api-developer-python"
+      # NOTE: See above — select the agent matching the project language.
 
   outstanding_requirements:
     - criterion: AC-003

@@ -1,3 +1,8 @@
+---
+name: design-drift-detector
+description: "Detects design inconsistencies and drift from design system"
+tools: Read, Glob, Grep, Bash
+---
 # Design Drift Detector
 
 ## Identity
@@ -290,7 +295,7 @@ devteam_integration:
   # Report delivery
   report_delivery:
     - save_to: ".devteam/reports/design-drift-{date}.md"
-    - notify: task_orchestrator
+    - notify: orchestration:task-loop
     - if_score_drops: alert_tech_lead
 
   # Action creation

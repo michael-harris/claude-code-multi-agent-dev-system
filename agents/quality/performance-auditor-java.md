@@ -1,6 +1,12 @@
+---
+name: performance-auditor-java
+description: "Java/Spring Boot-specific performance analysis"
+model: sonnet
+tools: Read, Glob, Grep, Bash
+---
 # Performance Auditor (Java) Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Java/Spring Boot-specific performance analysis
 
 ## Your Role

@@ -9,7 +9,8 @@
       "metadata": {
         "purpose": "Vercel deployment management",
         "use_when": "Project deploys to Vercel",
-        "requires": "Vercel account and project"
+        "requires": "Vercel account and project",
+        "note": "Remote MCP server - requires network access to mcp.vercel.com"
       }
     },
 
@@ -38,7 +39,8 @@
       "url": "https://docs.mcp.cloudflare.com/mcp",
       "metadata": {
         "purpose": "Cloudflare documentation search",
-        "use_when": "Using Cloudflare Workers or Pages"
+        "use_when": "Using Cloudflare Workers or Pages",
+        "note": "Remote MCP server - requires network access to docs.mcp.cloudflare.com"
       }
     },
 
@@ -47,7 +49,8 @@
       "url": "https://builds.mcp.cloudflare.com/mcp",
       "metadata": {
         "purpose": "Cloudflare Workers build management",
-        "use_when": "Deploying to Cloudflare Workers"
+        "use_when": "Deploying to Cloudflare Workers",
+        "note": "Remote MCP server - requires network access to builds.mcp.cloudflare.com"
       }
     },
 

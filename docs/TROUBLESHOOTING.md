@@ -69,7 +69,7 @@ bash scripts/db-init.sh
 
 ---
 
-### 3. Tests Keep Failing (Ralph Loop Not Converging)
+### 3. Tests Keep Failing (Task Loop Not Converging)
 
 **Symptoms:**
 - Same tests fail repeatedly
@@ -82,7 +82,7 @@ bash scripts/db-init.sh
 /devteam:logs --level error --since 1h
 
 # Check gate results
-sqlite3 .devteam/devteam.db "SELECT * FROM gate_results WHERE NOT passed ORDER BY executed_at DESC LIMIT 5"
+sqlite3 .devteam/devteam.db "SELECT * FROM gate_results WHERE NOT passed ORDER BY timestamp DESC LIMIT 5"
 ```
 
 **Solutions:**
@@ -93,9 +93,9 @@ sqlite3 .devteam/devteam.db "SELECT * FROM gate_results WHERE NOT passed ORDER B
    # Add details about what the test expects
    ```
 
-2. **Force higher model:**
+2. **Force a more capable model:**
    ```bash
-   /devteam:implement --model opus
+   /devteam:implement --model opus  # Use opus for complex reasoning
    ```
 
 3. **Break into smaller tasks:**
@@ -248,7 +248,7 @@ git worktree list
 **Symptoms:**
 - Wrong language agent selected
 - Frontend agent for backend task
-- T2 used when T1 would suffice
+- More expensive model used when a cheaper one would suffice
 
 **Solutions:**
 
@@ -258,15 +258,18 @@ git worktree list
    /devteam:implement --type frontend
    ```
 
-2. **Force model tier:**
+2. **Force a specific model:**
    ```bash
-   /devteam:implement --model haiku  # Force T1
-   /devteam:implement --model opus   # Force T2
+   /devteam:implement --model haiku   # Cost-optimized for simple tasks
+   /devteam:implement --model sonnet  # Default for most operations
+   /devteam:implement --model opus    # Complex reasoning and architecture
    ```
 
 3. **Check project detection:**
    - Ensure package.json/pyproject.toml exists
    - Verify language-specific config files
+
+**Note:** Each agent has an explicit model assignment (haiku, sonnet, or opus) in its YAML frontmatter and plugin.json. Orchestrators handle escalation automatically (sonnet -> opus after 2 failures, opus -> Bug Council after 3 failures).
 
 ---
 

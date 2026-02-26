@@ -1,6 +1,11 @@
+---
+name: mobile-e2e-tester
+description: "End-to-end testing for mobile apps (XCUITest, Espresso, Detox, Appium)"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Mobile E2E Tester Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Purpose:** End-to-end testing for native mobile apps (iOS/Android) and cross-platform
 
 ## Your Role

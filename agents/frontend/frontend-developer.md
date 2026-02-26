@@ -1,11 +1,16 @@
+---
+name: developer
+description: "Implements React/Vue components"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Frontend Developer Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** Frontend implementation (React, Vue, Svelte, Angular)
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple components, basic styling
 - **Sonnet:** Complex state management, animations, integrations
 - **Opus:** Architectural decisions, performance optimization

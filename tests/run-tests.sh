@@ -438,7 +438,7 @@ test_file_structure() {
     assert_file_exists "$PROJECT_ROOT/scripts/schema.sql" "scripts/schema.sql should exist"
 
     # Check agent directories
-    assert_file_exists "$PROJECT_ROOT/agents/core/ralph.md" "Ralph agent should exist"
+    assert_file_exists "$PROJECT_ROOT/agents/orchestration/task-loop.md" "Task Loop agent should exist"
 
     # Check commands directory
     local cmd_count

@@ -203,8 +203,7 @@ if (shouldActivateBugCouncil(bug)) {
     // Spawn 5 diagnostic agents in parallel
     const councilResults = await Promise.all([
         Task({
-            subagent_type: "diagnosis",
-            agent: "root-cause-analyst",
+            subagent_type: "diagnosis:root-cause-analyst",
             model: "opus",
             prompt: `Analyze bug: ${bug.description}
 
@@ -220,8 +219,7 @@ if (shouldActivateBugCouncil(bug)) {
         }),
 
         Task({
-            subagent_type: "diagnosis",
-            agent: "code-archaeologist",
+            subagent_type: "diagnosis:code-archaeologist",
             model: "opus",
             prompt: `Investigate git history for: ${bug.description}
 
@@ -233,8 +231,7 @@ if (shouldActivateBugCouncil(bug)) {
         }),
 
         Task({
-            subagent_type: "diagnosis",
-            agent: "pattern-matcher",
+            subagent_type: "diagnosis:pattern-matcher",
             model: "opus",
             prompt: `Search codebase for patterns related to: ${bug.description}
 
@@ -246,8 +243,7 @@ if (shouldActivateBugCouncil(bug)) {
         }),
 
         Task({
-            subagent_type: "diagnosis",
-            agent: "systems-thinker",
+            subagent_type: "diagnosis:systems-thinker",
             model: "opus",
             prompt: `Analyze system interactions for: ${bug.description}
 
@@ -259,8 +255,7 @@ if (shouldActivateBugCouncil(bug)) {
         }),
 
         Task({
-            subagent_type: "diagnosis",
-            agent: "adversarial-tester",
+            subagent_type: "diagnosis:adversarial-tester",
             model: "opus",
             prompt: `Find edge cases for: ${bug.description}
 
@@ -285,16 +280,16 @@ if (shouldActivateBugCouncil(bug)) {
 ```yaml
 bug_council_decision:
   winning_proposal:
-    agent: pattern_matcher
+    agent: diagnosis:pattern-matcher
     diagnosis: "Inconsistent null checking across 4 locations"
     confidence: 0.92
 
   votes:
-    pattern_matcher: 11 points (winner)
-    systems_thinker: 10 points
-    root_cause_analyst: 16 points
-    adversarial_tester: 16 points
-    code_archaeologist: 22 points
+    diagnosis:pattern-matcher: 11 points (winner)
+    diagnosis:systems-thinker: 10 points
+    diagnosis:root-cause-analyst: 16 points
+    diagnosis:adversarial-tester: 16 points
+    diagnosis:code-archaeologist: 22 points
 
   consensus: "Strong (4/5 ranked winner in top 2)"
 
@@ -316,8 +311,7 @@ bug_council_decision:
 set_phase('implementing')
 
 const result = await Task({
-    subagent_type: "backend",  // or frontend, based on bug location
-    agent: selectAgent(bug),
+    subagent_type: "orchestration:task-loop",
     model: selectModel(bug.complexity),
     prompt: `Fix bug: ${bug.description}
 
@@ -339,8 +333,7 @@ log_agent_completed(result.agent, result.model, result.files_changed)
 
 ```javascript
 const result = await Task({
-    subagent_type: "orchestration",
-    agent: "task-orchestrator",
+    subagent_type: "orchestration:task-loop",
     model: "opus",
     prompt: `Implement Bug Council decision:
 
@@ -478,6 +471,8 @@ Proceeding with implementation...
 
 ## See Also
 
-- `/devteam:issue` - Fix GitHub issues
+- `/devteam:issue` - Fix GitHub issues (use when you have a GitHub issue number to reference)
 - `/devteam:implement` - General implementation
 - `/devteam:status` - Check progress
+
+> **When to use `/devteam:bug` vs `/devteam:issue`:** Use `/devteam:bug` for locally-discovered bugs without a GitHub issue. Use `/devteam:issue` when fixing a tracked GitHub issue by number.

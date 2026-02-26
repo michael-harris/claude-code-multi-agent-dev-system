@@ -25,19 +25,26 @@ Agents are AI personas with specialized knowledge and capabilities. Each agent i
 
 1. **Trigger Matching**: Keywords in user request match agent triggers
 2. **Weight Scoring**: Higher weight = higher priority when multiple match
-3. **Tier Selection**: T1 (specialists) selected before T2 (generalists)
+3. **Model Assignment**: Each agent specifies its model (haiku, sonnet, or opus) in YAML frontmatter
 4. **Context Awareness**: Current phase influences agent selection
+5. **Escalation**: Orchestrators handle model escalation via LLM instructions (sonnet -> opus after 2 failures, opus -> Bug Council after 3 failures)
 
 ## Agent Categories
 
 | Category | Path | Purpose |
 |----------|------|---------|
-| `core/` | `agents/core/` | Orchestration and planning |
-| `specialized/` | `agents/specialized/` | Domain expertise |
-| `quality/` | `agents/quality/` | Testing and verification |
-| `language/` | `agents/language/` | Language-specific |
-| `framework/` | `agents/framework/` | Framework-specific |
-| `bug-council/` | `agents/bug-council/` | Bug diagnosis |
+| `orchestration/` | `agents/orchestration/` | Task loops, sprint orchestration, coordination |
+| `planning/` | `agents/planning/` | PRD generation, sprint planning, task analysis |
+| `backend/` | `agents/backend/` | API design, development, and code review |
+| `frontend/` | `agents/frontend/` | UI design, development, and code review |
+| `database/` | `agents/database/` | Schema design and language-specific DB development |
+| `quality/` | `agents/quality/` | Testing, security auditing, performance |
+| `diagnosis/` | `agents/diagnosis/` | Bug Council root cause analysis |
+| `devops/` | `agents/devops/` | CI/CD, Docker, Kubernetes, Terraform |
+| `mobile/` | `agents/mobile/` | iOS, Android, Flutter, React Native |
+| `security/` | `agents/security/` | Language-specific security auditing |
+| `scripting/` | `agents/scripting/` | Shell and PowerShell scripting |
+| `ux/` | `agents/ux/` | Design systems, accessibility, UX |
 
 ## Creating a New Agent
 
@@ -48,11 +55,12 @@ Before creating an agent, ask:
 - Is this specialized enough to warrant a dedicated agent?
 - What unique value does this agent provide?
 
-### Step 2: Choose Category and Tier
+### Step 2: Choose Category and Model
 
-**Tiers:**
-- **T1 (Specialist)**: Deep expertise in narrow domain (weight: 70-100)
-- **T2 (Generalist)**: Broad knowledge, handles edge cases (weight: 30-60)
+**Models (set in YAML frontmatter):**
+- **haiku**: Cost-optimized for straightforward, well-defined tasks (weight: 70-100)
+- **sonnet**: Default for most operations, good balance of capability and cost (weight: 50-80)
+- **opus**: Required for complex reasoning, architecture, and security-critical tasks (weight: 30-60)
 
 ### Step 3: Create the Agent File
 
@@ -236,21 +244,12 @@ Escalate to a more capable model when:
 
 ```json
 {
-  "id": "my-agent",
+  "id": "category:agent-name",
   "name": "My Agent Display Name",
   "description": "Brief description for selection",
-  "path": "agents/specialized/my-agent.md",
-  "category": "specialized",
-  "tier": "T1",
-  "weight": 75,
-  "triggers": [
-    "keyword1",
-    "keyword2",
-    "phrase with spaces"
-  ],
-  "languages": ["typescript", "javascript"],
-  "frameworks": ["react", "next"],
-  "model_preference": "sonnet"
+  "file": "agents/category/agent-name.md",
+  "model": "sonnet",
+  "category": "category"
 }
 ```
 
@@ -258,24 +257,18 @@ Escalate to a more capable model when:
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `id` | Yes | Unique identifier (kebab-case) |
+| `id` | Yes | Unique identifier in `category:name` format (kebab-case) |
 | `name` | Yes | Display name |
 | `description` | Yes | Brief description for selection |
-| `path` | Yes | Relative path to agent file |
-| `category` | Yes | Agent category |
-| `tier` | Yes | T1 or T2 |
-| `weight` | Yes | Selection priority (1-100) |
-| `triggers` | Yes | Keywords that activate agent |
-| `languages` | No | Applicable languages |
-| `frameworks` | No | Applicable frameworks |
-| `model_preference` | No | Preferred model tier |
+| `file` | Yes | Relative path to agent markdown file |
+| `model` | Yes | Model assignment: `haiku`, `sonnet`, or `opus` |
+| `category` | Yes | Agent category matching directory name |
 
-### Trigger Guidelines
+### Naming Convention
 
-1. **Be specific**: Use domain-specific terms
-2. **Include variations**: "test", "tests", "testing"
-3. **Avoid conflicts**: Check existing agent triggers
-4. **Use phrases**: "add feature", "fix bug"
+1. **ID format**: `category:name` where name does NOT repeat the category prefix
+2. **Examples**: `backend:api-developer-python`, `frontend:developer`, `database:designer`
+3. **File path**: Must match `agents/{category}/{name}.md`
 
 ## Testing Agents
 
@@ -394,7 +387,7 @@ Check the current phase before acting:
 ## Examples of Good Agents
 
 Study these well-designed agents:
-- `agents/orchestration/ralph-orchestrator.md` - Orchestration example
+- `agents/orchestration/autonomous-controller.md` - Orchestration example
 - `agents/quality/test-writer.md` - Testing example
 - `agents/security/penetration-tester.md` - Security example
 

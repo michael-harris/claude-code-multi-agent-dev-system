@@ -39,12 +39,12 @@ async function getLogs(options) {
             e.id,
             e.timestamp,
             e.event_type,
-            e.event_data,
+            e.data,
             s.command as session_command,
-            ar.agent_id
+            ar.agent
         FROM events e
         LEFT JOIN sessions s ON e.session_id = s.id
-        LEFT JOIN agent_runs ar ON e.agent_run_id = ar.id
+        LEFT JOIN agent_runs ar ON e.session_id = ar.session_id
         WHERE 1=1
     `
 
@@ -56,12 +56,12 @@ async function getLogs(options) {
     }
 
     if (options.agent) {
-        query += ` AND ar.agent_id LIKE ?`
+        query += ` AND ar.agent LIKE ?`
         params.push(`%${options.agent}%`)
     }
 
     if (options.level) {
-        query += ` AND json_extract(e.event_data, '$.level') = ?`
+        query += ` AND json_extract(e.data, '$.level') = ?`
         params.push(options.level)
     }
 
@@ -93,7 +93,7 @@ async function getLogs(options) {
   Session: sess_abc123
 
 2026-01-29 10:45:25 [INFO] agent_started
-  Agent: api-developer-typescript-t1
+  Agent: backend:api-developer-typescript
   Task: TASK-001
   Model: sonnet
 
@@ -141,7 +141,7 @@ Export: /devteam:logs --export
 ╚═══════════════════════════════════════════════════════════════╝
 
 2026-01-29 09:15:42 [ERROR] agent_failed
-  Agent: database-developer-python-t1
+  Agent: database:developer-python
   Task: TASK-003
   Error: Migration failed - column already exists
   Stack: alembic/operations.py:123
@@ -176,7 +176,7 @@ Timeline
 ───────────────────────────────────────────────────────────────
 10:45:23.123  session_started
 10:45:23.456  phase_changed → initializing
-10:45:24.789  agent_started → api-developer-typescript-t1
+10:45:24.789  agent_started → backend:api-developer-typescript
 10:45:25.012  phase_changed → executing
 10:45:45.234  tool_call → Edit (src/api.ts)
 10:46:02.456  tool_call → Bash (npm test)
@@ -191,7 +191,7 @@ Timeline
 
 Agents Used
 ───────────────────────────────────────────────────────────────
-  api-developer-typescript-t1  │ 1m 45s │ sonnet │ $0.10
+  backend:api-developer-typescript  │ 1m 45s │ sonnet │ $0.10
   lint-fixer                   │ 25s    │ haiku  │ $0.02
 
 Quality Gates
@@ -222,7 +222,7 @@ Creates: `logs/devteam-2026-01-29T104500.log`
 # Entries: 156
 
 [2026-01-29T10:45:23.123Z] INFO session_started session_id=sess_abc123 command="/devteam:implement --sprint 1"
-[2026-01-29T10:45:25.012Z] INFO agent_started agent=api-developer-typescript-t1 model=sonnet task=TASK-001
+[2026-01-29T10:45:25.012Z] INFO agent_started agent=backend:api-developer-typescript model=sonnet task=TASK-001
 ...
 ```
 

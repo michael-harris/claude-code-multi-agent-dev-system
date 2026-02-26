@@ -96,7 +96,7 @@ agents/ux/
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
 │  1. DETECTION                                                    │
-│     └── Task Orchestrator checks for design-system/ directory   │
+│     └── Task Loop checks for design-system/ directory           │
 │                                                                  │
 │  2. INJECTION                                                    │
 │     └── Design tokens prepended to frontend agent prompts       │
@@ -108,7 +108,7 @@ agents/ux/
 │     └── Design Compliance Validator scans for violations        │
 │                                                                  │
 │  5. QUALITY GATE                                                 │
-│     └── Ralph blocks completion if violations found             │
+│     └── Task Loop blocks completion if violations found         │
 │                                                                  │
 │  6. DRIFT MONITORING                                             │
 │     └── Weekly checks for gradual deviation from design system  │
@@ -121,8 +121,7 @@ agents/ux/
 These agents integrate with:
 - **Frontend Developer** - Receives design tokens and implements
 - **Accessibility Specialist** - Reviews for WCAG compliance
-- **Ralph Quality Loop** - Design compliance validation gate
-- **Task Orchestrator** - Auto-detection and token injection
+- **Task Loop** - Design compliance validation gate, auto-detection, and token injection
 
 ## Tech Stack Support
 

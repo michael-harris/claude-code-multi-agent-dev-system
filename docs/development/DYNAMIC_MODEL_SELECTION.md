@@ -1,5 +1,15 @@
 # Dynamic Model Selection System
 
+> **DEPRECATED:** This document describes a proposed complexity-scoring algorithm for dynamic model selection that was **never implemented**. The system has been replaced with a simpler, more practical approach:
+>
+> - **Model assignment:** Each agent has an explicit `model: haiku|sonnet|opus` field in its YAML frontmatter and a corresponding entry in `plugin.json` (84 sonnet, 38 opus, 5 haiku).
+> - **Escalation:** Handled via LLM instructions in orchestrator agents (task-loop, sprint-orchestrator). The chain is: sonnet -> opus (after 2 failures), opus -> Bug Council (after 3 failures).
+> - **No executable code:** Model selection is entirely driven by instructions in agent markdown files, not by any scoring algorithm or runtime code.
+>
+> This file is preserved for historical context only.
+
+---
+
 Replace fixed T1/T2 agent tiers with intelligent, dynamic model selection based on task complexity and iteration position.
 
 ---
@@ -34,7 +44,7 @@ Replace fixed T1/T2 agent tiers with intelligent, dynamic model selection based 
 
 ### Assessment Criteria
 
-Performed automatically by task-orchestrator before first iteration.
+Performed automatically by task-loop before first iteration.
 
 ```yaml
 complexity_factors:
@@ -83,7 +93,7 @@ complexity_thresholds:
 
 The orchestrator determines complexity from:
 
-1. **Task definition file** (`docs/planning/tasks/TASK-XXX.yaml`):
+1. **Task definition file** (`docs/planning/tasks/TASK-XXX.json`):
    ```yaml
    estimated_files: 3
    estimated_lines: 120
@@ -249,7 +259,7 @@ agents/database/
 
 ## Model Selection
 
-Model is determined dynamically by task-orchestrator based on:
+Model is determined dynamically by task-loop based on:
 - Task complexity assessment
 - Current iteration in execution loop
 - Validation failure analysis
@@ -272,7 +282,7 @@ This agent may run as Haiku, Sonnet, or Opus depending on context.
 
 ---
 
-## Task Orchestrator Changes
+## Task Loop Changes
 
 ### New Complexity Assessment Step
 
@@ -285,7 +295,7 @@ Add before iteration loop:
 
 2. **NEW: Assess Task Complexity**
 
-   a. Read task definition from `docs/planning/tasks/TASK-XXX.yaml`
+   a. Read task definition from `docs/planning/tasks/TASK-XXX.json`
 
    b. Calculate complexity score:
       - Count files affected
@@ -400,7 +410,7 @@ tasks:
 Task definitions can include hints to improve assessment accuracy:
 
 ```yaml
-# docs/planning/tasks/TASK-XXX.yaml
+# docs/planning/tasks/TASK-XXX.json
 id: TASK-005
 name: User Authentication API
 type: backend
@@ -454,7 +464,7 @@ acceptance_criteria:
 ## Migration Path
 
 ### Phase 1: Add Complexity Assessment
-- Add complexity calculation to task-orchestrator
+- Add complexity calculation to task-loop
 - Log assessments but don't change model selection yet
 - Validate assessment accuracy
 
@@ -475,7 +485,7 @@ acceptance_criteria:
 
 ---
 
-## Integration with Ralph Loop (Option 3)
+## Integration with Task Loop (Option 3)
 
 The dynamic model selection integrates naturally with autonomous mode:
 

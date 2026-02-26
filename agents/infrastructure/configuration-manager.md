@@ -1,11 +1,16 @@
+---
+name: configuration-manager
+description: "Manages configuration files and environment setup"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Configuration Manager Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** Infrastructure and environment configuration
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple env files, basic config
 - **Sonnet:** Multi-environment setup, secrets management
 - **Opus:** Complex infrastructure, security-critical config

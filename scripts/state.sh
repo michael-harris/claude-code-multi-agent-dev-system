@@ -12,7 +12,7 @@ set -euo pipefail
 
 # Get script directory and source common library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/lib/common.sh"
+source "${SCRIPT_DIR}/lib/common.sh" || { echo "ERROR: Cannot source common.sh" >&2; exit 1; }
 
 # ============================================================================
 # SESSION MANAGEMENT
@@ -76,11 +76,23 @@ end_session() {
     esc_status=$(sql_escape "$status")
     esc_reason=$(sql_escape "$exit_reason")
 
-    local query="UPDATE sessions
-        SET status = '$esc_status',
-            exit_reason = '$esc_reason',
-            ended_at = CURRENT_TIMESTAMP
-        WHERE status = 'running';"
+    # Target the specific running session instead of blanket update
+    local session_id
+    session_id=$(get_current_session_id)
+
+    local query
+    if [ -n "$session_id" ]; then
+        local esc_id
+        esc_id=$(sql_escape "$session_id")
+        query="UPDATE sessions
+            SET status = '$esc_status',
+                exit_reason = '$esc_reason',
+                ended_at = CURRENT_TIMESTAMP
+            WHERE id = '$esc_id';"
+    else
+        log_error "No active session found to end" "state"
+        return 1
+    fi
 
     if ! sql_exec "$query" > /dev/null; then
         log_error "Failed to end session" "session"
@@ -544,6 +556,8 @@ delete_kv_state() {
 
 # Add tokens to session total
 # Args: tokens_input, tokens_output, cost_cents, [session_id]
+# NOTE: cost_cents is in CENTS (integer). Do NOT pass USD dollars here.
+# - cost-tracking.sh calculate_cost() returns USD — multiply by 100 before passing here
 add_tokens() {
     local tokens_input="$1"
     local tokens_output="$2"
@@ -558,6 +572,13 @@ add_tokens() {
         return 1
     fi
     if ! validate_decimal "$cost_cents" "cost_cents"; then
+        return 1
+    fi
+
+    # Reject negative values (validate_numeric already ensures non-negative integers,
+    # but guard against future changes; cost_cents is decimal so check explicitly)
+    if [[ "$cost_cents" == -* ]]; then
+        log_error "Negative cost_cents not allowed: $cost_cents" "cost"
         return 1
     fi
 
@@ -619,8 +640,8 @@ get_total_cost_dollars() {
 # CIRCUIT BREAKER
 # ============================================================================
 
-# Circuit breaker threshold constant
-readonly CIRCUIT_BREAKER_DEFAULT_THRESHOLD=5
+# Circuit breaker threshold (configurable via env, M9)
+CIRCUIT_BREAKER_DEFAULT_THRESHOLD="${DEVTEAM_CIRCUIT_BREAKER_THRESHOLD:-5}"
 
 # Check if circuit breaker should trip
 # Returns: 0 if should trip, 1 otherwise
@@ -634,7 +655,17 @@ should_trip_circuit_breaker() {
     # Use default if not set
     max_failures="${max_failures:-$CIRCUIT_BREAKER_DEFAULT_THRESHOLD}"
 
-    [ "${failures:-0}" -ge "${max_failures:-$CIRCUIT_BREAKER_DEFAULT_THRESHOLD}" ]
+    # Validate both values are numeric before comparison
+    if ! [[ "${failures:-0}" =~ ^[0-9]+$ ]]; then
+        log_warn "Non-numeric failures value: ${failures:-0}, defaulting to 0" "circuit"
+        failures=0
+    fi
+    if ! [[ "$max_failures" =~ ^[0-9]+$ ]]; then
+        log_warn "Non-numeric max_failures value: $max_failures, using default" "circuit"
+        max_failures="$CIRCUIT_BREAKER_DEFAULT_THRESHOLD"
+    fi
+
+    [ "$failures" -ge "$max_failures" ]
 }
 
 # Trip the circuit breaker
@@ -660,10 +691,11 @@ reset_circuit_breaker() {
 get_next_model() {
     local current="$1"
     case "$current" in
-        haiku)  echo "sonnet" ;;
-        sonnet) echo "opus" ;;
-        opus)   echo "bug_council" ;;
-        *)      echo "sonnet" ;;  # Default fallback
+        haiku)        echo "sonnet" ;;
+        sonnet)       echo "opus" ;;
+        opus)         echo "bug_council" ;;
+        bug_council)  echo "bug_council" ;;  # Already at top of chain (H3)
+        *)            echo "sonnet" ;;  # Default fallback
     esac
 }
 
@@ -687,6 +719,12 @@ record_escalation() {
     local reason="$3"
     local agent="${4:-}"
     local session_id="${5:-}"
+
+    # Validate target model before escalating (M7)
+    if ! _in_array "$to_model" "${VALID_MODELS[@]}"; then
+        log_error "Invalid escalation target model: $to_model" "escalation"
+        return 1
+    fi
 
     if [ -z "$session_id" ]; then
         session_id=$(get_current_session_id)

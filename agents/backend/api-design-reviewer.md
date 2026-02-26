@@ -1,8 +1,14 @@
+---
+name: api-design-reviewer
+description: "Reviews API designs for consistency, usability, security, and best practices"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # API Design Reviewer
 
 **Agent ID:** `backend:api-design-reviewer`
 **Category:** Backend
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 6-10
 
 ## Purpose

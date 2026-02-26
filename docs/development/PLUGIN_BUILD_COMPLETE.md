@@ -1,4 +1,6 @@
-# Plugin Build Complete! 🎉
+# Plugin Build Complete!
+
+> **Note:** This is a historical development document. The T1/T2 tier system described here has been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Escalation is now handled by orchestrator agents via LLM instructions.
 
 ## Summary
 
@@ -17,7 +19,7 @@ Your multi-agent development system has been successfully converted into a profe
 
 **27 Specialized Agents:**
 - ✅ Planning (3): prd-generator, task-graph-analyzer, sprint-planner
-- ✅ Orchestration (3): sprint-orchestrator, task-orchestrator, requirements-validator
+- ✅ Orchestration (3): sprint-orchestrator, task-loop, requirements-validator
 - ✅ Database (5): designer + 4 language-specific developers (T1/T2)
 - ✅ Backend (7): api-designer + 4 developers (T1/T2) + 2 reviewers
 - ✅ Frontend (4): designer + 2 developers (T1/T2) + reviewer
@@ -205,7 +207,7 @@ agents/                # Agent definitions
 commands/
   └── sprint.md        # Launches sprint-orchestrator agent
 
-User → Main Claude → sprint-orchestrator → task-orchestrator → specialized agents
+User → Main Claude → sprint-orchestrator → task-loop → specialized agents
                   ↑
            Proper agent hierarchy
 ```
@@ -238,7 +240,7 @@ User → Main Claude → sprint-orchestrator → task-orchestrator → specializ
 
 ### Orchestration Agents
 - `orchestration:sprint-orchestrator` (Opus)
-- `orchestration:task-orchestrator` (Sonnet)
+- `orchestration:task-loop` (Sonnet)
 - `orchestration:requirements-validator` (Opus)
 
 ### Database Agents

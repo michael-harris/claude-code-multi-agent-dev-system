@@ -1,0 +1,34 @@
+# DevTeam Frontend Configuration
+# Referenced by: frontend/frontend-designer.md
+# Defines frontend framework, component architecture, and design standards
+
+frontend_design:
+  framework: "react"
+  meta_framework: "nextjs"
+
+  component_architecture:
+    methodology: "atomic_design"
+    max_component_depth: 4
+    require_composition: true
+
+  state_management:
+    server_state: "react-query"
+    client_state: "context"
+    form_state: "react-hook-form"
+
+  styling:
+    approach: "tailwind"
+    design_system: "custom"
+
+  accessibility:
+    wcag_level: "AA"
+    require_aria_specs: true
+    require_keyboard_specs: true
+
+  responsive:
+    approach: "mobile_first"
+    breakpoints:
+      sm: 640
+      md: 768
+      lg: 1024
+      xl: 1280

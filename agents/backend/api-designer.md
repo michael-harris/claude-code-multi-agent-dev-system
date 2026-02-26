@@ -1,10 +1,13 @@
+---
+name: api-designer
+description: "Designs RESTful API specifications with OpenAPI"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # API Designer Agent
 
-**Agent ID:** `backend/api-designer`
+**Agent ID:** `backend:api-designer`
 **Category:** Backend Architecture
-**Model:** Dynamic (assigned at runtime based on task complexity)
-
----
+**Model:** sonnet
 
 ## Purpose
 
@@ -179,71 +182,94 @@ constraints:
 
 ### Primary Output: API Design Document
 
-Location: `docs/design/api/TASK-XXX-api.yaml`
+Location: `docs/design/api/TASK-XXX-api.json`
 
-```yaml
-api_version: "1.0"
-base_path: "/api/v1"
-authentication:
-  type: "bearer"
-  header: "Authorization"
-  format: "Bearer {token}"
-
-endpoints:
-  - path: /users
-    method: POST
-    summary: "Create new user account"
-    description: "Registers a new user with email and password"
-    authentication: false
-    rate_limit: "10/minute"
-    request_body:
-      content_type: "application/json"
-      schema:
-        email:
-          type: string
-          required: true
-          format: email
-          max_length: 255
-        password:
-          type: string
-          required: true
-          min_length: 8
-          max_length: 128
-          pattern: "^(?=.*[A-Za-z])(?=.*\\d).*$"
-        display_name:
-          type: string
-          required: false
-          max_length: 100
-    responses:
-      201:
-        description: "User created successfully"
-        schema:
-          user_id: {type: uuid}
-          email: {type: string}
-          display_name: {type: string}
-          created_at: {type: datetime, format: "ISO 8601"}
-      400:
-        description: "Invalid request data"
-        schema:
-          error: {type: string}
-          code: {type: string}
-          details: {type: array}
-      409:
-        description: "Email already exists"
-        schema:
-          error: {type: string}
-          code: {type: string, value: "EMAIL_EXISTS"}
-
-error_codes:
-  - code: "VALIDATION_ERROR"
-    description: "Request validation failed"
-    status: 400
-  - code: "EMAIL_EXISTS"
-    description: "Email address already registered"
-    status: 409
-  - code: "UNAUTHORIZED"
-    description: "Authentication required"
-    status: 401
+```json
+{
+  "api_version": "1.0",
+  "base_path": "/api/v1",
+  "authentication": {
+    "type": "bearer",
+    "header": "Authorization",
+    "format": "Bearer {token}"
+  },
+  "endpoints": [
+    {
+      "path": "/users",
+      "method": "POST",
+      "summary": "Create new user account",
+      "description": "Registers a new user with email and password",
+      "authentication": false,
+      "rate_limit": "10/minute",
+      "request_body": {
+        "content_type": "application/json",
+        "schema": {
+          "email": {
+            "type": "string",
+            "required": true,
+            "format": "email",
+            "max_length": 255
+          },
+          "password": {
+            "type": "string",
+            "required": true,
+            "min_length": 8,
+            "max_length": 128,
+            "pattern": "^(?=.*[A-Za-z])(?=.*\\d).*$"
+          },
+          "display_name": {
+            "type": "string",
+            "required": false,
+            "max_length": 100
+          }
+        }
+      },
+      "responses": {
+        "201": {
+          "description": "User created successfully",
+          "schema": {
+            "user_id": {"type": "uuid"},
+            "email": {"type": "string"},
+            "display_name": {"type": "string"},
+            "created_at": {"type": "datetime", "format": "ISO 8601"}
+          }
+        },
+        "400": {
+          "description": "Invalid request data",
+          "schema": {
+            "error": {"type": "string"},
+            "code": {"type": "string"},
+            "details": {"type": "array"}
+          }
+        },
+        "409": {
+          "description": "Email already exists",
+          "schema": {
+            "error": {"type": "string"},
+            "code": {"type": "string", "value": "EMAIL_EXISTS"}
+          }
+        }
+      }
+    }
+  ],
+  "error_codes": [
+    {
+      "code": "VALIDATION_ERROR",
+      "description": "Request validation failed",
+      "status": 400
+    },
+    {
+      "code": "EMAIL_EXISTS",
+      "description": "Email address already registered",
+      "status": 409
+    },
+    {
+      "code": "UNAUTHORIZED",
+      "description": "Authentication required",
+      "status": 401
+    }
+  ]
+}
 ```
 
 ---
@@ -287,16 +313,16 @@ error_codes:
 ### Upstream Dependencies
 | Agent | Purpose |
 |-------|---------|
-| `orchestrator/project-manager` | Receives task assignments |
-| `frontend/ui-designer` | Aligns with UI data requirements |
+| `orchestration/sprint-orchestrator` | Receives task assignments |
+| `frontend:designer` | Aligns with UI data requirements |
 
 ### Downstream Consumers
 | Agent | Purpose |
 |-------|---------|
 | `backend/api-developer-*` | Implements designed endpoints |
-| `frontend/react-developer` | Consumes API specifications |
+| `frontend:developer` | Consumes API specifications |
 | `quality/documentation-coordinator` | Generates API documentation |
-| `database/schema-designer` | Aligns data models |
+| `database:designer` | Aligns data models |
 
 ---
 
@@ -350,8 +376,9 @@ api_designer:
 
 ## See Also
 
-- [API Developer C# Agent](./api-developer-csharp.md) - C# implementation
-- [API Developer Python Agent](./api-developer-python.md) - Python implementation
-- [API Developer Ruby Agent](./api-developer-ruby.md) - Ruby implementation
-- [Schema Designer Agent](../database/schema-designer.md) - Database schema design
-- [Documentation Coordinator](../quality/documentation-coordinator.md) - API docs generation
+- `backend/api-developer-csharp.md` - C# implementation
+- `backend/api-developer-python.md` - Python implementation
+- `backend/api-developer-ruby.md` - Ruby implementation
+- `database/database-designer.md` - Database schema design
+- `quality/documentation-coordinator.md` - API docs generation
+- `quality/runtime-verifier.md` - Runtime verification of API endpoints

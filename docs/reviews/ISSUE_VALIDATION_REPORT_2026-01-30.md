@@ -1,4 +1,7 @@
 # Outstanding Issues Validation Report
+
+> **Note:** This is a historical review document. References to T1/T2 tiers and "Dynamic" model selection reflect the system at the time of review. The T1/T2 tier system has since been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Some issues identified here regarding model specification mismatches have been resolved by the migration to explicit model values.
+
 **Date:** 2026-01-30
 **Reviewer:** Claude Code Session
 

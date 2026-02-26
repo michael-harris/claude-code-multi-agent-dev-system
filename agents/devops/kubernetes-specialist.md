@@ -1,6 +1,11 @@
+---
+name: kubernetes-specialist
+description: "Creates and manages Kubernetes deployments and manifests"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Kubernetes Specialist Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Tier:** Sonnet
 **Purpose:** Kubernetes orchestration and deployment expert
 

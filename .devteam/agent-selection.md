@@ -568,9 +568,9 @@ selection:
   model: sonnet
 ```
 
-## Integration with Task Orchestrator
+## Integration with Task Loop
 
-The task orchestrator uses this system:
+The Task Loop uses this system:
 
 ```python
 def execute_task(task: Task):

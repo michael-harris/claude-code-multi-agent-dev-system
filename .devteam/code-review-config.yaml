@@ -1,0 +1,125 @@
+# DevTeam Code Review Configuration
+# Referenced by: orchestration/code-review-coordinator.md, backend/backend-code-reviewer-python.md,
+#   backend/backend-code-reviewer-typescript.md, frontend/frontend-code-reviewer.md
+# Defines code review policies, severity thresholds, and language-specific review settings
+
+code_review:
+  required_approval: true
+  min_reviewers: 1
+
+  severity_thresholds:
+    block_on: [critical, high]
+    warn_on: [medium]
+    info_only: [low]
+
+  skip_files:
+    - "*.md"
+    - "*.json"
+    - "*.yaml"
+    - "package-lock.json"
+    - "*.lock"
+
+  focus_areas:
+    - security
+    - correctness
+    - performance
+
+python_review:
+  python_version: "3.11"
+  require_type_hints: true
+  max_function_lines: 50
+  max_complexity: 10
+
+  linting:
+    tool: "ruff"
+    strict_mode: true
+
+  security:
+    require_input_validation: true
+    require_rate_limiting: true
+    forbidden_functions:
+      - "eval"
+      - "exec"
+      - "pickle.loads"
+
+  framework:
+    fastapi:
+      require_response_models: true
+      require_openapi: true
+    django:
+      require_serializers: true
+      max_view_lines: 30
+
+  package_manager:
+    required: "uv"
+    forbid_direct_pip: true
+
+  severity_levels:
+    block_on: ["critical", "major"]
+    warn_on: ["minor"]
+
+  excluded_paths:
+    - "**/*_test.py"
+    - "**/test_*.py"
+    - "**/conftest.py"
+
+typescript_review:
+  strict_mode_required: true
+  max_any_types: 0
+  max_type_assertions: 5
+
+  security:
+    require_input_validation: true
+    require_rate_limiting: true
+    require_helmet: true
+
+  framework:
+    nestjs:
+      require_swagger: true
+      require_dtos: true
+    express:
+      require_error_middleware: true
+
+  severity_levels:
+    block_on: ["critical", "major"]
+    warn_on: ["minor"]
+
+  excluded_paths:
+    - "**/*.test.ts"
+    - "**/*.spec.ts"
+    - "**/node_modules/**"
+
+frontend_review:
+  framework: "react"
+  typescript:
+    strict_mode_required: true
+    max_any_types: 0
+
+  accessibility:
+    wcag_level: "AA"
+    require_aria_labels: true
+    require_alt_text: true
+    min_color_contrast: 4.5
+
+  react:
+    require_memo_for_lists: true
+    require_error_boundaries: true
+    max_component_lines: 200
+
+  performance:
+    max_bundle_size_kb: 500
+    require_lazy_loading: true
+    require_image_optimization: true
+
+  security:
+    block_dangerous_html: true
+    require_csp_compatible: true
+
+  severity_levels:
+    block_on: ["critical", "major"]
+    warn_on: ["minor"]
+
+  excluded_paths:
+    - "**/*.test.tsx"
+    - "**/*.spec.tsx"
+    - "**/node_modules/**"

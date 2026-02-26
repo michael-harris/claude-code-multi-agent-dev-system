@@ -139,13 +139,13 @@ def calculate_complexity(task):
     return min(score, 14)
 ```
 
-## Ralph Integration
+## Task Loop Integration
 
-Model selection integrates with the Ralph quality loop:
+Model selection integrates with the Task Loop quality loop:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                 RALPH MODEL ESCALATION                       │
+│                 TASK LOOP MODEL ESCALATION                    │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  Initial: Complexity-based selection                        │
@@ -168,7 +168,7 @@ Model selection integrates with the Ralph quality loop:
 
 ### Escalation Thresholds
 
-Configured in `.devteam/ralph-config.yaml`:
+Configured in `.devteam/task-loop-config.yaml`:
 
 ```yaml
 model_escalation:

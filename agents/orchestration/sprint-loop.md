@@ -1,9 +1,14 @@
+---
+name: sprint-loop
+description: "Sprint-level quality validation after all tasks complete"
+model: opus
+tools: Read, Glob, Grep, Bash, Task
+---
 # Sprint Loop Agent
 
 **Agent ID:** `orchestration:sprint-loop`
 **Category:** Orchestration
-**Model:** Dynamic (assigned at runtime based on task complexity)
-**Complexity Range:** 6-12
+**Model:** opus
 
 ## Purpose
 
@@ -85,7 +90,15 @@ You do NOT:
 │                           │                                  │
 │                           ▼                                  │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │ 7. WORKFLOW COMPLIANCE                               │   │
+│   │ 7. CODE REVIEW                                       │   │
+│   │    • Review all sprint code changes                  │   │
+│   │    • Cross-task consistency check                    │   │
+│   │    • Code quality standards                          │   │
+│   └─────────────────────────────────────────────────────┘   │
+│                           │                                  │
+│                           ▼                                  │
+│   ┌─────────────────────────────────────────────────────┐   │
+│   │ 8. WORKFLOW COMPLIANCE                               │   │
 │   │    • All required steps completed                    │   │
 │   │    • Artifacts generated                             │   │
 │   │    • State file updated                              │   │
@@ -93,7 +106,7 @@ You do NOT:
 │                           │                                  │
 │                           ▼                                  │
 │   ┌─────────────────────────────────────────────────────┐   │
-│   │ 8. EVALUATE & ITERATE                                │   │
+│   │ 9. EVALUATE & ITERATE                                │   │
 │   │    • All checks pass → COMPLETE                      │   │
 │   │    • Issues found → Create fix tasks, loop           │   │
 │   │    • Max iterations → HALT                           │   │
@@ -102,13 +115,44 @@ You do NOT:
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Model Selection for Sub-Agent Delegation
+
+When spawning sub-agents via Task(), you MUST set the `model` parameter explicitly:
+
+| Sub-Agent | Model | Reason |
+|-----------|-------|--------|
+| `quality:runtime-verifier` | `sonnet` | Standard validation |
+| `quality:security-auditor` | `opus` | Security requires deep analysis |
+| `security:security-auditor-*` | `opus` | Security always opus |
+| `quality:e2e-tester` | `sonnet` | Standard testing |
+| `quality:visual-verification` | `opus` | Required for Computer Use |
+| `quality:performance-auditor-*` | `sonnet` | Standard analysis |
+| `quality:documentation-coordinator` | `haiku` | Documentation tasks |
+| `orchestration:workflow-compliance` | `opus` | Compliance requires deep analysis |
+| Implementation fix agents | `sonnet` | Start sonnet, escalate to opus on failure |
+
+**Implementation fix agents by language (use these when creating fix tasks):**
+
+| Language | Fix Agent ID |
+|----------|-------------|
+| Python | `backend:api-developer-python` |
+| TypeScript (backend) | `backend:api-developer-typescript` |
+| TypeScript (frontend) | `frontend:developer` |
+| Go | `backend:api-developer-go` |
+| Java | `backend:api-developer-java` |
+| Ruby | `backend:api-developer-ruby` |
+| PHP | `backend:api-developer-php` |
+| C# | `backend:api-developer-csharp` |
+
+**On failure escalation:** If a sonnet-level sub-agent fails validation twice, re-spawn it with `model: "opus"`.
+
 ## Execution Protocol
 
 ### Step 1: Integration Validation
 
 ```yaml
 integration_validation:
-  agent: "quality:integration-tester"
+  agent: "quality:runtime-verifier"  # Use model: "sonnet"
   checks:
     - Cross-task API contracts match
     - Data flows correctly between features
@@ -125,7 +169,7 @@ integration_validation:
 
 ```yaml
 security_audit:
-  agent: "security:security-auditor"  # General auditor for cross-cutting concerns
+  agent: "quality:security-auditor"  # General auditor for cross-cutting concerns
   additional_agents:
     - "security:security-auditor-{language}"  # Per detected language
 
@@ -272,7 +316,18 @@ documentation_check:
     - Iterate
 ```
 
-### Step 7: Workflow Compliance
+### Step 7: Code Review
+
+**Step 7 - Code Review:** Run code review on all sprint changes.
+```
+Task({
+  subagent_type: "orchestration:code-review-coordinator",
+  model: "opus",
+  prompt: "Review all code changes in this sprint. Sprint: {sprint_id}, Changed files: {all_changed_files}"
+})
+```
+
+### Step 8: Workflow Compliance
 
 ```yaml
 workflow_compliance:

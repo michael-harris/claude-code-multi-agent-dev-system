@@ -37,7 +37,7 @@ cmd_vacuum() {
     log_info "Running VACUUM..." "maintenance"
 
     local before_size
-    before_size=$(stat -f%z "$DB_FILE" 2>/dev/null || stat -c%s "$DB_FILE")
+    before_size=$(file_size_bytes "$DB_FILE")
 
     if ! sqlite3 "$DB_FILE" "VACUUM;"; then
         log_error "VACUUM failed" "maintenance"
@@ -45,7 +45,7 @@ cmd_vacuum() {
     fi
 
     local after_size
-    after_size=$(stat -f%z "$DB_FILE" 2>/dev/null || stat -c%s "$DB_FILE")
+    after_size=$(file_size_bytes "$DB_FILE")
 
     local saved=$((before_size - after_size))
     log_info "VACUUM complete. Space reclaimed: $saved bytes" "maintenance"
@@ -68,8 +68,13 @@ cmd_cleanup() {
     log_info "Cleaning up sessions older than $SESSION_RETENTION_DAYS days..." "maintenance"
 
     local cutoff_date
-    cutoff_date=$(date -d "$SESSION_RETENTION_DAYS days ago" '+%Y-%m-%d' 2>/dev/null || \
-                  date -v-${SESSION_RETENTION_DAYS}d '+%Y-%m-%d')
+    cutoff_date=$(date_days_ago "$SESSION_RETENTION_DAYS")
+
+    # Validate cutoff_date is a safe date string (YYYY-MM-DD)
+    if [[ ! "$cutoff_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+        log_error "Invalid cutoff date: $cutoff_date" "maintenance"
+        return 1
+    fi
 
     # Count sessions to delete
     local count
@@ -82,36 +87,17 @@ cmd_cleanup() {
 
     log_info "Found $count sessions to clean up" "maintenance"
 
-    # Delete in order: events, then related tables, then sessions
+    # Delete sessions; ON DELETE CASCADE handles child tables (events, agent_runs, gate_results, escalations)
     sqlite3 "$DB_FILE" <<EOF
+PRAGMA foreign_keys = ON;
 BEGIN TRANSACTION;
 
--- Delete related events
-DELETE FROM events WHERE session_id IN (
-    SELECT id FROM sessions WHERE ended_at < '$cutoff_date' AND status != 'running'
-);
-
--- Delete related agent_runs
-DELETE FROM agent_runs WHERE session_id IN (
-    SELECT id FROM sessions WHERE ended_at < '$cutoff_date' AND status != 'running'
-);
-
--- Delete related gate_results
-DELETE FROM gate_results WHERE session_id IN (
-    SELECT id FROM sessions WHERE ended_at < '$cutoff_date' AND status != 'running'
-);
-
--- Delete related escalations
-DELETE FROM escalations WHERE session_id IN (
-    SELECT id FROM sessions WHERE ended_at < '$cutoff_date' AND status != 'running'
-);
-
--- Delete related session_state
+-- Delete related session_state (may not have CASCADE)
 DELETE FROM session_state WHERE session_id IN (
     SELECT id FROM sessions WHERE ended_at < '$cutoff_date' AND status != 'running'
 );
 
--- Delete the sessions
+-- Delete the sessions (CASCADE will clean up events, agent_runs, gate_results, escalations)
 DELETE FROM sessions WHERE ended_at < '$cutoff_date' AND status != 'running';
 
 COMMIT;
@@ -188,8 +174,10 @@ cmd_stats() {
     echo ""
     echo "=== Database Size ==="
     local size
-    size=$(stat -f%z "$DB_FILE" 2>/dev/null || stat -c%s "$DB_FILE")
-    echo "File size: $size bytes ($(echo "scale=2; $size / 1024 / 1024" | bc) MB)"
+    size=$(file_size_bytes "$DB_FILE")
+    local size_mb
+    size_mb=$(echo "scale=2; $size / 1024 / 1024" | bc 2>/dev/null || echo "?")
+    echo "File size: $size bytes ($size_mb MB)"
 
     echo ""
     echo "=== Table Row Counts ==="

@@ -35,14 +35,14 @@ report_error() {
     local file="$1"
     local message="$2"
     log_error "[$file] $message" "validate"
-    ((ERRORS++))
+    ERRORS=$((ERRORS + 1))
 }
 
 report_warning() {
     local file="$1"
     local message="$2"
     log_warn "[$file] $message" "validate"
-    ((WARNINGS++))
+    WARNINGS=$((WARNINGS + 1))
 }
 
 report_info() {
@@ -82,7 +82,7 @@ validate_plugin_json() {
     # Required top-level fields
     local required_fields=("name" "version" "description" "agents" "commands")
     for field in "${required_fields[@]}"; do
-        if [ "$(jq "has(\"$field\")" "$PLUGIN_JSON")" != "true" ]; then
+        if [ "$(jq --arg f "$field" 'has($f)' "$PLUGIN_JSON")" != "true" ]; then
             report_error "plugin.json" "Missing required field: $field"
         fi
     done
@@ -116,7 +116,7 @@ validate_agents() {
 
         if [ -z "$agent_id" ]; then
             report_error "plugin.json" "Agent at index $i missing 'id'"
-            ((i++))
+            i=$((i + 1))
             continue
         fi
 
@@ -135,6 +135,8 @@ validate_agents() {
         file_path=$(jq -r ".agents[$i].file // .agents[$i].path // empty" "$PLUGIN_JSON")
         if [ -z "$file_path" ]; then
             report_error "plugin.json" "Agent '$agent_id' missing field: file (or path)"
+        elif ! validate_file_path "$file_path" "$PROJECT_ROOT"; then
+            report_error "plugin.json" "Agent '$agent_id' path traversal or invalid path: $file_path"
         elif [ ! -f "$PROJECT_ROOT/$file_path" ]; then
             report_error "plugin.json" "Agent '$agent_id' file not found: $file_path"
         fi
@@ -149,7 +151,7 @@ validate_agents() {
         # Validate category
         local category
         category=$(jq -r ".agents[$i].category // empty" "$PLUGIN_JSON")
-        local valid_categories=("planning" "research" "orchestration" "python" "typescript" "javascript" "go" "rust" "java" "frontend" "backend" "database" "quality" "security" "bug-council" "documentation" "devops" "workflow" "mobile" "specialized")
+        local valid_categories=("planning" "research" "orchestration" "python" "typescript" "javascript" "go" "rust" "java" "frontend" "backend" "database" "quality" "security" "bug-council" "documentation" "devops" "workflow" "mobile" "specialized" "accessibility" "architecture" "data-ai" "ux" "sre" "product" "devrel" "support" "scripting" "infrastructure" "diagnosis")
         local category_valid=false
         for valid_cat in "${valid_categories[@]}"; do
             if [ "$category" = "$valid_cat" ]; then
@@ -161,7 +163,7 @@ validate_agents() {
             report_warning "plugin.json" "Agent '$agent_id' has unusual category: $category"
         fi
 
-        ((i++))
+        i=$((i + 1))
     done
 }
 
@@ -178,7 +180,7 @@ validate_commands() {
 
         if [ -z "$cmd_name" ]; then
             report_error "plugin.json" "Command at index $i missing 'name'"
-            ((i++))
+            i=$((i + 1))
             continue
         fi
 
@@ -197,11 +199,13 @@ validate_commands() {
         file_path=$(jq -r ".commands[$i].file // .commands[$i].path // empty" "$PLUGIN_JSON")
         if [ -z "$file_path" ]; then
             report_error "plugin.json" "Command '$cmd_name' missing field: file (or path)"
+        elif ! validate_file_path "$file_path" "$PROJECT_ROOT"; then
+            report_error "plugin.json" "Command '$cmd_name' path traversal or invalid path: $file_path"
         elif [ ! -f "$PROJECT_ROOT/$file_path" ]; then
             report_error "plugin.json" "Command '$cmd_name' file not found: $file_path"
         fi
 
-        ((i++))
+        i=$((i + 1))
     done
 }
 
@@ -260,7 +264,7 @@ validate_config_yaml() {
     fi
 
     # Validate model_selection thresholds
-    local simple threshold
+    local simple
     simple=$(yq eval '.model_selection.thresholds.simple // 0' "$CONFIG_YAML")
     local moderate
     moderate=$(yq eval '.model_selection.thresholds.moderate // 0' "$CONFIG_YAML")

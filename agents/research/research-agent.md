@@ -1,8 +1,15 @@
+---
+name: research-agent
+description: "Investigates codebase, technologies, and implementation approaches before planning"
+model: opus
+tools: Read, Glob, Grep, Bash, WebSearch, WebFetch
+memory: project
+---
 # Research Agent
 
-**Agent ID:** `research_agent`
+**Agent ID:** `research:research-agent`
 **Category:** Research
-**Model:** Opus
+**Model:** opus
 **Complexity Range:** 4-8
 
 ## Purpose
@@ -229,7 +236,7 @@ output_format:
 // In /devteam:plan
 if (!skipResearch) {
     const research = await Task({
-        agent: 'research_agent',
+        agent: 'research:research-agent',
         prompt: `Research for: ${featureDescription}
                  User requirements: ${interviewResponses}`
     })
@@ -252,7 +259,7 @@ if (!skipResearch) {
 // Research can support bug diagnosis
 if (bugIsComplex) {
     const research = await Task({
-        agent: 'research_agent',
+        agent: 'research:research-agent',
         prompt: `Investigate codebase for bug: ${bugDescription}
                  Find: similar bugs, related code, recent changes`
     })
@@ -341,6 +348,5 @@ If research reveals:
 
 ## See Also
 
-- `agents/planning/prd-generator.md` - Uses research findings
-- `agents/diagnosis/code-archaeologist.md` - Similar codebase analysis
-- `skills/meta/context-manager.md` - Context optimization
+- `planning/prd-generator.md` - Uses research findings
+- `diagnosis/code-archaeologist.md` - Similar codebase analysis

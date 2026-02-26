@@ -10,7 +10,9 @@ project:
 
 # Model selection configuration
 model_selection:
-  strategy: dynamic  # dynamic, fixed, cost-optimized
+  # NOTE: strategy is documentation-only; not consumed by code.
+  # Model selection is handled by plugin.json assignments and agent markdown escalation logic.
+  strategy: fixed  # fixed, cost-optimized (documentation-only, not consumed by code)
 
   # Complexity thresholds (0-14 scale)
   thresholds:

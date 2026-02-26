@@ -3,9 +3,11 @@
 
 $ErrorActionPreference = "Stop"
 
+# Source common library for SQLite helpers
+. "$PSScriptRoot\lib\hook-common.ps1"
+
 # Configuration
 $MEMORY_DIR = ".devteam\memory"
-$STATE_FILE = ".devteam\state.yaml"
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $COMPACT_FILE = "$MEMORY_DIR\pre-compact-$Timestamp.md"
 
@@ -34,23 +36,18 @@ It preserves critical information that should not be lost.
 
     $StateSection = ""
 
-    # Add current task context
-    if (Test-Path $STATE_FILE) {
-        $Content = Get-Content $STATE_FILE -Raw
+    # Add current task context from SQLite database
+    if (Test-DatabaseExists) {
+        $sid = Invoke-DbQuery "SELECT id FROM sessions WHERE status='running' ORDER BY started_at DESC LIMIT 1;"
+        if (-not $sid) { $sid = "unknown" }
 
-        $CurrentSprint = "none"
-        $CurrentTask = "none"
-        $Phase = "unknown"
+        $CurrentSprint = Invoke-DbQuery "SELECT sprint_id FROM sessions WHERE id = '$sid';"
+        $CurrentTask = Invoke-DbQuery "SELECT current_task_id FROM sessions WHERE id = '$sid';"
+        $Phase = Invoke-DbQuery "SELECT current_phase FROM sessions WHERE id = '$sid';"
 
-        if ($Content -match "current_sprint:\s*(.+)") {
-            $CurrentSprint = $Matches[1].Trim()
-        }
-        if ($Content -match "current_task:\s*(.+)") {
-            $CurrentTask = $Matches[1].Trim()
-        }
-        if ($Content -match "phase:\s*(.+)") {
-            $Phase = $Matches[1].Trim()
-        }
+        if (-not $CurrentSprint) { $CurrentSprint = "none" }
+        if (-not $CurrentTask) { $CurrentTask = "none" }
+        if (-not $Phase) { $Phase = "unknown" }
 
         $StateSection = @"
 ## Current Execution State
@@ -62,21 +59,14 @@ It preserves critical information that should not be lost.
 "@
 
         # Get current task details if in progress
-        if ($CurrentTask -and $CurrentTask -ne "null" -and $CurrentTask -ne "none") {
-            $TaskStatus = "unknown"
-            $TaskIteration = "0"
-            $TaskTier = "unknown"
+        if ($CurrentTask -and $CurrentTask -ne "none") {
+            $TaskStatus = Invoke-DbQuery "SELECT status FROM tasks WHERE id='$CurrentTask';"
+            $TaskIteration = Invoke-DbQuery "SELECT actual_iterations FROM tasks WHERE id='$CurrentTask';"
+            $TaskTier = Invoke-DbQuery "SELECT estimated_effort FROM tasks WHERE id='$CurrentTask';"
 
-            # Simple extraction for task details
-            if ($Content -match "status:\s*(.+)") {
-                $TaskStatus = $Matches[1].Trim()
-            }
-            if ($Content -match "iterations:\s*(.+)") {
-                $TaskIteration = $Matches[1].Trim()
-            }
-            if ($Content -match "tier:\s*(.+)") {
-                $TaskTier = $Matches[1].Trim()
-            }
+            if (-not $TaskStatus) { $TaskStatus = "unknown" }
+            if (-not $TaskIteration) { $TaskIteration = "0" }
+            if (-not $TaskTier) { $TaskTier = "unknown" }
 
             $StateSection += @"
 ### Current Task Details
@@ -116,15 +106,15 @@ $CircuitBreaker
 
 ## Important Reminders
 
-1. Full state is in ``.devteam/state.yaml`` - always read it to understand progress
+1. Full state is in ``.devteam/devteam.db`` (SQLite) - query it to understand progress
 2. Check task status before starting work
-3. Update state file after completing tasks
+3. Update database state after completing tasks
 4. Output ``EXIT_SIGNAL: true`` only when ALL work is genuinely complete
 
 ## Recovery Instructions
 
 If resuming after compaction:
-1. Read ``.devteam/state.yaml`` to understand current state
+1. Query ``.devteam/devteam.db`` to understand current state
 2. Continue from the current task/sprint
 3. Do not restart completed work
 

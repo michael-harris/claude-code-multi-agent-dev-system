@@ -367,6 +367,7 @@ docker-compose.*.local.yml
 # State and runtime files (in user projects)
 # Note: The template files in .devteam/ ARE committed
 # but runtime state in user projects should be ignored
+# NOTE: state.yaml is DEPRECATED - SQLite (.devteam/devteam.db) is the source of truth
 .devteam/state.yaml
 .devteam/autonomous-mode
 .devteam/circuit-breaker.json
@@ -398,8 +399,7 @@ docker-compose.*.local.yml
 # Keep configuration templates
 !.devteam/config.yaml
 !.devteam/agent-capabilities.yaml
-!.devteam/state-schema.yaml
-!.devteam/state-example.yaml
+# state-schema.yaml and state-example.yaml moved to docs/deprecated/
 
 # Keep scripts/lib directory (overrides Python lib/ exclusion)
 !scripts/lib/

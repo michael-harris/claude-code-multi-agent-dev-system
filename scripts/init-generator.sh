@@ -16,6 +16,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 log_info() { echo -e "${GREEN}[init-gen]${NC} $1"; }
+log_success() { echo -e "${GREEN}[init-gen]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[init-gen]${NC} $1"; }
 log_error() { echo -e "${RED}[init-gen]${NC} $1"; }
 

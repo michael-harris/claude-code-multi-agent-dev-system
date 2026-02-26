@@ -12,44 +12,35 @@ Every agent must operate under strict scope constraints. Changes outside the def
 
 Every task MUST define explicit scope boundaries:
 
-```yaml
-# docs/planning/tasks/TASK-XXX.yaml
-id: TASK-042
-title: "Fix user authentication timeout"
-description: "Users are logged out after 5 minutes instead of 30"
-
-# EXPLICIT SCOPE DEFINITION (REQUIRED)
-scope:
-  # Files that CAN be modified
-  allowed_files:
-    - "src/auth/session.ts"
-    - "src/auth/middleware.ts"
-    - "src/config/auth.config.ts"
-
-  # Patterns that CAN be modified (glob)
-  allowed_patterns:
-    - "src/auth/**/*.ts"
-    - "tests/auth/**/*.test.ts"
-
-  # Files that MUST NOT be touched (even if in allowed patterns)
-  forbidden_files:
-    - "src/auth/oauth.ts"  # Not related to session timeout
-    - "src/auth/permissions.ts"
-
-  # Directories completely off-limits
-  forbidden_directories:
-    - "src/api/"
-    - "src/database/"
-    - "src/ui/"
-
-  # Maximum files that can be modified
-  max_files_changed: 5
-
-  # Reason for scope (helps agents understand boundaries)
-  scope_rationale: |
-    This task is specifically about session timeout configuration.
-    Only session management and auth middleware should be touched.
-    Do NOT refactor other auth code even if you notice issues.
+```json
+// docs/planning/tasks/TASK-XXX.json
+{
+  "id": "TASK-042",
+  "title": "Fix user authentication timeout",
+  "description": "Users are logged out after 5 minutes instead of 30",
+  "scope": {
+    "allowed_files": [
+      "src/auth/session.ts",
+      "src/auth/middleware.ts",
+      "src/config/auth.config.ts"
+    ],
+    "allowed_patterns": [
+      "src/auth/**/*.ts",
+      "tests/auth/**/*.test.ts"
+    ],
+    "forbidden_files": [
+      "src/auth/oauth.ts",
+      "src/auth/permissions.ts"
+    ],
+    "forbidden_directories": [
+      "src/api/",
+      "src/database/",
+      "src/ui/"
+    ],
+    "max_files_changed": 5,
+    "scope_rationale": "This task is specifically about session timeout configuration. Only session management and auth middleware should be touched. Do NOT refactor other auth code even if you notice issues."
+  }
+}
 ```
 
 ## Layer 2: Agent Prompt Constraints
@@ -110,7 +101,7 @@ You have VETO POWER over any out-of-scope changes.
 
 1. Receive: task_id, files_changed, diff
 
-2. Load task scope from: docs/planning/tasks/{task_id}.yaml
+2. Load task scope from: docs/planning/tasks/{task_id}.json
 
 3. For EACH file in files_changed:
 
@@ -182,7 +173,7 @@ if [ -z "$TASK_ID" ]; then
     exit 0
 fi
 
-TASK_FILE="docs/planning/tasks/${TASK_ID}.yaml"
+TASK_FILE="docs/planning/tasks/${TASK_ID}.json"
 
 if [ ! -f "$TASK_FILE" ]; then
     echo "Warning: Task file not found. Allowing commit."
@@ -266,37 +257,21 @@ exit 0
 
 Track and limit file access during task execution:
 
-```yaml
-# .devteam/state.yaml additions
-current_task:
-  id: TASK-042
-  scope:
-    allowed_files: [...]
-    forbidden_files: [...]
+```bash
+# State stored in SQLite database (.devteam/devteam.db)
+source scripts/state.sh
 
-file_access_log:
-  - timestamp: "2025-01-28T10:15:00Z"
-    file: "src/auth/session.ts"
-    action: read
-    allowed: true
+# Current task scope
+set_kv_state "current_task.id" "TASK-042"
+# Scope is read from the task JSON file: docs/planning/tasks/TASK-042.json
 
-  - timestamp: "2025-01-28T10:16:00Z"
-    file: "src/api/users.ts"
-    action: read
-    allowed: true  # Reading is OK
+# File access log entries (stored in SQLite)
+# Example queries:
+sqlite3 "${DEVTEAM_DB:-".devteam/devteam.db"}" \
+  "INSERT INTO events (type, data) VALUES ('file_access', '{\"timestamp\":\"2025-01-28T10:15:00Z\",\"file\":\"src/auth/session.ts\",\"action\":\"read\",\"allowed\":true}');"
 
-  - timestamp: "2025-01-28T10:17:00Z"
-    file: "src/api/users.ts"
-    action: write
-    allowed: false  # BLOCKED - not in scope
-    blocked_reason: "File in forbidden_directories"
-
-scope_violations:
-  - timestamp: "2025-01-28T10:17:00Z"
-    file: "src/api/users.ts"
-    attempted_action: write
-    agent: "backend-developer"
-    blocked: true
+sqlite3 "${DEVTEAM_DB:-".devteam/devteam.db"}" \
+  "INSERT INTO events (type, data) VALUES ('scope_violation', '{\"timestamp\":\"2025-01-28T10:17:00Z\",\"file\":\"src/api/users.ts\",\"attempted_action\":\"write\",\"agent\":\"backend-developer\",\"blocked\":true}');"
 ```
 
 ## Layer 6: Out-of-Scope Observations Log
@@ -347,7 +322,7 @@ Add scope constraint section to every agent.
 ### 4. Add Pre-Commit Hook
 `hooks/scope-check.sh`
 
-### 5. Update Task Orchestrator
+### 5. Update Task Loop
 - Load scope before task execution
 - Pass scope to all agents
 - Run scope validator after each change

@@ -1,5 +1,7 @@
 # Version 2.5.0 Enhancements
 
+> **Note:** This is a historical release document. References to T1/T2 tiers and T1->T2 escalation in this document reflect the system as it was at the time of this release. The T1/T2 tier system has since been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json.
+
 ## Overview
 
 Significant enhancement adding **workflow compliance validation**, **expanded worktree management**, and **improved testing requirements documentation**.

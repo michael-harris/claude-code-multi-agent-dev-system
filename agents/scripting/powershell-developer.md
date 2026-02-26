@@ -1,11 +1,16 @@
+---
+name: powershell-developer
+description: "Implements PowerShell scripts and automation"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # PowerShell Developer Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** PowerShell scripting and automation
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple scripts, basic automation
 - **Sonnet:** Complex logic, module development
 - **Opus:** Enterprise automation, critical scripts

@@ -1,10 +1,13 @@
+---
+name: developer-ruby
+description: "Implements ActiveRecord models and migrations"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Database Developer Ruby Agent
 
-**Agent ID:** `database/database-developer-ruby`
+**Agent ID:** `database:developer-ruby`
 **Category:** Database Development
-**Model:** Dynamic (assigned at runtime based on task complexity)
-
----
+**Model:** sonnet
 
 ## Purpose
 
@@ -343,7 +346,7 @@ users = UsersQuery.new
 ```yaml
 task_id: "TASK-XXX"
 type: "database_implementation"
-schema_reference: "docs/design/database/TASK-XXX-schema.yaml"
+schema_reference: "docs/design/database/TASK-XXX-schema.json"
 models:
   - name: "User"
     table: "users"
@@ -467,15 +470,15 @@ add_column :posts, :comments_count, :integer, default: 0, null: false
 ### Upstream Dependencies
 | Agent | Purpose |
 |-------|---------|
-| `database/schema-designer` | Provides schema design |
-| `orchestrator/project-manager` | Task assignment |
+| `database:designer` | Provides schema design |
+| `orchestration/sprint-orchestrator` | Task assignment |
 
 ### Downstream Consumers
 | Agent | Purpose |
 |-------|---------|
 | `backend/api-developer-ruby` | Uses models |
-| `quality/code-reviewer` | Code quality review |
-| `quality/test-runner-ruby` | Runs model specs |
+| `orchestration:code-review-coordinator` | Code quality review |
+| `quality/unit-test-writer-ruby` | Writes and runs model specs |
 
 ---
 
@@ -514,7 +517,7 @@ database_developer_ruby:
 
 ## See Also
 
-- [Schema Designer Agent](./schema-designer.md) - Database schema design
-- [Database Developer C# Agent](./database-developer-csharp.md) - C# equivalent
-- [API Developer Ruby Agent](../backend/api-developer-ruby.md) - API implementation
-- [Code Reviewer Agent](../quality/code-reviewer.md) - Code quality review
+- `database/database-designer.md` - Database schema design
+- `database/database-developer-csharp.md` - C# equivalent
+- `backend/api-developer-ruby.md` - API implementation
+- `orchestration/code-review-coordinator.md` - Code quality review

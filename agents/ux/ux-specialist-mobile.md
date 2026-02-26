@@ -1,8 +1,13 @@
+---
+name: ux-specialist-mobile
+description: "Specialized UX design for iOS and Android applications"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # UX Specialist - Mobile
 
 **Agent ID:** `ux:ux-specialist-mobile`
 **Category:** UX
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 5-8
 
 ## Purpose

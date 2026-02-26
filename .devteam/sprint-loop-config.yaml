@@ -1,0 +1,35 @@
+# DevTeam Sprint Loop Configuration
+# Referenced by: orchestration/sprint-loop.md
+# Defines sprint-level quality validation settings
+
+sprint_loop:
+  max_iterations: 3
+
+  required_checks:
+    - integration
+    - security
+    - hybrid_testing  # When frontend exists
+    - requirements
+    - workflow_compliance
+
+  optional_checks:
+    - performance
+    - documentation
+
+  conditional_checks:
+    hybrid_testing:
+      enabled_when: has_frontend
+      includes:
+        - playwright_e2e
+        - puppeteer_mcp  # When applicable
+        - visual_verification
+
+  halt_on:
+    - security_critical
+    - max_iterations
+
+  timeouts:
+    integration: 300
+    security: 180
+    performance: 180
+    requirements: 60

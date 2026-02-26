@@ -1,0 +1,31 @@
+# DevTeam Database Configuration
+# Referenced by: database/database-designer.md
+# Defines database design conventions, normalization rules, and indexing policies
+
+database_design:
+  default_database: "postgresql"
+
+  conventions:
+    primary_key: "uuid"  # uuid | auto_increment
+    naming_style: "snake_case"
+    timestamp_columns: true
+    soft_delete: true
+
+  normalization:
+    minimum_form: "3NF"
+    allow_denormalization: true
+    require_justification: true
+
+  indexing:
+    auto_index_foreign_keys: true
+    require_index_rationale: true
+    max_indexes_per_table: 10
+
+  constraints:
+    require_not_null_justification: false
+    require_check_constraints: true
+
+  audit:
+    require_created_at: true
+    require_updated_at: true
+    require_audit_tables: ["users", "orders", "payments"]

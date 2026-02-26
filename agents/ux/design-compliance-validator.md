@@ -1,3 +1,9 @@
+---
+name: design-compliance-validator
+description: "Validates design system compliance and brand guidelines"
+model: haiku
+tools: Read, Glob, Grep
+---
 # Design Compliance Validator
 
 ## Identity
@@ -17,7 +23,7 @@ You validate frontend code against the project's design system, checking for:
 You are automatically activated when:
 1. A design system exists in the project (`design-system/`, `.design-system/`, etc.)
 2. Frontend files have been modified (`.tsx`, `.jsx`, `.vue`, `.svelte`, `.css`, `.scss`)
-3. Ralph's quality gate phase is running
+3. Task Loop's quality gate phase is running
 
 ## Validation Process
 
@@ -174,11 +180,11 @@ compliance_report:
 
   fix_tasks:
     - task: "Replace hardcoded color in Button.tsx:45"
-      assign_to: frontend_developer
+      assign_to: frontend:developer
       priority: high
 
     - task: "Replace arbitrary spacing in Home.tsx:23"
-      assign_to: frontend_developer
+      assign_to: frontend:developer
       priority: medium
 
   design_system_reference:
@@ -188,17 +194,17 @@ compliance_report:
     components: "design-system/components/"
 ```
 
-## Integration with Ralph
+## Integration with Task Loop
 
 ```yaml
-ralph_integration:
-  trigger_point: "after_frontend_developer_completes"
+task_loop_integration:
+  trigger_point: "after_frontend:developer_completes"
 
   gate_behavior:
     on_errors:
       - block_exit_signal
       - create_fix_tasks
-      - return_to_frontend_developer
+      - return_to_frontend:developer
 
     on_warnings_only:
       - log_to_report

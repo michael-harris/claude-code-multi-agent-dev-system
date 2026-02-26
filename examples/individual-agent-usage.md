@@ -9,13 +9,13 @@ This guide shows how to use specific agents for targeted tasks without running f
 **Use Case:** You need to design a database schema before starting implementation.
 
 ### Agent to Use
-`database:designer` (Opus)
+`database:designer` (Sonnet)
 
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:database:designer",
-  model="opus",
+  subagent_type="database:designer",
+  model="sonnet",
   description="Design user profile schema",
   prompt=`Design a normalized database schema for user profiles with the following requirements:
 
@@ -24,50 +24,62 @@ Task(
 - Users can follow other users (many-to-many)
 - Track when relationships were created
 
-Provide the schema in YAML format following your standard output structure.`
+Provide the schema in JSON format following your standard output structure.`
 )
 ```
 
 ### Expected Output
-```yaml
-# docs/design/database/user-profile-schema.yaml
-
-tables:
-  users:
-    columns:
-      id: {type: UUID, primary: true}
-      email: {type: STRING, unique: true}
-      created_at: {type: TIMESTAMP}
-    indexes:
-      - {columns: [email], unique: true}
-
-  profiles:
-    columns:
-      id: {type: UUID, primary: true}
-      user_id: {type: UUID, foreign_key: users.id, null: false}
-      bio: {type: TEXT}
-      avatar_url: {type: STRING}
-      location: {type: STRING}
-      social_links: {type: JSONB}
-      updated_at: {type: TIMESTAMP}
-    relationships:
-      - {type: one-to-one, target: users, on_delete: CASCADE}
-    indexes:
-      - {columns: [user_id], unique: true}
-
-  user_follows:
-    columns:
-      id: {type: UUID, primary: true}
-      follower_id: {type: UUID, foreign_key: users.id}
-      following_id: {type: UUID, foreign_key: users.id}
-      created_at: {type: TIMESTAMP}
-    relationships:
-      - {type: many-to-one, target: users, foreign_key: follower_id}
-      - {type: many-to-one, target: users, foreign_key: following_id}
-    indexes:
-      - {columns: [follower_id, following_id], unique: true}
-    constraints:
-      - {type: check, condition: "follower_id != following_id"}
+```json
+// docs/design/database/user-profile-schema.json
+{
+  "tables": {
+    "users": {
+      "columns": {
+        "id": {"type": "UUID", "primary": true},
+        "email": {"type": "STRING", "unique": true},
+        "created_at": {"type": "TIMESTAMP"}
+      },
+      "indexes": [
+        {"columns": ["email"], "unique": true}
+      ]
+    },
+    "profiles": {
+      "columns": {
+        "id": {"type": "UUID", "primary": true},
+        "user_id": {"type": "UUID", "foreign_key": "users.id", "null": false},
+        "bio": {"type": "TEXT"},
+        "avatar_url": {"type": "STRING"},
+        "location": {"type": "STRING"},
+        "social_links": {"type": "JSONB"},
+        "updated_at": {"type": "TIMESTAMP"}
+      },
+      "relationships": [
+        {"type": "one-to-one", "target": "users", "on_delete": "CASCADE"}
+      ],
+      "indexes": [
+        {"columns": ["user_id"], "unique": true}
+      ]
+    },
+    "user_follows": {
+      "columns": {
+        "id": {"type": "UUID", "primary": true},
+        "follower_id": {"type": "UUID", "foreign_key": "users.id"},
+        "following_id": {"type": "UUID", "foreign_key": "users.id"},
+        "created_at": {"type": "TIMESTAMP"}
+      },
+      "relationships": [
+        {"type": "many-to-one", "target": "users", "foreign_key": "follower_id"},
+        {"type": "many-to-one", "target": "users", "foreign_key": "following_id"}
+      ],
+      "indexes": [
+        {"columns": ["follower_id", "following_id"], "unique": true}
+      ],
+      "constraints": [
+        {"type": "check", "condition": "follower_id != following_id"}
+      ]
+    }
+  }
+}
 ```
 
 ---
@@ -77,15 +89,15 @@ tables:
 **Use Case:** You have a schema design and need to implement SQLAlchemy models.
 
 ### Agent to Use
-`database:developer-python-t1` (Haiku) → Escalate to T2 if issues
+`database:developer-python` (Sonnet)
 
-### Code (T1 First)
+### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:database:developer-python-t1",
-  model="haiku",
+  subagent_type="database:developer-python",
+  model="sonnet",
   description="Implement user profile SQLAlchemy models",
-  prompt=`Implement SQLAlchemy models based on the schema design in docs/design/database/user-profile-schema.yaml
+  prompt=`Implement SQLAlchemy models based on the schema design in docs/design/database/user-profile-schema.json
 
 Requirements:
 - Use SQLAlchemy 2.0 style
@@ -101,23 +113,6 @@ Project uses:
 )
 ```
 
-### If T1 Has Issues → Escalate to T2
-```javascript
-Task(
-  subagent_type="multi-agent:database:developer-python-t2",
-  model="sonnet",
-  description="Fix complex relationship issues in models",
-  prompt=`Review and fix the SQLAlchemy models created by T1 agent.
-
-Issues identified:
-- Circular import between User and Profile models
-- user_follows self-referential relationship not properly configured
-- Missing cascade deletes on relationships
-
-Fix these issues while maintaining all other requirements.`
-)
-```
-
 ---
 
 ## Scenario 3: API Design Review
@@ -125,13 +120,13 @@ Fix these issues while maintaining all other requirements.`
 **Use Case:** You've manually written an API and want an expert review.
 
 ### Agent to Use
-`backend:api-designer` (Opus)
+`backend:api-designer` (Sonnet)
 
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:api-designer",
-  model="opus",
+  subagent_type="backend:api-designer",
+  model="sonnet",
   description="Review and improve API design",
   prompt=`Review the following API design and provide recommendations:
 
@@ -148,7 +143,7 @@ Issues I'm concerned about:
 3. How to handle unfollowing?
 4. Pagination for followers list?
 
-Provide a complete, improved API specification in YAML format.`
+Provide a complete, improved API specification in JSON format.`
 )
 ```
 
@@ -159,15 +154,15 @@ Provide a complete, improved API specification in YAML format.`
 **Use Case:** You have an API specification and need implementation.
 
 ### Agent to Use
-`backend:api-developer-python-t1` (Haiku)
+`backend:api-developer-python` (Sonnet)
 
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:api-developer-python-t1",
-  model="haiku",
+  subagent_type="backend:api-developer-python",
+  model="sonnet",
   description="Implement user profile API endpoints",
-  prompt=`Implement the following FastAPI endpoints based on docs/design/api/profile-api.yaml:
+  prompt=`Implement the following FastAPI endpoints based on docs/design/api/profile-api.json:
 
 1. POST /api/profiles - Create user profile
 2. GET /api/profiles/:user_id - Get profile
@@ -202,7 +197,7 @@ Project structure:
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:quality:security-auditor",
+  subagent_type="quality:security-auditor",
   model="opus",
   description="Security audit of authentication system",
   prompt=`Perform a comprehensive security audit of the authentication system:
@@ -286,7 +281,7 @@ async def login(credentials: LoginSchema):
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:quality:test-writer",
+  subagent_type="quality:test-writer",
   model="sonnet",
   description="Create test suite for profile API",
   prompt=`Create comprehensive tests for the profile API endpoints:
@@ -325,8 +320,8 @@ Place tests in tests/test_profiles.py and tests/test_follows.py`
 **Step 1: Design Phase**
 ```javascript
 Task(
-  subagent_type="multi-agent:frontend:designer",
-  model="opus",
+  subagent_type="frontend:designer",
+  model="sonnet",
   description="Design user profile component",
   prompt=`Design a UserProfile React component with:
 
@@ -338,17 +333,17 @@ Requirements:
 - Responsive (mobile & desktop)
 - Accessibility compliant
 
-Provide component specification in YAML format.`
+Provide component specification in JSON format.`
 )
 ```
 
-**Step 2: Implementation (T1)**
+**Step 2: Implementation**
 ```javascript
 Task(
-  subagent_type="multi-agent:frontend:developer-t1",
-  model="haiku",
+  subagent_type="frontend:developer",
+  model="sonnet",
   description="Implement UserProfile component",
-  prompt=`Implement the UserProfile component based on docs/design/frontend/user-profile-component.yaml
+  prompt=`Implement the UserProfile component based on docs/design/frontend/user-profile-component.json
 
 Requirements:
 - TypeScript + React
@@ -378,7 +373,7 @@ Create:
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:code-reviewer-python",
+  subagent_type="backend:code-reviewer-python",
   model="sonnet",
   description="Review profile management code",
   prompt=`Review the following Python files for quality and best practices:
@@ -407,15 +402,15 @@ Provide categorized issues: CRITICAL / MAJOR / MINOR`
 **Use Case:** You need a Python CLI tool for data processing.
 
 ### Agent to Use
-`python:developer-generic-t1` (Haiku)
+`python:developer-generic` (Sonnet)
 
 **Note:** Use python agents for utilities, NOT for backend API code
 
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:python:developer-generic-t1",
-  model="haiku",
+  subagent_type="python:developer-generic",
+  model="sonnet",
   description="Create user data export CLI tool",
   prompt=`Create a CLI tool that exports user data to various formats:
 
@@ -448,13 +443,13 @@ Create:
 **Use Case:** You've built features and need comprehensive documentation.
 
 ### Agent to Use
-`quality:documentation-coordinator` (Sonnet)
+`quality:documentation-coordinator` (Haiku)
 
 ### Code
 ```javascript
 Task(
-  subagent_type="multi-agent:quality:documentation-coordinator",
-  model="sonnet",
+  subagent_type="quality:documentation-coordinator",
+  model="haiku",
   description="Create complete project documentation",
   prompt=`Generate comprehensive documentation for the TaskFlow project:
 
@@ -501,10 +496,10 @@ Create:
 
 ## Best Practices for Individual Agent Usage
 
-### 1. Choose the Right Tier
-- **Start with T1 (Haiku)** for implementation agents
-- **Use Opus** for design decisions and audits
-- **Escalate to T2 (Sonnet)** only when needed
+### 1. Choose the Right Model
+- **Sonnet** for most implementation and design agents
+- **Opus** for security audits and orchestration
+- **Haiku** for documentation and simple tasks
 
 ### 2. Provide Context
 - Reference existing files
@@ -522,7 +517,7 @@ Create:
 - Review agent output
 - Provide feedback if issues found
 - Launch same agent again with specific fixes
-- Or escalate to T2 for complex issues
+- Or escalate model tier for complex issues
 
 ### 5. Use Agents Sequentially
 - Design → Implementation → Testing → Review
@@ -535,18 +530,17 @@ Create:
 
 | Scenario | Agent | Model | Approx. Cost | Time |
 |----------|-------|-------|--------------|------|
-| Schema Design | database:designer | Opus | $0.05 | 2-3 min |
-| Implement Models (T1) | database:developer-python-t1 | Haiku | $0.003 | 5-8 min |
-| Implement Models (T2) | database:developer-python-t2 | Sonnet | $0.01 | 5-8 min |
-| API Design | backend:api-designer | Opus | $0.04 | 3-5 min |
-| API Implementation (T1) | backend:api-developer-python-t1 | Haiku | $0.01 | 8-12 min |
+| Schema Design | database:designer | Sonnet | $0.03 | 2-3 min |
+| Implement Models | database:developer-python | Sonnet | $0.01 | 5-8 min |
+| API Design | backend:api-designer | Sonnet | $0.03 | 3-5 min |
+| API Implementation | backend:api-developer-python | Sonnet | $0.01 | 8-12 min |
 | Security Audit | quality:security-auditor | Opus | $0.08 | 8-10 min |
 | Write Tests | quality:test-writer | Sonnet | $0.02 | 10-15 min |
-| Frontend Design | frontend:designer | Opus | $0.03 | 3-5 min |
-| Frontend Impl (T1) | frontend:developer-t1 | Haiku | $0.01 | 10-15 min |
+| Frontend Design | frontend:designer | Sonnet | $0.02 | 3-5 min |
+| Frontend Impl | frontend:developer | Sonnet | $0.01 | 10-15 min |
 | Code Review | backend:code-reviewer-python | Sonnet | $0.02 | 5-8 min |
-| CLI Tool (T1) | python:developer-generic-t1 | Haiku | $0.005 | 8-12 min |
-| Documentation | quality:documentation-coordinator | Sonnet | $0.03 | 10-15 min |
+| CLI Tool | python:developer-generic | Sonnet | $0.005 | 8-12 min |
+| Documentation | quality:documentation-coordinator | Haiku | $0.01 | 10-15 min |
 
 **Total for all scenarios:** ~$0.30
 
@@ -577,32 +571,26 @@ Create:
 ## Quick Reference
 
 ```javascript
-// Design Agents (Opus) - Architecture & Specs
-database:designer
-backend:api-designer
-frontend:designer
+// Design Agents (Sonnet) - Architecture & Specs
+database:designer              // Sonnet
+backend:api-designer                    // Sonnet
+frontend:designer              // Sonnet
 
-// T1 Developers (Haiku) - Try First
-database:developer-{python,typescript}-t1
-backend:api-developer-{python,typescript}-t1
-frontend:developer-t1
-python:developer-generic-t1
+// Implementation Agents (Sonnet) - Feature Development
+database:developer-{python,typescript,java,go,ruby,php,csharp}
+backend:api-developer-{python,typescript,java,go,ruby,php,csharp}
+frontend:developer
+python:developer-generic
 
-// T2 Developers (Sonnet) - Complex Cases
-database:developer-{python,typescript}-t2
-backend:api-developer-{python,typescript}-t2
-frontend:developer-t2
-python:developer-generic-t2
-
-// Quality & Review (Sonnet/Opus)
-quality:test-writer                    // Sonnet
-quality:security-auditor               // Opus
-quality:documentation-coordinator      // Sonnet
-backend:code-reviewer-{python,typescript}  // Sonnet
-frontend:code-reviewer                 // Sonnet
+// Quality & Review (Haiku/Sonnet/Opus)
+quality:test-writer                     // Sonnet
+quality:security-auditor                // Opus
+quality:documentation-coordinator       // Haiku
+backend:code-reviewer-{python,typescript,java,go,ruby,php,csharp}  // Sonnet
+frontend:code-reviewer         // Sonnet
 
 // Orchestration (Sonnet/Opus)
-orchestration:task-orchestrator        // Sonnet
-orchestration:sprint-orchestrator      // Opus
-orchestration:requirements-validator   // Opus
+orchestration:task-loop                 // Opus
+orchestration:sprint-orchestrator       // Opus
+orchestration:requirements-validator    // Opus
 ```

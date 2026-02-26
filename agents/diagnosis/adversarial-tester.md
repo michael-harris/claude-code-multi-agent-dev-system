@@ -1,6 +1,12 @@
+---
+name: adversarial-tester
+description: "Bug Council member - Edge cases, security vulnerabilities, attack vectors"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Adversarial Tester Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Role:** Bug Council Member
 **Purpose:** Find edge cases and related failure modes
 

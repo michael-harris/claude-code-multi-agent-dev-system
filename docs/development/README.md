@@ -1,5 +1,7 @@
 # Development History Archive
 
+> **Note:** Documents in this directory are historical. References to the T1/T2 tier system have been superseded by explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Escalation is now handled by orchestrator agents via LLM instructions.
+
 This directory contains archived development documents from the creation and evolution of the claude-devteam plugin.
 
 ## Purpose
@@ -66,7 +68,7 @@ If you're using this plugin, you **don't need to read these files**. They're pre
 
 If you're contributing to this plugin, these documents provide valuable context on:
 - Why certain architectural decisions were made
-- How the T1/T2 tier system was designed
+- How the original T1/T2 tier system was designed (now replaced with explicit haiku/sonnet/opus model assignments)
 - Model assignment rationale
 - Quality gate design philosophy
 - Cost optimization strategies

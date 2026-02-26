@@ -1,200 +1,290 @@
 # DevTeam Scope Check Hook (PowerShell)
-# Validates that commits stay within assigned task scope
+# Validates git commits against task scope
 #
 # Exit codes:
-#   0 = All changes within scope, commit allowed
-#   1 = Scope violation detected, commit blocked
+#   0 = Commit allowed
+#   1 = Commit blocked (scope violation)
 
 $ErrorActionPreference = "Stop"
 
-# Configuration
-$CURRENT_TASK_FILE = ".devteam\current-task.txt"
-$TASKS_DIR = "docs\planning\tasks"
+# Source common library
+. "$PSScriptRoot\lib\hook-common.ps1"
 
-# Logging function
-function Write-Log {
-    param([string]$Message)
-    Write-Host "[Scope Check] $Message"
-}
+Initialize-Hook "scope-check"
 
-# Get current task ID
-if (-not (Test-Path $CURRENT_TASK_FILE)) {
-    Write-Log "No current task file found. Skipping scope check."
-    exit 0
-}
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
 
-$TASK_ID = (Get-Content $CURRENT_TASK_FILE -Raw).Trim()
-if ([string]::IsNullOrEmpty($TASK_ID)) {
-    Write-Log "No task ID found. Skipping scope check."
-    exit 0
-}
+$CURRENT_TASK_FILE = Join-Path $script:DEVTEAM_DIR "current-task.txt"
 
-Write-Log "Checking scope for task: $TASK_ID"
+# ============================================================================
+# SENSITIVE FILE PATTERNS
+# ============================================================================
 
-# Find task definition file
-$TASK_FILE = Join-Path $TASKS_DIR "$TASK_ID.yaml"
-if (-not (Test-Path $TASK_FILE)) {
-    Write-Log "Task file not found: $TASK_FILE. Skipping scope check."
-    exit 0
-}
+$SENSITIVE_PATTERNS = @(
+    ".env",
+    ".env.*",
+    "*.env",
+    "*credentials*",
+    "*secret*",
+    "*password*",
+    "*.pem",
+    "*.key",
+    "*.p12",
+    "*.pfx",
+    "*token*",
+    ".aws\*",
+    ".ssh\*",
+    "*_rsa",
+    "*_dsa",
+    "*_ecdsa",
+    "*_ed25519",
+    "id_rsa*",
+    "*.keystore",
+    "*.jks"
+)
 
-# Parse task file for scope (simple YAML parsing)
-$taskContent = Get-Content $TASK_FILE -Raw
+# ============================================================================
+# GET TASK SCOPE
+# ============================================================================
 
-# Extract scope section
-$inScope = $false
-$allowedFiles = @()
-$allowedPatterns = @()
-$forbiddenFiles = @()
-$forbiddenDirectories = @()
+function Get-TaskScope {
+    param([string]$TaskId)
 
-foreach ($line in (Get-Content $TASK_FILE)) {
-    if ($line -match "^scope:") {
-        $inScope = $true
-        continue
-    }
-
-    if ($inScope) {
-        # Check for end of scope section (non-indented line)
-        if ($line -match "^[a-z]" -and $line -notmatch "^\s") {
-            $inScope = $false
-            continue
-        }
-
-        # Parse allowed_files
-        if ($line -match '^\s+allowed_files:') {
-            $currentList = "allowed_files"
-            continue
-        }
-        if ($line -match '^\s+allowed_patterns:') {
-            $currentList = "allowed_patterns"
-            continue
-        }
-        if ($line -match '^\s+forbidden_files:') {
-            $currentList = "forbidden_files"
-            continue
-        }
-        if ($line -match '^\s+forbidden_directories:') {
-            $currentList = "forbidden_directories"
-            continue
-        }
-
-        # Parse list items
-        if ($line -match '^\s+-\s+"?([^"]+)"?') {
-            $item = $matches[1]
-            switch ($currentList) {
-                "allowed_files" { $allowedFiles += $item }
-                "allowed_patterns" { $allowedPatterns += $item }
-                "forbidden_files" { $forbiddenFiles += $item }
-                "forbidden_directories" { $forbiddenDirectories += $item }
-            }
-        }
-    }
-}
-
-# If no scope defined, allow all
-if ($allowedFiles.Count -eq 0 -and $allowedPatterns.Count -eq 0) {
-    Write-Log "No scope restrictions defined. Allowing commit."
-    exit 0
-}
-
-# Get staged files
-$stagedFiles = git diff --cached --name-only 2>$null
-if ([string]::IsNullOrEmpty($stagedFiles)) {
-    Write-Log "No staged files. Allowing commit."
-    exit 0
-}
-
-$stagedFileList = $stagedFiles -split "`n" | Where-Object { $_ }
-
-# Check each staged file against scope
-$violations = @()
-
-foreach ($file in $stagedFileList) {
-    $isAllowed = $false
-
-    # Check forbidden directories first
-    foreach ($forbiddenDir in $forbiddenDirectories) {
-        $normalizedDir = $forbiddenDir.TrimEnd('/\')
-        # Only match files within the directory (require path separator after directory name)
-        if ($file -eq $normalizedDir -or $file -like "$normalizedDir\*" -or $file -like "$normalizedDir/*") {
-            $violations += "FORBIDDEN DIRECTORY: $file (in $forbiddenDir)"
-            continue
+    # Try database first
+    if (Test-DatabaseExists) {
+        $scope = Invoke-DbQuery "SELECT scope_files FROM tasks WHERE id = '$TaskId';"
+        if ($scope) {
+            return $scope -split ','
         }
     }
 
-    # Check forbidden files
-    foreach ($forbiddenFile in $forbiddenFiles) {
-        if ($file -eq $forbiddenFile) {
-            $violations += "FORBIDDEN FILE: $file"
-            continue
-        }
-    }
+    # Try task file (JSON format)
+    $taskDirs = @("docs\planning\tasks", "docs\tasks", ".devteam\tasks")
+    $taskFile = $null
 
-    # Check allowed files (exact match)
-    foreach ($allowedFile in $allowedFiles) {
-        if ($file -eq $allowedFile) {
-            $isAllowed = $true
+    foreach ($dir in $taskDirs) {
+        $path = Join-Path $script:DEVTEAM_ROOT $dir "$TaskId.json"
+        if (Test-Path $path) {
+            $taskFile = $path
             break
         }
     }
 
-    # Check allowed patterns (glob-style)
-    if (-not $isAllowed) {
-        foreach ($pattern in $allowedPatterns) {
-            # Convert glob to PowerShell wildcard
-            $psPattern = $pattern -replace '\*\*', '**DOUBLESTAR**'
-            $psPattern = $psPattern -replace '\*', '*'
-            $psPattern = $psPattern -replace '\*\*DOUBLESTAR\*\*', '*'
+    if (-not $taskFile) { return @() }
 
-            if ($file -like $psPattern) {
-                $isAllowed = $true
+    # Parse JSON for scope
+    $scope = @()
+    $json = Get-Content $taskFile -Raw | ConvertFrom-Json
+
+    if ($json.scope) {
+        if ($json.scope.allowed_files) {
+            foreach ($f in $json.scope.allowed_files) { $scope += "+$f" }
+        }
+        if ($json.scope.allowed_patterns) {
+            foreach ($p in $json.scope.allowed_patterns) { $scope += "+$p" }
+        }
+        if ($json.scope.forbidden_files) {
+            foreach ($f in $json.scope.forbidden_files) { $scope += "-$f" }
+        }
+        if ($json.scope.forbidden_directories) {
+            foreach ($d in $json.scope.forbidden_directories) { $scope += "!$d" }
+        }
+    }
+
+    return $scope
+}
+
+# ============================================================================
+# SCOPE VALIDATION
+# ============================================================================
+
+function Test-FileAgainstScope {
+    param(
+        [string]$File,
+        [array]$Scope
+    )
+
+    $allowedFound = $false
+    $forbiddenMatch = $null
+
+    foreach ($line in $Scope) {
+        if (-not $line) { continue }
+
+        $prefix = $line.Substring(0,1)
+        $pattern = $line.Substring(1)
+
+        switch ($prefix) {
+            "+" {
+                # Allowed pattern
+                $regex = $pattern -replace '\*\*', '.*' -replace '\*', '[^/\\]*'
+                if ($File -eq $pattern -or $File -match "^$regex$") {
+                    $allowedFound = $true
+                }
+            }
+            "-" {
+                # Forbidden file
+                if ($File -eq $pattern) {
+                    $forbiddenMatch = "Explicitly forbidden file"
+                }
+            }
+            "!" {
+                # Forbidden directory
+                $normalizedDir = $pattern.TrimEnd('/\')
+                if ($File -like "$normalizedDir\*" -or $File -like "$normalizedDir/*") {
+                    $forbiddenMatch = "In forbidden directory: $pattern"
+                }
+            }
+        }
+    }
+
+    if ($forbiddenMatch) {
+        return @{ Allowed = $false; Reason = $forbiddenMatch }
+    }
+
+    $hasAllowedRules = ($Scope | Where-Object { $_.StartsWith("+") }).Count -gt 0
+    if ($hasAllowedRules) {
+        if ($allowedFound) {
+            return @{ Allowed = $true; Reason = $null }
+        } else {
+            return @{ Allowed = $false; Reason = "Not in allowed_files or allowed_patterns" }
+        }
+    }
+
+    return @{ Allowed = $true; Reason = $null }
+}
+
+# ============================================================================
+# SENSITIVE FILE CHECK
+# ============================================================================
+
+function Test-SensitiveFiles {
+    param([array]$Files)
+
+    $warnings = @()
+
+    foreach ($file in $Files) {
+        foreach ($pattern in $SENSITIVE_PATTERNS) {
+            if ($file -like $pattern -or (Split-Path $file -Leaf) -like $pattern) {
+                $warnings += $file
                 break
             }
         }
     }
 
-    # If not explicitly allowed and we have scope restrictions, it's a violation
-    if (-not $isAllowed -and ($allowedFiles.Count -gt 0 -or $allowedPatterns.Count -gt 0)) {
-        # Check if it wasn't already flagged as forbidden
-        $alreadyViolation = $violations | Where-Object { $_ -match [regex]::Escape($file) }
-        if (-not $alreadyViolation) {
-            $violations += "OUT OF SCOPE: $file"
+    if ($warnings.Count -gt 0) {
+        Write-HookWarn "scope-check" "Sensitive files in commit: $($warnings -join ', ')"
+        Write-Host ""
+        Write-Host "WARNING: Potentially sensitive files detected:" -ForegroundColor Yellow
+        foreach ($file in $warnings) {
+            Write-Host "  ! $file" -ForegroundColor Yellow
         }
+        Write-Host ""
+        Write-Host "Please verify these files don't contain secrets."
+        Write-Host ""
     }
 }
+
+# ============================================================================
+# MAIN EXECUTION
+# ============================================================================
+
+# Get current task ID
+$taskId = $null
+if (Test-Path $CURRENT_TASK_FILE) {
+    $taskId = (Get-Content $CURRENT_TASK_FILE -Raw).Trim()
+}
+
+if (-not $taskId) {
+    Write-Host "! No task context found. Scope check skipped." -ForegroundColor Yellow
+    exit 0
+}
+
+Write-HookDebug "scope-check" "Checking scope for task: $taskId"
+
+# Get scope
+$scope = Get-TaskScope $taskId
+
+if ($scope.Count -eq 0) {
+    Write-Host "! No scope defined for task $taskId. Scope check skipped." -ForegroundColor Yellow
+    exit 0
+}
+
+Write-Host "Checking scope for task: $taskId"
+Write-Host ""
+
+# Get staged files
+$stagedFiles = git diff --cached --name-only --diff-filter=ACMR 2>$null
+if (-not $stagedFiles) {
+    Write-Host "No files staged for commit." -ForegroundColor Green
+    exit 0
+}
+
+$stagedFileList = $stagedFiles -split "`n" | Where-Object { $_ }
+
+# Check sensitive files
+Test-SensitiveFiles $stagedFileList
+
+# Track violations
+$violations = @()
+$fileCount = 0
+
+foreach ($file in $stagedFileList) {
+    $fileCount++
+    $result = Test-FileAgainstScope $file $scope
+
+    if ($result.Allowed) {
+        Write-Host "  ok $file" -ForegroundColor Green
+    } else {
+        $violations += @{ File = $file; Reason = $result.Reason }
+        Write-Host "  X $file" -ForegroundColor Red
+        Write-Host "      Reason: $($result.Reason)"
+    }
+}
+
+Write-Host ""
 
 # Report results
 if ($violations.Count -gt 0) {
-    Write-Log "========================================"
-    Write-Log "SCOPE VIOLATION DETECTED - COMMIT BLOCKED"
-    Write-Log "========================================"
-    Write-Log ""
-    Write-Log "Task: $TASK_ID"
-    Write-Log ""
-    Write-Log "Violations:"
+    Write-HookError "scope-check" "$($violations.Count) scope violations"
+    Write-EventToDb "scope_violation" "error" "Commit blocked: $($violations.Count) out-of-scope files"
+
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host "  SCOPE VIOLATION - COMMIT BLOCKED" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Task: $taskId"
+    Write-Host "Violations: $($violations.Count)"
+    Write-Host ""
+    Write-Host "Out-of-scope changes:"
     foreach ($v in $violations) {
-        Write-Log "  - $v"
+        Write-Host "  X $($v.File)" -ForegroundColor Red
+        Write-Host "      $($v.Reason)"
     }
-    Write-Log ""
-    Write-Log "Allowed files:"
-    foreach ($f in $allowedFiles) {
-        Write-Log "  - $f"
+    Write-Host ""
+    Write-Host "To fix:"
+    Write-Host "  1. Revert out-of-scope files:"
+    foreach ($v in $violations) {
+        Write-Host "     git checkout -- $($v.File)"
     }
-    Write-Log ""
-    Write-Log "Allowed patterns:"
-    foreach ($p in $allowedPatterns) {
-        Write-Log "  - $p"
-    }
-    Write-Log ""
-    Write-Log "To proceed, either:"
-    Write-Log "  1. Unstage the out-of-scope files"
-    Write-Log "  2. Update the task scope in $TASK_FILE"
-    Write-Log "  3. Log observations to .devteam\out-of-scope-observations.md"
-    Write-Log ""
+    Write-Host ""
+    Write-Host "  2. Or update task scope if changes are truly required"
+    Write-Host ""
 
+    $safeTaskId = ConvertTo-SafeJsonString $taskId
+    Send-McpNotification "scope_violation" "{`"task`": `"$safeTaskId`", `"violations`": $($violations.Count)}"
     exit 1
-}
+} else {
+    Write-HookInfo "scope-check" "Commit scope validated: $fileCount files"
 
-Write-Log "All $($stagedFileList.Count) staged files are within scope. Commit allowed."
-exit 0
+    Write-Host "========================================" -ForegroundColor Green
+    Write-Host "  SCOPE CHECK PASSED" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "All $fileCount files are within task scope."
+
+    $safeTaskId = ConvertTo-SafeJsonString $taskId
+    Send-McpNotification "commit_validated" "{`"task`": `"$safeTaskId`", `"files`": $fileCount}"
+    exit 0
+}

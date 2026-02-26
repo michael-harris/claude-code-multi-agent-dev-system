@@ -1,8 +1,13 @@
+---
+name: designer
+description: "Designs UI/UX with component specifications"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Frontend Designer Agent
 
 **Agent ID:** `frontend:designer`
 **Category:** Frontend / Architecture
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ## Purpose
 
@@ -192,7 +197,7 @@ input:
 
 ```yaml
 output:
-  component_specs: string             # Path to YAML specs
+  component_specs: string             # Path to JSON specs
   state_diagram: string               # Path to state diagram
   data_flow_diagram: string           # Path to data flow diagram
   documentation:
@@ -203,265 +208,289 @@ output:
 
 ## Output Format (Component Specs)
 
-Generate `docs/design/frontend/TASK-XXX-components.yaml`:
+Generate `docs/design/frontend/TASK-XXX-components.json`:
 
-```yaml
-feature:
-  name: "User Authentication"
-  version: "1.0.0"
-  description: "Login, registration, and password recovery flows"
-
-components:
-  # ATOMS
-  Button:
-    level: atom
-    description: "Reusable button component with variants"
-    props:
-      variant:
-        type: "'primary' | 'secondary' | 'ghost' | 'danger'"
-        required: false
-        default: "'primary'"
-      size:
-        type: "'sm' | 'md' | 'lg'"
-        required: false
-        default: "'md'"
-      disabled:
-        type: boolean
-        required: false
-        default: false
-      loading:
-        type: boolean
-        required: false
-        default: false
-      type:
-        type: "'button' | 'submit' | 'reset'"
-        required: false
-        default: "'button'"
-      onClick:
-        type: "() => void"
-        required: false
-    accessibility:
-      - "aria-disabled when loading or disabled"
-      - "aria-busy when loading"
-      - "Focus visible indicator"
-      - "Keyboard activation with Enter/Space"
-
-  Input:
-    level: atom
-    description: "Text input with validation support"
-    props:
-      type:
-        type: "'text' | 'email' | 'password' | 'number'"
-        default: "'text'"
-      value:
-        type: string
-        required: true
-      onChange:
-        type: "(value: string) => void"
-        required: true
-      placeholder:
-        type: string
-        required: false
-      error:
-        type: string
-        required: false
-      disabled:
-        type: boolean
-        default: false
-    accessibility:
-      - "aria-invalid when error present"
-      - "aria-describedby for error message"
-      - "Associated label required"
-
-  # MOLECULES
-  FormField:
-    level: molecule
-    description: "Label, input, and error message combination"
-    composition:
-      - Label
-      - Input
-      - ErrorMessage
-    props:
-      label:
-        type: string
-        required: true
-      name:
-        type: string
-        required: true
-      type:
-        type: string
-        default: "'text'"
-      value:
-        type: string
-        required: true
-      onChange:
-        type: "(value: string) => void"
-        required: true
-      error:
-        type: string
-        required: false
-      required:
-        type: boolean
-        default: false
-    accessibility:
-      - "Label associated via htmlFor"
-      - "Required indicator (*) with sr-only text"
-      - "Error announced via aria-live"
-
-  # ORGANISMS
-  LoginForm:
-    level: organism
-    description: "Complete login form with validation"
-    composition:
-      - FormField (email)
-      - FormField (password)
-      - Button (submit)
-      - Link (forgot password)
-      - Link (register)
-    props:
-      onSubmit:
-        type: "(credentials: LoginCredentials) => Promise<void>"
-        required: true
-      initialEmail:
-        type: string
-        required: false
-      isLoading:
-        type: boolean
-        default: false
-      error:
-        type: string
-        required: false
-    state:
-      local:
-        - email: string
-        - password: string
-        - errors: ValidationErrors
-        - touched: TouchedFields
-    features:
-      - Email/password inputs with validation
-      - Validation on blur and submit
-      - Loading state during submission
-      - Error display from API
-      - Password visibility toggle
-    accessibility:
-      - "Form submit on Enter key"
-      - "Focus on first error field after validation failure"
-      - "aria-label on form element"
-      - "Loading state announced"
-      - "Error message announced via aria-live"
-    validation:
-      email:
-        - required: "Email is required"
-        - format: "Please enter a valid email"
-      password:
-        - required: "Password is required"
-        - minLength: "Password must be at least 8 characters"
-
-state_management:
-  strategy: "React Query + Context"
-  rationale: "Server state via React Query, auth state via Context"
-
-  contexts:
-    AuthContext:
-      description: "Authentication state and methods"
-      state:
-        user: "User | null"
-        isAuthenticated: boolean
-        isLoading: boolean
-      methods:
-        login: "(credentials: Credentials) => Promise<void>"
-        logout: "() => Promise<void>"
-        refreshToken: "() => Promise<void>"
-      provider_location: "_app.tsx or layout.tsx"
-
-  server_state:
-    useLoginMutation:
-      description: "Login API mutation"
-      query_key: "['auth', 'login']"
-      endpoint: "POST /api/auth/login"
-      on_success: "Update AuthContext, redirect to dashboard"
-      on_error: "Display error message"
-
-data_flow:
-  LoginPage:
-    description: "Data flow for login page"
-    diagram: |
-      ┌─────────────────────────────────────────────────────────┐
-      │                      LoginPage                           │
-      │  ┌─────────────────────────────────────────────────┐    │
-      │  │                AuthLayout                        │    │
-      │  │  ┌─────────────────────────────────────────┐    │    │
-      │  │  │              LoginForm                   │    │    │
-      │  │  │                                          │    │    │
-      │  │  │  [email state] ──► FormField             │    │    │
-      │  │  │  [password state] ──► FormField          │    │    │
-      │  │  │                                          │    │    │
-      │  │  │  onSubmit ──► useLoginMutation           │    │    │
-      │  │  │                    │                     │    │    │
-      │  │  │                    ▼                     │    │    │
-      │  │  │              API: /auth/login            │    │    │
-      │  │  │                    │                     │    │    │
-      │  │  │         ┌─────────┴─────────┐           │    │    │
-      │  │  │         ▼                   ▼           │    │    │
-      │  │  │     Success              Error          │    │    │
-      │  │  │         │                   │           │    │    │
-      │  │  │         ▼                   ▼           │    │    │
-      │  │  │   AuthContext.login    Show error       │    │    │
-      │  │  │         │                               │    │    │
-      │  │  │         ▼                               │    │    │
-      │  │  │   Redirect to /dashboard                │    │    │
-      │  │  └─────────────────────────────────────────┘    │    │
-      │  └─────────────────────────────────────────────────┘    │
-      └─────────────────────────────────────────────────────────┘
-
-responsive_design:
-  breakpoints:
-    sm: "640px"
-    md: "768px"
-    lg: "1024px"
-    xl: "1280px"
-  approach: "Mobile-first"
-  component_adaptations:
-    LoginForm:
-      mobile: "Full-width, stacked fields"
-      tablet: "Centered card, max-width 400px"
-      desktop: "Same as tablet"
-
-styling:
-  approach: "Tailwind CSS"
-  design_system: "Custom with Tailwind"
-  theme:
-    colors:
-      primary: "Blue scale"
-      error: "Red scale"
-      success: "Green scale"
-    typography:
-      font_family: "Inter"
-      scale: "Tailwind defaults"
-
-testing_requirements:
-  unit:
-    - "FormField validation logic"
-    - "Button states and variants"
-  integration:
-    - "LoginForm submission flow"
-    - "Error handling"
-  e2e:
-    - "Complete login flow"
-    - "Validation errors"
-  accessibility:
-    - "Keyboard navigation"
-    - "Screen reader announcement"
+```json
+{
+  "feature": {
+    "name": "User Authentication",
+    "version": "1.0.0",
+    "description": "Login, registration, and password recovery flows"
+  },
+  "components": {
+    "Button": {
+      "level": "atom",
+      "description": "Reusable button component with variants",
+      "props": {
+        "variant": {
+          "type": "'primary' | 'secondary' | 'ghost' | 'danger'",
+          "required": false,
+          "default": "'primary'"
+        },
+        "size": {
+          "type": "'sm' | 'md' | 'lg'",
+          "required": false,
+          "default": "'md'"
+        },
+        "disabled": {
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "loading": {
+          "type": "boolean",
+          "required": false,
+          "default": false
+        },
+        "type": {
+          "type": "'button' | 'submit' | 'reset'",
+          "required": false,
+          "default": "'button'"
+        },
+        "onClick": {
+          "type": "() => void",
+          "required": false
+        }
+      },
+      "accessibility": [
+        "aria-disabled when loading or disabled",
+        "aria-busy when loading",
+        "Focus visible indicator",
+        "Keyboard activation with Enter/Space"
+      ]
+    },
+    "Input": {
+      "level": "atom",
+      "description": "Text input with validation support",
+      "props": {
+        "type": {
+          "type": "'text' | 'email' | 'password' | 'number'",
+          "default": "'text'"
+        },
+        "value": {
+          "type": "string",
+          "required": true
+        },
+        "onChange": {
+          "type": "(value: string) => void",
+          "required": true
+        },
+        "placeholder": {
+          "type": "string",
+          "required": false
+        },
+        "error": {
+          "type": "string",
+          "required": false
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "accessibility": [
+        "aria-invalid when error present",
+        "aria-describedby for error message",
+        "Associated label required"
+      ]
+    },
+    "FormField": {
+      "level": "molecule",
+      "description": "Label, input, and error message combination",
+      "composition": ["Label", "Input", "ErrorMessage"],
+      "props": {
+        "label": {
+          "type": "string",
+          "required": true
+        },
+        "name": {
+          "type": "string",
+          "required": true
+        },
+        "type": {
+          "type": "string",
+          "default": "'text'"
+        },
+        "value": {
+          "type": "string",
+          "required": true
+        },
+        "onChange": {
+          "type": "(value: string) => void",
+          "required": true
+        },
+        "error": {
+          "type": "string",
+          "required": false
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "accessibility": [
+        "Label associated via htmlFor",
+        "Required indicator (*) with sr-only text",
+        "Error announced via aria-live"
+      ]
+    },
+    "LoginForm": {
+      "level": "organism",
+      "description": "Complete login form with validation",
+      "composition": [
+        "FormField (email)",
+        "FormField (password)",
+        "Button (submit)",
+        "Link (forgot password)",
+        "Link (register)"
+      ],
+      "props": {
+        "onSubmit": {
+          "type": "(credentials: LoginCredentials) => Promise<void>",
+          "required": true
+        },
+        "initialEmail": {
+          "type": "string",
+          "required": false
+        },
+        "isLoading": {
+          "type": "boolean",
+          "default": false
+        },
+        "error": {
+          "type": "string",
+          "required": false
+        }
+      },
+      "state": {
+        "local": [
+          {"email": "string"},
+          {"password": "string"},
+          {"errors": "ValidationErrors"},
+          {"touched": "TouchedFields"}
+        ]
+      },
+      "features": [
+        "Email/password inputs with validation",
+        "Validation on blur and submit",
+        "Loading state during submission",
+        "Error display from API",
+        "Password visibility toggle"
+      ],
+      "accessibility": [
+        "Form submit on Enter key",
+        "Focus on first error field after validation failure",
+        "aria-label on form element",
+        "Loading state announced",
+        "Error message announced via aria-live"
+      ],
+      "validation": {
+        "email": [
+          {"required": "Email is required"},
+          {"format": "Please enter a valid email"}
+        ],
+        "password": [
+          {"required": "Password is required"},
+          {"minLength": "Password must be at least 8 characters"}
+        ]
+      }
+    }
+  },
+  "state_management": {
+    "strategy": "React Query + Context",
+    "rationale": "Server state via React Query, auth state via Context",
+    "contexts": {
+      "AuthContext": {
+        "description": "Authentication state and methods",
+        "state": {
+          "user": "User | null",
+          "isAuthenticated": "boolean",
+          "isLoading": "boolean"
+        },
+        "methods": {
+          "login": "(credentials: Credentials) => Promise<void>",
+          "logout": "() => Promise<void>",
+          "refreshToken": "() => Promise<void>"
+        },
+        "provider_location": "_app.tsx or layout.tsx"
+      }
+    },
+    "server_state": {
+      "useLoginMutation": {
+        "description": "Login API mutation",
+        "query_key": "['auth', 'login']",
+        "endpoint": "POST /api/auth/login",
+        "on_success": "Update AuthContext, redirect to dashboard",
+        "on_error": "Display error message"
+      }
+    }
+  },
+  "data_flow": {
+    "LoginPage": {
+      "description": "Data flow for login page",
+      "diagram": "LoginPage > AuthLayout > LoginForm > [email/password state] > FormField; onSubmit > useLoginMutation > API: /auth/login > Success: AuthContext.login > Redirect to /dashboard | Error: Show error"
+    }
+  },
+  "responsive_design": {
+    "breakpoints": {
+      "sm": "640px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px"
+    },
+    "approach": "Mobile-first",
+    "component_adaptations": {
+      "LoginForm": {
+        "mobile": "Full-width, stacked fields",
+        "tablet": "Centered card, max-width 400px",
+        "desktop": "Same as tablet"
+      }
+    }
+  },
+  "styling": {
+    "approach": "Tailwind CSS",
+    "design_system": "Custom with Tailwind",
+    "theme": {
+      "colors": {
+        "primary": "Blue scale",
+        "error": "Red scale",
+        "success": "Green scale"
+      },
+      "typography": {
+        "font_family": "Inter",
+        "scale": "Tailwind defaults"
+      }
+    }
+  },
+  "testing_requirements": {
+    "unit": [
+      "FormField validation logic",
+      "Button states and variants"
+    ],
+    "integration": [
+      "LoginForm submission flow",
+      "Error handling"
+    ],
+    "e2e": [
+      "Complete login flow",
+      "Validation errors"
+    ],
+    "accessibility": [
+      "Keyboard navigation",
+      "Screen reader announcement"
+    ]
+  }
+}
 ```
 
 ## Integration with Other Agents
 
 ```yaml
 collaborates_with:
-  - agent: "frontend:frontend-developer"
+  - agent: "frontend:developer"
     interaction: "Hands off specs for implementation"
 
-  - agent: "frontend:frontend-code-reviewer"
+  - agent: "frontend:code-reviewer"
     interaction: "Specs inform code review expectations"
 
   - agent: "ux:design-system-architect"

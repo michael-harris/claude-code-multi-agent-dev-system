@@ -31,7 +31,7 @@ Create an OpenAPI 3.0 specification BEFORE any implementation. Both backend and 
 ### Step 1: Generate PRD with API-First Requirements
 
 ```bash
-/prd
+/devteam:plan
 ```
 
 **When prompted, specify:**
@@ -78,154 +78,184 @@ features:
 ### Step 2: Run Planning with API-First Task Structure
 
 ```bash
-/planning
+/devteam:plan
 ```
 
 The planning phase will create tasks with proper dependencies:
 
 #### Expected Task Structure
 
-```yaml
-# docs/planning/tasks/TASK-001.yaml
-id: TASK-001
-title: Design Complete API Specification
-description: Create OpenAPI 3.0 spec for entire application
-agent: backend:api-designer
-dependencies: []  # Runs FIRST - no dependencies
-priority: critical
-acceptance_criteria:
-  - OpenAPI 3.0 spec created at docs/api/openapi.yaml
-  - All endpoints documented with full schemas
-  - Authentication flow defined (JWT)
-  - Error response formats standardized (400, 401, 404, 500)
-  - Request/response examples included
-  - Pagination pattern defined
-  - Passes openapi-spec-validator
-deliverables:
-  - docs/api/openapi.yaml
-  - docs/api/API_DESIGN_DECISIONS.md
+```json
+// docs/planning/tasks/TASK-001.json
+{
+  "id": "TASK-001",
+  "title": "Design Complete API Specification",
+  "description": "Create OpenAPI 3.0 spec for entire application",
+  "agent": "backend:api-designer",
+  "dependencies": [],
+  "priority": "critical",
+  "acceptance_criteria": [
+    "OpenAPI 3.0 spec created at docs/api/openapi.yaml",
+    "All endpoints documented with full schemas",
+    "Authentication flow defined (JWT)",
+    "Error response formats standardized (400, 401, 404, 500)",
+    "Request/response examples included",
+    "Pagination pattern defined",
+    "Passes openapi-spec-validator"
+  ],
+  "deliverables": [
+    "docs/api/openapi.yaml",
+    "docs/api/API_DESIGN_DECISIONS.md"
+  ]
+}
+```
 
----
+```json
+// docs/planning/tasks/TASK-002.json
+{
+  "id": "TASK-002",
+  "title": "Design Database Schema",
+  "description": "Design PostgreSQL schema based on API data models",
+  "agent": "database:designer",
+  "dependencies": ["TASK-001"],
+  "acceptance_criteria": [
+    "Schema matches data models in openapi.yaml",
+    "Proper indexes for API query patterns",
+    "Foreign keys for relationships"
+  ],
+  "deliverables": [
+    "docs/design/database/schema.json"
+  ]
+}
+```
 
-# docs/planning/tasks/TASK-002.yaml
-id: TASK-002
-title: Design Database Schema
-description: Design PostgreSQL schema based on API data models
-agent: database:designer
-dependencies: [TASK-001]  # Waits for API spec
-acceptance_criteria:
-  - Schema matches data models in openapi.yaml
-  - Proper indexes for API query patterns
-  - Foreign keys for relationships
-deliverables:
-  - docs/design/database/schema.yaml
+```json
+// docs/planning/tasks/TASK-003.json
+{
+  "id": "TASK-003",
+  "title": "Implement Database Models",
+  "description": "Implement SQLAlchemy models from schema",
+  "agent": "database:developer-python",
+  "dependencies": ["TASK-002"],
+  "acceptance_criteria": [
+    "Models match database schema design",
+    "Alembic migrations created",
+    "Models align with API response schemas"
+  ],
+  "deliverables": [
+    "backend/models/*.py",
+    "alembic/versions/*.py"
+  ]
+}
+```
 
----
+```json
+// docs/planning/tasks/TASK-004.json
+{
+  "id": "TASK-004",
+  "title": "Implement Backend API",
+  "description": "Implement FastAPI endpoints from OpenAPI spec",
+  "agent": "backend:api-developer-python",
+  "dependencies": ["TASK-001", "TASK-003"],
+  "acceptance_criteria": [
+    "Implements ALL endpoints from docs/api/openapi.yaml",
+    "Exact request/response schemas match spec",
+    "Pydantic models generated from OpenAPI schemas",
+    "FastAPI auto-validates against spec",
+    "/docs endpoint serves the specification",
+    "Passes openapi-spec-validator",
+    "NO endpoints not in spec",
+    "NO schema deviations from spec"
+  ],
+  "validation": [
+    "Run: openapi-spec-validator docs/api/openapi.yaml",
+    "Run: pytest tests/test_api_compliance.py",
+    "Verify: curl http://localhost:8000/docs matches spec"
+  ],
+  "deliverables": [
+    "backend/routes/*.py",
+    "backend/schemas/*.py",
+    "tests/test_api_compliance.py"
+  ]
+}
+```
 
-# docs/planning/tasks/TASK-003.yaml
-id: TASK-003
-title: Implement Database Models
-description: Implement SQLAlchemy models from schema
-agent: database:developer-python-t1
-dependencies: [TASK-002]
-acceptance_criteria:
-  - Models match database schema design
-  - Alembic migrations created
-  - Models align with API response schemas
-deliverables:
-  - backend/models/*.py
-  - alembic/versions/*.py
+```json
+// docs/planning/tasks/TASK-005.json
+{
+  "id": "TASK-005",
+  "title": "Generate Frontend API Client",
+  "description": "Auto-generate TypeScript API client from OpenAPI spec",
+  "agent": "frontend:developer",
+  "dependencies": ["TASK-001"],
+  "acceptance_criteria": [
+    "Client generated using openapi-typescript-codegen",
+    "TypeScript types match API schemas exactly",
+    "All endpoints have type-safe methods",
+    "Authentication handled automatically",
+    "NO manual endpoint definitions",
+    "Compilation ensures type safety"
+  ],
+  "validation": [
+    "Verify: No hardcoded API endpoints in src/",
+    "Verify: All API calls use generated client",
+    "Run: npm run type-check (must pass)"
+  ],
+  "deliverables": [
+    "src/api/generated/*",
+    "src/api/client.ts",
+    "package.json"
+  ]
+}
+```
 
----
+```json
+// docs/planning/tasks/TASK-006.json
+{
+  "id": "TASK-006",
+  "title": "Implement Frontend UI",
+  "description": "Build React UI using generated API client",
+  "agent": "frontend:developer",
+  "dependencies": ["TASK-005"],
+  "acceptance_criteria": [
+    "Uses ONLY generated API client (no fetch/axios directly)",
+    "TypeScript ensures compile-time API correctness",
+    "Proper error handling for all error codes from spec",
+    "Loading states for async operations"
+  ],
+  "deliverables": [
+    "src/components/*.tsx",
+    "src/pages/*.tsx",
+    "src/hooks/useApi.ts"
+  ]
+}
+```
 
-# docs/planning/tasks/TASK-004.yaml
-id: TASK-004
-title: Implement Backend API
-description: Implement FastAPI endpoints from OpenAPI spec
-agent: backend:api-developer-python-t1
-dependencies: [TASK-001, TASK-003]  # Needs API spec AND database models
-acceptance_criteria:
-  - Implements ALL endpoints from docs/api/openapi.yaml
-  - Exact request/response schemas match spec
-  - Pydantic models generated from OpenAPI schemas
-  - FastAPI auto-validates against spec
-  - /docs endpoint serves the specification
-  - Passes openapi-spec-validator
-  - NO endpoints not in spec
-  - NO schema deviations from spec
-validation:
-  - Run: openapi-spec-validator docs/api/openapi.yaml
-  - Run: pytest tests/test_api_compliance.py
-  - Verify: curl http://localhost:8000/docs matches spec
-deliverables:
-  - backend/routes/*.py
-  - backend/schemas/*.py (from OpenAPI)
-  - tests/test_api_compliance.py
-
----
-
-# docs/planning/tasks/TASK-005.yaml
-id: TASK-005
-title: Generate Frontend API Client
-description: Auto-generate TypeScript API client from OpenAPI spec
-agent: frontend:developer-t1
-dependencies: [TASK-001]  # Only needs API spec
-acceptance_criteria:
-  - Client generated using openapi-typescript-codegen
-  - TypeScript types match API schemas exactly
-  - All endpoints have type-safe methods
-  - Authentication handled automatically
-  - NO manual endpoint definitions
-  - Compilation ensures type safety
-validation:
-  - Verify: No hardcoded API endpoints in src/
-  - Verify: All API calls use generated client
-  - Run: npm run type-check (must pass)
-deliverables:
-  - src/api/generated/* (auto-generated, committed)
-  - src/api/client.ts (wrapper around generated)
-  - package.json (with codegen script)
-
----
-
-# docs/planning/tasks/TASK-006.yaml
-id: TASK-006
-title: Implement Frontend UI
-description: Build React UI using generated API client
-agent: frontend:developer-t1
-dependencies: [TASK-005]  # Needs generated API client
-acceptance_criteria:
-  - Uses ONLY generated API client (no fetch/axios directly)
-  - TypeScript ensures compile-time API correctness
-  - Proper error handling for all error codes from spec
-  - Loading states for async operations
-deliverables:
-  - src/components/*.tsx
-  - src/pages/*.tsx
-  - src/hooks/useApi.ts
-
----
-
-# docs/planning/tasks/TASK-007.yaml
-id: TASK-007
-title: Integration Testing
-description: Verify frontend and backend work together
-agent: quality:test-writer
-dependencies: [TASK-004, TASK-006]  # Needs both implementations
-acceptance_criteria:
-  - End-to-end tests verify API contract
-  - Tests use OpenAPI spec for validation
-  - Backend responses match schemas
-  - Frontend handles all response types
-deliverables:
-  - tests/integration/test_api_contract.py
-  - e2e/tests/*.spec.ts
+```json
+// docs/planning/tasks/TASK-007.json
+{
+  "id": "TASK-007",
+  "title": "Integration Testing",
+  "description": "Verify frontend and backend work together",
+  "agent": "quality:test-writer",
+  "dependencies": ["TASK-004", "TASK-006"],
+  "acceptance_criteria": [
+    "End-to-end tests verify API contract",
+    "Tests use OpenAPI spec for validation",
+    "Backend responses match schemas",
+    "Frontend handles all response types"
+  ],
+  "deliverables": [
+    "tests/integration/test_api_contract.py",
+    "e2e/tests/*.spec.ts"
+  ]
+}
 ```
 
 ### Step 3: Execute Sprint
 
 ```bash
-/sprint SPRINT-001
+/devteam:implement --sprint SPRINT-001
 ```
 
 The sprint will execute tasks in dependency order, ensuring the API spec is created first.
@@ -241,7 +271,7 @@ The sprint will execute tasks in dependency order, ensuring the API spec is crea
 **Prompt:**
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:api-designer",
+  subagent_type="backend:api-designer",
   model="sonnet",
   description="Design complete API specification",
   prompt=`Design comprehensive OpenAPI 3.0 specification for TaskFlow application.
@@ -561,12 +591,12 @@ paths:
 
 ### TASK-004: Implement Backend (References Spec)
 
-**Agent:** `backend:api-developer-python-t1`
+**Agent:** `backend:api-developer-python`
 
 **Prompt:**
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:api-developer-python-t1",
+  subagent_type="backend:api-developer-python",
   model="haiku",
   description="Implement FastAPI backend from OpenAPI spec",
   prompt=`Implement FastAPI backend that EXACTLY matches docs/api/openapi.yaml
@@ -704,12 +734,12 @@ async def get_task(
 
 ### TASK-005: Generate Frontend Client (From Spec)
 
-**Agent:** `frontend:developer-t1`
+**Agent:** `frontend:developer`
 
 **Prompt:**
 ```javascript
 Task(
-  subagent_type="multi-agent:frontend:developer-t1",
+  subagent_type="frontend:developer",
   model="haiku",
   description="Generate TypeScript API client from OpenAPI spec",
   prompt=`Generate type-safe TypeScript API client from docs/api/openapi.yaml
@@ -814,12 +844,12 @@ export * from './generated';
 
 ### TASK-006: Implement Frontend UI (Uses Generated Client)
 
-**Agent:** `frontend:developer-t1`
+**Agent:** `frontend:developer`
 
 **Prompt:**
 ```javascript
 Task(
-  subagent_type="multi-agent:frontend:developer-t1",
+  subagent_type="frontend:developer",
   model="haiku",
   description="Implement React UI using generated API client",
   prompt=`Implement React UI using ONLY the generated API client from src/api/generated

@@ -1,8 +1,13 @@
+---
+name: unit-test-writer-java
+description: "Writes Java unit tests with JUnit 5, Mockito, and AssertJ"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Unit Test Writer - Java
 
 **Agent ID:** `quality:unit-test-writer-java`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 4-7
 
 ## Purpose
@@ -179,4 +184,4 @@ src/test/java/
 ## See Also
 
 - `quality:test-coordinator` - Coordinates testing
-- `quality:integration-tester` - Integration tests
+- `quality:runtime-verifier` - Integration tests

@@ -1,6 +1,6 @@
 # Getting Started with DevTeam
 
-Welcome to DevTeam, a 126-agent automated development system for Claude Code. This guide will help you get started quickly.
+Welcome to DevTeam, a 127-agent automated development system for Claude Code. This guide will help you get started quickly.
 
 ## Quick Start (5 minutes)
 
@@ -79,7 +79,7 @@ The typical DevTeam workflow:
 # DevTeam will:
 # - Execute tasks with appropriate agents
 # - Run quality gates (tests, lint, typecheck)
-# - Auto-fix issues through the Ralph loop
+# - Auto-fix issues through the Task Loop
 # - Report completion
 
 # Step 3: Check progress
@@ -103,7 +103,7 @@ The typical DevTeam workflow:
 DevTeam can be expensive if you're not careful. Use eco mode for simple tasks:
 
 ```bash
-# Eco mode: 30-50% cost savings
+# Eco mode: uses lower-cost models for simpler tasks
 /devteam:implement "Fix typo in header" --eco
 
 # Set eco as default
@@ -121,13 +121,13 @@ DevTeam can be expensive if you're not careful. Use eco mode for simple tasks:
 - Security-sensitive code
 - Complexity 10+ tasks
 
-## The Ralph Loop
+## The Task Loop
 
 DevTeam uses an iterative quality loop:
 
 ```
 ┌─────────────────────────────────────────────┐
-│            RALPH QUALITY LOOP               │
+│            TASK QUALITY LOOP                │
 ├─────────────────────────────────────────────┤
 │  Execute Agent(s)                           │
 │        ↓                                    │
@@ -145,7 +145,7 @@ DevTeam uses an iterative quality loop:
 
 ## Specialized Agents
 
-DevTeam has 126 specialized agents across categories:
+DevTeam has 127 specialized agents across categories:
 
 - **Planning**: PRD generation, task breakdown, sprint planning
 - **Orchestration**: Task coordination, quality loops, scope validation
@@ -165,14 +165,14 @@ After initialization, DevTeam creates:
 your-project/
 ├── .devteam/
 │   ├── devteam.db        # SQLite database (state, events, metrics)
-│   └── ralph-config.yaml # Configuration
+│   └── task-loop-config.yaml # Configuration
 ├── docs/
 │   ├── planning/
-│   │   ├── PROJECT_PRD.yaml
+│   │   ├── PROJECT_PRD.json
 │   │   └── tasks/
-│   │       └── TASK-XXX.yaml
+│   │       └── TASK-XXX.json
 │   └── sprints/
-│       └── SPRINT-XXX.yaml
+│       └── SPRINT-XXX.json
 └── ... (your code)
 ```
 

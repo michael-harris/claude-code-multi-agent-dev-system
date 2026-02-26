@@ -1,8 +1,13 @@
+---
+name: test-writer
+description: "Creates comprehensive test suites (unit, integration, e2e)"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Test Writer Agent
 
 **Agent ID:** `quality:test-writer`
 **Category:** Quality / Testing
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ## Purpose
 
@@ -370,7 +375,7 @@ collaborates_with:
   - agent: "backend:api-developer-*"
     interaction: "Receives code to test, returns test files"
 
-  - agent: "frontend:frontend-developer"
+  - agent: "frontend:developer"
     interaction: "Tests React components and hooks"
 
   - agent: "orchestration:quality-gate-enforcer"

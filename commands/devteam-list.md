@@ -18,7 +18,7 @@ List all development plans and their status.
 
 ```bash
 # Load plan index
-cat .devteam/plans/index.yaml
+cat .devteam/plans/index.json
 ```
 
 If no index exists:
@@ -53,7 +53,7 @@ Commands:
   /devteam:select <#>     Select a plan to work on
   /devteam:implement           Execute the active plan
   /devteam:plan --feature Create new feature plan
-  /devteam:archive <#>    Archive a completed plan
+  /devteam:archive <#>    Archive a completed plan (planned, not yet implemented)
 ```
 
 ### Status Icons

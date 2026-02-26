@@ -1,8 +1,14 @@
+---
+name: security-auditor-csharp
+description: "C#/.NET security auditing with Security Code Scan and Roslyn analyzers"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Security Auditor - C#
 
 **Agent ID:** `security:security-auditor-csharp`
 **Category:** Security
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 6-10
 
 ## Purpose
@@ -152,5 +158,5 @@ dotnet list package --vulnerable
 
 ## See Also
 
-- `security:security-auditor` - General security auditor
+- `quality:security-auditor` - General security auditor
 - `orchestration:sprint-loop` - Calls for sprint security audit

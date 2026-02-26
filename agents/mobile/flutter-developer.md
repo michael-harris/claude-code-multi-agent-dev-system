@@ -1,11 +1,16 @@
+---
+name: flutter-developer
+description: "Cross-platform mobile development with Flutter/Dart"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Flutter Developer Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** Cross-platform mobile development with Flutter/Dart
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple UI widgets, basic navigation
 - **Sonnet:** Complex features, state management, platform channels
 - **Opus:** App architecture, performance optimization, complex animations

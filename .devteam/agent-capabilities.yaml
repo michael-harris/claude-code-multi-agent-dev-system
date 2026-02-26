@@ -1,5 +1,9 @@
 # DevTeam Agent Capabilities Index
 # Used for dynamic agent selection based on task requirements
+#
+# NOTE: Agent IDs in this file use underscores (e.g., api_developer_python).
+# These map to plugin.json IDs with category prefix and hyphens (e.g., backend:api-developer-python).
+# The mapping is: underscores → hyphens, and category prefix is added based on the agent's directory.
 
 version: "2.0"
 
@@ -26,19 +30,7 @@ categories:
           keywords: [architecture, system design, scalability, design decision, microservices]
           task_types: [architecture, design_review]
 
-      - id: tech_lead
-        capabilities:
-          - code_review
-          - standards_enforcement
-          - mentoring
-          - technical_decisions
-          - team_coordination
-          - best_practices
-        complexity_range: [4, 12]
-        default_model: sonnet
-        triggers:
-          keywords: [review, standards, best practices, technical decision]
-          task_types: [code_review, technical_guidance]
+      # tech_lead: Removed - no tech_lead agent in plugin.json. Use architecture:architect for review workflows.
 
       - id: api_designer
         capabilities:
@@ -166,19 +158,7 @@ categories:
           files: ["*.java"]
           keywords: [java, spring, spring boot]
 
-      - id: api_developer_rust
-        capabilities:
-          - api_implementation
-          - rust_development
-          - actix
-          - axum
-          - tokio
-        complexity_range: [2, 12]
-        languages: [rust]
-        frameworks: [actix, axum]
-        triggers:
-          files: ["*.rs"]
-          keywords: [rust, actix, axum]
+      # api_developer_rust: Removed - no Rust agent implemented. Use api_developer_go as closest alternative.
 
       - id: frontend_developer
         capabilities:
@@ -194,13 +174,7 @@ categories:
           files: ["*.tsx", "*.jsx", "*.vue", "*.svelte"]
           keywords: [frontend, ui, react, vue, component]
 
-      - id: fullstack_developer
-        capabilities:
-          - api_implementation
-          - ui_implementation
-          - integration
-          - database_operations
-        complexity_range: [3, 10]
+      # fullstack_developer: Removed - no fullstack agent in plugin.json. Use api_developer_* + frontend_developer instead.
 
       - id: database_developer
         capabilities:
@@ -719,33 +693,12 @@ categories:
           keywords: [machine learning, ml, model, training, inference]
           task_types: [ml_engineering]
 
-      - id: data_scientist
-        capabilities:
-          - statistical_analysis
-          - data_visualization
-          - experiment_design
-          - hypothesis_testing
-        complexity_range: [5, 12]
-        default_model: sonnet
-        triggers:
-          keywords: [analytics, metrics, dashboard, reporting]
-          task_types: [analytics]
+      # data_scientist: Removed - no data_scientist agent in plugin.json. Use data-ai:data-engineer or data-ai:ml-engineer instead.
 
   documentation:
     description: "Documentation and developer relations"
     agents:
-      - id: technical_writer
-        capabilities:
-          - api_documentation
-          - readme_creation
-          - architecture_docs
-          - user_guides
-          - tutorial_writing
-        complexity_range: [1, 6]
-        default_model: haiku
-        triggers:
-          keywords: [documentation, docs, readme, api docs, tutorial]
-          task_types: [documentation]
+      # technical_writer: Removed - replaced by quality:documentation-coordinator in plugin.json.
 
       - id: developer_advocate
         capabilities:
@@ -771,20 +724,12 @@ categories:
           - compatibility_checks
         complexity_range: [2, 8]
 
-      - id: refactoring_specialist
+      - id: refactoring_coordinator
         capabilities:
           - code_cleanup
           - pattern_application
           - dead_code_removal
         complexity_range: [3, 10]
-
-      - id: migration_specialist
-        capabilities:
-          - framework_migration
-          - language_migration
-          - api_versioning
-        complexity_range: [6, 14]
-        default_model: opus
 
   ux_design:
     description: "UX/UI Design and Design System management"
@@ -883,7 +828,7 @@ categories:
   orchestration:
     description: "Task orchestration and coordination"
     agents:
-      - id: task_orchestrator
+      - id: task_loop
         capabilities:
           - task_decomposition
           - agent_coordination
@@ -926,7 +871,7 @@ capability_index:
   design_monitoring: [design_drift_detector]
 
   # Implementation
-  api_implementation: [api_developer_python, api_developer_typescript, api_developer_go, api_developer_java, api_developer_rust]
+  api_implementation: [api_developer_python, api_developer_typescript, api_developer_go, api_developer_java]
   ui_implementation: [frontend_developer]
   database_operations: [database_developer]
 
@@ -976,14 +921,15 @@ capability_index:
   machine_learning: [ml_engineer]
 
   # Documentation
-  documentation: [technical_writer, developer_advocate]
+  # documentation_coordinator maps to quality:documentation-coordinator in plugin.json
+  documentation: [documentation_coordinator, developer_advocate]
 
 # Task type to agent recommendations
 task_type_agents:
   feature:
     primary: [api_developer_python, api_developer_typescript, frontend_developer]
-    support: [test_writer, technical_writer]
-    review: [tech_lead]
+    support: [test_writer, documentation_coordinator]  # technical_writer replaced by documentation_coordinator
+    review: [architect]  # tech_lead replaced by architecture:architect
 
   bug:
     diagnosis: [root_cause_analyst, code_archaeologist, pattern_matcher, systems_thinker, adversarial_tester]
@@ -991,15 +937,15 @@ task_type_agents:
     verify: [test_writer]
 
   refactor:
-    primary: [refactoring_specialist]
-    review: [tech_lead, architect]
+    primary: [refactoring_coordinator]
+    review: [architect]  # tech_lead removed, architect handles review
     verify: [test_writer]
 
   security:
     primary: [security_auditor, penetration_tester]
     compliance: [compliance_engineer]
     fix: [api_developer_python, api_developer_typescript]
-    review: [tech_lead]
+    review: [architect]  # tech_lead replaced by architecture:architect
 
   performance:
     primary: [performance_auditor]
@@ -1017,8 +963,8 @@ task_type_agents:
     review: [site_reliability_engineer]
 
   documentation:
-    primary: [technical_writer, developer_advocate]
-    review: [tech_lead]
+    primary: [documentation_coordinator, developer_advocate]  # technical_writer replaced by documentation_coordinator
+    review: [architect]  # tech_lead replaced by architecture:architect
 
   accessibility:
     primary: [accessibility_specialist]

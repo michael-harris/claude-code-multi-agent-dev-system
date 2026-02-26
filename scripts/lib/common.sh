@@ -226,15 +226,67 @@ validate_decimal() {
 # Valid table names (whitelist to prevent SQL injection)
 readonly VALID_TABLES=(
     "sessions"
+    "session_state"
     "events"
     "schema_version"
+    "agent_runs"
+    "gate_results"
+    "interviews"
+    "interview_questions"
+    "research_sessions"
+    "research_findings"
+    "bugs"
+    "plans"
+    "escalations"
+    "acceptance_criteria"
+    "features"
+    "context_snapshots"
+    "context_budgets"
+    "progress_summaries"
+    "session_phases"
+    "baselines"
+    "checkpoints"
+    "checkpoint_restores"
+    "rollbacks"
+    "token_usage"
+    "error_log"
+    "dead_letter"
+    "tasks"
+    "task_attempts"
+    "task_files"
 )
 
 # Valid column names per table (whitelist to prevent SQL injection)
 declare -A VALID_COLUMNS
-VALID_COLUMNS[sessions]="id,started_at,ended_at,status,current_phase,current_agent,current_model,current_iteration,consecutive_failures,execution_mode,bug_council_activated,bug_council_reason,circuit_breaker_state,max_consecutive_failures,max_iterations,plan_id,sprint_id,exit_reason,total_tokens_input,total_tokens_output,total_cost_cents"
-VALID_COLUMNS[events]="id,session_id,timestamp,event_type,phase,agent,model,iteration,status,message,metadata,tokens_input,tokens_output,cost_cents"
+VALID_COLUMNS[sessions]="id,started_at,ended_at,command,command_type,status,exit_reason,current_phase,current_task_id,current_agent,current_model,current_iteration,max_iterations,consecutive_failures,max_consecutive_failures,circuit_breaker_state,plan_id,sprint_id,execution_mode,total_tokens_input,total_tokens_output,total_cost_cents,bug_council_activated,bug_council_reason"
+VALID_COLUMNS[session_state]="session_id,key,value,updated_at"
+VALID_COLUMNS[events]="id,session_id,timestamp,event_type,event_category,agent,model,iteration,phase,data,metadata,message,tokens_input,tokens_output,cost_cents"
 VALID_COLUMNS[schema_version]="version,applied_at"
+VALID_COLUMNS[agent_runs]="id,session_id,agent,agent_type,model,started_at,ended_at,duration_seconds,status,error_message,error_type,task_id,iteration,attempt,tokens_input,tokens_output,cost_cents,files_changed,output_summary"
+VALID_COLUMNS[gate_results]="id,session_id,gate,iteration,passed,details,error_count,warning_count,coverage_percent,timestamp,duration_seconds"
+VALID_COLUMNS[interviews]="id,session_id,interview_type,started_at,completed_at,status,questions_asked,questions_answered"
+VALID_COLUMNS[interview_questions]="id,interview_id,question_key,question_text,question_type,response,responded_at,sequence,required"
+VALID_COLUMNS[research_sessions]="id,session_id,started_at,completed_at,status,findings_count,recommendations_count,blockers_found"
+VALID_COLUMNS[research_findings]="id,research_session_id,finding_type,title,description,source,file_path,evidence,priority,timestamp"
+VALID_COLUMNS[bugs]="id,session_id,description,severity,complexity,root_cause,diagnosis_method,fix_summary,files_changed,prevention_measures,status,created_at,resolved_at,council_activated,council_votes"
+VALID_COLUMNS[plans]="id,name,description,plan_type,prd_path,tasks_path,sprints_path,status,total_sprints,completed_sprints,total_tasks,completed_tasks,created_at,started_at,completed_at,research_session_id"
+VALID_COLUMNS[escalations]="id,session_id,from_model,to_model,agent,reason,failure_count,iteration,task_id,timestamp"
+VALID_COLUMNS[acceptance_criteria]="id,task_id,sprint_id,plan_id,criterion_id,description,category,passes,verified_at,verified_by,verification_method,verification_evidence,last_failure_reason,failure_count,priority,sequence,created_at,updated_at"
+VALID_COLUMNS[features]="id,plan_id,sprint_id,feature_id,name,description,category,steps,passes,all_steps_pass,steps_total,steps_passed,verified_at,verified_by,priority,sequence,created_at,updated_at"
+VALID_COLUMNS[context_snapshots]="id,session_id,snapshot_type,tokens_before,tokens_after,tokens_saved,preserved_items,summarized_items,summary_text,trigger_reason,created_at"
+VALID_COLUMNS[context_budgets]="id,session_id,model,context_limit,current_usage,usage_percent,warn_threshold,summarize_threshold,status,last_action,updated_at"
+VALID_COLUMNS[progress_summaries]="id,session_id,summary_text,from_iteration,to_iteration,tasks_completed,tasks_remaining,tests_passing,tests_failing,features_passing,features_total,last_commit_sha,files_changed,created_at"
+VALID_COLUMNS[session_phases]="id,session_id,phase_type,is_first_run,init_script_created,features_enumerated,progress_file_created,baseline_commit_sha,features_attempted,features_completed,resumed_from_session,resume_point,created_at"
+VALID_COLUMNS[baselines]="id,tag_name,commit_hash,milestone,description,branch,files_changed,created_at"
+VALID_COLUMNS[checkpoints]="id,checkpoint_id,path,description,git_commit,session_id,task_id,sprint_id,can_restore,created_at"
+VALID_COLUMNS[checkpoint_restores]="id,checkpoint_id,restored_at"
+VALID_COLUMNS[rollbacks]="id,rollback_type,target_commit,target_tag,reason,from_commit,trigger_type,check_type,backup_branch,rolled_back_at"
+VALID_COLUMNS[token_usage]="id,session_id,task_id,sprint_id,model,input_tokens,output_tokens,cost_usd,operation,agent_name,recorded_at"
+VALID_COLUMNS[error_log]="id,session_id,task_id,operation,error_type,error_message,error_pattern,recovery_action,recovery_success,retry_count,circuit_opened,logged_at"
+VALID_COLUMNS[dead_letter]="id,operation_type,operation_params,error_message,stack_trace,attempt_count,session_id,task_id,status,retry_after,expires_at,created_at"
+VALID_COLUMNS[tasks]="id,name,description,task_type,plan_id,sprint_id,parent_task_id,session_id,status,scope_files,scope_json,assigned_agent,assigned_model,priority,sequence,depends_on,blocks,estimated_effort,actual_iterations,files_changed,created_at,started_at,completed_at,result_summary,error_message,commit_sha"
+VALID_COLUMNS[task_attempts]="id,task_id,session_id,attempt_number,model,agent,started_at,ended_at,duration_seconds,status,error_type,error_message,tokens_input,tokens_output,cost_cents"
+VALID_COLUMNS[task_files]="id,task_id,file_path,file_type,access_type,is_pattern"
 
 # Validate table name against whitelist
 validate_table_name() {
@@ -258,12 +310,16 @@ validate_column_name() {
         return 1
     fi
 
-    # Check if column is in the comma-separated list
-    if [[ ! ",$valid_cols," == *",$column,"* ]]; then
-        log_error "Invalid column name '$column' for table '$table'" "validation"
-        return 1
-    fi
-    return 0
+    # Check if column is in the comma-separated list (exact match)
+    local col_item
+    IFS=',' read -ra _col_check_arr <<< "$valid_cols"
+    for col_item in "${_col_check_arr[@]}"; do
+        if [ "$col_item" = "$column" ]; then
+            return 0
+        fi
+    done
+    log_error "Invalid column name '$column' for table '$table'" "validation"
+    return 1
 }
 
 # Validate multiple column names
@@ -274,9 +330,12 @@ validate_columns() {
     # Split by comma and validate each
     IFS=',' read -ra col_array <<< "$columns"
     for col in "${col_array[@]}"; do
-        # Trim whitespace
-        col="${col## }"
-        col="${col%% }"
+        # Trim all leading/trailing whitespace
+        col="${col#"${col%%[![:space:]]*}"}"
+        col="${col%"${col##*[![:space:]]}"}"
+        if [ -z "$col" ]; then
+            continue
+        fi
         if ! validate_column_name "$table" "$col"; then
             return 1
         fi
@@ -352,7 +411,7 @@ sql_exec() {
     fi
 
     local result
-    if ! result=$(sqlite3 "$DB_FILE" "$query" 2>&1); then
+    if ! result=$(sqlite3 "$DB_FILE" "PRAGMA foreign_keys = ON; $query" 2>&1); then
         log_error "SQL execution failed: $result" "sql"
         log_debug "Query was: $query" "sql"
         return 1
@@ -371,7 +430,7 @@ sql_exec_json() {
     fi
 
     local result
-    if ! result=$(sqlite3 -json "$DB_FILE" "$query" 2>&1); then
+    if ! result=$(sqlite3 -json "$DB_FILE" "PRAGMA foreign_keys = ON; $query" 2>&1); then
         log_error "SQL execution failed: $result" "sql"
         return 1
     fi
@@ -389,7 +448,7 @@ sql_exec_table() {
     fi
 
     local result
-    if ! result=$(sqlite3 -column -header "$DB_FILE" "$query" 2>&1); then
+    if ! result=$(sqlite3 -column -header "$DB_FILE" "PRAGMA foreign_keys = ON; $query" 2>&1); then
         log_error "SQL execution failed: $result" "sql"
         return 1
     fi
@@ -549,17 +608,26 @@ sql_select() {
 
 # Begin a transaction (for atomic multi-step operations)
 sql_begin_transaction() {
-    sql_exec "BEGIN IMMEDIATE TRANSACTION;"
+    if ! sql_exec "BEGIN IMMEDIATE TRANSACTION;"; then
+        log_error "Failed to begin transaction" "sql"
+        return 1
+    fi
 }
 
 # Commit a transaction
 sql_commit() {
-    sql_exec "COMMIT;"
+    if ! sql_exec "COMMIT;"; then
+        log_error "Failed to commit transaction" "sql"
+        return 1
+    fi
 }
 
 # Rollback a transaction
 sql_rollback() {
-    sql_exec "ROLLBACK;"
+    if ! sql_exec "ROLLBACK;"; then
+        log_error "Failed to rollback transaction" "sql"
+        return 1
+    fi
 }
 
 # Execute multiple statements atomically
@@ -571,7 +639,7 @@ sql_transaction() {
     fi
 
     # Build full transaction
-    local full_sql="BEGIN IMMEDIATE TRANSACTION;"
+    local full_sql="PRAGMA foreign_keys = ON; BEGIN IMMEDIATE TRANSACTION;"
     for stmt in "$@"; do
         full_sql+=" $stmt"
     done
@@ -644,11 +712,12 @@ generate_id() {
     local hex_suffix
 
     # Try xxd first (common on Linux), fall back to od (POSIX)
+    # Use 8 bytes (16 hex chars) to reduce collision risk (M8)
     if command -v xxd &> /dev/null; then
-        hex_suffix=$(head -c 4 /dev/urandom | xxd -p)
+        hex_suffix=$(head -c 8 /dev/urandom | xxd -p)
     else
         # POSIX-compliant alternative using od
-        hex_suffix=$(head -c 4 /dev/urandom | od -An -tx1 | tr -d ' \n')
+        hex_suffix=$(head -c 8 /dev/urandom | od -An -tx1 | tr -d ' \n')
     fi
 
     echo "${prefix}-$(date +%Y%m%d-%H%M%S)-${hex_suffix}"
@@ -662,4 +731,208 @@ require_command() {
         return 1
     fi
     return 0
+}
+
+# ============================================================================
+# PORTABLE HELPERS
+# ============================================================================
+
+# Ensure we're inside a git repository
+# Usage: ensure_git
+ensure_git() {
+    if ! git rev-parse --git-dir > /dev/null 2>&1; then
+        log_error "Not a git repository" "git"
+        return 1
+    fi
+    return 0
+}
+
+# Format a number with thousands separators (portable)
+# Falls back to plain number on systems without locale support
+# Usage: format_number 1234567  =>  "1,234,567"
+format_number() {
+    local num="$1"
+    # Try printf with grouping (glibc); fall back to awk
+    if printf "%'d" "$num" 2>/dev/null; then
+        return 0
+    fi
+    # Portable awk fallback
+    echo "$num" | awk '{ printf "%d", $1; exit }' | \
+        awk '{
+            s = $0
+            len = length(s)
+            result = ""
+            for (i = 1; i <= len; i++) {
+                if (i > 1 && (len - i + 1) % 3 == 0) result = result ","
+                result = result substr(s, i, 1)
+            }
+            print result
+        }'
+}
+
+# Get file size in bytes (portable across Linux and macOS)
+# Usage: file_size_bytes "/path/to/file"
+file_size_bytes() {
+    local filepath="$1"
+    if [ ! -f "$filepath" ]; then
+        echo "0"
+        return 1
+    fi
+    # wc -c is POSIX and works everywhere
+    wc -c < "$filepath" | tr -d ' '
+}
+
+# Validate a file path is contained within the project root
+# Prevents path traversal attacks from untrusted input
+# Usage: validate_file_path "$path" "$allowed_root"
+validate_file_path() {
+    local filepath="$1"
+    local allowed_root="${2:-$(pwd)}"
+
+    if [ -z "$filepath" ]; then
+        log_error "Empty file path" "validation"
+        return 1
+    fi
+
+    # Resolve to absolute path (use readlink -f on Linux, realpath or fallback on macOS)
+    local resolved
+    if command -v realpath &>/dev/null; then
+        resolved=$(realpath -m "$allowed_root/$filepath" 2>/dev/null) || resolved=""
+    elif readlink -f "/" &>/dev/null 2>&1; then
+        resolved=$(readlink -f "$allowed_root/$filepath" 2>/dev/null) || resolved=""
+    else
+        # Basic fallback: reject paths with ..
+        resolved="$allowed_root/$filepath"
+    fi
+
+    if [ -z "$resolved" ]; then
+        log_error "Cannot resolve path: $filepath" "validation"
+        return 1
+    fi
+
+    # Resolve allowed_root too
+    local resolved_root
+    if command -v realpath &>/dev/null; then
+        resolved_root=$(realpath -m "$allowed_root" 2>/dev/null) || resolved_root="$allowed_root"
+    elif readlink -f "/" &>/dev/null 2>&1; then
+        resolved_root=$(readlink -f "$allowed_root" 2>/dev/null) || resolved_root="$allowed_root"
+    else
+        resolved_root="$allowed_root"
+    fi
+
+    # Check containment
+    case "$resolved" in
+        "$resolved_root"/*)
+            return 0
+            ;;
+        "$resolved_root")
+            return 0
+            ;;
+        *)
+            log_error "Path traversal detected: $filepath resolves outside $allowed_root" "validation"
+            return 1
+            ;;
+    esac
+}
+
+# Validate database file: exists, non-empty, and responds to queries
+# Usage: validate_db
+validate_db() {
+    if [ ! -f "$DB_FILE" ]; then
+        log_error "Database file not found: $DB_FILE" "db"
+        return 1
+    fi
+
+    local size
+    size=$(file_size_bytes "$DB_FILE")
+    if [ "$size" -eq 0 ]; then
+        log_error "Database file is empty: $DB_FILE" "db"
+        return 1
+    fi
+
+    if ! sqlite3 "$DB_FILE" "SELECT 1;" >/dev/null 2>&1; then
+        log_error "Database file is not valid SQLite: $DB_FILE" "db"
+        return 1
+    fi
+
+    return 0
+}
+
+# Compute a date N days ago (portable across GNU and BSD date)
+# Usage: date_days_ago 30  =>  "2025-01-01"
+date_days_ago() {
+    local days="$1"
+    # GNU date
+    if date -d "$days days ago" '+%Y-%m-%d' 2>/dev/null; then
+        return 0
+    fi
+    # BSD/macOS date
+    if date -v-${days}d '+%Y-%m-%d' 2>/dev/null; then
+        return 0
+    fi
+    # Fallback using awk and current epoch
+    local now
+    now=$(date '+%s' 2>/dev/null || echo "0")
+    local target=$((now - days * 86400))
+    date -d "@$target" '+%Y-%m-%d' 2>/dev/null || \
+        awk "BEGIN { print strftime(\"%Y-%m-%d\", $target) }" 2>/dev/null || \
+        echo "1970-01-01"
+}
+
+# ============================================================================
+# TEMP FILE MANAGEMENT
+# ============================================================================
+
+# Global array to track temp files for cleanup
+_DEVTEAM_TEMP_FILES=()
+
+# Create a temp file and register it for cleanup
+# Usage: local tmp; tmp=$(safe_mktemp)
+safe_mktemp() {
+    local tmp
+    tmp=$(mktemp)
+    _DEVTEAM_TEMP_FILES+=("$tmp")
+    echo "$tmp"
+}
+
+# Remove all registered temp files
+cleanup_temp_files() {
+    local f
+    for f in "${_DEVTEAM_TEMP_FILES[@]+"${_DEVTEAM_TEMP_FILES[@]}"}"; do
+        rm -f "$f" 2>/dev/null || true
+    done
+    _DEVTEAM_TEMP_FILES=()
+}
+
+# Register the cleanup trap (call once per script)
+# Chains with existing EXIT traps and catches INT/TERM (M10)
+setup_temp_cleanup() {
+    # Chain with existing EXIT trap if any
+    local existing_trap
+    existing_trap=$(trap -p EXIT 2>/dev/null | sed "s/^trap -- '//;s/' EXIT$//" || true)
+    if [ -n "$existing_trap" ]; then
+        # shellcheck disable=SC2064
+        trap "cleanup_temp_files; $existing_trap" EXIT
+    else
+        trap cleanup_temp_files EXIT
+    fi
+    trap 'cleanup_temp_files; exit 130' INT
+    trap 'cleanup_temp_files; exit 143' TERM
+}
+
+# Sanitize user-supplied text: strip control characters and limit length
+# Usage: sanitize_input "$value" [max_length]
+sanitize_input() {
+    local value="$1"
+    local max_length="${2:-1024}"
+
+    # Strip control characters except newline and tab
+    value=$(printf '%s' "$value" | tr -d '\000-\010\013\014\016-\037')
+
+    # Truncate to max length
+    if [ "${#value}" -gt "$max_length" ]; then
+        value="${value:0:$max_length}"
+    fi
+
+    echo "$value"
 }

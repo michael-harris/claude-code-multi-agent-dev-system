@@ -13,15 +13,15 @@ Building a full-stack e-commerce platform with:
 ## Step 1: Generate PRD
 
 ```bash
-/devteam:prd
+/devteam:plan
 ```
 
-**System creates:** `docs/planning/PROJECT_PRD.yaml`
+**System creates:** `docs/planning/PROJECT_PRD.json`
 
 ## Step 2: Planning with Parallel Tracks
 
 ```bash
-/devteam:planning 3
+/devteam:plan 3
 ```
 
 **Task Graph Analyzer Output:**
@@ -45,7 +45,7 @@ Reasoning:
 - At peak, 3 tasks can run simultaneously
 - If using 3 tracks, all chains run in parallel with minimal idle time
 
-Recommendation: /devteam:planning 3
+Recommendation: /devteam:plan 3
 ```
 
 **Sprint Planner Output:**
@@ -96,21 +96,21 @@ Total: 18 tasks, ~128 hours development
 Parallel execution time: ~52 hours (vs 128 sequential)
 Time savings: 59%
 
-State tracking initialized at: docs/planning/.project-state.yaml
+State tracking initialized in SQLite at: .devteam/devteam.db
 
 Ready to execute:
 Option 1 - All tracks sequentially:
-  /devteam:sprint all
+  /devteam:implement --sprint all
 
 Option 2 - Specific track:
-  /devteam:sprint all 01    (Track 1 only)
-  /devteam:sprint all 02    (Track 2 only)
-  /devteam:sprint all 03    (Track 3 only)
+  /devteam:implement --sprint all 01    (Track 1 only)
+  /devteam:implement --sprint all 02    (Track 2 only)
+  /devteam:implement --sprint all 03    (Track 3 only)
 
 Option 3 - Parallel execution (multiple terminals):
-  Terminal 1: /devteam:sprint all 01
-  Terminal 2: /devteam:sprint all 02
-  Terminal 3: /devteam:sprint all 03
+  Terminal 1: /devteam:implement --sprint all 01
+  Terminal 2: /devteam:implement --sprint all 02
+  Terminal 3: /devteam:implement --sprint all 03
 ```
 
 ## Step 3: Execute Tracks in Parallel
@@ -118,12 +118,12 @@ Option 3 - Parallel execution (multiple terminals):
 ### Terminal 1: Backend Track
 
 ```bash
-/devteam:sprint all 01
+/devteam:implement --sprint all 01
 ```
 
 **Output:**
 ```
-Loading state file: docs/planning/.project-state.yaml
+Loading state from SQLite: .devteam/devteam.db
 Track 1 (Backend API) - 2 sprints to execute
 
 ═══════════════════════════════════════
@@ -131,23 +131,23 @@ SPRINT-001-01: Foundation
 ═══════════════════════════════════════
 
 Task 1/3: TASK-001 - Database schema design
-  Launching database:designer (Opus)...
+  Launching database:designer (Sonnet)...
   ✅ Schema designed (8 tables, normalized)
 
-  Launching database:developer-python-t1 (Haiku)...
+  Launching database:developer-python (Sonnet)...
   ✅ SQLAlchemy models created
 
   Launching orchestration:requirements-validator (Opus)...
   ✅ PASS (100% criteria met)
 
-  TASK-001 complete (2 iterations, T1 only, 45 min)
+  TASK-001 complete (2 iterations, sonnet, 45 min)
   State updated: TASK-001 marked as completed
 
 Task 2/3: TASK-004 - User authentication API
-  Launching backend:api-designer (Opus)...
+  Launching backend:api-designer (Sonnet)...
   ✅ API specification created (OpenAPI 3.0)
 
-  Launching backend:api-developer-python-t1 (Haiku)...
+  Launching backend:api-developer-python (Sonnet)...
   ✅ FastAPI endpoints implemented
 
   Launching quality:test-writer (Sonnet)...
@@ -156,23 +156,23 @@ Task 2/3: TASK-004 - User authentication API
   Launching orchestration:requirements-validator (Opus)...
   ⚠️ FAIL - Missing password reset endpoint
 
-  Re-attempting with T1...
+  Re-attempting with sonnet...
   ✅ Password reset endpoint added
 
   Launching orchestration:requirements-validator (Opus)...
   ✅ PASS (100% criteria met)
 
-  TASK-004 complete (3 iterations, T1 only, 62 min)
+  TASK-004 complete (3 iterations, sonnet, 62 min)
   State updated: TASK-004 marked as completed
 
 Task 3/3: TASK-008 - Product catalog API
-  Launching backend:api-developer-python-t1 (Haiku)...
+  Launching backend:api-developer-python (Sonnet)...
   ✅ CRUD endpoints implemented
 
   Launching orchestration:requirements-validator (Opus)...
   ✅ PASS (100% criteria met)
 
-  TASK-008 complete (1 iteration, T1 only, 38 min)
+  TASK-008 complete (1 iteration, sonnet, 38 min)
   State updated: TASK-008 marked as completed
 
 Final Sprint Review...
@@ -216,12 +216,12 @@ Next: Wait for other tracks to complete before final project review
 ### Terminal 2: Frontend Track
 
 ```bash
-/devteam:sprint all 02
+/devteam:implement --sprint all 02
 ```
 
 **Output:**
 ```
-Loading state file: docs/planning/.project-state.yaml
+Loading state from SQLite: .devteam/devteam.db
 Track 2 (Frontend) - 2 sprints to execute
 
 [Similar execution pattern for frontend tasks...]
@@ -236,12 +236,12 @@ Total cost: ~$2.80
 ### Terminal 3: Infrastructure Track
 
 ```bash
-/devteam:sprint all 03
+/devteam:implement --sprint all 03
 ```
 
 **Output:**
 ```
-Loading state file: docs/planning/.project-state.yaml
+Loading state from SQLite: .devteam/devteam.db
 Track 3 (Infrastructure) - 2 sprints to execute
 
 [Similar execution pattern for infrastructure tasks...]
@@ -260,7 +260,7 @@ After all tracks complete, run final integration review:
 ```bash
 # Automatically triggered after last track completes
 # Or manually run:
-/devteam:sprint all
+/devteam:implement --sprint all
 ```
 
 **Output:**
@@ -311,8 +311,8 @@ Overall Statistics:
   Total tasks: 18/18 completed
   Total sprints: 6 (2 per track × 3 tracks)
   Total iterations: 47
-  T1 tasks: 14 (78%)
-  T2 tasks: 4 (22%)
+  Sonnet tasks: 14 (78%)
+  Opus tasks: 4 (22%)
 
 Execution Time:
   Sequential estimate: ~128 hours
@@ -348,88 +348,41 @@ Features Delivered:
 Ready for deployment! 🚀
 ```
 
-## Step 5: Viewing State File
+## Step 5: Viewing State
 
 ```bash
-cat docs/planning/.project-state.yaml
+# Query task progress from SQLite
+sqlite3 .devteam/devteam.db "SELECT * FROM v_sprint_progress;"
 ```
 
-**State File Content:**
-```yaml
-version: "1.0"
-type: project
-created_at: "2025-10-31T10:00:00Z"
-updated_at: "2025-10-31T15:30:00Z"
+**Example Query Output:**
+```sql
+-- Task status summary
+sqlite3 .devteam/devteam.db "
+  SELECT status, COUNT(*) as count FROM tasks GROUP BY status;
+"
+-- status     | count
+-- completed  | 18
 
-parallel_tracks:
-  enabled: true
-  total_tracks: 3
-  max_possible_tracks: 3
-  track_info:
-    1:
-      name: "Backend API"
-      estimated_hours: 52
-      completed_hours: 52
-      status: completed
-    2:
-      name: "Frontend"
-      estimated_hours: 44
-      completed_hours: 44
-      status: completed
-    3:
-      name: "Infrastructure"
-      estimated_hours: 32
-      completed_hours: 32
-      status: completed
+-- Sprint progress
+sqlite3 .devteam/devteam.db "
+  SELECT id, status, tasks_completed, tasks_total FROM tasks
+  WHERE id LIKE 'SPRINT-%';
+"
 
-tasks:
-  TASK-001:
-    status: completed
-    track: 1
-    started_at: "2025-10-31T10:15:00Z"
-    completed_at: "2025-10-31T11:00:00Z"
-    duration_minutes: 45
-    tier_used: T1
-    iterations: 2
-    validation_result: PASS
-  # ... all other tasks ...
-
-sprints:
-  SPRINT-001-01:
-    status: completed
-    track: 1
-    completed_at: "2025-10-31T12:30:00Z"
-    tasks_completed: 3
-    tasks_total: 3
-    quality_gates_passed: true
-  SPRINT-001-02:
-    status: completed
-    track: 2
-    completed_at: "2025-10-31T12:45:00Z"
-    tasks_completed: 3
-    tasks_total: 3
-    quality_gates_passed: true
-  SPRINT-001-03:
-    status: completed
-    track: 3
-    completed_at: "2025-10-31T13:00:00Z"
-    tasks_completed: 2
-    tasks_total: 2
-    quality_gates_passed: true
-  # ... all other sprints ...
-
-current_execution: null
-
-statistics:
-  total_tasks: 18
-  completed_tasks: 18
-  in_progress_tasks: 0
-  pending_tasks: 0
-  total_sprints: 6
-  completed_sprints: 6
-  t1_tasks: 14
-  t2_tasks: 4
+-- Session state
+sqlite3 .devteam/devteam.db "
+  SELECT key, value FROM session_state WHERE session_id = (
+    SELECT id FROM sessions ORDER BY started_at DESC LIMIT 1
+  );
+"
 ```
+
+**Key state data tracked in SQLite:**
+- **sessions** table: Execution sessions with timestamps and status
+- **tasks** table: Each task with status, track, iterations, model used, completion time
+- **session_state** table: Key-value pairs for parallel_tracks config, statistics, etc.
+- **events** table: Full audit log of all actions
 
 ## Resume Example
 
@@ -439,10 +392,10 @@ If execution is interrupted:
 # Terminal 1 crashes during SPRINT-002-01
 
 # Later, resume:
-/devteam:sprint all 01
+/devteam:implement --sprint all 01
 
 # Output:
-Loading state file: docs/planning/.project-state.yaml
+Loading state from SQLite: .devteam/devteam.db
 Checking track 1 status...
 
 Found completed sprint: SPRINT-001-01 (skipping)
@@ -465,7 +418,7 @@ Task 2/4: TASK-016 - Payment integration API
 1. **Parallel Execution**: 3 tracks ran simultaneously, reducing 128 hours to ~5.5 hours wall clock time
 2. **Resume Capability**: Can interrupt and resume any track at any point
 3. **Independent Progress**: Each track tracks its own progress independently
-4. **Cost Efficiency**: T1→T2 escalation kept costs low (~$9.60 for full project)
+4. **Cost Efficiency**: Model escalation kept costs low (~$9.60 for full project)
 5. **Quality Assurance**: Every task validated, comprehensive final review
 6. **Audit Trail**: Complete state file shows all work done with timestamps and metadata
 
@@ -486,6 +439,6 @@ Task 2/4: TASK-016 - Payment integration API
 ## Tips
 
 1. **Max tracks calculation is automatic** - System analyzes dependencies and tells you max possible
-2. **Can run tracks sequentially** - Use `/devteam:sprint all` to run all tracks one after another if no parallelization available
-3. **State files enable coordination** - Multiple developers can work on different tracks, state file coordinates progress
+2. **Can run tracks sequentially** - Use `/devteam:implement --sprint all` to run all tracks one after another if no parallelization available
+3. **SQLite state enables coordination** - Multiple developers can work on different tracks, SQLite database coordinates progress
 4. **Resume anytime** - If interrupted, just rerun the command, system picks up where it left off

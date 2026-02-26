@@ -11,12 +11,12 @@ CREATE TABLE IF NOT EXISTS acceptance_criteria (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
 
     -- Parent reference (task or sprint)
-    task_id TEXT,
+    task_id TEXT REFERENCES tasks(id) ON DELETE CASCADE,
     sprint_id TEXT,
-    plan_id TEXT,
+    plan_id TEXT REFERENCES plans(id) ON DELETE CASCADE,
 
     -- Criterion details
-    criterion_id TEXT NOT NULL UNIQUE,   -- AC-001, AC-002, etc.
+    criterion_id TEXT NOT NULL,            -- AC-001, AC-002, etc.
     description TEXT NOT NULL,
     category TEXT,                        -- functional, visual, performance, security
 
@@ -38,7 +38,9 @@ CREATE TABLE IF NOT EXISTS acceptance_criteria (
     sequence INTEGER DEFAULT 0,
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE(plan_id, criterion_id)
 );
 
 -- ============================================================================
@@ -49,7 +51,7 @@ CREATE TABLE IF NOT EXISTS features (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
 
     -- Parent reference
-    plan_id TEXT,
+    plan_id TEXT REFERENCES plans(id) ON DELETE CASCADE,
     sprint_id TEXT,
 
     -- Feature details
@@ -128,8 +130,8 @@ CREATE TABLE IF NOT EXISTS context_budgets (
     usage_percent REAL DEFAULT 0.0,
 
     -- Thresholds
-    warn_threshold INTEGER,               -- Token count to warn at
-    summarize_threshold INTEGER,          -- Token count to auto-summarize
+    warn_threshold INTEGER NOT NULL DEFAULT 0,       -- Token count to warn at
+    summarize_threshold INTEGER NOT NULL DEFAULT 0,  -- Token count to auto-summarize
 
     -- Status
     status TEXT DEFAULT 'ok',             -- ok, warning, critical
@@ -203,8 +205,10 @@ CREATE TABLE IF NOT EXISTS session_phases (
 -- ============================================================================
 
 CREATE INDEX IF NOT EXISTS idx_acceptance_criteria_task ON acceptance_criteria(task_id);
+CREATE INDEX IF NOT EXISTS idx_acceptance_criteria_plan ON acceptance_criteria(plan_id);
 CREATE INDEX IF NOT EXISTS idx_acceptance_criteria_passes ON acceptance_criteria(passes);
 CREATE INDEX IF NOT EXISTS idx_features_plan ON features(plan_id);
+CREATE INDEX IF NOT EXISTS idx_events_agent ON events(agent);
 CREATE INDEX IF NOT EXISTS idx_features_passes ON features(passes);
 CREATE INDEX IF NOT EXISTS idx_context_snapshots_session ON context_snapshots(session_id);
 CREATE INDEX IF NOT EXISTS idx_progress_summaries_session ON progress_summaries(session_id);
@@ -286,8 +290,8 @@ CREATE TABLE IF NOT EXISTS checkpoints (
     -- Context
     description TEXT,
     git_commit TEXT,
-    session_id TEXT,
-    task_id TEXT,
+    session_id TEXT REFERENCES sessions(id) ON DELETE SET NULL,
+    task_id TEXT REFERENCES tasks(id) ON DELETE SET NULL,
     sprint_id TEXT,
 
     -- Status
@@ -302,7 +306,7 @@ CREATE TABLE IF NOT EXISTS checkpoints (
 
 CREATE TABLE IF NOT EXISTS checkpoint_restores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    checkpoint_id TEXT NOT NULL,
+    checkpoint_id TEXT NOT NULL REFERENCES checkpoints(checkpoint_id) ON DELETE CASCADE,
     restored_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -429,6 +433,13 @@ CREATE INDEX IF NOT EXISTS idx_token_usage_recorded ON token_usage(recorded_at);
 CREATE INDEX IF NOT EXISTS idx_error_log_session ON error_log(session_id);
 CREATE INDEX IF NOT EXISTS idx_error_log_type ON error_log(error_type);
 CREATE INDEX IF NOT EXISTS idx_dead_letter_status ON dead_letter(status);
+CREATE INDEX IF NOT EXISTS idx_features_sprint ON features(sprint_id);
+CREATE INDEX IF NOT EXISTS idx_token_usage_agent ON token_usage(agent_name);
+CREATE INDEX IF NOT EXISTS idx_token_usage_model ON token_usage(model);
+CREATE INDEX IF NOT EXISTS idx_checkpoints_task ON checkpoints(task_id);
+CREATE INDEX IF NOT EXISTS idx_checkpoints_can_restore ON checkpoints(can_restore);
+CREATE INDEX IF NOT EXISTS idx_acceptance_criteria_sprint ON acceptance_criteria(sprint_id);
+CREATE INDEX IF NOT EXISTS idx_token_usage_session_model ON token_usage(session_id, model);
 
 -- ============================================================================
 -- ADDITIONAL VIEWS
@@ -468,8 +479,4 @@ SELECT
 FROM error_log
 GROUP BY error_type;
 
--- ============================================================================
--- SCHEMA VERSION UPDATE
--- ============================================================================
-
-INSERT OR REPLACE INTO schema_version (version) VALUES (2);
+-- Note: Schema version is managed by db-init.sh

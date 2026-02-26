@@ -5,21 +5,15 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/common.sh"
+
 PROJECT_ROOT="${PROJECT_ROOT:-$(pwd)}"
 DEVTEAM_DIR="${PROJECT_ROOT}/.devteam"
+DB_FILE="${DEVTEAM_DIR}/devteam.db"
 CHECKPOINT_DIR="${DEVTEAM_DIR}/checkpoints"
-DB_FILE="${DEVTEAM_DIR}/state.db"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-log_info() { echo -e "${GREEN}[checkpoint]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[checkpoint]${NC} $1"; }
-log_error() { echo -e "${RED}[checkpoint]${NC} $1"; }
+# Register temp file cleanup
+setup_temp_cleanup
 
 # Ensure checkpoint directory exists
 ensure_dirs() {
@@ -28,12 +22,19 @@ ensure_dirs() {
 
 # Generate checkpoint ID
 generate_checkpoint_id() {
-    echo "chkpt-$(date +%Y%m%d-%H%M%S)-$(head -c 4 /dev/urandom | xxd -p)"
+    if ! command -v xxd &>/dev/null; then
+        hex=$(od -A n -t x1 -N 4 /dev/urandom | tr -d ' \n')
+    else
+        hex=$(head -c 4 /dev/urandom | xxd -p)
+    fi
+    echo "chkpt-$(date +%Y%m%d-%H%M%S)-${hex}"
 }
 
 # Create a full checkpoint
 create_checkpoint() {
     local description="${1:-Manual checkpoint}"
+    # Sanitize user-supplied description
+    description=$(sanitize_input "$description" 1024)
     local checkpoint_id
     checkpoint_id=$(generate_checkpoint_id)
     local checkpoint_path="${CHECKPOINT_DIR}/${checkpoint_id}"
@@ -41,20 +42,32 @@ create_checkpoint() {
     ensure_dirs
     mkdir -p "$checkpoint_path"
 
+    # Verify git repo exists
+    ensure_git || {
+        log_error "Cannot create checkpoint outside a git repository"
+        return 1
+    }
+
     log_info "Creating checkpoint: ${checkpoint_id}"
 
     # 1. Save git state
     log_info "Saving git state..."
     local git_info="${checkpoint_path}/git-state.json"
-    cat > "$git_info" << EOF
-{
-    "branch": "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')",
-    "commit": "$(git rev-parse HEAD 2>/dev/null || echo 'unknown')",
-    "dirty": $(if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then echo "true"; else echo "false"; fi),
-    "stash_count": $(git stash list 2>/dev/null | wc -l || echo 0),
-    "timestamp": "$(date -Iseconds)"
-}
-EOF
+    local git_branch
+    git_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')
+    local git_commit
+    git_commit=$(git rev-parse HEAD 2>/dev/null || echo 'unknown')
+    local git_dirty
+    if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then git_dirty="true"; else git_dirty="false"; fi
+    local git_stash_count
+    git_stash_count=$(git stash list 2>/dev/null | wc -l || echo 0)
+
+    json_object \
+        "branch" "$git_branch" \
+        "commit" "$git_commit" \
+        "dirty" "$git_dirty" \
+        "stash_count" "$git_stash_count" \
+        "timestamp" "$(date -Iseconds)" > "$git_info"
 
     # Stash any uncommitted changes
     if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
@@ -66,7 +79,7 @@ EOF
     # 2. Save database state
     if [[ -f "$DB_FILE" ]]; then
         log_info "Saving database state..."
-        cp "$DB_FILE" "${checkpoint_path}/state.db"
+        cp "$DB_FILE" "${checkpoint_path}/devteam.db"
     fi
 
     # 3. Save features.json if exists
@@ -84,21 +97,41 @@ EOF
     # 5. Save current session context
     log_info "Saving session context..."
     local context_file="${checkpoint_path}/context.json"
+    local ctx_phase
+    ctx_phase=$(cat "${DEVTEAM_DIR}/current-phase" 2>/dev/null || echo 'unknown')
+    local ctx_active_task
+    ctx_active_task=$(sql_exec "SELECT id FROM tasks WHERE status='in_progress' LIMIT 1;" 2>/dev/null || echo 'none')
+    local ctx_active_sprint='none'
+
+    local esc_checkpoint_id esc_description esc_project_root esc_user esc_hostname esc_shell esc_phase esc_task esc_sprint
+    esc_checkpoint_id=$(json_escape "$checkpoint_id")
+    esc_description=$(json_escape "$description")
+    esc_project_root=$(json_escape "$PROJECT_ROOT")
+    esc_user=$(json_escape "${USER:-unknown}")
+    esc_hostname=$(json_escape "$(hostname)")
+    esc_shell=$(json_escape "${SHELL:-unknown}")
+    esc_phase=$(json_escape "$ctx_phase")
+    esc_task=$(json_escape "$ctx_active_task")
+    esc_sprint=$(json_escape "$ctx_active_sprint")
+
+    local esc_timestamp
+    esc_timestamp=$(json_escape "$(date -Iseconds)")
+
     cat > "$context_file" << EOF
 {
-    "checkpoint_id": "${checkpoint_id}",
-    "description": "${description}",
-    "created_at": "$(date -Iseconds)",
-    "working_directory": "${PROJECT_ROOT}",
+    "checkpoint_id": "${esc_checkpoint_id}",
+    "description": "${esc_description}",
+    "created_at": "${esc_timestamp}",
+    "working_directory": "${esc_project_root}",
     "environment": {
-        "user": "${USER:-unknown}",
-        "hostname": "$(hostname)",
-        "shell": "${SHELL:-unknown}"
+        "user": "${esc_user}",
+        "hostname": "${esc_hostname}",
+        "shell": "${esc_shell}"
     },
     "session": {
-        "phase": "$(cat "${DEVTEAM_DIR}/current-phase" 2>/dev/null || echo 'unknown')",
-        "active_task": "$(sqlite3 "$DB_FILE" "SELECT task_id FROM tasks WHERE status='in_progress' LIMIT 1;" 2>/dev/null || echo 'none')",
-        "active_sprint": "$(sqlite3 "$DB_FILE" "SELECT sprint_id FROM sprints WHERE status='in_progress' LIMIT 1;" 2>/dev/null || echo 'none')"
+        "phase": "${esc_phase}",
+        "active_task": "${esc_task}",
+        "active_sprint": "${esc_sprint}"
     }
 }
 EOF
@@ -110,15 +143,18 @@ EOF
 
     # 7. Create checkpoint manifest
     local manifest="${checkpoint_path}/manifest.json"
+    local esc_manifest_ts
+    esc_manifest_ts=$(json_escape "$(date -Iseconds)")
+
     cat > "$manifest" << EOF
 {
     "version": "1.0",
-    "checkpoint_id": "${checkpoint_id}",
-    "description": "${description}",
-    "created_at": "$(date -Iseconds)",
+    "checkpoint_id": "${esc_checkpoint_id}",
+    "description": "${esc_description}",
+    "created_at": "${esc_manifest_ts}",
     "files": [
         "git-state.json",
-        "state.db",
+        "devteam.db",
         "features.json",
         "progress.txt",
         "context.json"
@@ -129,21 +165,13 @@ EOF
 
     # 8. Record in database
     if [[ -f "$DB_FILE" ]]; then
-        sqlite3 "$DB_FILE" << EOF
-INSERT INTO checkpoints (
-    checkpoint_id,
-    path,
-    description,
-    git_commit,
-    created_at
-) VALUES (
-    '${checkpoint_id}',
-    '${checkpoint_path}',
-    '${description}',
-    '$(git rev-parse HEAD 2>/dev/null || echo 'unknown')',
-    datetime('now')
-);
-EOF
+        local sql_ckpt_id sql_ckpt_path sql_description sql_git_commit
+        sql_ckpt_id=$(sql_escape "$checkpoint_id")
+        sql_ckpt_path=$(sql_escape "$checkpoint_path")
+        sql_description=$(sql_escape "$description")
+        sql_git_commit=$(sql_escape "$(git rev-parse HEAD 2>/dev/null || echo 'unknown')")
+
+        sql_exec "INSERT INTO checkpoints (checkpoint_id, path, description, git_commit, created_at) VALUES ('${sql_ckpt_id}', '${sql_ckpt_path}', '${sql_description}', '${sql_git_commit}', datetime('now'));" > /dev/null
     fi
 
     log_info "Checkpoint created: ${checkpoint_id}"
@@ -180,9 +208,17 @@ list_checkpoints() {
                 local id
                 id=$(basename "$checkpoint_dir")
                 local desc
-                desc=$(grep -o '"description": "[^"]*"' "$manifest" | cut -d'"' -f4 | head -c 23)
+                if command -v jq &>/dev/null; then
+                    desc=$(jq -r '.description // empty' "$manifest" 2>/dev/null | head -c 23)
+                else
+                    desc=$(grep -o '"description": "[^"]*"' "$manifest" | cut -d'"' -f4 | head -c 23)
+                fi
                 local created
-                created=$(grep -o '"created_at": "[^"]*"' "$manifest" | cut -d'"' -f4 | cut -dT -f1)
+                if command -v jq &>/dev/null; then
+                    created=$(jq -r '.created_at // empty' "$manifest" 2>/dev/null | cut -dT -f1)
+                else
+                    created=$(grep -o '"created_at": "[^"]*"' "$manifest" | cut -d'"' -f4 | cut -dT -f1)
+                fi
                 printf "%-35s %-25s %-20s\n" "$id" "$desc" "$created"
             fi
         fi
@@ -202,20 +238,39 @@ restore_checkpoint() {
         exit 1
     fi
 
+    # Verify git repo exists
+    ensure_git || {
+        log_error "Cannot restore checkpoint outside a git repository"
+        return 1
+    }
+
     log_warn "Restoring from checkpoint: ${checkpoint_id}"
 
     # 1. Create a safety checkpoint first
     log_info "Creating safety checkpoint before restore..."
-    create_checkpoint "pre-restore-safety"
+    if ! create_checkpoint "pre-restore-safety"; then
+        log_error "Failed to create safety checkpoint; aborting restore"
+        return 1
+    fi
 
     # 2. Restore git state
     if [[ -f "${checkpoint_path}/git-state.json" ]]; then
         log_info "Restoring git state..."
         local target_commit
-        target_commit=$(grep -o '"commit": "[^"]*"' "${checkpoint_path}/git-state.json" | cut -d'"' -f4)
+        if command -v jq &>/dev/null; then
+            target_commit=$(jq -r '.commit // empty' "${checkpoint_path}/git-state.json" 2>/dev/null)
+        else
+            target_commit=$(grep -o '"commit": "[^"]*"' "${checkpoint_path}/git-state.json" | cut -d'"' -f4)
+        fi
 
         if [[ -n "$target_commit" ]] && [[ "$target_commit" != "unknown" ]]; then
-            git reset --hard "$target_commit"
+            # Validate commit exists before resetting (M6)
+            if git cat-file -t "$target_commit" &>/dev/null; then
+                git reset --hard "$target_commit"
+            else
+                log_error "Target commit not found: $target_commit"
+                return 1
+            fi
         fi
 
         # Restore stashed changes if any
@@ -225,9 +280,12 @@ restore_checkpoint() {
         fi
     fi
 
-    # 3. Restore database
-    if [[ -f "${checkpoint_path}/state.db" ]]; then
+    # 3. Restore database (check both old and new naming)
+    if [[ -f "${checkpoint_path}/devteam.db" ]]; then
         log_info "Restoring database..."
+        cp "${checkpoint_path}/devteam.db" "$DB_FILE"
+    elif [[ -f "${checkpoint_path}/state.db" ]]; then
+        log_info "Restoring database (legacy checkpoint)..."
         cp "${checkpoint_path}/state.db" "$DB_FILE"
     fi
 
@@ -246,7 +304,11 @@ restore_checkpoint() {
     # 6. Restore session context
     if [[ -f "${checkpoint_path}/context.json" ]]; then
         local phase
-        phase=$(grep -o '"phase": "[^"]*"' "${checkpoint_path}/context.json" | cut -d'"' -f4)
+        if command -v jq &>/dev/null; then
+            phase=$(jq -r '.session.phase // empty' "${checkpoint_path}/context.json" 2>/dev/null)
+        else
+            phase=$(grep -o '"phase": "[^"]*"' "${checkpoint_path}/context.json" | cut -d'"' -f4)
+        fi
         if [[ -n "$phase" ]] && [[ "$phase" != "unknown" ]]; then
             echo "$phase" > "${DEVTEAM_DIR}/current-phase"
         fi
@@ -254,15 +316,9 @@ restore_checkpoint() {
 
     # Record restoration
     if [[ -f "$DB_FILE" ]]; then
-        sqlite3 "$DB_FILE" << EOF
-INSERT INTO checkpoint_restores (
-    checkpoint_id,
-    restored_at
-) VALUES (
-    '${checkpoint_id}',
-    datetime('now')
-);
-EOF
+        local sql_ckpt_id
+        sql_ckpt_id=$(sql_escape "$checkpoint_id")
+        sql_exec "INSERT INTO checkpoint_restores (checkpoint_id, restored_at) VALUES ('${sql_ckpt_id}', datetime('now'));" > /dev/null
     fi
 
     log_info "Checkpoint restored: ${checkpoint_id}"
@@ -284,7 +340,9 @@ delete_checkpoint() {
 
     # Update database
     if [[ -f "$DB_FILE" ]]; then
-        sqlite3 "$DB_FILE" "DELETE FROM checkpoints WHERE checkpoint_id='${checkpoint_id}';"
+        local sql_ckpt_id
+        sql_ckpt_id=$(sql_escape "$checkpoint_id")
+        sql_exec "DELETE FROM checkpoints WHERE checkpoint_id='${sql_ckpt_id}';" > /dev/null
     fi
 }
 
@@ -295,7 +353,7 @@ clean_checkpoints() {
     ensure_dirs
 
     local all_checkpoints
-    all_checkpoints=$(ls -1t "$CHECKPOINT_DIR" 2>/dev/null | head -n -"$keep")
+    all_checkpoints=$(ls -1t "$CHECKPOINT_DIR" 2>/dev/null | tail -n +"$((keep + 1))")
 
     if [[ -z "$all_checkpoints" ]]; then
         log_info "No old checkpoints to clean"

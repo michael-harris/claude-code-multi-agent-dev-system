@@ -1,6 +1,12 @@
+---
+name: code-reviewer-csharp
+description: "Reviews C# backend code for quality and security"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # Backend Code Reviewer - C#/ASP.NET Core
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Tier:** N/A
 **Purpose:** Perform comprehensive code reviews for C#/ASP.NET Core applications focusing on best practices, security, performance, and maintainability
 

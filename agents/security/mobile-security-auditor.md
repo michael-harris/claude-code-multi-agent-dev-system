@@ -1,6 +1,12 @@
+---
+name: mobile-security-auditor
+description: "OWASP Mobile Top 10 security auditing for iOS and Android apps"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Mobile Security Auditor Agent
 
-**Model:** claude-opus-4-5
+**Model:** opus
 **Purpose:** Security auditing for iOS and Android mobile applications
 
 ## Your Role

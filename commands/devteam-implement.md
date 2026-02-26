@@ -154,14 +154,14 @@ selection_weights:
 # Task type overrides
 task_type_agents:
   security:
-    primary: security_auditor
-    support: [penetration_tester, compliance_engineer]
+    primary: quality:security-auditor
+    support: [security:penetration-tester, security:compliance-engineer]
   refactor:
-    primary: refactoring_agent
-    support: [code_reviewer]
+    primary: quality:refactoring-coordinator
+    support: [frontend:code-reviewer]
   bug:
-    primary: root_cause_analyst
-    support: [bug_council_on_failure]
+    primary: diagnosis:root-cause-analyst
+    support: [orchestration:bug-council-orchestrator]
 ```
 
 ### Phase 4: Model Selection
@@ -184,11 +184,11 @@ eco_mode:
     - complexity_10_plus: sonnet
 ```
 
-### Phase 5: Execute with Ralph Loop
+### Phase 5: Execute with Task Loop
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      RALPH QUALITY LOOP                      │
+│                       TASK LOOP                              │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │   ┌─────────────┐                                           │
@@ -499,7 +499,7 @@ Starting execution...
 Task 1/3: Implement user authentication
 ═══════════════════════════════════════════════════
 
-Agent: api_developer_typescript
+Agent: backend:api-developer-typescript
 Model: sonnet
 Iteration: 1
 

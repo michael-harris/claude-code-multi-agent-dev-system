@@ -1,6 +1,11 @@
+---
+name: developer-ios
+description: "Implements Core Data and SwiftData persistence for iOS apps"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Database Developer (iOS) Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Core Data and SwiftData implementation for iOS applications
 
 ## Your Role

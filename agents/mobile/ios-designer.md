@@ -1,6 +1,11 @@
+---
+name: ios-designer
+description: "iOS UI/UX design following Apple Human Interface Guidelines"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # iOS Designer Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** iOS UI/UX design following Apple Human Interface Guidelines
 
 ## Your Role

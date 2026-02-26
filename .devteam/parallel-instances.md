@@ -70,7 +70,7 @@ When a plan starts execution, it acquires a lock:
 ```
 .devteam/plans/feature-dark-mode/
 ├── lock.json          ← Lock file
-├── state.yaml
+├── devteam.db         ← SQLite state database
 ├── tasks/
 └── sprints/
 ```

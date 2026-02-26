@@ -15,35 +15,38 @@ Fix a GitHub issue by number. Automatically fetches details and implements a fix
 
 ### Phase 0: Initialize State Tracking
 
-Before starting, create/update `.devteam/state.yaml`:
+Before starting, initialize state in SQLite database (`.devteam/devteam.db`):
 
-```yaml
-version: "3.0"
+```bash
+# Source the state management functions
+source scripts/state.sh
 
-metadata:
-  created_at: "[timestamp]"
-  project_name: "Issue #123 Fix"
-  project_type: issue
+# Initialize the database if needed
+source scripts/db-init.sh
 
-issue:
-  number: 123
-  title: "[from GitHub]"
-  type: bug | security | performance | enhancement
-  severity: critical | high | medium | low
-  complexity: simple | moderate | complex
+# Set project metadata
+set_kv_state "metadata.created_at" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+set_kv_state "metadata.project_name" "Issue #123 Fix"
+set_kv_state "metadata.project_type" "issue"
 
-current_execution:
-  command: "/devteam:issue 123"
-  phase: diagnosis
+# Set issue details
+set_kv_state "issue.number" "123"
+set_kv_state "issue.title" "[from GitHub]"
+set_kv_state "issue.type" "bug"           # bug | security | performance | enhancement
+set_kv_state "issue.severity" "high"       # critical | high | medium | low
+set_kv_state "issue.complexity" "moderate"  # simple | moderate | complex
 
-autonomous_mode:
-  enabled: true
-  max_iterations: 20            # Lower for issues
-  current_iteration: 0
-  circuit_breaker:
-    consecutive_failures: 0
-    max_failures: 3             # Lower tolerance for issues
-    state: closed
+# Set execution context
+set_kv_state "current_execution.command" "/devteam:issue 123"
+set_phase "diagnosis"
+
+# Configure autonomous mode
+set_kv_state "autonomous_mode.enabled" "true"
+set_kv_state "autonomous_mode.max_iterations" "20"
+set_kv_state "autonomous_mode.current_iteration" "0"
+set_kv_state "autonomous_mode.circuit_breaker.consecutive_failures" "0"
+set_kv_state "autonomous_mode.circuit_breaker.max_failures" "3"
+set_kv_state "autonomous_mode.circuit_breaker.state" "closed"
 ```
 
 ### Phase 1: Fetch Issue Details
@@ -93,7 +96,7 @@ gh issue view 123 --json title,body,labels,comments,state
 // Spawn 5 diagnostic agents in parallel
 const councilResults = await Promise.all([
   Task({
-    subagent_type: "diagnosis/root-cause-analyst",
+    subagent_type: "diagnosis:root-cause-analyst",
     model: "opus",
     prompt: `Analyze issue #${issueNumber}:
       Title: ${title}
@@ -107,25 +110,25 @@ const councilResults = await Promise.all([
   }),
 
   Task({
-    subagent_type: "diagnosis/code-archaeologist",
+    subagent_type: "diagnosis:code-archaeologist",
     model: "opus",
     prompt: `Investigate git history for issue #${issueNumber}...`
   }),
 
   Task({
-    subagent_type: "diagnosis/pattern-matcher",
+    subagent_type: "diagnosis:pattern-matcher",
     model: "opus",
     prompt: `Search codebase for similar patterns...`
   }),
 
   Task({
-    subagent_type: "diagnosis/systems-thinker",
+    subagent_type: "diagnosis:systems-thinker",
     model: "opus",
     prompt: `Analyze system interactions...`
   }),
 
   Task({
-    subagent_type: "diagnosis/adversarial-tester",
+    subagent_type: "diagnosis:adversarial-tester",
     model: "opus",
     prompt: `Find edge cases and related failures...`
   })
@@ -148,23 +151,23 @@ bug_council:
 
   proposals:
     A:
-      agent: root_cause_analyst
+      agent: diagnosis:root-cause-analyst
       diagnosis: "Null reference in guest user handling"
       confidence: 0.85
     B:
-      agent: code_archaeologist
+      agent: diagnosis:code-archaeologist
       diagnosis: "Regression from commit abc123"
       confidence: 0.78
     C:
-      agent: pattern_matcher
+      agent: diagnosis:pattern-matcher
       diagnosis: "Inconsistent optional chaining"
       confidence: 0.92
     D:
-      agent: systems_thinker
+      agent: diagnosis:systems-thinker
       diagnosis: "AuthContext contract violation"
       confidence: 0.80
     E:
-      agent: adversarial_tester
+      agent: diagnosis:adversarial-tester
       diagnosis: "Multiple paths to same failure"
       confidence: 0.75
 
@@ -184,8 +187,8 @@ bug_council:
 **Simple/Moderate Issues (no council):**
 ```javascript
 Task({
-  subagent_type: "task-orchestrator",
-  model: "dynamic",  // Based on complexity
+  subagent_type: "orchestration:task-loop",
+  model: "opus",
   prompt: `Fix issue #${issueNumber}:
 
     Issue: ${title}
@@ -203,7 +206,7 @@ Task({
 **Complex Issues (with council):**
 ```javascript
 Task({
-  subagent_type: "task-orchestrator",
+  subagent_type: "orchestration:task-loop",
   model: "sonnet",
   prompt: `Fix issue #${issueNumber} using Bug Council decision:
 
@@ -394,3 +397,11 @@ GitHub issue #123 closed automatically.
 - Implementation: ~$1.50
 - Testing: ~$0.50
 - **Total: ~$5.50**
+
+## See Also
+
+- `/devteam:bug` - Fix locally-discovered bugs (use when there's no GitHub issue)
+- `/devteam:implement` - General implementation
+- `/devteam:status` - Check progress
+
+> **When to use `/devteam:issue` vs `/devteam:bug`:** Use `/devteam:issue` when fixing a tracked GitHub issue by number. Use `/devteam:bug` for locally-discovered bugs without a GitHub issue.

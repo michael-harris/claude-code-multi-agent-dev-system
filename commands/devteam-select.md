@@ -46,7 +46,7 @@ Check plan status:
 ### Step 3: Update Active Plan
 
 ```bash
-# Update index.yaml
+# Update index.json
 active_plan: feature-dark-mode
 
 # Update pointer file
@@ -71,7 +71,7 @@ Tasks:
 
 Next steps:
   • /devteam:implement         Execute this plan
-  • /devteam:plan --edit  Modify the plan
+  • /devteam:plan         Modify the plan
   • /devteam:list         See all plans
 ```
 

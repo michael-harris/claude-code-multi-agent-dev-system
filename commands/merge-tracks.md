@@ -27,7 +27,7 @@ You are orchestrating the **parallel development tracks merging phase** to combi
 This command only works for projects planned with git worktrees (`--use-worktrees` flag).
 
 **Pre-flight checks:**
-1. State file must exist with worktree mode enabled
+1. SQLite state database must exist with worktree mode enabled
 2. All tracks must be complete (all sprints in all tracks marked "completed")
 3. No uncommitted changes in any worktree
 4. All worktrees should have pushed to remote (optional but recommended)
@@ -44,7 +44,7 @@ Extract flags from command:
 
 ### Step 1: Load State and Validate
 
-1. **Load state file** (`docs/planning/.project-state.yaml`)
+1. **Load state from SQLite** (`.devteam/devteam.db` via `source scripts/state.sh`)
 
 2. **Verify worktree mode:**
    ```python
@@ -138,12 +138,12 @@ If not dry-run, launch the **track-merger** agent:
 
 ```javascript
 Task(
-  subagent_type="multi-agent:orchestration:track-merger",
-  model="sonnet",
+  subagent_type="orchestration:track-merger",
+  model="opus",
   description="Merge all development tracks intelligently",
   prompt=`Merge all development tracks back to main branch.
 
-State file: docs/planning/.project-state.yaml
+State database: .devteam/devteam.db (via source scripts/state.sh)
 
 Your responsibilities:
 1. Verify all pre-flight checks passed
@@ -159,7 +159,7 @@ Your responsibilities:
 8. Create pull request (unless --manual-merge)
 9. Clean up worktrees (unless --keep-worktrees)
 10. Optionally delete track branches (if --delete-branches)
-11. Update state file to mark merge complete
+11. Update SQLite state database to mark merge complete
 12. Generate merge completion report
 
 Flags:
@@ -182,15 +182,16 @@ After track-merger completes:
    - Integration testing
    - Documentation review
 
-2. **Update state file:**
-   ```yaml
-   merge_info:
-     merged_at: "2025-11-03T15:30:00Z"
-     tracks_merged: [1, 2, 3]
-     merge_commit: "abc123def456"
-     conflicts_resolved: 2
-     worktrees_cleaned: true
-     branches_deleted: false
+2. **Update state in SQLite:**
+   ```bash
+   source scripts/state.sh
+
+   set_kv_state "merge_info.merged_at" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+   set_kv_state "merge_info.tracks_merged" "1,2,3"
+   set_kv_state "merge_info.merge_commit" "abc123def456"
+   set_kv_state "merge_info.conflicts_resolved" "2"
+   set_kv_state "merge_info.worktrees_cleaned" "true"
+   set_kv_state "merge_info.branches_deleted" "false"
    ```
 
 3. **Generate completion report** in `docs/merge-completion-report.md`

@@ -1,6 +1,11 @@
+---
+name: android-designer
+description: "Android UI/UX design following Material Design 3 guidelines"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Android Designer Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Android UI/UX design following Material Design 3 guidelines
 
 ## Your Role

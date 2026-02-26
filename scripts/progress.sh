@@ -10,10 +10,11 @@ set -euo pipefail
 # Get script directory and source common library
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib/common.sh"
+source "${SCRIPT_DIR}/state.sh"
 
 # Progress file path
-PROGRESS_FILE="${DEVTEAM_DIR:-".devteam"}/progress.txt"
-FEATURES_FILE="${DEVTEAM_DIR:-".devteam"}/features.json"
+DEVTEAM_PROGRESS_FILE="${DEVTEAM_DIR:-".devteam"}/progress.txt"
+DEVTEAM_FEATURES_FILE="${DEVTEAM_DIR:-".devteam"}/features.json"
 
 # ============================================================================
 # PROGRESS FILE GENERATION
@@ -34,15 +35,21 @@ generate_progress_summary() {
     local project_name
     project_name=$(basename "$(pwd)")
 
+    # Check jq dependency for feature stats
+    if ! command -v jq &>/dev/null; then
+        log_warn "jq not available" "progress"
+        return 1
+    fi
+
     # Get feature stats if features.json exists
     local total_features=0
     local passing_features=0
     local failing_features=0
     local pass_percentage=0
 
-    if [ -f "$FEATURES_FILE" ]; then
-        total_features=$(jq '.features | length' "$FEATURES_FILE" 2>/dev/null || echo "0")
-        passing_features=$(jq '[.features[] | select(.passes == true)] | length' "$FEATURES_FILE" 2>/dev/null || echo "0")
+    if [ -f "$DEVTEAM_FEATURES_FILE" ]; then
+        total_features=$(jq '.features | length' "$DEVTEAM_FEATURES_FILE" 2>/dev/null || echo "0")
+        passing_features=$(jq '[.features[] | select(.passes == true)] | length' "$DEVTEAM_FEATURES_FILE" 2>/dev/null || echo "0")
         failing_features=$((total_features - passing_features))
         if [ "$total_features" -gt 0 ]; then
             pass_percentage=$((passing_features * 100 / total_features))
@@ -59,13 +66,15 @@ generate_progress_summary() {
     local session_status=""
 
     if [ -n "$session_id" ]; then
-        current_phase=$(sql_exec "SELECT current_phase FROM sessions WHERE id = '$session_id';" 2>/dev/null || echo "")
-        current_iteration=$(sql_exec "SELECT current_iteration FROM sessions WHERE id = '$session_id';" 2>/dev/null || echo "0")
-        session_status=$(sql_exec "SELECT status FROM sessions WHERE id = '$session_id';" 2>/dev/null || echo "")
+        local esc_sid
+        esc_sid=$(sql_escape "$session_id")
+        current_phase=$(sql_exec "SELECT current_phase FROM sessions WHERE id = '$esc_sid';" 2>/dev/null || echo "")
+        current_iteration=$(sql_exec "SELECT current_iteration FROM sessions WHERE id = '$esc_sid';" 2>/dev/null || echo "0")
+        session_status=$(sql_exec "SELECT status FROM sessions WHERE id = '$esc_sid';" 2>/dev/null || echo "")
     fi
 
     # Generate the progress file
-    cat > "$PROGRESS_FILE" << EOF
+    cat > "$DEVTEAM_PROGRESS_FILE" << EOF
 ═══════════════════════════════════════════════════════════════
 DEVTEAM PROGRESS TRACKER
 ═══════════════════════════════════════════════════════════════
@@ -103,7 +112,12 @@ $(get_next_feature)
 ═══════════════════════════════════════════════════════════════
 EOF
 
-    log_info "Progress summary updated: $PROGRESS_FILE" "progress"
+    log_info "Progress summary updated: $DEVTEAM_PROGRESS_FILE" "progress"
+
+    # Sync progress to database if session is available (H4)
+    if [ -n "$session_id" ]; then
+        sync_progress_to_db "$session_id"
+    fi
 }
 
 # Generate ASCII progress bar
@@ -132,7 +146,7 @@ generate_progress_bar() {
 
 # Get next feature to work on
 get_next_feature() {
-    if [ ! -f "$FEATURES_FILE" ]; then
+    if [ ! -f "$DEVTEAM_FEATURES_FILE" ]; then
         echo "No features.json found. Run initializer phase first."
         return
     fi
@@ -150,7 +164,7 @@ get_next_feature() {
         )
         | .[0]
         | if . then "[\(.id)] \(.description)" else "All features complete!" end
-    ' "$FEATURES_FILE" 2>/dev/null)
+    ' "$DEVTEAM_FEATURES_FILE" 2>/dev/null)
 
     echo "${next_feature:-"Unable to determine next feature"}"
 }
@@ -164,7 +178,7 @@ get_next_feature() {
 mark_feature_passing() {
     local feature_id="$1"
 
-    if [ ! -f "$FEATURES_FILE" ]; then
+    if [ ! -f "$DEVTEAM_FEATURES_FILE" ]; then
         log_error "features.json not found" "progress"
         return 1
     fi
@@ -172,9 +186,48 @@ mark_feature_passing() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+    # File locking to prevent race conditions
+    local lock_dir="${DEVTEAM_FEATURES_FILE}.lock"
+    local lock_pid_file="${lock_dir}/pid"
+    # Clean stale locks: older than 10 seconds OR held by dead process
+    if [ -d "$lock_dir" ]; then
+        local lock_age
+        local lock_mtime
+        if [[ "$(uname)" == "Darwin" ]]; then
+            lock_mtime=$(stat -f %m "$lock_dir" 2>/dev/null || echo "0")
+        else
+            lock_mtime=$(stat -c %Y "$lock_dir" 2>/dev/null || echo "0")
+        fi
+        lock_age=$(( $(date +%s) - lock_mtime ))
+        local stale=false
+        if [ "$lock_age" -gt 10 ]; then
+            stale=true
+        elif [ -f "$lock_pid_file" ]; then
+            local lock_pid
+            lock_pid=$(cat "$lock_pid_file" 2>/dev/null || echo "0")
+            if [ "$lock_pid" != "0" ] && ! kill -0 "$lock_pid" 2>/dev/null; then
+                stale=true
+            fi
+        fi
+        if [ "$stale" = true ]; then
+            rm -rf "$lock_dir" 2>/dev/null || true
+        fi
+    fi
+    local attempts=0
+    while ! mkdir "$lock_dir" 2>/dev/null; do
+        attempts=$((attempts + 1))
+        if [ "$attempts" -ge 50 ]; then
+            log_warn "Could not acquire lock after 50 attempts" "progress"
+            return 1
+        fi
+        sleep 0.1
+    done
+    echo $$ > "$lock_pid_file" 2>/dev/null || true
+    trap "rm -rf '$lock_dir' 2>/dev/null" RETURN
+
     # Update the feature
     local tmp_file
-    tmp_file=$(mktemp)
+    tmp_file=$(safe_mktemp)
 
     jq --arg id "$feature_id" --arg ts "$timestamp" '
         .features = [.features[] |
@@ -186,9 +239,9 @@ mark_feature_passing() {
             end
         ] |
         .updated_at = $ts
-    ' "$FEATURES_FILE" > "$tmp_file"
+    ' "$DEVTEAM_FEATURES_FILE" > "$tmp_file"
 
-    mv "$tmp_file" "$FEATURES_FILE"
+    mv "$tmp_file" "$DEVTEAM_FEATURES_FILE"
 
     log_info "Feature $feature_id marked as passing" "progress"
 
@@ -202,7 +255,7 @@ mark_feature_failing() {
     local feature_id="$1"
     local reason="${2:-"Verification failed"}"
 
-    if [ ! -f "$FEATURES_FILE" ]; then
+    if [ ! -f "$DEVTEAM_FEATURES_FILE" ]; then
         log_error "features.json not found" "progress"
         return 1
     fi
@@ -210,8 +263,47 @@ mark_feature_failing() {
     local timestamp
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+    # File locking to prevent race conditions
+    local lock_dir="${DEVTEAM_FEATURES_FILE}.lock"
+    local lock_pid_file="${lock_dir}/pid"
+    # Clean stale locks: older than 10 seconds OR held by dead process
+    if [ -d "$lock_dir" ]; then
+        local lock_age
+        local lock_mtime
+        if [[ "$(uname)" == "Darwin" ]]; then
+            lock_mtime=$(stat -f %m "$lock_dir" 2>/dev/null || echo "0")
+        else
+            lock_mtime=$(stat -c %Y "$lock_dir" 2>/dev/null || echo "0")
+        fi
+        lock_age=$(( $(date +%s) - lock_mtime ))
+        local stale=false
+        if [ "$lock_age" -gt 10 ]; then
+            stale=true
+        elif [ -f "$lock_pid_file" ]; then
+            local lock_pid
+            lock_pid=$(cat "$lock_pid_file" 2>/dev/null || echo "0")
+            if [ "$lock_pid" != "0" ] && ! kill -0 "$lock_pid" 2>/dev/null; then
+                stale=true
+            fi
+        fi
+        if [ "$stale" = true ]; then
+            rm -rf "$lock_dir" 2>/dev/null || true
+        fi
+    fi
+    local attempts=0
+    while ! mkdir "$lock_dir" 2>/dev/null; do
+        attempts=$((attempts + 1))
+        if [ "$attempts" -ge 50 ]; then
+            log_warn "Could not acquire lock after 50 attempts" "progress"
+            return 1
+        fi
+        sleep 0.1
+    done
+    echo $$ > "$lock_pid_file" 2>/dev/null || true
+    trap "rm -rf '$lock_dir' 2>/dev/null" RETURN
+
     local tmp_file
-    tmp_file=$(mktemp)
+    tmp_file=$(safe_mktemp)
 
     jq --arg id "$feature_id" --arg ts "$timestamp" --arg reason "$reason" '
         .features = [.features[] |
@@ -223,9 +315,9 @@ mark_feature_failing() {
             end
         ] |
         .updated_at = $ts
-    ' "$FEATURES_FILE" > "$tmp_file"
+    ' "$DEVTEAM_FEATURES_FILE" > "$tmp_file"
 
-    mv "$tmp_file" "$FEATURES_FILE"
+    mv "$tmp_file" "$DEVTEAM_FEATURES_FILE"
 
     log_warn "Feature $feature_id marked as failing: $reason" "progress"
 
@@ -238,14 +330,14 @@ mark_feature_failing() {
 get_feature_status() {
     local feature_id="$1"
 
-    if [ ! -f "$FEATURES_FILE" ]; then
+    if [ ! -f "$DEVTEAM_FEATURES_FILE" ]; then
         echo "unknown"
         return
     fi
 
     jq -r --arg id "$feature_id" '
         .features[] | select(.id == $id) | if .passes then "passing" else "failing" end
-    ' "$FEATURES_FILE" 2>/dev/null || echo "unknown"
+    ' "$DEVTEAM_FEATURES_FILE" 2>/dev/null || echo "unknown"
 }
 
 # ============================================================================
@@ -270,9 +362,9 @@ sync_progress_to_db() {
     local total_features=0
     local passing_features=0
 
-    if [ -f "$FEATURES_FILE" ]; then
-        total_features=$(jq '.features | length' "$FEATURES_FILE" 2>/dev/null || echo "0")
-        passing_features=$(jq '[.features[] | select(.passes == true)] | length' "$FEATURES_FILE" 2>/dev/null || echo "0")
+    if [ -f "$DEVTEAM_FEATURES_FILE" ]; then
+        total_features=$(jq '.features | length' "$DEVTEAM_FEATURES_FILE" 2>/dev/null || echo "0")
+        passing_features=$(jq '[.features[] | select(.passes == true)] | length' "$DEVTEAM_FEATURES_FILE" 2>/dev/null || echo "0")
     fi
 
     local remaining=$((total_features - passing_features))
@@ -281,13 +373,16 @@ sync_progress_to_db() {
     local tests_passing=0
     local tests_failing=0
 
+    local esc_sync_sid
+    esc_sync_sid=$(sql_escape "$session_id")
+
     tests_passing=$(sql_exec "
         SELECT COALESCE(
             json_extract(details, '$.tests_passed'),
             0
         )
         FROM gate_results
-        WHERE session_id = '$session_id' AND gate = 'tests'
+        WHERE session_id = '$esc_sync_sid' AND gate = 'tests'
         ORDER BY timestamp DESC LIMIT 1;
     " 2>/dev/null || echo "0")
 
@@ -297,13 +392,13 @@ sync_progress_to_db() {
             0
         )
         FROM gate_results
-        WHERE session_id = '$session_id' AND gate = 'tests'
+        WHERE session_id = '$esc_sync_sid' AND gate = 'tests'
         ORDER BY timestamp DESC LIMIT 1;
     " 2>/dev/null || echo "0")
 
     # Get current iteration
     local current_iteration
-    current_iteration=$(sql_exec "SELECT current_iteration FROM sessions WHERE id = '$session_id';" 2>/dev/null || echo "0")
+    current_iteration=$(sql_exec "SELECT current_iteration FROM sessions WHERE id = '$esc_sync_sid';" 2>/dev/null || echo "0")
 
     # Get last commit
     local last_commit
@@ -311,15 +406,19 @@ sync_progress_to_db() {
 
     # Read progress file content
     local summary_text=""
-    if [ -f "$PROGRESS_FILE" ]; then
-        summary_text=$(cat "$PROGRESS_FILE")
+    if [ -f "$DEVTEAM_PROGRESS_FILE" ]; then
+        summary_text=$(cat "$DEVTEAM_PROGRESS_FILE")
     fi
 
-    # Escape for SQL
-    summary_text=$(echo "$summary_text" | sed "s/'/''/g")
+    # Escape for SQL using sql_escape()
+    local esc_summary esc_session_id esc_last_commit
+    esc_summary=$(sql_escape "$summary_text")
+    esc_session_id=$(sql_escape "$session_id")
+    esc_last_commit=$(sql_escape "$last_commit")
 
-    # Insert progress summary
+    # Insert progress summary atomically
     sql_exec "
+        BEGIN;
         INSERT INTO progress_summaries (
             session_id,
             summary_text,
@@ -333,8 +432,8 @@ sync_progress_to_db() {
             features_total,
             last_commit_sha
         ) VALUES (
-            '$session_id',
-            '$summary_text',
+            '$esc_session_id',
+            '$esc_summary',
             ${current_iteration:-0},
             ${current_iteration:-0},
             $passing_features,
@@ -343,8 +442,9 @@ sync_progress_to_db() {
             ${tests_failing:-0},
             $passing_features,
             $total_features,
-            '$last_commit'
+            '$esc_last_commit'
         );
+        COMMIT;
     " 2>/dev/null
 
     log_info "Progress synced to database" "progress"
@@ -366,7 +466,7 @@ initialize_features_json() {
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     # Create initial structure
-    cat > "$FEATURES_FILE" << EOF
+    cat > "$DEVTEAM_FEATURES_FILE" << EOF
 {
   "project_name": "${project_name}",
   "plan_id": "${plan_id}",
@@ -388,7 +488,7 @@ add_feature() {
     local priority="${4:-medium}"
     local steps_json="${5:-"[]"}"
 
-    if [ ! -f "$FEATURES_FILE" ]; then
+    if [ ! -f "$DEVTEAM_FEATURES_FILE" ]; then
         initialize_features_json
     fi
 
@@ -396,7 +496,7 @@ add_feature() {
     timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
     local tmp_file
-    tmp_file=$(mktemp)
+    tmp_file=$(safe_mktemp)
 
     jq --arg id "$id" \
        --arg cat "$category" \
@@ -413,9 +513,9 @@ add_feature() {
             "passes": false
         }] |
         .updated_at = $ts
-    ' "$FEATURES_FILE" > "$tmp_file"
+    ' "$DEVTEAM_FEATURES_FILE" > "$tmp_file"
 
-    mv "$tmp_file" "$FEATURES_FILE"
+    mv "$tmp_file" "$DEVTEAM_FEATURES_FILE"
 
     log_info "Added feature $id" "progress"
 }

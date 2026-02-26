@@ -1,6 +1,12 @@
+---
+name: performance-auditor-python
+description: "Python-specific performance analysis and optimization"
+model: sonnet
+tools: Read, Glob, Grep, Bash
+---
 # Performance Auditor (Python) Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Python-specific performance analysis and optimization
 
 ## Your Role

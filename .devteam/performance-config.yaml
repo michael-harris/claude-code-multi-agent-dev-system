@@ -1,0 +1,67 @@
+# DevTeam Performance Configuration
+# Referenced by: quality/performance-auditor-php.md, quality/performance-auditor-ruby.md
+# Defines performance thresholds, caching policies, and profiling settings
+
+php_performance:
+  php_version: "8.2"
+  framework: "laravel"
+
+  thresholds:
+    max_queries_per_request: 20
+    max_query_time_ms: 100
+    max_memory_mb: 128
+    max_response_time_ms: 500
+
+  database:
+    check_n_plus_one: true
+    check_missing_indexes: true
+    require_pagination: true
+    max_unpaginated_results: 100
+
+  caching:
+    require_query_cache: true
+    require_route_cache: true  # production
+    require_config_cache: true  # production
+    cache_driver: "redis"
+
+  opcache:
+    require_enabled: true  # production
+    require_jit: true  # PHP 8.0+
+    validate_timestamps: false  # production
+
+  excluded_paths:
+    - "tests/**"
+    - "database/migrations/**"
+    - "bootstrap/**"
+
+ruby_performance:
+  ruby_version: "3.2"
+  rails_version: "7.1"
+
+  thresholds:
+    max_queries_per_request: 15
+    max_query_time_ms: 50
+    max_memory_mb: 512
+    max_response_time_ms: 300
+
+  database:
+    check_n_plus_one: true
+    check_missing_indexes: true
+    check_counter_caches: true
+    require_pagination: true
+    max_unpaginated_results: 100
+
+  caching:
+    require_fragment_caching: true
+    require_russian_doll: true
+    cache_store: "redis_cache_store"
+
+  runtime:
+    require_frozen_string_literals: true
+    require_yjit: true  # Ruby 3.1+
+    gc_tuning: true
+
+  gems:
+    bullet:
+      enabled: true
+      environments: ["development", "test"]

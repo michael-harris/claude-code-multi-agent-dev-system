@@ -1,3 +1,7 @@
+# DEPRECATED: State is now managed in SQLite (.devteam/devteam.db).
+# See scripts/schema*.sql for the current schema. Query with: sqlite3 .devteam/devteam.db
+# This file is kept as historical reference only. Do NOT use for new development.
+#
 # DevTeam State File Example
 # This shows what a populated state file looks like during execution
 # Actual state files are created in user projects at .devteam/state.yaml

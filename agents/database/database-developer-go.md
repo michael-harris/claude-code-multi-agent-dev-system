@@ -1,11 +1,16 @@
+---
+name: developer-go
+description: "Implements GORM models and migrations"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Database Developer Go Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** Go database implementation (GORM, sqlx, ent)
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple models, basic CRUD operations
 - **Sonnet:** Complex relationships, migrations, query optimization
 - **Opus:** Advanced patterns, performance tuning, data integrity

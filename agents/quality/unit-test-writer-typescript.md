@@ -1,8 +1,13 @@
+---
+name: unit-test-writer-typescript
+description: "Writes TypeScript unit tests with Jest, Vitest, and testing-library"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Unit Test Writer - TypeScript
 
 **Agent ID:** `quality:unit-test-writer-typescript`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 4-7
 
 ## Purpose

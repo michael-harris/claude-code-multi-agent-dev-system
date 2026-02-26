@@ -2,13 +2,23 @@
 # DevTeam Session End Hook
 # Saves session context for future resumption
 
-set -e
+set -euo pipefail
 
 # Configuration
 MEMORY_DIR=".devteam/memory"
-STATE_FILE=".devteam/state.yaml"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 MEMORY_FILE="$MEMORY_DIR/session-$TIMESTAMP.md"
+
+# Source common library for SQLite helpers
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/lib/hook-common.sh" ]]; then
+    source "$SCRIPT_DIR/lib/hook-common.sh"
+elif [[ -f "$SCRIPT_DIR/../lib/hook-common.sh" ]]; then
+    source "$SCRIPT_DIR/../lib/hook-common.sh"
+else
+    echo "[DevTeam Session End] Warning: hook-common.sh not found" >&2
+    exit 0
+fi
 
 # Logging function
 log() {
@@ -19,20 +29,21 @@ log() {
 # EXTRACT STATE INFORMATION
 # ============================================
 extract_state() {
-    if [ -f "$STATE_FILE" ]; then
-        if command -v yq &> /dev/null; then
-            CURRENT_SPRINT=$(yq -r '.current_execution.current_sprint // "unknown"' "$STATE_FILE" 2>/dev/null)
-            CURRENT_TASK=$(yq -r '.current_execution.current_task // "unknown"' "$STATE_FILE" 2>/dev/null)
-            PHASE=$(yq -r '.current_execution.phase // "unknown"' "$STATE_FILE" 2>/dev/null)
-            COMPLETED_TASKS=$(yq -r '.statistics.completed_tasks // 0' "$STATE_FILE" 2>/dev/null)
-            TOTAL_TASKS=$(yq -r '.statistics.total_tasks // 0' "$STATE_FILE" 2>/dev/null)
-        else
-            CURRENT_SPRINT=$(grep "current_sprint:" "$STATE_FILE" 2>/dev/null | head -1 | awk '{print $2}' || echo "unknown")
-            CURRENT_TASK=$(grep "current_task:" "$STATE_FILE" 2>/dev/null | head -1 | awk '{print $2}' || echo "unknown")
-            PHASE=$(grep "phase:" "$STATE_FILE" 2>/dev/null | head -1 | awk '{print $2}' || echo "unknown")
-            COMPLETED_TASKS=$(grep -c "status: completed" "$STATE_FILE" 2>/dev/null || echo "0")
-            TOTAL_TASKS=$(grep -c "TASK-" "$STATE_FILE" 2>/dev/null || echo "0")
-        fi
+    if db_exists 2>/dev/null; then
+        local safe_session_id
+        safe_session_id=$(get_current_session 2>/dev/null || echo "")
+        safe_session_id="${safe_session_id//\'/\'\'}"
+        CURRENT_SPRINT=$(db_query "SELECT sprint_id FROM sessions WHERE id = '$safe_session_id';" 2>/dev/null || echo "unknown")
+        CURRENT_TASK=$(db_query "SELECT current_task_id FROM sessions WHERE id = '$safe_session_id';" 2>/dev/null || echo "unknown")
+        PHASE=$(db_query "SELECT current_phase FROM sessions WHERE id = '$safe_session_id';" 2>/dev/null || echo "unknown")
+        COMPLETED_TASKS=$(db_query "SELECT COUNT(*) FROM tasks WHERE status='completed';" 2>/dev/null || echo "0")
+        TOTAL_TASKS=$(db_query "SELECT COUNT(*) FROM tasks;" 2>/dev/null || echo "0")
+
+        CURRENT_SPRINT="${CURRENT_SPRINT:-unknown}"
+        CURRENT_TASK="${CURRENT_TASK:-unknown}"
+        PHASE="${PHASE:-unknown}"
+        COMPLETED_TASKS="${COMPLETED_TASKS:-0}"
+        TOTAL_TASKS="${TOTAL_TASKS:-0}"
     else
         CURRENT_SPRINT="unknown"
         CURRENT_TASK="unknown"
@@ -60,16 +71,16 @@ save_memory() {
 - **Phase:** $PHASE
 - **Progress:** $COMPLETED_TASKS / $TOTAL_TASKS tasks completed
 
-## State File Location
+## State Database Location
 
-The full project state is stored in: \`$STATE_FILE\`
+The full project state is stored in: \`.devteam/devteam.db\` (SQLite)
 
 ## Resumption Instructions
 
 To resume this work:
-1. The state file contains all progress information
+1. The database contains all progress information
 2. Run \`/devteam:implement --resume\` to continue autonomous execution
-3. Or run \`/devteam:sprint <sprint-id>\` to continue a specific sprint
+3. Or run \`/devteam:implement --sprint <sprint-id>\` to continue a specific sprint
 
 ## Notes
 

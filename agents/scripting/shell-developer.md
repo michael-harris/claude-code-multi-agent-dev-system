@@ -1,11 +1,16 @@
+---
+name: shell-developer
+description: "Implements Bash/shell scripts and automation"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Shell Developer Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** Shell scripting (Bash, Zsh, POSIX sh)
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple scripts, basic automation
 - **Sonnet:** Complex logic, multi-file scripts
 - **Opus:** System-level scripts, critical automation

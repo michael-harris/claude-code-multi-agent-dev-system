@@ -19,9 +19,14 @@
 git worktree list --porcelain
 ```
 
-### Step 2: Load State File
+### Step 2: Load State from SQLite
 
-Read `docs/planning/.project-state.yaml` to correlate git worktrees with development tracks.
+Query the SQLite database (`.devteam/devteam.db`) to correlate git worktrees with development tracks:
+
+```bash
+source scripts/state.sh
+# Track info available via get_state "parallel_tracks.track_info.*"
+```
 
 ### Step 3: Display Worktree Information
 
@@ -31,7 +36,7 @@ Read `docs/planning/.project-state.yaml` to correlate git worktrees with develop
 ═══════════════════════════════════════════
 
 Mode: Git worktrees enabled
-State file: docs/planning/.project-state.yaml
+State database: .devteam/devteam.db
 
 Main Repository:
 ───────────────────────────────────────────
@@ -112,6 +117,6 @@ If git is not working, check git installation:
 ## Notes
 
 - Shows all worktrees (not just multi-agent tracks)
-- Correlates with state file for track information
+- Correlates with SQLite state database for track information
 - Displays disk usage per worktree
 - Quick reference for expert users

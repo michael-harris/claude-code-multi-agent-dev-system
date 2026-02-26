@@ -1,8 +1,13 @@
+---
+name: designer
+description: "Designs normalized database schemas (language-agnostic)"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Database Designer Agent
 
 **Agent ID:** `database:designer`
 **Category:** Database / Architecture
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ## Purpose
 
@@ -78,7 +83,7 @@ You do NOT:
 │          │                                                       │
 │          ▼                                                       │
 │   ┌──────────────────┐                                          │
-│   │ 7. Generate      │──► YAML schema, ERD, documentation       │
+│   │ 7. Generate      │──► JSON schema, ERD, documentation       │
 │   │    Artifacts     │                                          │
 │   └──────────────────┘                                          │
 │                                                                  │
@@ -189,7 +194,7 @@ input:
 
 ```yaml
 output:
-  schema_file: string                 # Path to YAML schema
+  schema_file: string                 # Path to JSON schema
   erd_diagram: string                 # Path to ERD image/mermaid
   documentation:
     design_decisions: List[Decision]
@@ -201,161 +206,216 @@ output:
     rollback_strategy: string
 ```
 
-## Output Format (Schema YAML)
+## Output Format (Schema JSON)
 
-Generate `docs/design/database/TASK-XXX-schema.yaml`:
+Generate `docs/design/database/TASK-XXX-schema.json`:
 
-```yaml
-schema:
-  name: "user_management"
-  version: "1.0.0"
-  database: "postgresql"
-
-tables:
-  users:
-    description: "Core user accounts"
-    columns:
-      id:
-        type: UUID
-        primary: true
-        default: "gen_random_uuid()"
-      email:
-        type: VARCHAR(255)
-        null: false
-        unique: true
-        description: "Unique email address for login"
-      password_hash:
-        type: VARCHAR(255)
-        null: false
-        description: "Bcrypt hashed password"
-      name:
-        type: VARCHAR(100)
-        null: false
-      status:
-        type: ENUM
-        values: ["active", "inactive", "suspended"]
-        default: "active"
-      created_at:
-        type: TIMESTAMP
-        null: false
-        default: "NOW()"
-      updated_at:
-        type: TIMESTAMP
-        null: false
-        default: "NOW()"
-      deleted_at:
-        type: TIMESTAMP
-        null: true
-        description: "Soft delete timestamp"
-    indexes:
-      - name: "idx_users_email"
-        columns: [email]
-        unique: true
-      - name: "idx_users_status"
-        columns: [status]
-      - name: "idx_users_created"
-        columns: [created_at]
-    constraints:
-      - type: CHECK
-        name: "chk_users_email_format"
-        condition: "email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'"
-
-  profiles:
-    description: "Extended user profile information"
-    columns:
-      id:
-        type: UUID
-        primary: true
-        default: "gen_random_uuid()"
-      user_id:
-        type: UUID
-        null: false
-        foreign_key:
-          table: users
-          column: id
-          on_delete: CASCADE
-      bio:
-        type: TEXT
-        null: true
-      avatar_url:
-        type: VARCHAR(500)
-        null: true
-      timezone:
-        type: VARCHAR(50)
-        default: "'UTC'"
-    indexes:
-      - name: "idx_profiles_user"
-        columns: [user_id]
-        unique: true
-    relationships:
-      - type: one-to-one
-        target: users
-        on_delete: CASCADE
-
-  orders:
-    description: "User purchase orders"
-    columns:
-      id:
-        type: UUID
-        primary: true
-      user_id:
-        type: UUID
-        null: false
-        foreign_key:
-          table: users
-          column: id
-          on_delete: RESTRICT
-      status:
-        type: ENUM
-        values: ["pending", "paid", "shipped", "delivered", "cancelled"]
-        default: "pending"
-      total:
-        type: DECIMAL(10,2)
-        null: false
-      ordered_at:
-        type: TIMESTAMP
-        null: false
-        default: "NOW()"
-    indexes:
-      - name: "idx_orders_user"
-        columns: [user_id]
-      - name: "idx_orders_status_date"
-        columns: [status, ordered_at]
-        description: "For filtering orders by status and date range"
-    relationships:
-      - type: many-to-one
-        target: users
-        on_delete: RESTRICT
-
-design_decisions:
-  - decision: "Use UUID for primary keys"
-    rationale: "Enables distributed ID generation, prevents enumeration attacks"
-    trade_off: "Slightly larger storage, slower joins than integer"
-
-  - decision: "Soft delete on users table"
-    rationale: "Preserve referential integrity, enable account recovery"
-    trade_off: "Requires filtering in all queries, increases table size"
-
-  - decision: "RESTRICT on orders.user_id"
-    rationale: "Prevent accidental data loss, users with orders must be handled explicitly"
-    trade_off: "Requires explicit order migration before user deletion"
-
-migration_order:
-  - users
-  - profiles
-  - orders
-
-estimated_growth:
-  users: "100K first year, 1M by year 3"
-  orders: "500K first year, 10M by year 3"
-  partitioning_recommendation: "Consider partitioning orders by ordered_at after 1M rows"
+```json
+{
+  "schema": {
+    "name": "user_management",
+    "version": "1.0.0",
+    "database": "postgresql"
+  },
+  "tables": {
+    "users": {
+      "description": "Core user accounts",
+      "columns": {
+        "id": {
+          "type": "UUID",
+          "primary": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "type": "VARCHAR(255)",
+          "null": false,
+          "unique": true,
+          "description": "Unique email address for login"
+        },
+        "password_hash": {
+          "type": "VARCHAR(255)",
+          "null": false,
+          "description": "Bcrypt hashed password"
+        },
+        "name": {
+          "type": "VARCHAR(100)",
+          "null": false
+        },
+        "status": {
+          "type": "ENUM",
+          "values": ["active", "inactive", "suspended"],
+          "default": "active"
+        },
+        "created_at": {
+          "type": "TIMESTAMP",
+          "null": false,
+          "default": "NOW()"
+        },
+        "updated_at": {
+          "type": "TIMESTAMP",
+          "null": false,
+          "default": "NOW()"
+        },
+        "deleted_at": {
+          "type": "TIMESTAMP",
+          "null": true,
+          "description": "Soft delete timestamp"
+        }
+      },
+      "indexes": [
+        {
+          "name": "idx_users_email",
+          "columns": ["email"],
+          "unique": true
+        },
+        {
+          "name": "idx_users_status",
+          "columns": ["status"]
+        },
+        {
+          "name": "idx_users_created",
+          "columns": ["created_at"]
+        }
+      ],
+      "constraints": [
+        {
+          "type": "CHECK",
+          "name": "chk_users_email_format",
+          "condition": "email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'"
+        }
+      ]
+    },
+    "profiles": {
+      "description": "Extended user profile information",
+      "columns": {
+        "id": {
+          "type": "UUID",
+          "primary": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "type": "UUID",
+          "null": false,
+          "foreign_key": {
+            "table": "users",
+            "column": "id",
+            "on_delete": "CASCADE"
+          }
+        },
+        "bio": {
+          "type": "TEXT",
+          "null": true
+        },
+        "avatar_url": {
+          "type": "VARCHAR(500)",
+          "null": true
+        },
+        "timezone": {
+          "type": "VARCHAR(50)",
+          "default": "UTC"
+        }
+      },
+      "indexes": [
+        {
+          "name": "idx_profiles_user",
+          "columns": ["user_id"],
+          "unique": true
+        }
+      ],
+      "relationships": [
+        {
+          "type": "one-to-one",
+          "target": "users",
+          "on_delete": "CASCADE"
+        }
+      ]
+    },
+    "orders": {
+      "description": "User purchase orders",
+      "columns": {
+        "id": {
+          "type": "UUID",
+          "primary": true
+        },
+        "user_id": {
+          "type": "UUID",
+          "null": false,
+          "foreign_key": {
+            "table": "users",
+            "column": "id",
+            "on_delete": "RESTRICT"
+          }
+        },
+        "status": {
+          "type": "ENUM",
+          "values": ["pending", "paid", "shipped", "delivered", "cancelled"],
+          "default": "pending"
+        },
+        "total": {
+          "type": "DECIMAL(10,2)",
+          "null": false
+        },
+        "ordered_at": {
+          "type": "TIMESTAMP",
+          "null": false,
+          "default": "NOW()"
+        }
+      },
+      "indexes": [
+        {
+          "name": "idx_orders_user",
+          "columns": ["user_id"]
+        },
+        {
+          "name": "idx_orders_status_date",
+          "columns": ["status", "ordered_at"],
+          "description": "For filtering orders by status and date range"
+        }
+      ],
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "target": "users",
+          "on_delete": "RESTRICT"
+        }
+      ]
+    }
+  },
+  "design_decisions": [
+    {
+      "decision": "Use UUID for primary keys",
+      "rationale": "Enables distributed ID generation, prevents enumeration attacks",
+      "trade_off": "Slightly larger storage, slower joins than integer"
+    },
+    {
+      "decision": "Soft delete on users table",
+      "rationale": "Preserve referential integrity, enable account recovery",
+      "trade_off": "Requires filtering in all queries, increases table size"
+    },
+    {
+      "decision": "RESTRICT on orders.user_id",
+      "rationale": "Prevent accidental data loss, users with orders must be handled explicitly",
+      "trade_off": "Requires explicit order migration before user deletion"
+    }
+  ],
+  "migration_order": [
+    "users",
+    "profiles",
+    "orders"
+  ],
+  "estimated_growth": {
+    "users": "100K first year, 1M by year 3",
+    "orders": "500K first year, 10M by year 3",
+    "partitioning_recommendation": "Consider partitioning orders by ordered_at after 1M rows"
+  }
+}
 ```
 
 ## Integration with Other Agents
 
 ```yaml
 collaborates_with:
-  - agent: "database:database-developer-*"
+  - agent: "database:developer-*"
     interaction: "Hands off schema design for implementation"
 
   - agent: "backend:api-developer-*"

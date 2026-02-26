@@ -235,7 +235,7 @@ log_agent_started() {
     esc_task_id=$(sql_escape "$task_id")
 
     local query="INSERT INTO agent_runs (session_id, agent, model, task_id, iteration, status)
-        VALUES ('$esc_session_id', '$esc_agent', '$esc_model', '$esc_task_id', ${iteration:-0}, 'running');"
+        VALUES ('$esc_session_id', '$esc_agent', '$esc_model', NULLIF('$esc_task_id', ''), ${iteration:-0}, 'running');"
 
     sql_exec "$query" > /dev/null || log_warn "Failed to insert agent_runs record" "events"
 }
@@ -283,7 +283,16 @@ log_agent_completed() {
     esc_agent=$(sql_escape "$agent")
     esc_files_changed=$(sql_escape "$files_changed")
 
-    local query="UPDATE agent_runs
+    local esc_model
+    esc_model=$(sql_escape "$model")
+
+    # NOTE: We match on agent+model+session to disambiguate concurrent runs of the
+    # same agent at different model tiers (e.g. after escalation). If two runs share
+    # the same agent name AND model simultaneously, the LIMIT 1 / ORDER BY started_at
+    # heuristic may update the wrong row. A proper fix would be to return the rowid
+    # from log_agent_started() and pass it here, but that requires callers to change.
+    local query="BEGIN IMMEDIATE TRANSACTION;
+        UPDATE agent_runs
         SET status = 'success',
             ended_at = CURRENT_TIMESTAMP,
             duration_seconds = CAST((julianday(CURRENT_TIMESTAMP) - julianday(started_at)) * 86400 AS INTEGER),
@@ -291,16 +300,21 @@ log_agent_completed() {
             tokens_input = ${tokens_input:-0},
             tokens_output = ${tokens_output:-0},
             cost_cents = ${cost_cents:-0}
-        WHERE session_id = '$esc_session_id'
-        AND agent = '$esc_agent'
-        AND status = 'running'
-        ORDER BY started_at DESC
-        LIMIT 1;"
+        WHERE rowid = (
+            SELECT rowid FROM agent_runs
+            WHERE session_id = '$esc_session_id'
+            AND agent = '$esc_agent'
+            AND model = '$esc_model'
+            AND status = 'running'
+            ORDER BY started_at DESC
+            LIMIT 1
+        );
+        COMMIT;"
 
     sql_exec "$query" > /dev/null || log_warn "Failed to update agent_runs record" "events"
 
     # Update session totals
-    add_tokens "$tokens_input" "$tokens_output" "$cost_cents" || true
+    add_tokens "$tokens_input" "$tokens_output" "$cost_cents" || log_warn "Failed to update session token totals" "events"
 }
 
 # Log agent failed event
@@ -335,17 +349,26 @@ log_agent_failed() {
     esc_error_message=$(sql_escape "$error_message")
     esc_error_type=$(sql_escape "$error_type")
 
+    local esc_model
+    esc_model=$(sql_escape "$model")
+
+    # NOTE: Match on model too to disambiguate concurrent same-name agents at
+    # different tiers. See comment in log_agent_completed() for remaining caveats.
     local query="UPDATE agent_runs
         SET status = 'failed',
             ended_at = CURRENT_TIMESTAMP,
             duration_seconds = CAST((julianday(CURRENT_TIMESTAMP) - julianday(started_at)) * 86400 AS INTEGER),
             error_message = '$esc_error_message',
             error_type = '$esc_error_type'
-        WHERE session_id = '$esc_session_id'
-        AND agent = '$esc_agent'
-        AND status = 'running'
-        ORDER BY started_at DESC
-        LIMIT 1;"
+        WHERE rowid = (
+            SELECT rowid FROM agent_runs
+            WHERE session_id = '$esc_session_id'
+            AND agent = '$esc_agent'
+            AND model = '$esc_model'
+            AND status = 'running'
+            ORDER BY started_at DESC
+            LIMIT 1
+        );"
 
     sql_exec "$query" > /dev/null || log_warn "Failed to update agent_runs record" "events"
 
@@ -365,13 +388,13 @@ log_model_escalated() {
     local reason="$3"
     local agent="${4:-}"
 
-    local esc_from esc_to esc_reason
-    esc_from=$(sql_escape "$from_model")
-    esc_to=$(sql_escape "$to_model")
-    esc_reason=$(sql_escape "$reason")
+    local json_from json_to json_reason
+    json_from=$(json_escape "$from_model")
+    json_to=$(json_escape "$to_model")
+    json_reason=$(json_escape "$reason")
 
     log_event "model_escalated" "escalation" "Model escalated: $from_model -> $to_model ($reason)" \
-        "{\"from\": \"$esc_from\", \"to\": \"$esc_to\", \"reason\": \"$esc_reason\"}" "$agent" "$to_model"
+        "{\"from\": \"$json_from\", \"to\": \"$json_to\", \"reason\": \"$json_reason\"}" "$agent" "$to_model"
 
     # Record in escalations table
     record_escalation "$from_model" "$to_model" "$reason" "$agent" || true
@@ -384,13 +407,13 @@ log_model_deescalated() {
     local to_model="$2"
     local reason="$3"
 
-    local esc_from esc_to esc_reason
-    esc_from=$(sql_escape "$from_model")
-    esc_to=$(sql_escape "$to_model")
-    esc_reason=$(sql_escape "$reason")
+    local json_from json_to json_reason
+    json_from=$(json_escape "$from_model")
+    json_to=$(json_escape "$to_model")
+    json_reason=$(json_escape "$reason")
 
     log_event "model_deescalated" "escalation" "Model de-escalated: $from_model -> $to_model ($reason)" \
-        "{\"from\": \"$esc_from\", \"to\": \"$esc_to\", \"reason\": \"$esc_reason\"}"
+        "{\"from\": \"$json_from\", \"to\": \"$json_to\", \"reason\": \"$json_reason\"}"
 }
 
 # ============================================================================
@@ -489,10 +512,10 @@ log_bug_council_activated() {
         return 1
     fi
 
-    local esc_reason
-    esc_reason=$(sql_escape "$reason")
+    local json_reason
+    json_reason=$(json_escape "$reason")
     log_event "bug_council_activated" "bug_council" "Bug Council activated: $reason" \
-        "{\"reason\": \"$esc_reason\"}"
+        "{\"reason\": \"$json_reason\"}"
 
     activate_bug_council "$reason" || true
 }
@@ -586,10 +609,13 @@ log_interview_completed() {
         SET status = 'completed',
             completed_at = CURRENT_TIMESTAMP,
             questions_answered = ${questions_count:-0}
-        WHERE session_id = '$esc_session_id'
-        AND status = 'in_progress'
-        ORDER BY started_at DESC
-        LIMIT 1;"
+        WHERE rowid = (
+            SELECT rowid FROM interviews
+            WHERE session_id = '$esc_session_id'
+            AND status = 'in_progress'
+            ORDER BY started_at DESC
+            LIMIT 1
+        );"
 
     sql_exec "$query" > /dev/null || log_warn "Failed to update interview record" "events"
 }
@@ -700,10 +726,13 @@ log_research_completed() {
             completed_at = CURRENT_TIMESTAMP,
             findings_count = ${findings_count:-0},
             blockers_found = ${blockers_count:-0}
-        WHERE session_id = '$esc_session_id'
-        AND status = 'in_progress'
-        ORDER BY started_at DESC
-        LIMIT 1;"
+        WHERE rowid = (
+            SELECT rowid FROM research_sessions
+            WHERE session_id = '$esc_session_id'
+            AND status = 'in_progress'
+            ORDER BY started_at DESC
+            LIMIT 1
+        );"
 
     sql_exec "$query" > /dev/null || log_warn "Failed to update research_sessions record" "events"
 }

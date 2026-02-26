@@ -8,7 +8,6 @@ This document describes the directory structure of the DevTeam plugin and the fi
 claude-devteam/
 ├── plugin.json                 # Plugin manifest
 ├── README.md                   # Main documentation
-├── ENHANCEMENTS_V3.0.md        # Version 3.0 changelog
 │
 ├── commands/                   # Slash command definitions
 │   ├── devteam-plan.md         # /devteam:plan
@@ -23,25 +22,46 @@ claude-devteam/
 │   ├── devteam-list.md         # /devteam:list
 │   ├── devteam-select.md       # /devteam:select
 │   ├── devteam-issue-new.md    # /devteam:issue-new
+│   ├── devteam-design.md       # /devteam:design
+│   ├── devteam-design-drift.md # /devteam:design-drift
+│   ├── devteam-review.md       # /devteam:review
+│   ├── devteam-test.md         # /devteam:test
 │   ├── merge-tracks.md         # [Debug] /devteam:merge-tracks
 │   ├── worktree-status.md      # [Debug] /devteam:worktree-status
 │   ├── worktree-list.md        # [Debug] /devteam:worktree-list
 │   └── worktree-cleanup.md     # [Debug] /devteam:worktree-cleanup
 │
-├── agents/                     # Agent definitions (89 agents)
+├── skills/                    # Skill definitions (20 skills)
+│   ├── devteam-plan/SKILL.md
+│   ├── devteam-implement/SKILL.md
+│   ├── devteam-bug/SKILL.md
+│   ├── ... (one directory per command, each with SKILL.md)
+│   └── worktree-cleanup/SKILL.md
+│
+├── .claude/
+│   └── rules/                 # Path-specific rule files (11)
+│       └── *.md
+│
+├── settings.json              # Default settings, env flags, hooks config
+├── .mcp.json                  # Bundled MCP server configs (GitHub, Memory)
+├── .lsp.json                  # Language server configs (8 languages)
+│
+├── agents/                     # Agent definitions (127 agents)
 │   ├── planning/               # Planning agents (3)
 │   │   ├── prd-generator.md
 │   │   ├── task-graph-analyzer.md
 │   │   └── sprint-planner.md
-│   ├── orchestration/          # Orchestration agents (9)
-│   │   ├── ralph-orchestrator.md
-│   │   ├── sprint-orchestrator.md
-│   │   ├── task-orchestrator.md
+│   ├── orchestration/          # Orchestration agents (11)
 │   │   ├── autonomous-controller.md
 │   │   ├── bug-council-orchestrator.md
-│   │   ├── scope-validator.md
-│   │   ├── track-merger.md
+│   │   ├── code-review-coordinator.md
+│   │   ├── quality-gate-enforcer.md
 │   │   ├── requirements-validator.md
+│   │   ├── scope-validator.md
+│   │   ├── sprint-loop.md
+│   │   ├── sprint-orchestrator.md
+│   │   ├── task-loop.md
+│   │   ├── track-merger.md
 │   │   └── workflow-compliance.md
 │   ├── research/               # Research agents (1)
 │   │   └── research-agent.md
@@ -51,101 +71,151 @@ claude-devteam/
 │   │   ├── pattern-matcher.md
 │   │   ├── systems-thinker.md
 │   │   └── adversarial-tester.md
-│   ├── database/               # Database agents (13)
-│   │   ├── database-designer.md
-│   │   └── database-developer-{lang}-{tier}.md
-│   ├── backend/                # Backend agents (21)
+│   ├── backend/                # Backend agents (16)
 │   │   ├── api-designer.md
-│   │   ├── api-developer-{lang}-{tier}.md
-│   │   └── backend-code-reviewer-{lang}.md
-│   ├── frontend/               # Frontend agents (4)
+│   │   ├── api-design-reviewer.md
+│   │   ├── api-developer-{lang}.md  # 7 languages
+│   │   └── backend-code-reviewer-{lang}.md  # 7 languages
+│   ├── frontend/               # Frontend agents (3)
 │   │   ├── frontend-designer.md
-│   │   ├── frontend-developer-{tier}.md
+│   │   ├── frontend-developer.md
 │   │   └── frontend-code-reviewer.md
-│   ├── quality/                # Quality agents (10)
+│   ├── database/               # Database agents (12)
+│   │   ├── database-designer.md
+│   │   ├── database-developer-{lang}.md  # 9 languages
+│   │   ├── sql-code-reviewer.md
+│   │   └── nosql-code-reviewer.md
+│   ├── quality/                # Quality agents (26)
+│   │   ├── test-coordinator.md
 │   │   ├── test-writer.md
-│   │   ├── security-auditor.md
-│   │   ├── refactoring-agent.md
-│   │   ├── documentation-coordinator.md
+│   │   ├── unit-test-writer-{lang}.md  # 7 languages
+│   │   ├── e2e-tester.md
+│   │   ├── mobile-e2e-tester.md
+│   │   ├── mobile-test-writer.md
+│   │   ├── performance-auditor-{lang}.md  # 9 languages
+│   │   ├── refactoring-coordinator.md
 │   │   ├── runtime-verifier.md
-│   │   └── performance-auditor-{lang}.md
-│   ├── devops/                 # DevOps agents (4)
+│   │   ├── security-auditor.md
+│   │   ├── documentation-coordinator.md
+│   │   └── visual-verification-agent.md
+│   ├── devops/                 # DevOps agents (5)
+│   │   ├── cicd-specialist.md
 │   │   ├── docker-specialist.md
 │   │   ├── kubernetes-specialist.md
-│   │   ├── cicd-specialist.md
-│   │   └── terraform-specialist.md
-│   ├── mobile/                 # Mobile agents (4)
-│   │   ├── ios-developer-{tier}.md
-│   │   └── android-developer-{tier}.md
-│   ├── scripting/              # Scripting agents (4)
-│   │   ├── powershell-developer-{tier}.md
-│   │   └── shell-developer-{tier}.md
-│   ├── infrastructure/         # Infrastructure agents (2)
-│   │   └── configuration-manager-{tier}.md
-│   └── python/                 # Python generic agents (2)
-│       └── python-developer-generic-{tier}.md
-│
-├── skills/                     # Reusable skills (18)
-│   ├── README.md
-│   ├── core/                   # Core skills (3)
-│   │   ├── code-reviewer.md
-│   │   ├── debugger.md
-│   │   └── refactorer.md
-│   ├── testing/                # Testing skills (3)
-│   │   ├── test-generator.md
-│   │   ├── integration-tester.md
-│   │   └── e2e-tester.md
-│   ├── quality/                # Quality skills (3)
-│   │   ├── performance-optimizer.md
-│   │   ├── security-scanner.md
-│   │   └── accessibility-checker.md
-│   ├── workflow/               # Workflow skills (3)
-│   │   ├── ci-cd-engineer.md
-│   │   ├── git-specialist.md
-│   │   └── deployment-manager.md
-│   ├── frontend/               # Frontend skills (3)
-│   │   ├── ui-ux-pro-max.md
-│   │   ├── responsive-design.md
-│   │   └── accessibility-expert.md
-│   └── meta/                   # Meta skills (3)
-│       ├── prompt-engineer.md
-│       ├── context-manager.md
-│       └── learning-optimizer.md
+│   │   ├── terraform-specialist.md
+│   │   └── mobile-cicd-specialist.md
+│   ├── mobile/                 # Mobile agents (8)
+│   │   ├── android-developer.md
+│   │   ├── ios-developer.md
+│   │   ├── flutter-developer.md
+│   │   ├── react-native-developer.md
+│   │   ├── android-designer.md
+│   │   ├── ios-designer.md
+│   │   ├── android-code-reviewer.md
+│   │   └── ios-code-reviewer.md
+│   ├── scripting/              # Scripting agents (2)
+│   │   ├── shell-developer.md
+│   │   └── powershell-developer.md
+│   ├── infrastructure/         # Infrastructure agents (1)
+│   │   └── configuration-manager.md
+│   ├── python/                 # Python generic agents (1)
+│   │   └── python-developer-generic.md
+│   ├── accessibility/          # Accessibility agents (2)
+│   │   ├── accessibility-specialist.md
+│   │   └── mobile-accessibility-specialist.md
+│   ├── architecture/           # Architecture agents (1)
+│   │   └── architect.md
+│   ├── data-ai/                # Data & AI agents (2)
+│   │   ├── data-engineer.md
+│   │   └── ml-engineer.md
+│   ├── devrel/                 # Developer Relations agents (1)
+│   │   └── developer-advocate.md
+│   ├── product/                # Product agents (1)
+│   │   └── product-manager.md
+│   ├── security/               # Security agents (10)
+│   │   ├── penetration-tester.md
+│   │   ├── compliance-engineer.md
+│   │   ├── mobile-security-auditor.md
+│   │   └── security-auditor-{lang}.md  # 7 languages
+│   ├── specialized/            # Specialized agents (1)
+│   │   └── observability-engineer.md
+│   ├── sre/                    # Site Reliability agents (2)
+│   │   ├── site-reliability-engineer.md
+│   │   └── platform-engineer.md
+│   ├── support/                # Support agents (1)
+│   │   └── dependency-manager.md
+│   ├── ux/                     # UX agents (12)
+│   │   ├── design-system-architect.md
+│   │   ├── design-system-orchestrator.md
+│   │   ├── ux-system-coordinator.md
+│   │   ├── ux-specialist-{platform}.md  # 3 platforms
+│   │   ├── design-drift-detector.md
+│   │   ├── color-palette-specialist.md
+│   │   ├── typography-specialist.md
+│   │   ├── data-visualization-designer.md
+│   │   ├── design-compliance-validator.md
+│   │   └── ui-style-curator.md
+│   └── templates/              # Agent templates (1)
+│       └── base-agent.md
 │
 ├── hooks/                      # Lifecycle hooks
-│   ├── stop-hook.sh            # Stop/completion hook
-│   ├── stop-hook.ps1           # Windows version
-│   ├── persistence-hook.sh     # State persistence
-│   ├── persistence-hook.ps1
-│   ├── scope-check.sh          # Scope validation
-│   ├── scope-check.ps1
-│   ├── session-start.sh        # Session initialization
-│   ├── session-start.ps1
-│   ├── session-end.sh          # Session cleanup
-│   ├── session-end.ps1
-│   ├── pre-compact.sh          # Pre-context-compaction
-│   └── pre-compact.ps1
+│   ├── stop-hook.sh / .ps1     # Stop/completion hook
+│   ├── persistence-hook.sh / .ps1  # State persistence
+│   ├── scope-check.sh / .ps1   # Scope validation
+│   ├── pre-compact.sh / .ps1   # Pre-context-compaction
+│   ├── pre-tool-use-hook.sh / .ps1  # Pre-execution validation
+│   ├── post-tool-use-hook.sh / .ps1 # Post-execution logging
+│   ├── session-start.sh / .ps1 # Session initialization
+│   ├── session-end.sh / .ps1   # Session cleanup
+│   ├── install.sh / .ps1       # Hook installation
+│   ├── lib/                    # Shared hook utilities
+│   │   ├── hook-common.sh
+│   │   └── hook-common.ps1
+│   ├── tests/                  # Hook test suite
+│   │   └── test-hooks.sh
+│   └── README.md
 │
 ├── templates/                  # Templates
 │   └── interview-questions.yaml  # Interview question templates
 │
 ├── scripts/                    # Utility scripts
-│   ├── schema.sql              # SQLite database schema
+│   ├── schema.sql              # SQLite database schema (v1)
+│   ├── schema-v2.sql           # Schema migration v2
+│   ├── schema-v3.sql           # Schema migration v3
+│   ├── schema-v4.sql           # Schema migration v4
 │   ├── db-init.sh              # Database initialization (Linux/macOS)
 │   ├── db-init.ps1             # Database initialization (Windows)
+│   ├── db-maintenance.sh       # Database cleanup and optimization
 │   ├── state.sh                # State management functions (Bash)
 │   ├── state.ps1               # State management functions (PowerShell)
-│   └── events.sh               # Event logging functions
+│   ├── events.sh               # Event logging functions
+│   ├── baseline.sh             # Baseline commit management
+│   ├── checkpoint.sh           # Full agent state snapshots
+│   ├── cost-tracking.sh        # API cost monitoring
+│   ├── progress.sh             # Session progress tracking
+│   ├── rollback.sh             # Auto-detect and revert regressions
+│   ├── validate-config.sh      # Config file validation
+│   ├── init-generator.sh       # Generate init.sh for dev server
+│   └── lib/                    # Shared script utilities
+│       ├── common.sh
+│       └── progress.sh
 │
 ├── examples/                   # Usage examples
 │   ├── complete-workflow-example.md
-│   └── parallel-tracks-example.md
+│   ├── parallel-tracks-example.md
+│   ├── individual-agent-usage.md
+│   ├── api-first-fullstack-workflow.md
+│   └── multi-language-examples.md
 │
 └── docs/                       # Documentation
     ├── GETTING_STARTED.md      # New user guide
     ├── DIRECTORY_STRUCTURE.md  # This file
     ├── SQLITE_SCHEMA.md        # Database schema docs
     ├── TROUBLESHOOTING.md      # Problem solving guide
+    ├── releases/               # Release changelogs
+    │   ├── ENHANCEMENTS_V2.1.md
+    │   ├── ENHANCEMENTS_V2.5.md
+    │   └── ENHANCEMENTS_V3.0.md
     └── development/            # Development docs
         └── *.md
 ```
@@ -166,18 +236,29 @@ your-project/
 │   │   ├── research_findings   # Research results
 │   │   ├── bugs                # Bug tracking
 │   │   └── escalations         # Model escalations
-│   └── ralph-config.yaml       # Configuration file
+│   ├── task-loop-config.yaml   # Configuration file
+│   ├── sprint-loop-config.yaml # Sprint loop settings
+│   ├── task-loop-config.yaml   # Task loop settings
+│   ├── test-config.yaml        # Test execution config
+│   ├── testing-config.yaml     # Testing strategy config
+│   ├── code-review-config.yaml # Code review settings
+│   ├── database-config.yaml    # Database preferences
+│   ├── frontend-config.yaml    # Frontend settings
+│   ├── performance-config.yaml # Performance thresholds
+│   ├── refactoring-config.yaml # Refactoring rules
+│   ├── ux-config.yaml          # UX design settings
+│   └── validation-config.yaml  # Validation rules
 │
 ├── docs/
 │   ├── planning/               # Planning artifacts
-│   │   ├── PROJECT_PRD.yaml    # Product Requirements Document
+│   │   ├── PROJECT_PRD.json    # Product Requirements Document
 │   │   └── tasks/              # Task definitions
-│   │       ├── TASK-001.yaml
-│   │       ├── TASK-002.yaml
+│   │       ├── TASK-001.json
+│   │       ├── TASK-002.json
 │   │       └── ...
 │   └── sprints/                # Sprint definitions
-│       ├── SPRINT-001.yaml
-│       ├── SPRINT-002.yaml
+│       ├── SPRINT-001.json
+│       ├── SPRINT-002.json
 │       └── ...
 │
 └── .multi-agent/               # Worktrees (temporary, auto-managed)
@@ -191,7 +272,7 @@ your-project/
 ### `.devteam/devteam.db`
 SQLite database containing all runtime state. See [SQLITE_SCHEMA.md](SQLITE_SCHEMA.md) for details.
 
-### `.devteam/ralph-config.yaml`
+### `.devteam/task-loop-config.yaml`
 Configuration file for DevTeam behavior:
 
 ```yaml
@@ -219,69 +300,75 @@ gates:
     enabled: false
 ```
 
-### `docs/planning/PROJECT_PRD.yaml`
+### `docs/planning/PROJECT_PRD.json`
 Product Requirements Document generated during planning:
 
-```yaml
-version: "1.0"
-project_name: "My Project"
-created: "2026-01-29"
-
-technology_stack:
-  primary_language: typescript
-  backend_framework: express
-  frontend_framework: react
-  database: postgresql
-
-problem_statement: |
-  Description of the problem being solved
-
-features:
-  must_have:
-    - id: F001
-      name: "Feature name"
-      acceptance_criteria:
-        - "Criterion 1"
+```json
+{
+  "version": "1.0",
+  "project_name": "My Project",
+  "created": "2026-01-29",
+  "technology_stack": {
+    "primary_language": "typescript",
+    "backend_framework": "express",
+    "frontend_framework": "react",
+    "database": "postgresql"
+  },
+  "problem_statement": "Description of the problem being solved",
+  "features": {
+    "must_have": [
+      {
+        "id": "F001",
+        "name": "Feature name",
+        "acceptance_criteria": [
+          "Criterion 1"
+        ]
+      }
+    ]
+  }
+}
 ```
 
-### `docs/planning/tasks/TASK-XXX.yaml`
+### `docs/planning/tasks/TASK-XXX.json`
 Individual task definitions:
 
-```yaml
-id: TASK-001
-title: "Implement user authentication"
-description: |
-  Create login and registration endpoints
-
-feature_ref: F001
-task_type: backend
-complexity:
-  score: 6
-  tier: moderate
-
-dependencies: []
-acceptance_criteria:
-  - "Users can register"
-  - "Users can login"
+```json
+{
+  "id": "TASK-001",
+  "title": "Implement user authentication",
+  "description": "Create login and registration endpoints",
+  "feature_ref": "F001",
+  "task_type": "backend",
+  "complexity": {
+    "score": 6,
+    "tier": "moderate"
+  },
+  "dependencies": [],
+  "acceptance_criteria": [
+    "Users can register",
+    "Users can login"
+  ]
+}
 ```
 
-### `docs/sprints/SPRINT-XXX.yaml`
+### `docs/sprints/SPRINT-XXX.json`
 Sprint definitions grouping tasks:
 
-```yaml
-id: SPRINT-001
-name: "Foundation"
-goal: "Set up core infrastructure"
-
-tasks:
-  - TASK-001
-  - TASK-002
-
-estimated_complexity: 12
-
-quality_gates:
-  - All tests pass
-  - No type errors
+```json
+{
+  "id": "SPRINT-001",
+  "name": "Foundation",
+  "goal": "Set up core infrastructure",
+  "tasks": [
+    "TASK-001",
+    "TASK-002"
+  ],
+  "estimated_complexity": 12,
+  "quality_gates": [
+    "All tests pass",
+    "No type errors"
+  ]
+}
 ```
 
 ## Temporary Files
@@ -305,7 +392,7 @@ Add to your `.gitignore`:
 .multi-agent/
 
 # Keep config in version control
-!.devteam/ralph-config.yaml
+!.devteam/task-loop-config.yaml
 ```
 
 ## Cleaning Up

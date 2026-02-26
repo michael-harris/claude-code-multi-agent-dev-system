@@ -1,8 +1,14 @@
+---
+name: security-auditor-python
+description: "Python-specific security auditing with Bandit, Safety, and SAST"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Security Auditor - Python
 
 **Agent ID:** `security:security-auditor-python`
 **Category:** Security
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 6-10
 
 ## Purpose
@@ -201,5 +207,5 @@ security_audit:
 
 ## See Also
 
-- `security:security-auditor` - General security auditor
+- `quality:security-auditor` - General security auditor
 - `orchestration:sprint-loop` - Calls for sprint security audit

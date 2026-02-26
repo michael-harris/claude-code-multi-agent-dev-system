@@ -1,14 +1,14 @@
-# Adding Ralph Functionality to Multi-Agent System
+# Task Loop Integration Options (from ralph-claude-code)
 
-This document identifies the specific functionality that Ralph provides which this project lacks, and presents options for adding those capabilities natively.
+This document identifies the specific functionality from ralph-claude-code that this project lacked, and presents options for adding those capabilities natively.
 
 ---
 
 ## Functional Gap Analysis
 
-### What Ralph Does That This Project Doesn't
+### What ralph-claude-code Does That This Project Didn't
 
-| Capability | Ralph | This Project | Gap |
+| Capability | ralph-claude-code | This Project | Gap |
 |------------|-------|--------------|-----|
 | **Continuous execution until done** | Loop re-injects prompt until complete | Executes within single session | **CRITICAL GAP** |
 | **Stop interception** | Hook blocks Claude exit, re-prompts | No hook system | **CRITICAL GAP** |
@@ -22,7 +22,7 @@ This document identifies the specific functionality that Ralph provides which th
 
 **This project requires the user to stay engaged.** If Claude's session ends, context limits hit, or the user closes their terminal, work stops. The user must manually re-run `/devteam:sprint all` to continue.
 
-**Ralph lets you walk away.** The stop hook intercepts exit attempts and re-injects the prompt, creating a self-sustaining loop until the project is genuinely complete.
+**ralph-claude-code lets you walk away.** The stop hook intercepts exit attempts and re-injects the prompt, creating a self-sustaining loop until the project is genuinely complete.
 
 ---
 
@@ -43,9 +43,9 @@ hooks/
 **`hooks/stop-hook.sh`:**
 ```bash
 #!/bin/bash
-# Ralph-style stop hook for multi-agent system
+# Task Loop-style stop hook for multi-agent system
 
-STATE_FILE="docs/planning/.project-state.yaml"
+DB_FILE=".devteam/devteam.db"
 CIRCUIT_BREAKER_FILE=".multi-agent/circuit-breaker.json"
 
 # Initialize circuit breaker if needed
@@ -77,14 +77,13 @@ if echo "$STOP_HOOK_MESSAGE" | grep -q "EXIT_SIGNAL: true"; then
     exit 0  # Allow exit
 fi
 
-# Check state file for completion
-if [ -f "$STATE_FILE" ]; then
-    # Count completed vs total sprints
-    COMPLETED=$(grep -c "status: completed" "$STATE_FILE" 2>/dev/null || echo "0")
-    TOTAL_SPRINTS=$(grep -c "SPRINT-" "$STATE_FILE" 2>/dev/null || echo "0")
+# Check SQLite database for completion
+if [ -f "$DB_FILE" ]; then
+    PENDING=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM tasks WHERE status = 'pending';" 2>/dev/null || echo "0")
+    IN_PROGRESS=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM tasks WHERE status = 'in_progress';" 2>/dev/null || echo "0")
 
-    if [ "$COMPLETED" -eq "$TOTAL_SPRINTS" ] && [ "$TOTAL_SPRINTS" -gt 0 ]; then
-        echo "All sprints complete. Allowing exit."
+    if [ "$PENDING" -eq 0 ] && [ "$IN_PROGRESS" -eq 0 ]; then
+        echo "All work complete. Allowing exit."
         exit 0  # Allow exit
     fi
 fi
@@ -174,8 +173,8 @@ WHILE true:
         OUTPUT "EXIT_SIGNAL: true"
         BREAK
 
-    # Load state
-    state = READ "docs/planning/.project-state.yaml"
+    # Load state from SQLite
+    state = QUERY ".devteam/devteam.db" "SELECT * FROM v_current_session"
 
     # Determine next action
     IF no PRD exists:
@@ -273,28 +272,18 @@ Launches autonomous controller that runs until project completion.
 
 **What to add/modify:**
 
-1. **Extend state file schema:**
-```yaml
-# docs/planning/.project-state.yaml
-version: "2.0"
+1. **Extend state in SQLite (`.devteam/devteam.db`):**
+```bash
+# State is managed via SQLite session_state table
+source scripts/state.sh
 
-# ... existing fields ...
-
-autonomous_mode:
-  enabled: true
-  max_iterations: 50
-  current_iteration: 12
-  circuit_breaker:
-    consecutive_failures: 0
-    max_failures: 5
-    last_failure_point: null
-    state: closed  # closed | open
-  session:
-    started_at: "2025-01-28T10:00:00Z"
-    last_activity: "2025-01-28T12:30:00Z"
-  exit_detection:
-    completion_indicators: 2
-    exit_signal_required: true
+set_state "autonomous_mode_enabled" "true"
+set_state "max_iterations" "50"
+set_state "current_iteration" "12"
+set_state "circuit_breaker" '{"consecutive_failures":0,"max_failures":5,"last_failure_point":null,"state":"closed"}'
+set_state "session_started_at" "2025-01-28T10:00:00Z"
+set_state "session_last_activity" "2025-01-28T12:30:00Z"
+set_state "exit_detection" '{"completion_indicators":2,"exit_signal_required":true}'
 ```
 
 2. **Modify `commands/sprint-all.md`** to add `--autonomous` flag:
@@ -308,7 +297,7 @@ autonomous_mode:
 
 3. **Add autonomous behavior to sprint-orchestrator:**
 
-When `autonomous_mode.enabled = true` in state file:
+When `autonomous_mode_enabled = true` in SQLite session state:
 - Continue past normal stopping points
 - Check circuit breaker before each sprint
 - Output EXIT_SIGNAL only when genuinely complete

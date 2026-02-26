@@ -1,8 +1,14 @@
+---
+name: security-auditor-java
+description: "Java security auditing with SpotBugs, FindSecBugs, and OWASP checks"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Security Auditor - Java
 
 **Agent ID:** `security:security-auditor-java`
 **Category:** Security
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 6-10
 
 ## Purpose
@@ -156,5 +162,5 @@ mvn com.h3xstream.findsecbugs:findsecbugs-maven-plugin:check
 
 ## See Also
 
-- `security:security-auditor` - General security auditor
+- `quality:security-auditor` - General security auditor
 - `orchestration:sprint-loop` - Calls for sprint security audit

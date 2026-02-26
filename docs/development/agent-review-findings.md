@@ -1,5 +1,7 @@
 # Multi-Agent System: Comprehensive Review & Plugin Conversion Readiness
 
+> **Note:** This is a historical development document. The T1/T2 tier system described here has been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Escalation is now handled by orchestrator agents via LLM instructions.
+
 **Date:** 2025-10-30
 **Review Scope:** All 28 agents, 3 commands, architecture analysis
 **Status:** ✅ ALL FIXES APPLIED - READY FOR PLUGIN CONVERSION
@@ -26,7 +28,7 @@
 
 #### Orchestration Agents (3)
 - ✅ `sprint-orchestrator` - Opus ⚠️ (See architectural note)
-- ✅ `task-orchestrator` - Sonnet
+- ✅ `task-loop` - Sonnet
 - ✅ `requirements-validator` - Opus (Quality gate)
 
 #### Database Agents (5)
@@ -106,7 +108,7 @@ User: /devteam:prd
   ↓
 Main Claude → prd-generator agent (Sonnet)
   ↓
-Output: docs/planning/PROJECT_PRD.yaml
+Output: docs/planning/PROJECT_PRD.json
 ```
 
 **Key Feature:** Technology stack selection FIRST (based on integrations)
@@ -119,8 +121,8 @@ Output: docs/planning/PROJECT_PRD.yaml
 User: /devteam:planning
   ↓
 Main Claude orchestrates:
-  1. task-graph-analyzer (Sonnet) → Creates TASK-XXX.yaml files
-  2. sprint-planner (Sonnet) → Creates SPRINT-XXX.yaml files
+  1. task-graph-analyzer (Sonnet) → Creates TASK-XXX.json files
+  2. sprint-planner (Sonnet) → Creates SPRINT-XXX.json files
 ```
 
 ### `/devteam:sprint` Command ⚠️ **IMPORTANT ARCHITECTURAL FINDING**
@@ -170,7 +172,7 @@ Main Claude calls requirements-validator as quality gate
 
 ### Sonnet (claude-sonnet-4-5) - Balanced Quality [13 agents]
 - Planning: `prd-generator`, `task-graph-analyzer`, `sprint-planner`
-- Orchestration: `task-orchestrator`
+- Orchestration: `task-loop`
 - T2 Developers: All 6 T2 implementation agents
 - Quality: `test-writer`, `documentation-coordinator`
 - Reviewers: All 3 code reviewer agents
@@ -236,8 +238,8 @@ Every agent has:
 - **Issue:** Mismatch between agent definition and actual usage
 - **Recommendation:** Update `/devteam:sprint` command to launch the agent for architectural consistency
 
-**4. Task Orchestrator vs Sprint Orchestrator**
-- **task-orchestrator:** Sonnet - Handles single task workflow
+**4. Task Loop vs Sprint Orchestrator**
+- **task-loop:** Sonnet - Handles single task workflow
 - **sprint-orchestrator:** Opus - Handles entire sprint (but not launched)
 - **Assessment:** If sprint-orchestrator were used, Opus is appropriate
 - **Recommendation:** If converting to plugin, decide on orchestration model
@@ -280,7 +282,7 @@ Task(
 
 **C. Remove from Plugin**
 - Remove sprint-orchestrator.md
-- Only include task-orchestrator
+- Only include task-loop
 - `/devteam:sprint` remains command-only (no agent)
 
 **RECOMMENDATION: Option A** - Consistency and proper agent-based architecture
@@ -305,7 +307,7 @@ claude-devteam/
 │   │   └── sprint-planner.md
 │   ├── orchestration/
 │   │   ├── sprint-orchestrator.md   [DECISION: Keep or remove?]
-│   │   ├── task-orchestrator.md
+│   │   ├── task-loop.md
 │   │   └── requirements-validator.md
 │   ├── database/ (5 agents - ALL FIXED)
 │   ├── backend/ (7 agents - ALL FIXED)
@@ -395,7 +397,7 @@ Your multi-agent development system is **production-ready** and well-architected
 | Planning | task-graph-analyzer | Sonnet | - | Complex dependency analysis |
 | Planning | sprint-planner | Sonnet | - | Strategic sprint organization |
 | Orchestration | sprint-orchestrator | Opus | - | High-level multi-agent coordination |
-| Orchestration | task-orchestrator | Sonnet | - | Single-task workflow management |
+| Orchestration | task-loop | Sonnet | - | Single-task workflow management |
 | Orchestration | requirements-validator | Opus | - | Critical quality gate |
 | Database | database-designer | Opus | - | Architectural schema decisions |
 | Database | database-developer-python-t1 | Haiku | T1 | Straightforward SQLAlchemy implementation |

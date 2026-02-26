@@ -1,8 +1,8 @@
-# Ralph Configuration
+# Task Loop Configuration
 # Iterative Quality Refinement Loop with Model Escalation
 
 version: "1.0"
-name: "Ralph - Recursive Agent Loop for Polished Handling"
+name: "Task Loop - Iterative Quality Refinement"
 
 # =============================================================================
 # CORE LOOP SETTINGS
@@ -14,7 +14,7 @@ loop_settings:
   total_timeout_minutes: 120
 
 # =============================================================================
-# RATE LIMITING (inspired by ralph-claude-code)
+# RATE LIMITING
 # =============================================================================
 
 rate_limiting:

@@ -1,6 +1,12 @@
+---
+name: prd-generator
+description: "Interactive PRD creation through structured Q&A with technology stack selection"
+model: sonnet
+tools: Read, Glob, Grep, Bash, Write
+---
 # PRD Generator Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Interactive PRD creation through structured Q&A with technology stack selection
 
 ## Your Role
@@ -198,106 +204,139 @@ Save enumerated features to `.devteam/features.json` with explicit `passes: fals
 
 ## Output Format
 
-Generate `docs/planning/PROJECT_PRD.yaml`:
+Generate `docs/planning/PROJECT_PRD.json`:
 
-```yaml
-project:
-  name: "[Project Name]"
-  version: "0.1.0"
-  created: "[Date]"
-
-technology:
-  backend:
-    language: "python" or "typescript"
-    framework: "fastapi" or "django" or "express" or "nestjs"
-    reasoning: "[Why this stack was chosen]"
-  frontend:
-    framework: "react" or "nextjs"
-  database:
-    system: "postgresql"
-    orm: "sqlalchemy" or "prisma" or "typeorm"
-  testing:
-    backend: "pytest" or "jest"
-    frontend: "jest"
-
-problem:
-  statement: "[Clear problem description]"
-  target_users: "[Who experiences this problem]"
-  current_solutions: "[Existing alternatives and their limitations]"
-
-solution:
-  overview: "[Your proposed solution]"
-  value_proposition: "[Why this is better]"
-  key_features:
-    - "[Feature 1]"
-    - "[Feature 2]"
-
-users:
-  primary:
-    - persona: "[User type]"
-      needs: "[What they need]"
-      goals: "[What they want to achieve]"
-
-requirements:
-  must_have:
-    - id: "REQ-001"
-      description: "[Requirement]"
-      acceptance_criteria:
-        - "[Criterion 1]"
-        - "[Criterion 2]"
-      priority: "critical"
-
-  should_have:
-    - id: "REQ-002"
-      description: "[Requirement]"
-      priority: "high"
-
-  out_of_scope:
-    - "[What we're NOT building]"
-
-technical:
-  integrations:
-    - name: "[Service/API name]"
-      purpose: "[Why integrating]"
-      type: "[REST API / SDK / etc]"
-
-  performance:
-    - metric: "[e.g., API response time]"
-      target: "[e.g., <200ms]"
-
-  scale:
-    - users: "[Expected user count]"
-    - requests: "[Expected request volume]"
-
-success_criteria:
-  metrics:
-    - metric: "[Metric name]"
-      target: "[Target value]"
-      measurement: "[How to measure]"
-
-  mvp_complete_when:
-    - "[Completion criterion 1]"
-    - "[Completion criterion 2]"
-
-constraints:
-  timeline:
-    mvp_deadline: "[Date or duration]"
-  budget:
-    limit: "[Budget constraint if any]"
-  security:
-    requirements:
-      - "[Security requirement]"
-  compliance:
-    standards:
-      - "[Compliance standard if any]"
-
-assumptions:
-  - "[Assumption 1]"
-  - "[Assumption 2]"
-
-risks:
-  - risk: "[Risk description]"
-    mitigation: "[How to mitigate]"
+```json
+{
+  "project": {
+    "name": "[Project Name]",
+    "version": "0.1.0",
+    "created": "[Date]"
+  },
+  "technology": {
+    "backend": {
+      "language": "python or typescript",
+      "framework": "fastapi or django or express or nestjs",
+      "reasoning": "[Why this stack was chosen]"
+    },
+    "frontend": {
+      "framework": "react or nextjs"
+    },
+    "database": {
+      "system": "postgresql",
+      "orm": "sqlalchemy or prisma or typeorm"
+    },
+    "testing": {
+      "backend": "pytest or jest",
+      "frontend": "jest"
+    }
+  },
+  "problem": {
+    "statement": "[Clear problem description]",
+    "target_users": "[Who experiences this problem]",
+    "current_solutions": "[Existing alternatives and their limitations]"
+  },
+  "solution": {
+    "overview": "[Your proposed solution]",
+    "value_proposition": "[Why this is better]",
+    "key_features": [
+      "[Feature 1]",
+      "[Feature 2]"
+    ]
+  },
+  "users": {
+    "primary": [
+      {
+        "persona": "[User type]",
+        "needs": "[What they need]",
+        "goals": "[What they want to achieve]"
+      }
+    ]
+  },
+  "requirements": {
+    "must_have": [
+      {
+        "id": "REQ-001",
+        "description": "[Requirement]",
+        "acceptance_criteria": [
+          "[Criterion 1]",
+          "[Criterion 2]"
+        ],
+        "priority": "critical"
+      }
+    ],
+    "should_have": [
+      {
+        "id": "REQ-002",
+        "description": "[Requirement]",
+        "priority": "high"
+      }
+    ],
+    "out_of_scope": [
+      "[What we're NOT building]"
+    ]
+  },
+  "technical": {
+    "integrations": [
+      {
+        "name": "[Service/API name]",
+        "purpose": "[Why integrating]",
+        "type": "[REST API / SDK / etc]"
+      }
+    ],
+    "performance": [
+      {
+        "metric": "[e.g., API response time]",
+        "target": "[e.g., <200ms]"
+      }
+    ],
+    "scale": {
+      "users": "[Expected user count]",
+      "requests": "[Expected request volume]"
+    }
+  },
+  "success_criteria": {
+    "metrics": [
+      {
+        "metric": "[Metric name]",
+        "target": "[Target value]",
+        "measurement": "[How to measure]"
+      }
+    ],
+    "mvp_complete_when": [
+      "[Completion criterion 1]",
+      "[Completion criterion 2]"
+    ]
+  },
+  "constraints": {
+    "timeline": {
+      "mvp_deadline": "[Date or duration]"
+    },
+    "budget": {
+      "limit": "[Budget constraint if any]"
+    },
+    "security": {
+      "requirements": [
+        "[Security requirement]"
+      ]
+    },
+    "compliance": {
+      "standards": [
+        "[Compliance standard if any]"
+      ]
+    }
+  },
+  "assumptions": [
+    "[Assumption 1]",
+    "[Assumption 2]"
+  ],
+  "risks": [
+    {
+      "risk": "[Risk description]",
+      "mitigation": "[How to mitigate]"
+    }
+  ]
+}
 ```
 
 ## Interview Style
@@ -370,7 +409,7 @@ Features are only marked `passes: true` after actual verification during impleme
 
 **Confirm next steps:**
 ```
-PRD saved to docs/planning/PROJECT_PRD.yaml
+PRD saved to docs/planning/PROJECT_PRD.json
 Features enumerated to .devteam/features.json
 
 Your technology stack:
@@ -384,7 +423,7 @@ Feature Summary:
 - All features start as "passes: false"
 
 Next steps:
-1. Review the PRD: docs/planning/PROJECT_PRD.yaml
+1. Review the PRD: docs/planning/PROJECT_PRD.json
 2. Review features: .devteam/features.json
 3. Run `/devteam:implement` to start development
 4. The system will track feature completion automatically
@@ -414,4 +453,4 @@ Before generating PRD:
 - **TypeScript for full-stack JS teams** - consistency and type safety
 - **Be opinionated but flexible** - recommend strongly, but respect user choice
 - **Keep interview focused** - don't ask questions you don't need
-- **Generate complete, structured YAML** - this feeds the entire system
+- **Generate complete, structured JSON** - this feeds the entire system

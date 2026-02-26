@@ -4,7 +4,7 @@ This document describes how UX design agents integrate with the DevTeam workflow
 
 ## Trigger Detection
 
-The Task Orchestrator detects when design system generation is needed:
+The Task Loop detects when design system generation is needed:
 
 ```yaml
 design_triggers:
@@ -47,7 +47,7 @@ design_triggers:
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                   TASK ORCHESTRATOR                              │
+│                      TASK LOOP                                   │
 │  1. Parse request                                                │
 │  2. Detect: frontend + no design system = DESIGN FIRST          │
 │  3. Extract: industry=beauty/spa, type=landing+booking          │
@@ -134,7 +134,7 @@ design_triggers:
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│            PHASE 3: RALPH QUALITY LOOP                           │
+│            PHASE 3: TASK LOOP QUALITY LOOP                       │
 │                                                                  │
 │  Quality Gates:                                                  │
 │  ✓ Design tokens applied correctly                              │
@@ -206,7 +206,7 @@ categories:
         parent: design_system_orchestrator
 ```
 
-## Task Orchestrator Integration
+## Task Loop Integration
 
 ```yaml
 # In task decomposition
@@ -271,7 +271,7 @@ handoff_to_frontend:
 
 ## Pre-Delivery Checklist Integration
 
-Add to Ralph quality gates:
+Add to Task Loop quality gates:
 
 ```yaml
 quality_gates:
@@ -351,7 +351,7 @@ Frontend developer receives design system and creates:
 
 ### Phase 3: Quality Loop
 
-Ralph validates:
+Task Loop validates:
 - ✅ Colors match design system
 - ✅ Typography scale followed
 - ✅ Booking flow is 3 steps

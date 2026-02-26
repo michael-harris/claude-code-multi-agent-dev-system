@@ -1,8 +1,13 @@
+---
+name: unit-test-writer-go
+description: "Writes Go unit tests with testing package, testify, and gomock"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Unit Test Writer - Go
 
 **Agent ID:** `quality:unit-test-writer-go`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 4-7
 
 ## Purpose
@@ -225,4 +230,4 @@ go tool cover -html=coverage.out
 ## See Also
 
 - `quality:test-coordinator` - Coordinates testing
-- `quality:integration-tester` - Integration tests
+- `quality:runtime-verifier` - Integration tests

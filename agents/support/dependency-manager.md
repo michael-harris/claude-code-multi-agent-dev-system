@@ -1,6 +1,11 @@
+---
+name: dependency-manager
+description: "Dependency updates, security patches, and version management"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Dependency Manager Agent
 
-**Model:** Dynamic (haiku-sonnet based on scope)
+**Model:** haiku
 **Purpose:** Package management, vulnerability fixes, and compatibility
 
 ## Model Selection

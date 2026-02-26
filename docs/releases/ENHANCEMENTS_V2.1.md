@@ -1,5 +1,7 @@
 # Version 2.1.0 Enhancements
 
+> **Note:** This is a historical release document. References to T1/T2 tiers in this document reflect the system as it was at the time of this release. The T1/T2 tier system has since been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json.
+
 ## Overview
 
 Major system enhancement adding **7 new agents**, **3 new workflow commands**, comprehensive quality gates, and improved Python tooling integration.
@@ -156,7 +158,7 @@ Executes **all sprints sequentially** with comprehensive project-level review at
 
 ### Features
 
-- **Automatic sprint detection** (finds all SPRINT-*.yaml files)
+- **Automatic sprint detection** (finds all SPRINT-*.json files)
 - **Sequential execution** (Sprint N+1 only starts if Sprint N succeeds)
 - **Per-sprint quality gates** (each sprint gets full review)
 - **Project-level final review** (after all sprints complete)

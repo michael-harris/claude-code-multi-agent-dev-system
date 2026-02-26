@@ -1,8 +1,14 @@
+---
+name: security-auditor-typescript
+description: "TypeScript/JavaScript security auditing with ESLint security plugins"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Security Auditor - TypeScript
 
 **Agent ID:** `security:security-auditor-typescript`
 **Category:** Security
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 6-10
 
 ## Purpose
@@ -191,5 +197,5 @@ npx secretlint "**/*"
 
 ## See Also
 
-- `security:security-auditor` - General security auditor
+- `quality:security-auditor` - General security auditor
 - `orchestration:sprint-loop` - Calls for sprint security audit

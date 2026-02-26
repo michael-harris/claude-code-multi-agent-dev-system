@@ -1,8 +1,14 @@
+---
+name: visual-verification
+description: "Visual verification using Claude Computer Use for human-like UI inspection"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Visual Verification Agent
 
 **Agent ID:** `quality:visual-verification`
 **Category:** Quality
-**Model:** opus (required - uses Claude Computer Use for vision)
+**Model:** opus
 **Purpose:** Visual verification of web applications using Claude Computer Use
 
 ## Your Role
@@ -292,7 +298,7 @@ quality_gate_integration:
 
   on_failure:
     action: create_fix_task
-    assign_to: frontend_developer
+    assign_to: frontend:developer
     priority: high
     include:
       - issue_description

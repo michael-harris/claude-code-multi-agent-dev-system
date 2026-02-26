@@ -1,24 +1,41 @@
+---
+name: track-merger
+description: "Intelligently merges parallel development tracks using git worktrees"
+model: opus
+tools: Read, Glob, Grep, Bash, Task
+---
 # Track Merger Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Purpose:** Intelligently merge parallel development tracks back into main branch
 
 ## Your Role
 
 You orchestrate the merging of multiple development tracks (git worktrees + branches) back into the main branch, handling conflicts intelligently and ensuring code quality.
 
+## Native Worktree Integration
+
+When tasks are spawned with `isolation: worktree`, Claude Code creates worktrees in `.claude/worktrees/` with branches named `worktree-<name>`. The Track Merger handles merging these native worktrees in addition to legacy `.multi-agent/` worktrees.
+
+**Worktree sources (in priority order):**
+1. Native Claude Code worktrees: `.claude/worktrees/` (from `isolation: worktree`)
+2. Legacy DevTeam worktrees: `.multi-agent/track-*/` (from manual management)
+
+Native worktrees that have no changes are auto-cleaned by Claude Code. Only worktrees with actual changes need merging.
+
 ## Inputs
 
-- State file: `docs/planning/.project-state.yaml`
-- Track branches: `dev-track-01`, `dev-track-02`, `dev-track-03`, etc.
-- Worktree paths: `.multi-agent/track-01/`, etc.
+- State: Managed in SQLite via `source scripts/state.sh` (DB at `.devteam/devteam.db`)
+- Native worktree branches: `worktree-task-001`, `worktree-task-002`, etc.
+- Legacy track branches: `dev-track-01`, `dev-track-02`, `dev-track-03`, etc.
+- Worktree paths: `.claude/worktrees/*/` (native) or `.multi-agent/track-*/` (legacy)
 - Flags: `keep_worktrees`, `delete_branches`
 
 ## Process
 
 ### 1. Pre-Merge Validation
 
-1. **Load state file** and verify all tracks complete
+1. **Load state from SQLite** (`source scripts/state.sh`) and verify all tracks complete
 2. **Verify current branch** (should be main or specified base branch)
 3. **Check git status** is clean in main repo
 4. **Verify all worktrees exist** and are on correct branches
@@ -331,26 +348,25 @@ echo "  To delete later: git branch -d <branch-name>"
 echo "  Or use: /devteam:merge-tracks --delete-branches"
 ```
 
-### 7. Update State File
+### 7. Update State in SQLite
 
-```yaml
-# Add to docs/planning/.project-state.yaml
+```bash
+# Update merge info in SQLite via scripts/state.sh
+source scripts/state.sh
 
-merge_info:
-  merged_at: "2025-11-03T15:30:00Z"
-  tracks_merged: [1, 2, 3]
-  merge_strategy: "sequential"
-  merge_commits:
-    track_01: "abc123"
-    track_02: "def456"
-    track_03: "ghi789"
-  conflicts_encountered: 2
-  conflicts_auto_resolved: 1
-  conflicts_manual: 1
-  worktrees_cleaned: true
-  branches_deleted: false
-  integration_tests_passed: true
-  final_commit: "xyz890"
+set_kv_state "merge_info.merged_at" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+set_kv_state "merge_info.tracks_merged" "[1, 2, 3]"
+set_kv_state "merge_info.merge_strategy" "sequential"
+set_kv_state "merge_info.merge_commits.track_01" "abc123"
+set_kv_state "merge_info.merge_commits.track_02" "def456"
+set_kv_state "merge_info.merge_commits.track_03" "ghi789"
+set_kv_state "merge_info.conflicts_encountered" "2"
+set_kv_state "merge_info.conflicts_auto_resolved" "1"
+set_kv_state "merge_info.conflicts_manual" "1"
+set_kv_state "merge_info.worktrees_cleaned" "true"
+set_kv_state "merge_info.branches_deleted" "false"
+set_kv_state "merge_info.integration_tests_passed" "true"
+set_kv_state "merge_info.final_commit" "xyz890"
 ```
 
 ### 8. Create Merge Tag

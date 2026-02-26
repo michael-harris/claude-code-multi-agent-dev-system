@@ -1,0 +1,18 @@
+# DevTeam Validation Configuration
+# Referenced by: orchestration/requirements-validator.md
+# Defines requirements validation strictness and criteria sources
+
+requirements_validation:
+  strict_mode: true  # No partial passes
+  require_evidence: true  # Must cite code locations
+
+  criteria_sources:
+    - task_definition
+    - sprint_definition
+    - prd_requirements
+
+  fail_on:
+    - missing_implementation
+    - partial_implementation
+    - placeholder_code
+    - missing_documentation

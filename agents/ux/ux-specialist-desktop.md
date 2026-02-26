@@ -1,8 +1,13 @@
+---
+name: ux-specialist-desktop
+description: "Specialized UX design for Windows, macOS, and Linux applications"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # UX Specialist - Desktop
 
 **Agent ID:** `ux:ux-specialist-desktop`
 **Category:** UX
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 5-8
 
 ## Purpose
