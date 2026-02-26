@@ -51,8 +51,8 @@ Reset state, clear stuck sessions, and recover from errors.
 ### Basic Reset (Abort Current Session)
 
 ```bash
-source scripts/state.sh
-source scripts/events.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
+source "${CLAUDE_PLUGIN_ROOT}/scripts/events.sh"
 
 # Check for running session
 if is_session_running; then

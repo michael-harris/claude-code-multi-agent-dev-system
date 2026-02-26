@@ -689,7 +689,7 @@ Or merge directly:
 
 ## Important Notes
 
-- Model is set to opus in plugin.json; do not override
+- Model is set to opus in agent-registry.json; do not override
 - Delegate all actual work to specialized agents
 - Track costs and model usage for optimization insights
 - Final review is MANDATORY - no exceptions

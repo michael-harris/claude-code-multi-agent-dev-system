@@ -29,7 +29,7 @@ This command is destructive. Use with caution.
 
 ### Step 1: Load State and Validate
 
-1. Load state from SQLite database (`.devteam/devteam.db`) via `source scripts/state.sh`
+1. Load state from SQLite database (`.devteam/devteam.db`) via `source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"`
 2. Verify worktree mode enabled
 3. If specific track, verify track exists
 4. Check if tracks are complete (warning if not)
@@ -109,7 +109,7 @@ done
 
 ```bash
 # Update state in SQLite database (.devteam/devteam.db)
-source scripts/state.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
 
 set_kv_state "cleanup_info.cleaned_at" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 set_kv_state "cleanup_info.worktrees_removed" "1,2,3"

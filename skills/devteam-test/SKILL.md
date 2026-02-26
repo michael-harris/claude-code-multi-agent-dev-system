@@ -7,9 +7,9 @@ allowed-tools: Read, Glob, Grep, Bash, Task
 model: opus
 ---
 
-Current session: !`source scripts/state.sh && get_current_session 2>/dev/null || echo "No active session"`
-Active sprint: !`source scripts/state.sh && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
-Failure count: !`source scripts/state.sh && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
+Current session: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_current_session 2>/dev/null || echo "No active session"`
+Active sprint: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
+Failure count: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
 
 # DevTeam Test Command
 
@@ -57,8 +57,8 @@ Coordinate test writing and execution across the project. Launches the Test Coor
 ### Phase 0: Initialize Session
 
 ```bash
-source scripts/state.sh
-source scripts/events.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
+source "${CLAUDE_PLUGIN_ROOT}/scripts/events.sh"
 
 SESSION_ID=$(start_session "/devteam:test $*" "test")
 log_session_started "/devteam:test $*" "test"

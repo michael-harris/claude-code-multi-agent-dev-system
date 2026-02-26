@@ -16,7 +16,21 @@ These hooks integrate with Claude Code's hook system to provide:
 
 ## Quick Start
 
-### Automatic Installation
+### Plugin Installation (Recommended)
+
+When DevTeam is installed as a Claude Code plugin (via marketplace or local install), all hooks are configured automatically through `hooks/hooks.json`. No manual setup is required.
+
+```bash
+# Install from marketplace (hooks auto-configured)
+/plugin marketplace add https://github.com/michael-harris/devteam
+/plugin install devteam@devteam-marketplace
+```
+
+All hook paths use `${CLAUDE_PLUGIN_ROOT}` to resolve correctly regardless of where the plugin is cached.
+
+### Legacy Manual Installation
+
+If running hooks outside the plugin system, you can still install manually:
 
 ```bash
 # Linux/macOS
@@ -31,41 +45,6 @@ The installer will:
 2. Install git pre-commit hook for scope checking
 3. Generate Claude Code settings configuration
 4. Optionally auto-install to your settings.json
-
-### Manual Installation
-
-Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": ".*",
-        "hooks": ["/path/to/project/hooks/pre-tool-use-hook.sh"]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": ".*",
-        "hooks": ["/path/to/project/hooks/post-tool-use-hook.sh"]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": ".*",
-        "hooks": ["/path/to/project/hooks/stop-hook.sh"]
-      }
-    ],
-    "PostMessage": [
-      {
-        "matcher": ".*",
-        "hooks": ["/path/to/project/hooks/persistence-hook.sh"]
-      }
-    ]
-  }
-}
-```
 
 ## Cross-Platform Support
 

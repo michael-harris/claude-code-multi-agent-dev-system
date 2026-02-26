@@ -269,7 +269,7 @@ git worktree list
    - Ensure package.json/pyproject.toml exists
    - Verify language-specific config files
 
-**Note:** Each agent has an explicit model assignment (haiku, sonnet, or opus) in its YAML frontmatter and plugin.json. Orchestrators handle escalation automatically (sonnet -> opus after 2 failures, opus -> Bug Council after 3 failures).
+**Note:** Each agent has an explicit model assignment (haiku, sonnet, or opus) in its YAML frontmatter and agent-registry.json. Orchestrators handle escalation automatically (sonnet -> opus after 2 failures, opus -> Bug Council after 3 failures).
 
 ---
 

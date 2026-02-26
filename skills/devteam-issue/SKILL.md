@@ -7,9 +7,9 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Task
 model: opus
 ---
 
-Current session: !`source scripts/state.sh && get_current_session 2>/dev/null || echo "No active session"`
-Active sprint: !`source scripts/state.sh && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
-Failure count: !`source scripts/state.sh && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
+Current session: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_current_session 2>/dev/null || echo "No active session"`
+Active sprint: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
+Failure count: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
 
 # DevTeam Issue Command
 
@@ -32,10 +32,10 @@ Before starting, initialize state in SQLite database (`.devteam/devteam.db`):
 
 ```bash
 # Source the state management functions
-source scripts/state.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
 
 # Initialize the database if needed
-source scripts/db-init.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/db-init.sh"
 
 # Set project metadata
 set_kv_state "metadata.created_at" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"

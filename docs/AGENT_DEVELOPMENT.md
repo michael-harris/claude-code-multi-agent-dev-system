@@ -73,7 +73,7 @@ cp agents/templates/base-agent.md agents/specialized/my-agent.md
 
 Edit the file with your agent definition (see structure below).
 
-### Step 5: Register in plugin.json
+### Step 5: Register in agent-registry.json
 
 Add entry to the agents array.
 
@@ -240,7 +240,7 @@ Escalate to a more capable model when:
 
 ## Registration
 
-### plugin.json Entry
+### agent-registry.json Entry
 
 ```json
 {
@@ -314,7 +314,7 @@ run_test test_my_agent_not_selected
 
 - [ ] Agent file passes markdown lint
 - [ ] All required sections present
-- [ ] Registered in plugin.json
+- [ ] Registered in agent-registry.json
 - [ ] Triggers don't conflict with existing agents
 - [ ] Examples are accurate
 - [ ] Output format is valid JSON (if applicable)

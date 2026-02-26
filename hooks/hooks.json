@@ -9,7 +9,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/pre-tool-use-hook.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use-hook.sh",
             "description": "Validate tool calls, check iteration limits, circuit breaker"
           },
           {
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/pre-tool-use-hook.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use-hook.sh",
             "description": "Validate bash commands, check for dangerous operations"
           }
         ]
@@ -37,13 +37,13 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/post-tool-use-hook.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-use-hook.sh",
             "description": "Detect quality gate results from bash output"
           },
           {
             "type": "agent",
             "agent": "quality-gate-analyzer",
-            "prompt": "Analyze the bash command output. Determine if this was a test run, lint check, type check, or security scan. Extract structured results: what passed, what failed, error messages. Write results to SQLite via: source scripts/events.sh && log_event 'gate_result' 'quality' '<message>' '<json_data>'",
+            "prompt": "Analyze the bash command output. Determine if this was a test run, lint check, type check, or security scan. Extract structured results: what passed, what failed, error messages. Write results to SQLite via: source \"${CLAUDE_PLUGIN_ROOT}/scripts/events.sh\" && log_event 'gate_result' 'quality' '<message>' '<json_data>'",
             "description": "Agent-based quality gate analysis — replaces fragile regex parsing",
             "tools": ["Read", "Bash", "Grep"]
           }
@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/post-tool-use-hook.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/post-tool-use-hook.sh",
             "description": "Track file modifications in state"
           }
         ]
@@ -66,7 +66,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/stop-hook.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/stop-hook.sh",
             "description": "Block exit unless EXIT_SIGNAL:true or quality gates pass"
           }
         ]
@@ -78,7 +78,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"agent_start\" \"orchestration\" \"Subagent started\" \"{}\" 2>/dev/null || true'",
+            "command": "bash -c 'source \"${CLAUDE_PLUGIN_ROOT}/scripts/events.sh\" 2>/dev/null && log_event \"agent_start\" \"orchestration\" \"Subagent started\" \"{}\" 2>/dev/null || true'",
             "description": "Track agent start time for cost tracking"
           }
         ]
@@ -90,7 +90,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"agent_stop\" \"orchestration\" \"Subagent completed\" \"{}\" 2>/dev/null || true'",
+            "command": "bash -c 'source \"${CLAUDE_PLUGIN_ROOT}/scripts/events.sh\" 2>/dev/null && log_event \"agent_stop\" \"orchestration\" \"Subagent completed\" \"{}\" 2>/dev/null || true'",
             "description": "Track agent completion for cost tracking and metrics"
           }
         ]
@@ -102,7 +102,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"task_completed\" \"orchestration\" \"Task marked complete\" \"{}\" 2>/dev/null || true'",
+            "command": "bash -c 'source \"${CLAUDE_PLUGIN_ROOT}/scripts/events.sh\" 2>/dev/null && log_event \"task_completed\" \"orchestration\" \"Task marked complete\" \"{}\" 2>/dev/null || true'",
             "description": "Log task completion — triggers downstream task assignment in Agent Teams mode"
           }
         ]
@@ -114,7 +114,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"worktree_created\" \"infrastructure\" \"Git worktree created\" \"{}\" 2>/dev/null || true'",
+            "command": "bash -c 'source \"${CLAUDE_PLUGIN_ROOT}/scripts/events.sh\" 2>/dev/null && log_event \"worktree_created\" \"infrastructure\" \"Git worktree created\" \"{}\" 2>/dev/null || true'",
             "description": "Track worktree creation for parallel track management"
           }
         ]
@@ -126,7 +126,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"worktree_removed\" \"infrastructure\" \"Git worktree removed\" \"{}\" 2>/dev/null || true'",
+            "command": "bash -c 'source \"${CLAUDE_PLUGIN_ROOT}/scripts/events.sh\" 2>/dev/null && log_event \"worktree_removed\" \"infrastructure\" \"Git worktree removed\" \"{}\" 2>/dev/null || true'",
             "description": "Track worktree removal for cleanup verification"
           }
         ]
@@ -150,7 +150,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/pre-compact.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact.sh",
             "description": "Save state to SQLite before context compaction"
           }
         ]
@@ -163,7 +163,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/session-start.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh",
             "description": "Initialize or resume session in SQLite"
           }
         ]
@@ -175,7 +175,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/session-end.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-end.sh",
             "description": "Finalize session, calculate costs"
           }
         ]
@@ -188,7 +188,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "hooks/persistence-hook.sh",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/persistence-hook.sh",
             "description": "Detect and prevent abandonment during autonomous execution"
           }
         ]

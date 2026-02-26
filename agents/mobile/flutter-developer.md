@@ -10,7 +10,7 @@ tools: Read, Edit, Write, Glob, Grep, Bash
 
 ## Model Selection
 
-Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
+Model is set in agent-registry.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple UI widgets, basic navigation
 - **Sonnet:** Complex features, state management, platform channels
 - **Opus:** App architecture, performance optimization, complex animations
