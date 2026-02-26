@@ -1,3 +1,7 @@
+# DEPRECATED: State is now managed in SQLite (.devteam/devteam.db).
+# Schema defined in: scripts/schema.sql, scripts/schema-v2.sql, scripts/schema-v3.sql, scripts/schema-v4.sql
+# This file is kept as historical reference only. Do NOT use for new development.
+#
 # DevTeam State File Schema v3.0
 # This file documents the schema for .devteam/state.yaml
 # The actual state file is created per-project

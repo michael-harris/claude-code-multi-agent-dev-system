@@ -1,25 +1,37 @@
 # DevTeam: Multi-Agent Autonomous Development System
 
-An enterprise-grade Claude Code plugin providing **126 specialized AI agents** with:
+A Claude Code plugin providing **127 specialized AI agents** with:
 - **Interview-driven planning** - Clarify requirements before work begins
 - **Codebase research** - Investigate patterns and blockers before implementation
 - **SQLite state management** - Reliable session tracking and cost analytics
 - **Model escalation** - Automatic haiku → sonnet → opus progression
 - **Bug Council** - 5-agent diagnostic team for complex issues
-- **Eco mode** - 30-50% cost reduction for routine tasks
+- **Eco mode** - Cost-optimized execution mode for simpler tasks
 - **Quality gates** - Tests, types, lint, security, coverage enforcement
+
+---
+
+## How This Works
+
+This is a **Claude Code plugin** composed of:
+- **Markdown agent instructions** (`agents/*.md`) — Claude Code reads these and follows them as subagent prompts via the Task tool
+- **YAML configuration** (`.devteam/*.yaml`) — defines capabilities, thresholds, and agent selection triggers
+- **Shell scripts** (`scripts/*.sh`, `hooks/*.sh`) — handle state persistence (SQLite), event logging, hook lifecycle, and database management
+- **Slash commands** (`commands/*.md`, `skills/*/SKILL.md`) — user-facing commands that orchestrate agent workflows
+
+There is no separate executable orchestrator. **Claude Code itself is the runtime** — it reads the agent markdown files, selects appropriate agents based on task characteristics, and executes them as subagents. The shell scripts provide supporting infrastructure (database, hooks, state tracking) but the orchestration logic lives in the agent instructions themselves.
 
 ---
 
 ## Key Features
 
-### Autonomous Development with Ralph
+### Autonomous Development with Task Loop
 
-**Ralph** (Recursive Agent Loop for Polished Handling) is the quality enforcement system that ensures every task is completed to specification:
+**Task Loop** is the iterative quality enforcement system that ensures every task is completed to specification:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                      RALPH QUALITY LOOP                      │
+│                       TASK LOOP                              │
 │                                                              │
 │   Execute → Quality Gates → Pass? → Complete                 │
 │      ↑           │                                           │
@@ -46,13 +58,7 @@ The `/devteam:implement` command automatically selects the best agents for your 
 /devteam:implement "Add user authentication with JWT tokens"
 ```
 
-**Selection Algorithm:**
-| Factor | Weight | Example |
-|--------|--------|---------|
-| Keywords | 40% | "authentication" → security_auditor |
-| File Types | 30% | `*.py` → api_developer_python |
-| Task Type | 20% | "bug" → Bug Council |
-| Language | 10% | FastAPI → Python agents |
+The `/devteam:implement` command analyzes your task description, file types involved, and project context to select appropriate agents. It considers keyword matches, file extensions, task type (feature vs. bug), and detected language/framework.
 
 ### Bug Council: Multi-Perspective Debugging
 
@@ -74,7 +80,7 @@ For complex bugs, the Bug Council convenes 5 specialized analysts:
 
 **Activation Triggers:**
 - Critical/high severity bugs
-- 2+ failed fix attempts
+- 3+ failed opus attempts
 - Complexity score ≥ 10
 - Explicit `bug_council: true` flag
 
@@ -121,9 +127,9 @@ Abandonment Attempt → Detected → Re-engagement Prompt
 
 ---
 
-## 126 Specialized Agents
+## 127 Specialized Agents
 
-### Enterprise Roles (NEW)
+### Enterprise Roles
 
 | Category | Agents | Capabilities |
 |----------|--------|--------------|
@@ -140,11 +146,17 @@ Abandonment Attempt → Detected → Re-engagement Prompt
 
 | Agent | Purpose |
 |-------|---------|
-| **Ralph Orchestrator** | Quality loop management, model escalation |
-| **Task Orchestrator** | Task decomposition, agent coordination |
+| **Autonomous Controller** | Execution loop management, state transitions, circuit breaker |
 | **Bug Council Orchestrator** | Multi-perspective bug analysis |
+| **Code Review Coordinator** | Cross-agent code review orchestration |
+| **Quality Gate Enforcer** | Run and aggregate quality gate results |
+| **Requirements Validator** | Validate acceptance criteria met |
 | **Scope Validator** | Enforce scope boundaries |
-| **Sprint Orchestrator** | Sprint execution management |
+| **Sprint Loop** | Sprint-level quality validation after all tasks |
+| **Sprint Orchestrator** | Sprint execution management, task sequencing |
+| **Task Loop** | Iterative quality loop for single task execution |
+| **Track Merger** | Merge parallel worktree tracks |
+| **Workflow Compliance** | Meta-validator auditing orchestration process |
 
 ### Bug Council Agents
 
@@ -163,7 +175,6 @@ Abandonment Attempt → Detected → Re-engagement Prompt
 - TypeScript (Express, NestJS, Fastify)
 - Go (Gin, Echo, Fiber)
 - Java (Spring Boot, Micronaut)
-- Rust (Actix, Axum)
 - C# (ASP.NET Core)
 - Ruby (Rails, Sinatra)
 - PHP (Laravel, Symfony)
@@ -215,7 +226,7 @@ The system will:
 1. **Interview** - Clarify requirements with targeted questions
 2. **Research** - Analyze codebase, identify patterns and blockers
 3. **Plan** - Generate PRD, tasks, and sprints
-4. **Execute** - Run with Ralph quality loop and model escalation
+4. **Execute** - Run with Task Loop quality loop and model escalation
 5. **Verify** - Pass all quality gates before completion
 
 ### Bug Fixing
@@ -234,7 +245,7 @@ The system will:
 ### Cost-Optimized Mode
 
 ```bash
-# Use eco mode for 30-50% cost savings
+# Use eco mode (lower-cost models for simpler tasks)
 /devteam:implement --eco
 /devteam:bug "Minor CSS issue" --eco
 ```
@@ -256,7 +267,7 @@ The system will:
 
 ## Configuration
 
-### Ralph Configuration (`.devteam/ralph-config.yaml`)
+### Task Loop Configuration (`.devteam/task-loop-config.yaml`)
 
 ```yaml
 loop_settings:
@@ -316,7 +327,12 @@ The system uses Claude Code hooks for autonomous execution. **All hooks support 
 | Stop Hook | `stop-hook.sh` | `stop-hook.ps1` | Blocks exit without `EXIT_SIGNAL: true` |
 | Persistence Hook | `persistence-hook.sh` | `persistence-hook.ps1` | Detects and prevents abandonment |
 | Scope Check | `scope-check.sh` | `scope-check.ps1` | Validates commits stay in scope |
-| Pre-Compact | `pre-compact.sh` | (coming soon) | Preserves state before context compaction |
+| Pre-Compact | `pre-compact.sh` | `pre-compact.ps1` | Preserves state before context compaction |
+| Pre-Tool-Use | `pre-tool-use-hook.sh` | `pre-tool-use-hook.ps1` | Pre-execution validation |
+| Post-Tool-Use | `post-tool-use-hook.sh` | `post-tool-use-hook.ps1` | Post-execution logging |
+| Session Start | `session-start.sh` | `session-start.ps1` | Session initialization |
+| Session End | `session-end.sh` | `session-end.ps1` | Session cleanup |
+| Install | `install.sh` | `install.ps1` | Hook installation script |
 
 See [hooks/README.md](hooks/README.md) for detailed cross-platform installation instructions.
 
@@ -351,11 +367,11 @@ Add to `~/.claude/settings.json`:
 
 ### Automatic Model Selection
 
-| Complexity | Model | Cost | Use Case |
-|------------|-------|------|----------|
-| 1-4 | Haiku | $0.001/1K | Simple fixes, docs |
-| 5-8 | Sonnet | $0.003/1K | Standard features |
-| 9-14 | Opus | $0.015/1K | Complex architecture |
+| Complexity | Model | Characteristics | Use Case |
+|------------|-------|------------------|----------|
+| 1-4 | Haiku | Fast, lowest cost | Simple fixes, docs |
+| 5-8 | Sonnet | Balanced | Standard features |
+| 9-14 | Opus | Most capable, highest cost | Complex architecture |
 
 ### Escalation Flow
 
@@ -400,12 +416,12 @@ User Request
          │
          ▼
 ┌─────────────────┐
-│ Task Orchestrator│ ← Decomposes task, assigns scope
+│   Task Loop     │ ← Iterative quality loop per task
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│     RALPH       │ ← Quality loop wrapper
+│   TASK LOOP     │ ← Quality loop wrapper
 │  ┌───────────┐  │
 │  │  Execute  │  │ ← Selected agents work
 │  │  Agents   │  │
@@ -440,7 +456,7 @@ User Request
 ```
 .devteam/
 ├── config.yaml              # Main project configuration
-├── ralph-config.yaml        # Ralph quality loop config
+├── task-loop-config.yaml    # Task Loop quality loop config
 ├── agent-capabilities.yaml  # Agent registry with triggers
 ├── agent-selection.md       # Selection algorithm docs
 ├── persistence-config.yaml  # Anti-abandonment rules
@@ -448,55 +464,115 @@ User Request
 ├── model-selection.md       # Dynamic model assignment
 ├── parallel-execution.md    # Concurrent task handling
 ├── plan-management.md       # Plan lifecycle tracking
-├── state.yaml               # Execution state (runtime)
-├── circuit-breaker.json     # Failure tracking (runtime)
+├── sprint-loop-config.yaml  # Sprint validation settings
+├── task-loop-config.yaml    # Task execution settings
+├── code-review-config.yaml  # Code review standards
+├── database-config.yaml     # Database setup
+├── frontend-config.yaml     # Frontend-specific settings
+├── performance-config.yaml  # Performance audit thresholds
+├── test-config.yaml         # Test framework configuration
+├── testing-config.yaml      # Test execution config
+├── ux-config.yaml           # UX validation rules
+├── validation-config.yaml   # Requirements validation rules
+├── refactoring-config.yaml  # Refactoring guidelines
+├── devteam.db               # SQLite execution state + circuit breaker tracking (runtime)
 └── plans/                   # Multi-plan storage (runtime)
 
 agents/
-├── orchestration/           # 9 orchestration agents
-│   ├── ralph-orchestrator.md
-│   ├── task-orchestrator.md
-│   ├── sprint-orchestrator.md
+├── orchestration/           # 11 orchestration agents
+│   ├── autonomous-controller.md
 │   ├── bug-council-orchestrator.md
+│   ├── code-review-coordinator.md
+│   ├── quality-gate-enforcer.md
+│   ├── requirements-validator.md
 │   ├── scope-validator.md
+│   ├── sprint-loop.md
+│   ├── sprint-orchestrator.md
+│   ├── task-loop.md
+│   ├── track-merger.md
 │   └── workflow-compliance.md
-├── planning/                # PRD & sprint planning
+├── planning/                # PRD & sprint planning (3)
+├── research/                # Codebase research (1)
 ├── diagnosis/               # Bug Council agents (5)
-├── backend/                 # Backend API developers
-├── frontend/                # Frontend developers
-├── database/                # Database specialists
-├── python/                  # Python utilities
-├── quality/                 # Testing & QA
-├── devops/                  # CI/CD, Docker, K8s
-├── sre/                     # Site Reliability Engineering
-├── security/                # Security & Compliance
-├── mobile/                  # iOS & Android
-├── scripting/               # Shell & PowerShell
-├── ux/                      # Design system agents
-├── accessibility/           # A11y specialists
+├── backend/                 # Backend API developers (16)
+├── frontend/                # Frontend developers (3)
+├── database/                # Database specialists (12)
+├── quality/                 # Testing & QA (26)
+├── devops/                  # CI/CD, Docker, K8s (5)
+├── mobile/                  # iOS, Android, Flutter, RN (8)
+├── security/                # Security & Compliance (10)
+├── sre/                     # Site Reliability Engineering (2)
+├── ux/                      # Design system agents (12)
+├── accessibility/           # A11y specialists (2)
+├── architecture/            # System architecture (1)
+├── data-ai/                 # Data & ML engineering (2)
+├── devrel/                  # Developer advocacy (1)
+├── product/                 # Product management (1)
+├── specialized/             # Observability (1)
+├── support/                 # Dependency management (1)
+├── infrastructure/          # Configuration management (1)
+├── python/                  # Python utilities (1)
+├── scripting/               # Shell & PowerShell (2)
 └── templates/
     └── base-agent.md
 
-commands/                    # 18 slash commands
-├── devteam-auto.md
+commands/                    # 20 slash commands
 ├── devteam-plan.md
-├── devteam-sprint.md
-├── devteam-list.md
-├── devteam-select.md
+├── devteam-implement.md
+├── devteam-bug.md
 ├── devteam-issue.md
 ├── devteam-issue-new.md
-└── ...
+├── devteam-status.md
+├── devteam-reset.md
+├── devteam-config.md
+├── devteam-logs.md
+├── devteam-help.md
+├── devteam-list.md
+├── devteam-select.md
+├── devteam-design.md
+├── devteam-design-drift.md
+├── devteam-review.md
+├── devteam-test.md
+├── merge-tracks.md
+├── worktree-status.md
+├── worktree-list.md
+└── worktree-cleanup.md
+
+skills/                      # 20 skill definitions (SKILL.md per directory)
+├── devteam-plan/
+├── devteam-implement/
+├── devteam-bug/
+├── ... (one directory per command)
+└── worktree-cleanup/
+
+.claude/
+└── rules/                   # 11 path-specific rule files
+    └── *.md
+
+settings.json                # Default settings with env flags and hooks config
+.mcp.json                    # Bundled MCP server configs (GitHub, Memory)
+.lsp.json                    # Language server configs (8 languages)
 
 hooks/                       # Cross-platform hooks
 ├── stop-hook.sh / .ps1      # Exit control
 ├── persistence-hook.sh / .ps1
 ├── scope-check.sh / .ps1
+├── pre-compact.sh / .ps1
+├── pre-tool-use-hook.sh / .ps1
+├── post-tool-use-hook.sh / .ps1
+├── session-start.sh / .ps1
+├── session-end.sh / .ps1
+├── install.sh / .ps1
+├── lib/                     # Shared hook utilities
+├── tests/                   # Hook test suite
 └── README.md
 
 mcp-configs/                 # MCP server configurations
 ├── required.json
 ├── recommended.json
-└── lsp-servers.json
+├── optional.json
+├── lsp-servers.json
+└── README.md
 ```
 
 ---
@@ -543,6 +619,15 @@ mcp-configs/                 # MCP server configurations
 /devteam:bug "desc" --eco          # Cost-optimized
 ```
 
+### Quality & Review Commands
+
+| Command | Description |
+|---------|-------------|
+| `/devteam:review` | Run cross-agent code review |
+| `/devteam:test` | Run test coordination and execution |
+| `/devteam:design` | Design system generation and validation |
+| `/devteam:design-drift` | Detect design system drift |
+
 ### Management Commands
 
 | Command | Description |
@@ -550,6 +635,9 @@ mcp-configs/                 # MCP server configurations
 | `/devteam:list` | List plans, sprints, and tasks |
 | `/devteam:select <plan>` | Select active plan |
 | `/devteam:issue-new "<desc>"` | Create new GitHub issue |
+| `/devteam:config` | View and modify configuration |
+| `/devteam:logs` | View execution logs |
+| `/devteam:help` | Get help on any topic |
 
 ### Worktree Commands
 
@@ -593,7 +681,7 @@ System automatically:
 1. Detects React frontend + FastAPI backend
 2. Selects: frontend_developer, api_developer_python, test_writer
 3. Creates scoped subtasks for each
-4. Executes with Ralph loop
+4. Executes with Task Loop
 5. Security audit on file upload
 6. Completes when all tests pass
 
@@ -614,7 +702,7 @@ System automatically:
 ### Example 3: Security Audit
 
 ```bash
-/devteam:security "Audit authentication system"
+/devteam:implement "Audit authentication system"
 ```
 
 System automatically:
@@ -628,28 +716,31 @@ System automatically:
 
 ## Installation
 
-### From GitHub
+### Prerequisites
+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
+- SQLite3
+- Bash 4.0+ (Linux/macOS) or PowerShell 5.1+ (Windows)
+- jq (used by install script)
+- Git
+
+### Setup
 
 ```bash
-/plugin marketplace add https://github.com/michael-harris/claude-devteam
-/plugin install claude-devteam
-```
-
-### Local Development
-
-```bash
+# 1. Clone the repository
 git clone https://github.com/michael-harris/claude-devteam.git
 cd claude-devteam
-./install-local.sh
-```
 
-### Configure Hooks
+# 2. Install hooks (configures Claude Code settings)
+bash hooks/install.sh        # Linux/macOS
+# powershell hooks/install.ps1  # Windows
 
-```bash
-# Make hooks executable
-chmod +x hooks/*.sh
+# 3. Initialize the database
+bash scripts/db-init.sh      # Linux/macOS
+# powershell scripts/db-init.ps1  # Windows
 
-# Add to Claude Code settings (see Hooks section)
+# 4. Verify installation
+/devteam:status
 ```
 
 ---
@@ -670,7 +761,7 @@ A: No. The scope validator has VETO power and blocks all out-of-scope changes. A
 
 **Q: What triggers the Bug Council?**
 
-A: Critical bugs, 2+ failed attempts, complexity ≥10, or explicit flag.
+A: Critical bugs, 3+ failed opus attempts, complexity ≥10, or explicit flag.
 
 **Q: How do I customize agent selection?**
 
@@ -710,12 +801,12 @@ While inspired by these projects, we developed original implementations:
 
 | Feature | Inspiration Source | Our Original Addition |
 |---------|-------------------|----------------------|
-| **Ralph Quality Loop** | ralph-claude-code's autonomous loop | Added model escalation (haiku→sonnet→opus), Bug Council activation, quality gates integration |
+| **Task Loop** | ralph-claude-code's autonomous loop | Added model escalation (haiku→sonnet→opus), Bug Council activation, quality gates integration |
 | **Model Escalation** | wshobson/agents tier concept | Automatic escalation after consecutive failures, complexity-based initial selection, de-escalation after success |
 | **Bug Council** | Original concept | 5-agent multi-perspective debugging system with synthesized solutions |
 | **Scope Enforcement** | Original concept | 6-layer enforcement with VETO power, out-of-scope observations logging |
 | **Anti-Abandonment** | Original concept | Persistence hooks detecting "give up" patterns, escalating re-engagement prompts |
-| **Agent Selection** | everything-claude-code delegation | Weighted scoring algorithm (keywords 40%, files 30%, task type 20%, language 10%) |
+| **Agent Selection** | everything-claude-code delegation | Task-aware agent selection based on keywords, file types, task type, and language |
 | **Enterprise Agents** | wshobson/agents categories | SRE, Platform Engineer, Compliance Engineer, Penetration Tester, and 8 other enterprise roles |
 
 ### Broader Ecosystem Inspirations
@@ -743,11 +834,9 @@ While inspired by these projects, we developed original implementations:
 All code in this repository was written from scratch. While we adopted concepts and patterns from the above projects (particularly the Ralph loop concept from frankbria/ralph-claude-code), our implementations are original:
 
 - Our hooks use different file structures (`.devteam/` vs `.ralph/`)
-- Our Ralph config uses YAML with model escalation (original uses INI without escalation)
+- Our config uses YAML with model escalation (original uses INI without escalation)
 - Our agent definitions follow a different structure
 - Bug Council, scope enforcement, and anti-abandonment are entirely original systems
-
-We believe in standing on the shoulders of giants while contributing our own innovations back to the community.
 
 ---
 
@@ -757,4 +846,4 @@ MIT License - See LICENSE file.
 
 ---
 
-**Built with Claude Code** - Enterprise-grade autonomous development.
+**Built for Claude Code**

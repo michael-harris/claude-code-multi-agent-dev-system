@@ -13,9 +13,16 @@
 
 ## Your Process
 
-### Step 1: Load State File
+### Step 1: Load State from SQLite
 
-Read `docs/planning/.project-state.yaml` to get worktree configuration.
+Query the SQLite database (`.devteam/devteam.db`) to get worktree configuration:
+
+```bash
+source scripts/state.sh
+
+# Check worktree mode
+mode=$(get_state "parallel_tracks.mode")
+```
 
 If not worktree mode:
 ```
@@ -26,7 +33,7 @@ No worktrees to show status for.
 
 ### Step 2: Collect Worktree Information
 
-For each track in state file:
+For each track in the state database:
 
 ```bash
 track_num = "01"
@@ -45,13 +52,13 @@ if [ -d "$worktree_path" ]; then
     ahead = $(git rev-list --count @{u}..HEAD 2>/dev/null || echo "N/A")
     behind = $(git rev-list --count HEAD..@{u} 2>/dev/null || echo "N/A")
 
-    # Get sprint status from state file
-    sprints = get_sprints_for_track(track_num)
+    # Get sprint status from SQLite database
+    sprints = get_sprints_for_track(track_num)  # via: source scripts/state.sh
     completed_sprints = count(s for s in sprints if s.status == "completed")
     total_sprints = len(sprints)
 
-    # Get task status
-    tasks = get_tasks_for_track(track_num)
+    # Get task status from SQLite database
+    tasks = get_tasks_for_track(track_num)  # via: source scripts/state.sh
     completed_tasks = count(t for t in tasks if t.status == "completed")
     total_tasks = len(tasks)
 

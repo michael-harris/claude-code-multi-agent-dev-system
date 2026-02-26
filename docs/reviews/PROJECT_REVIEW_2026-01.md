@@ -1,5 +1,7 @@
 # DevTeam Multi-Agent System - Comprehensive Project Review
 
+> **Note:** This is a historical review document. References to "Dynamic model selection" and T1/T2 tiers reflect the system at the time of review. The system now uses explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json, with orchestrators handling escalation via LLM instructions.
+
 **Review Date:** January 2026
 **Version Reviewed:** 3.0.0
 **Reviewer:** Claude Code (Opus 4.5)

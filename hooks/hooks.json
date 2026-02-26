@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "DevTeam declarative hooks configuration — includes command, prompt, and agent hook types",
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/pre-tool-use-hook.sh",
+            "description": "Validate tool calls, check iteration limits, circuit breaker"
+          },
+          {
+            "type": "prompt",
+            "prompt": "The agent is about to modify a file. Check if this modification is within the current task scope. The task scope should be defined in the agent's prompt context. If the file being modified is clearly unrelated to the task (e.g., modifying auth code when the task is about UI styling), return ok:false with a reason. If it's reasonable, return ok:true.",
+            "description": "LLM-based scope pre-check — catches obvious scope violations before they happen"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/pre-tool-use-hook.sh",
+            "description": "Validate bash commands, check for dangerous operations"
+          }
+        ]
+      }
+    ],
+
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/post-tool-use-hook.sh",
+            "description": "Detect quality gate results from bash output"
+          },
+          {
+            "type": "agent",
+            "agent": "quality-gate-analyzer",
+            "prompt": "Analyze the bash command output. Determine if this was a test run, lint check, type check, or security scan. Extract structured results: what passed, what failed, error messages. Write results to SQLite via: source scripts/events.sh && log_event 'gate_result' 'quality' '<message>' '<json_data>'",
+            "description": "Agent-based quality gate analysis — replaces fragile regex parsing",
+            "tools": ["Read", "Bash", "Grep"]
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/post-tool-use-hook.sh",
+            "description": "Track file modifications in state"
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/stop-hook.sh",
+            "description": "Block exit unless EXIT_SIGNAL:true or quality gates pass"
+          }
+        ]
+      }
+    ],
+
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"agent_start\" \"orchestration\" \"Subagent started\" \"{}\" 2>/dev/null || true'",
+            "description": "Track agent start time for cost tracking"
+          }
+        ]
+      }
+    ],
+
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"agent_stop\" \"orchestration\" \"Subagent completed\" \"{}\" 2>/dev/null || true'",
+            "description": "Track agent completion for cost tracking and metrics"
+          }
+        ]
+      }
+    ],
+
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"task_completed\" \"orchestration\" \"Task marked complete\" \"{}\" 2>/dev/null || true'",
+            "description": "Log task completion — triggers downstream task assignment in Agent Teams mode"
+          }
+        ]
+      }
+    ],
+
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"worktree_created\" \"infrastructure\" \"Git worktree created\" \"{}\" 2>/dev/null || true'",
+            "description": "Track worktree creation for parallel track management"
+          }
+        ]
+      }
+    ],
+
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'source scripts/events.sh 2>/dev/null && log_event \"worktree_removed\" \"infrastructure\" \"Git worktree removed\" \"{}\" 2>/dev/null || true'",
+            "description": "Track worktree removal for cleanup verification"
+          }
+        ]
+      }
+    ],
+
+    "TeammateIdle": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "A teammate agent has gone idle. Check if there are remaining tasks in the shared task list that this teammate could work on. If yes, return ok:false with reason 'Assign next task from backlog'. If all tasks are complete or claimed, return ok:true.",
+            "description": "Prevent teammates from going idle when work remains"
+          }
+        ]
+      }
+    ],
+
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/pre-compact.sh",
+            "description": "Save state to SQLite before context compaction"
+          }
+        ]
+      }
+    ],
+
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/session-start.sh",
+            "description": "Initialize or resume session in SQLite"
+          }
+        ]
+      }
+    ],
+
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/session-end.sh",
+            "description": "Finalize session, calculate costs"
+          }
+        ]
+      }
+    ],
+
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/persistence-hook.sh",
+            "description": "Detect and prevent abandonment during autonomous execution"
+          }
+        ]
+      }
+    ]
+  }
+}

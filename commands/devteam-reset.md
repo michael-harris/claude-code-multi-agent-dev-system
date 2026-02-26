@@ -261,7 +261,6 @@ bash scripts/db-init.sh
 ### Preserves
 
 - `.devteam/config.yaml` - Project configuration
-- `.devteam/ralph-config.yaml` - Ralph configuration
 - `.devteam/agent-capabilities.yaml` - Agent registry
 - `.devteam/plans/` - Plan files
 - `docs/planning/` - PRDs and planning docs

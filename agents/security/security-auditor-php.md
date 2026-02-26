@@ -1,8 +1,14 @@
+---
+name: security-auditor-php
+description: "PHP security auditing with Psalm, PHPStan, and RIPS"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Security Auditor - PHP
 
 **Agent ID:** `security:security-auditor-php`
 **Category:** Security
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 6-10
 
 ## Purpose
@@ -183,5 +189,5 @@ composer audit
 
 ## See Also
 
-- `security:security-auditor` - General security auditor
+- `quality:security-auditor` - General security auditor
 - `orchestration:sprint-loop` - Calls for sprint security audit

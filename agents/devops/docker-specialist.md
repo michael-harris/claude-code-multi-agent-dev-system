@@ -1,6 +1,11 @@
+---
+name: docker-specialist
+description: "Creates and optimizes Docker containers and compose files"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Docker Specialist Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** haiku
 **Tier:** Sonnet
 **Purpose:** Docker containerization and optimization expert
 

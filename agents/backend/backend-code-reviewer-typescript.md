@@ -1,8 +1,14 @@
+---
+name: code-reviewer-typescript
+description: "Reviews TypeScript backend code for quality and security"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # Backend Code Reviewer (TypeScript) Agent
 
 **Agent ID:** `backend:code-reviewer-typescript`
 **Category:** Backend / Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ## Purpose
 

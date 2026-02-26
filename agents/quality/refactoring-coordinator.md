@@ -1,8 +1,14 @@
+---
+name: refactoring-coordinator
+description: "Plans and coordinates refactoring activities, delegates to specialists"
+model: opus
+tools: Read, Glob, Grep, Bash, Task
+---
 # Refactoring Coordinator Agent
 
 **Agent ID:** `quality:refactoring-coordinator`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 5-10
 
 ## Purpose
@@ -116,8 +122,8 @@ delegation:
   specialist_selection:
     python_code: backend:api-developer-python
     typescript_code: backend:api-developer-typescript
-    frontend_code: frontend:frontend-developer
-    database_schema: database:database-developer-*
+    frontend_code: frontend:developer
+    database_schema: database:developer-*
     test_updates: quality:test-coordinator
     doc_updates: quality:documentation-coordinator
 ```

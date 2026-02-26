@@ -1,10 +1,12 @@
 # Converting Custom Agents to Claude Code Plugin
 
+> **Note:** This is a historical development document. The T1/T2 tier system described here has been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Escalation is now handled by orchestrator agents via LLM instructions.
+
 ## Current State ✅ UPDATED AFTER REVIEW
 
 You have **28 custom agent definitions** in `.claude/agents/` organized as markdown files:
 - `planning/` - **prd-generator** (NEW!), task-graph-analyzer, sprint-planner
-- `orchestration/` - sprint-orchestrator (⚠️ see notes), task-orchestrator, requirements-validator
+- `orchestration/` - sprint-orchestrator (⚠️ see notes), task-loop, requirements-validator
 - `database/` - database-designer, database-developer-{python,typescript}-{t1,t2} (FIXED)
 - `backend/` - api-designer, api-developer-{python,typescript}-{t1,t2} (FIXED), backend-code-reviewer-{python,typescript}
 - `frontend/` - frontend-designer, frontend-developer-{t1,t2} (FIXED), frontend-code-reviewer
@@ -48,7 +50,7 @@ claude-code-claude-devteam/
 │   │   └── sprint-planner.md
 │   ├── orchestration/
 │   │   ├── sprint-orchestrator.md
-│   │   └── task-orchestrator.md
+│   │   └── task-loop.md
 │   ├── database/
 │   │   ├── database-designer.md
 │   │   ├── database-developer-python-t1.md
@@ -110,16 +112,16 @@ claude-code-claude-devteam/
     {
       "id": "orchestration:sprint-orchestrator",
       "name": "Sprint Orchestrator",
-      "description": "Manages entire sprint execution and coordinates task orchestrator",
+      "description": "Manages entire sprint execution and coordinates task loop",
       "file": "agents/orchestration/devteam:sprint-orchestrator.md",
       "model": "sonnet",
       "category": "orchestration"
     },
     {
-      "id": "orchestration:task-orchestrator",
-      "name": "Task Orchestrator",
+      "id": "orchestration:task-loop",
+      "name": "Task Loop",
       "description": "Coordinates specialized agents for single task with T1/T2 escalation",
-      "file": "agents/orchestration/task-orchestrator.md",
+      "file": "agents/orchestration/task-loop.md",
       "model": "sonnet",
       "category": "orchestration"
     },
@@ -486,7 +488,7 @@ If you want others to use it:
 
 ### Option C: Remove from Plugin
 - Remove sprint-orchestrator.md entirely
-- Only include task-orchestrator
+- Only include task-loop
 - `/devteam:sprint` remains pure command
 
 **Recommendation:** **Option A** - Convert to true agent-based orchestration for consistency and plugin reusability.

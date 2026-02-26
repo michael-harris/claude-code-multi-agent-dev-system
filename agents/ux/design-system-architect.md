@@ -1,3 +1,9 @@
+---
+name: design-system-architect
+description: "Designs scalable design system architecture and token systems"
+model: opus
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Design System Architect Agent
 
 ## Identity
@@ -689,4 +695,4 @@ Tech stack: Next.js with shadcn/ui
 This agent is inspired by and builds upon concepts from:
 - [ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) by nextlevelbuilder
 
-Our implementation adapts these concepts for the DevTeam multi-agent system with integration to frontend developers, accessibility specialists, and the Ralph quality loop.
+Our implementation adapts these concepts for the DevTeam multi-agent system with integration to frontend developers, accessibility specialists, and the Task Loop quality gate.

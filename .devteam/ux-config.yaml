@@ -1,0 +1,21 @@
+# DevTeam UX Configuration
+# Referenced by: ux/ux-system-coordinator.md
+# Defines accessibility standards, platform targets, and design system paths
+
+ux:
+  accessibility:
+    level: AA  # A, AA, or AAA
+    require_audit: true
+
+  platforms:
+    primary: web
+    secondary: [mobile]
+
+  design_system:
+    tokens_path: "design/tokens/"
+    components_path: "design/components/"
+
+  validation:
+    check_consistency: true
+    check_accessibility: true
+    check_drift: true

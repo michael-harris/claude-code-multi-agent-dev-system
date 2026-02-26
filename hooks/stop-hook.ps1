@@ -1,110 +1,211 @@
 # DevTeam Stop Hook (PowerShell)
-# Implements Ralph-style session persistence for autonomous mode
+# Implements session persistence for autonomous mode
 #
 # Exit codes:
-#   0 = Allow exit (work complete or not in autonomous mode)
-#   2 = Block exit and re-inject prompt (work not complete)
+#   0 = Allow exit
+#   2 = Block exit and re-inject prompt
 
 $ErrorActionPreference = "Stop"
 
-# Configuration
-$STATE_FILE = ".devteam\state.yaml"
-$CIRCUIT_BREAKER_FILE = ".devteam\circuit-breaker.json"
-$AUTONOMOUS_MARKER = ".devteam\autonomous-mode"
-$MAX_FAILURES = 5
-$MAX_ITERATIONS = 100
+# Source common library
+. "$PSScriptRoot\lib\hook-common.ps1"
 
-# Logging function
-function Write-Log {
+Initialize-Hook "stop"
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+$MESSAGE = if ($env:STOP_HOOK_MESSAGE) { $env:STOP_HOOK_MESSAGE } else { $env:CLAUDE_OUTPUT }
+
+# ============================================================================
+# VALID EXIT SIGNALS
+# ============================================================================
+
+$VALID_EXIT_SIGNALS = @(
+    "EXIT_SIGNAL: true",
+    "EXIT_SIGNAL:true",
+    "All quality gates passed",
+    "Task completed successfully",
+    "Implementation complete",
+    "Session ended",
+    "All tasks completed",
+    "Sprint completed",
+    "/devteam:end"
+)
+
+# ============================================================================
+# EXIT SIGNAL DETECTION
+# ============================================================================
+
+function Test-ValidExitSignal {
     param([string]$Message)
-    Write-Host "[DevTeam Stop Hook] $Message"
+
+    foreach ($signal in $VALID_EXIT_SIGNALS) {
+        if ($Message -match [regex]::Escape($signal)) {
+            return $true
+        }
+    }
+    return $false
 }
+
+# ============================================================================
+# SESSION STATE CHECK
+# ============================================================================
+
+function Test-IncompleteWork {
+    $sessionId = Get-CurrentSession
+    if (-not $sessionId) { return $false }
+
+    # Check for in-progress tasks
+    if (Test-DatabaseExists) {
+        $safeSessionId = $sessionId -replace "'", "''"
+        $inProgress = Invoke-DbQuery "SELECT COUNT(*) FROM tasks WHERE session_id = '$safeSessionId' AND status = 'in_progress';"
+        if ([int]$inProgress -gt 0) {
+            Write-HookInfo "stop" "Found $inProgress in-progress tasks"
+            return $true
+        }
+    }
+
+    # Check session status
+    $safeSessionId = $sessionId -replace "'", "''"
+    $sessionStatus = Invoke-DbQuery "SELECT status FROM sessions WHERE id = '$safeSessionId';"
+    if ($sessionStatus -eq "running") {
+        $recentFailures = Invoke-DbQuery "SELECT COUNT(*) FROM events WHERE session_id = '$safeSessionId' AND event_type IN ('gate_failed', 'agent_failed', 'task_failed') AND timestamp > datetime('now', '-5 minutes');"
+        if ([int]$recentFailures -gt 0) {
+            Write-HookInfo "stop" "Found $recentFailures recent failures"
+            return $true
+        }
+    }
+
+    # Check database for pending work (fallback)
+    if (Test-DatabaseExists) {
+        $pending = Invoke-DbQuery "SELECT COUNT(*) FROM tasks WHERE status = 'pending';"
+        $inProg = Invoke-DbQuery "SELECT COUNT(*) FROM tasks WHERE status = 'in_progress';"
+        if ([int]$pending -gt 0 -or [int]$inProg -gt 0) {
+            Write-HookInfo "stop" "Database shows pending: $pending, in_progress: $inProg"
+            return $true
+        }
+    }
+
+    return $false
+}
+
+# ============================================================================
+# CHECKPOINT AND CLEANUP
+# ============================================================================
+
+function Save-ExitCheckpoint {
+    $sessionId = Get-CurrentSession
+    if ($sessionId) {
+        Write-HookInfo "stop" "Saving checkpoint before exit"
+        Save-Checkpoint "Auto-checkpoint before exit"
+        Write-EventToDb "checkpoint_created" "session" "Auto-checkpoint before exit"
+    }
+}
+
+function Clear-Session {
+    param([string]$ExitReason = "completed")
+
+    # Remove autonomous mode marker
+    if (Test-Path $script:AUTONOMOUS_MARKER) {
+        Remove-Item $script:AUTONOMOUS_MARKER -Force
+    }
+
+    # Update session status
+    $sessionId = Get-CurrentSession
+    if ($sessionId) {
+        $safeSessionId = $sessionId -replace "'", "''"
+        $safeExitReason = $ExitReason -replace "'", "''"
+        Invoke-DbQuery "UPDATE sessions SET status = 'completed', exit_reason = '$safeExitReason', ended_at = datetime('now') WHERE id = '$safeSessionId';"
+    }
+
+    $safeExitReason = ConvertTo-SafeJsonString $ExitReason
+    Send-McpNotification "session_exit" "{`"authorized`": true, `"reason`": `"$safeExitReason`"}"
+}
+
+# ============================================================================
+# MAIN EXECUTION
+# ============================================================================
 
 # Check if autonomous mode is active
-if (-not (Test-Path $AUTONOMOUS_MARKER)) {
-    # Not in autonomous mode, allow normal exit
+if (-not (Test-AutonomousMode)) {
+    Write-HookDebug "stop" "Not in autonomous mode, allowing exit"
     exit 0
 }
 
-# Check for explicit EXIT_SIGNAL in Claude's output
-# The STOP_HOOK_MESSAGE environment variable contains the last message
-$stopHookMessage = $env:STOP_HOOK_MESSAGE
-if ($stopHookMessage) {
-    if ($stopHookMessage -match "EXIT_SIGNAL:\s*true") {
-        Write-Log "EXIT_SIGNAL received. Project complete."
-        Remove-Item -Path $AUTONOMOUS_MARKER -Force -ErrorAction SilentlyContinue
-        exit 0
-    }
-}
-
-# Initialize circuit breaker if it doesn't exist
-if (-not (Test-Path $CIRCUIT_BREAKER_FILE)) {
-    $circuitBreakerDir = Split-Path $CIRCUIT_BREAKER_FILE -Parent
-    if (-not (Test-Path $circuitBreakerDir)) {
-        New-Item -ItemType Directory -Path $circuitBreakerDir -Force | Out-Null
-    }
-    @{
-        consecutive_failures = 0
-        total_iterations = 0
-        last_failure = $null
-    } | ConvertTo-Json | Set-Content $CIRCUIT_BREAKER_FILE
-}
-
-# Read circuit breaker state
-try {
-    $circuitBreaker = Get-Content $CIRCUIT_BREAKER_FILE -Raw | ConvertFrom-Json
-    $FAILURES = $circuitBreaker.consecutive_failures
-    $ITERATIONS = $circuitBreaker.total_iterations
-} catch {
-    $FAILURES = 0
-    $ITERATIONS = 0
-}
-
-# Check circuit breaker threshold
-if ($FAILURES -ge $MAX_FAILURES) {
-    Write-Log "Circuit breaker OPEN: $FAILURES consecutive failures."
-    Write-Log "Human intervention required. Check .devteam\state.yaml for details."
-    Remove-Item -Path $AUTONOMOUS_MARKER -Force -ErrorAction SilentlyContinue
+# Check for valid exit signal
+if ($MESSAGE -and (Test-ValidExitSignal $MESSAGE)) {
+    Write-HookInfo "stop" "Valid exit signal detected"
+    Save-ExitCheckpoint
+    Clear-Session "completed"
     exit 0
 }
 
-# Check maximum iterations
-if ($ITERATIONS -ge $MAX_ITERATIONS) {
-    Write-Log "Maximum iterations ($MAX_ITERATIONS) reached."
-    Write-Log "Review progress in .devteam\state.yaml"
-    Remove-Item -Path $AUTONOMOUS_MARKER -Force -ErrorAction SilentlyContinue
+# Check circuit breaker
+if (Test-CircuitBreakerOpen) {
+    Write-HookWarn "stop" "Circuit breaker OPEN - allowing exit"
+    Save-ExitCheckpoint
+    Clear-Session "circuit_breaker"
+
+    $message = Get-SystemMessage "circuit-breaker" @"
+CIRCUIT BREAKER TRIPPED
+
+Maximum consecutive failures ($($script:MAX_FAILURES)) reached.
+Human intervention is required.
+"@
+    Write-Output $message
     exit 0
 }
 
-# Check state file for completion status
-if (Test-Path $STATE_FILE) {
-    $stateContent = Get-Content $STATE_FILE -Raw
+# Check max iterations
+if (Test-MaxIterationsReached) {
+    Write-HookWarn "stop" "Maximum iterations reached"
+    Save-ExitCheckpoint
+    Clear-Session "max_iterations"
 
-    # Count task statuses
-    $PENDING = ([regex]::Matches($stateContent, "status:\s*pending")).Count
-    $IN_PROGRESS = ([regex]::Matches($stateContent, "status:\s*in_progress")).Count
+    $message = Get-SystemMessage "max-iterations" @"
+MAXIMUM ITERATIONS REACHED
 
-    # If no pending or in-progress tasks, work is complete
-    if ($PENDING -eq 0 -and $IN_PROGRESS -eq 0) {
-        Write-Log "All work complete. Allowing exit."
-        Remove-Item -Path $AUTONOMOUS_MARKER -Force -ErrorAction SilentlyContinue
-        exit 0
-    }
+The session has reached $($script:MAX_ITERATIONS) iterations.
+"@
+    Write-Output $message
+    exit 0
 }
 
-# Work not complete - increment iteration and continue
-$ITERATIONS++
+# In autonomous mode without a valid exit signal, always block
+# This matches the Bash version's behavior - autonomous mode requires explicit exit signal
+Write-HookWarn "stop" "Exit blocked - no valid exit signal in autonomous mode"
+Write-EventToDb "exit_blocked" "persistence" "Exit blocked - no valid exit signal"
 
-# Update circuit breaker file
-try {
-    $circuitBreaker.total_iterations = $ITERATIONS
-    $circuitBreaker | ConvertTo-Json | Set-Content $CIRCUIT_BREAKER_FILE
-} catch {
-    Write-Log "Warning: Could not update circuit breaker file"
+$sessionId = Get-CurrentSession
+$taskId = Get-CurrentTask
+$iteration = Get-CurrentIteration
+
+$message = Get-SystemMessage "exit-blocked" @"
+EXIT BLOCKED
+
+Autonomous mode requires a valid exit signal.
+
+Current state:
+- Session: $sessionId
+- Task: $taskId
+- Iteration: $iteration/$($script:MAX_ITERATIONS)
+
+You must either:
+1. Complete the task (all quality gates pass)
+2. Use devteam_save_checkpoint to save progress
+3. Use devteam_end_session with appropriate status
+
+Include EXIT_SIGNAL: true when properly complete.
+"@
+Write-Output $message
+
+# Increment iteration
+if ($sessionId) {
+    $safeId = $sessionId -replace "'", "''"
+    Invoke-DbQuery "UPDATE sessions SET current_iteration = $($iteration + 1) WHERE id = '$safeId';"
 }
 
-Write-Log "Work in progress (iteration $ITERATIONS/$MAX_ITERATIONS). Continuing..."
-Write-Log "Pending: $PENDING, In Progress: $IN_PROGRESS"
-
-# Exit code 2 tells Claude Code to block exit and re-inject the prompt
+Send-McpNotification "exit_blocked" (Get-ClaudeContext)
 exit 2

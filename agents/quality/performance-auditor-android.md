@@ -1,6 +1,12 @@
+---
+name: performance-auditor-android
+description: "Android-specific performance analysis (ANR, memory, battery)"
+model: sonnet
+tools: Read, Glob, Grep, Bash
+---
 # Performance Auditor (Android) Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Android-specific performance analysis and optimization
 
 ## Your Role

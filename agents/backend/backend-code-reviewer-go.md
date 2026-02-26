@@ -1,6 +1,12 @@
+---
+name: code-reviewer-go
+description: "Reviews Go backend code for quality and security"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # Backend Code Reviewer - Go
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Tier:** N/A
 **Purpose:** Perform comprehensive code reviews for Go applications focusing on idiomatic Go, concurrency safety, performance, and maintainability
 

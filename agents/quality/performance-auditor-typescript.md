@@ -1,6 +1,12 @@
+---
+name: performance-auditor-typescript
+description: "TypeScript/Node.js-specific performance analysis"
+model: sonnet
+tools: Read, Glob, Grep, Bash
+---
 # Performance Auditor (TypeScript) Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** TypeScript/Node.js-specific performance analysis
 
 ## Your Role

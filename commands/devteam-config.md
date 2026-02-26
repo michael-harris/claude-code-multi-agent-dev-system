@@ -31,13 +31,12 @@ View and modify DevTeam configuration settings.
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | `execution.mode` | string | `normal` | Default mode: normal, eco |
-| `execution.max_iterations` | int | `10` | Max Ralph loop iterations |
+| `execution.max_iterations` | int | `10` | Max Task Loop iterations |
 | `execution.parallel_gates` | bool | `true` | Run quality gates in parallel |
 
 ### Model Settings
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `models.default_tier` | string | `auto` | Default tier: auto, t1, t2 |
 | `models.escalation_threshold` | int | `2` | Failures before escalation |
 | `models.eco_threshold` | int | `4` | Escalation threshold in eco mode |
 
@@ -68,7 +67,7 @@ View and modify DevTeam configuration settings.
 ### Step 1: Load Configuration
 
 ```javascript
-const configPath = '.devteam/ralph-config.yaml'
+const configPath = '.devteam/config.yaml'
 
 function loadConfig() {
     if (existsSync(configPath)) {
@@ -124,7 +123,6 @@ Execution
 
 Models
 ───────────────────────────────────────────────────────────────
-  default_tier:          auto
   escalation_threshold:  2
   eco_threshold:         4
 
@@ -147,7 +145,7 @@ Research
   timeout_minutes:   5
 
 ───────────────────────────────────────────────────────────────
-Config file: .devteam/ralph-config.yaml
+Config file: .devteam/config.yaml
 Edit: /devteam:config set <key> <value>
 ```
 
@@ -194,7 +192,7 @@ async function initializeConfig() {
 
   Project type: ${projectType.type}
   Language: ${projectType.language}
-  Config file: .devteam/ralph-config.yaml
+  Config file: .devteam/config.yaml
 
 Edit settings: /devteam:config set <key> <value>
 View settings: /devteam:config show
@@ -220,7 +218,7 @@ View settings: /devteam:config show
 
 ## Config File Location
 
-Configuration is stored in `.devteam/ralph-config.yaml`:
+Configuration is stored in `.devteam/config.yaml`:
 
 ```yaml
 version: "3.0"

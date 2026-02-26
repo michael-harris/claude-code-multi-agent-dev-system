@@ -5,29 +5,34 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/common.sh"
+
 PROJECT_ROOT="${PROJECT_ROOT:-$(pwd)}"
 DEVTEAM_DIR="${PROJECT_ROOT}/.devteam"
-DB_FILE="${DEVTEAM_DIR}/state.db"
+DB_FILE="${DEVTEAM_DIR}/devteam.db"
 ROLLBACK_LOG="${DEVTEAM_DIR}/rollback-log.json"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+# Force/yes flag for non-interactive usage
+DEVTEAM_FORCE="false"
 
-log_info() { echo -e "${GREEN}[rollback]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[rollback]${NC} $1"; }
-log_error() { echo -e "${RED}[rollback]${NC} $1"; }
+# Parse global flags (--force, -f, --yes, -y) from arguments
+ARGS=()
+for arg in "$@"; do
+    case "$arg" in
+        --force|-f|--yes|-y)
+            DEVTEAM_FORCE="true"
+            ;;
+        *)
+            ARGS+=("$arg")
+            ;;
+    esac
+done
+set -- "${ARGS[@]+"${ARGS[@]}"}"
 
-# Ensure we're in a git repo
-ensure_git() {
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        log_error "Not a git repository"
-        exit 1
-    fi
-}
+# Register temp file cleanup
+setup_temp_cleanup
+
+# ensure_git is now provided by scripts/lib/common.sh
 
 # Detect regressions by running tests
 detect_regression() {
@@ -158,6 +163,21 @@ find_last_good_state() {
     local original_commit
     original_commit=$(git rev-parse HEAD)
 
+    # Save current HEAD and set trap to restore on error (H8: prevent detached HEAD)
+    local _restored=false
+    cleanup_rollback() {
+        local exit_code=$?
+        if [[ $exit_code -ne 0 ]] && [[ "$_restored" != "true" ]]; then
+            _restored=true
+            log_error "Rollback search failed, restoring to ${original_commit:0:8}"
+            git checkout "$current_branch" --quiet 2>/dev/null || git checkout "$original_commit" --quiet 2>/dev/null || true
+            if [[ "${stashed:-false}" == "true" ]]; then
+                git stash pop --quiet 2>/dev/null || true
+            fi
+        fi
+    }
+    trap cleanup_rollback EXIT
+
     # Stash any uncommitted changes
     local stashed=false
     if [[ -n "$(git status --porcelain)" ]]; then
@@ -189,6 +209,10 @@ find_last_good_state() {
     if [[ "$stashed" == "true" ]]; then
         git stash pop --quiet 2>/dev/null || true
     fi
+
+    # Mark as restored so trap won't double-restore
+    _restored=true
+    trap - EXIT
 
     if [[ -n "$good_commit" ]]; then
         echo "$good_commit"
@@ -229,6 +253,10 @@ auto_rollback() {
         return 0
     fi
 
+    # Capture current HEAD before rollback for auditing
+    local pre_rollback_commit
+    pre_rollback_commit=$(git rev-parse HEAD 2>/dev/null || echo 'unknown')
+
     # Create backup branch
     local backup_branch="backup/pre-rollback-$(date +%Y%m%d-%H%M%S)"
     git branch "$backup_branch"
@@ -239,7 +267,7 @@ auto_rollback() {
     log_info "Rolled back to: ${good_commit:0:8}"
 
     # Record rollback
-    record_rollback "auto" "$good_commit" "$check_type"
+    record_rollback "auto" "$good_commit" "$check_type" "$pre_rollback_commit"
 
     # Verify the rollback fixed the issue
     if detect_regression "$check_type" 2>/dev/null; then
@@ -277,12 +305,22 @@ manual_rollback() {
     echo ""
 
     if [[ "$force" != "true" ]]; then
-        read -p "Continue with rollback? (y/N): " confirm
+        local confirm
+        if [[ "$DEVTEAM_FORCE" == "true" ]] || [[ ! -t 0 ]]; then
+            # Auto-confirm in non-interactive or forced mode
+            confirm="y"
+        else
+            read -t 30 -p "Continue with rollback? (y/N): " confirm || confirm="N"
+        fi
         if [[ "$confirm" != "y" ]] && [[ "$confirm" != "Y" ]]; then
             log_info "Rollback cancelled"
             return 0
         fi
     fi
+
+    # Capture current HEAD before rollback for auditing
+    local pre_rollback_commit
+    pre_rollback_commit=$(git rev-parse HEAD 2>/dev/null || echo 'unknown')
 
     # Create backup
     local backup_branch="backup/manual-rollback-$(date +%Y%m%d-%H%M%S)"
@@ -294,7 +332,7 @@ manual_rollback() {
     log_info "Rolled back to: ${target_commit:0:8}"
 
     # Record
-    record_rollback "manual" "$target_commit" "user-requested"
+    record_rollback "manual" "$target_commit" "user-requested" "$pre_rollback_commit"
 }
 
 # Smart rollback - rolls back the minimum number of commits
@@ -310,13 +348,19 @@ smart_rollback() {
 
     # Binary search for the breaking commit
     local commits
-    commits=$(git log --oneline -n 20 --format="%H" | tac)  # Oldest first
-    local commits_array
-    readarray -t commits_array <<< "$commits"
+    commits=$(git log --oneline -n 20 --format="%H" | awk '{a[NR]=$0} END{for(i=NR;i>=1;i--) print a[i]}')  # Oldest first (portable)
+    local commits_array=()
+    while IFS= read -r line; do
+        [[ -n "$line" ]] && commits_array+=("$line")
+    done <<< "$commits"
 
     local low=0
     local high=$((${#commits_array[@]} - 1))
     local breaking_commit=""
+
+    # Save the branch name BEFORE any git checkout operations
+    local original_branch
+    original_branch=$(git rev-parse --abbrev-ref HEAD)
 
     # Stash changes
     local stashed=false
@@ -343,7 +387,11 @@ smart_rollback() {
     done
 
     # Return to original state
-    git checkout "$(git rev-parse --abbrev-ref HEAD)" --quiet 2>/dev/null || git checkout "$current_commit" --quiet
+    if [[ "$original_branch" != "HEAD" ]]; then
+        git checkout "$original_branch" --quiet 2>/dev/null || git checkout "$current_commit" --quiet
+    else
+        git checkout "$current_commit" --quiet
+    fi
 
     if [[ "$stashed" == "true" ]]; then
         git stash pop --quiet 2>/dev/null || true
@@ -355,7 +403,13 @@ smart_rollback() {
         echo ""
         log_info "Rollback to: ${breaking_commit}~1"
 
-        read -p "Rollback to the commit before? (y/N): " confirm
+        local confirm
+        if [[ "$DEVTEAM_FORCE" == "true" ]] || [[ ! -t 0 ]]; then
+            # Auto-confirm in non-interactive or forced mode
+            confirm="y"
+        else
+            read -t 30 -p "Rollback to the commit before? (y/N): " confirm || confirm="N"
+        fi
         if [[ "$confirm" == "y" ]] || [[ "$confirm" == "Y" ]]; then
             manual_rollback "${breaking_commit}~1" true
         fi
@@ -369,43 +423,42 @@ record_rollback() {
     local type="$1"
     local target_commit="$2"
     local reason="$3"
+    local from_commit="${4:-}"
 
     mkdir -p "$DEVTEAM_DIR"
 
+    # Use provided from_commit (captured before reset), or fall back to HEAD
+    if [[ -z "$from_commit" ]]; then
+        from_commit=$(git rev-parse HEAD 2>/dev/null || echo 'unknown')
+    fi
+
     local entry
-    entry=$(cat << EOF
-{
-    "timestamp": "$(date -Iseconds)",
-    "type": "${type}",
-    "target_commit": "${target_commit}",
-    "reason": "${reason}",
-    "from_commit": "$(git rev-parse HEAD~1 2>/dev/null || echo 'unknown')"
-}
-EOF
-)
+    entry=$(json_object \
+        "timestamp" "$(date -Iseconds)" \
+        "type" "$type" \
+        "target_commit" "$target_commit" \
+        "reason" "$reason" \
+        "from_commit" "$from_commit")
 
     if [[ ! -f "$ROLLBACK_LOG" ]]; then
         echo "[$entry]" > "$ROLLBACK_LOG"
     else
-        sed -i '$ s/]$/,/' "$ROLLBACK_LOG"
+        # Portable sed: use temp file instead of sed -i
+        local tmp
+        tmp=$(safe_mktemp)
+        sed '$ s/]$/,/' "$ROLLBACK_LOG" > "$tmp" && mv "$tmp" "$ROLLBACK_LOG"
         echo "$entry]" >> "$ROLLBACK_LOG"
     fi
 
     # Record in database
     if [[ -f "$DB_FILE" ]]; then
-        sqlite3 "$DB_FILE" << EOF
-INSERT INTO rollbacks (
-    rollback_type,
-    target_commit,
-    reason,
-    rolled_back_at
-) VALUES (
-    '${type}',
-    '${target_commit}',
-    '${reason}',
-    datetime('now')
-);
-EOF
+        local sql_type sql_target sql_reason sql_from_commit
+        sql_type=$(sql_escape "$type")
+        sql_target=$(sql_escape "$target_commit")
+        sql_reason=$(sql_escape "$reason")
+        sql_from_commit=$(sql_escape "$from_commit")
+
+        sql_exec "INSERT INTO rollbacks (rollback_type, target_commit, reason, from_commit, rolled_back_at) VALUES ('${sql_type}', '${sql_target}', '${sql_reason}', '${sql_from_commit}', datetime('now'));" > /dev/null
     fi
 }
 
@@ -418,16 +471,7 @@ history() {
     echo ""
 
     if [[ -f "$DB_FILE" ]]; then
-        sqlite3 -column -header "$DB_FILE" << EOF
-SELECT
-    rollback_type as type,
-    substr(target_commit, 1, 8) as target,
-    reason,
-    datetime(rolled_back_at, 'localtime') as time
-FROM rollbacks
-ORDER BY rolled_back_at DESC
-LIMIT 20;
-EOF
+        sql_exec_table "SELECT rollback_type as type, substr(target_commit, 1, 8) as target, reason, datetime(rolled_back_at, 'localtime') as time FROM rollbacks ORDER BY rolled_back_at DESC LIMIT 20;"
     elif [[ -f "$ROLLBACK_LOG" ]]; then
         cat "$ROLLBACK_LOG" | python3 -m json.tool 2>/dev/null || cat "$ROLLBACK_LOG"
     else
@@ -457,7 +501,13 @@ undo_rollback() {
     local latest_backup
     latest_backup=$(echo "$backups" | head -1 | tr -d ' ')
 
-    read -p "Restore from ${latest_backup}? (y/N): " confirm
+    local confirm
+    if [[ "$DEVTEAM_FORCE" == "true" ]] || [[ ! -t 0 ]]; then
+        # Auto-confirm in non-interactive or forced mode
+        confirm="y"
+    else
+        read -t 30 -p "Restore from ${latest_backup}? (y/N): " confirm || confirm="N"
+    fi
     if [[ "$confirm" == "y" ]] || [[ "$confirm" == "Y" ]]; then
         git reset --hard "$latest_backup"
         log_info "Restored from ${latest_backup}"
@@ -492,7 +542,7 @@ case "${1:-help}" in
         undo_rollback
         ;;
     help|*)
-        echo "Usage: $0 <command> [args]"
+        echo "Usage: $0 <command> [args] [--force|--yes]"
         echo ""
         echo "Commands:"
         echo "  check [type]           Check for regressions (build/test/typecheck/lint/all)"
@@ -503,11 +553,15 @@ case "${1:-help}" in
         echo "  history                Show rollback history"
         echo "  undo                   Undo the last rollback"
         echo ""
+        echo "Global flags:"
+        echo "  --force, -f, --yes, -y   Skip confirmation prompts (for automated use)"
+        echo ""
         echo "Examples:"
         echo "  $0 check build         # Check if build passes"
         echo "  $0 auto build          # Auto-rollback if build fails"
         echo "  $0 auto build true     # Dry run - show what would happen"
         echo "  $0 manual HEAD~3       # Rollback 3 commits"
         echo "  $0 smart test          # Find minimal rollback for test fix"
+        echo "  $0 manual HEAD~1 --force # Rollback without prompting"
         ;;
 esac

@@ -1,6 +1,11 @@
+---
+name: mobile-test-writer
+description: "Native mobile testing for iOS (XCTest) and Android (JUnit/Espresso)"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Mobile Test Writer Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Native mobile testing for iOS (XCTest) and Android (JUnit/Espresso)
 
 ## Your Role

@@ -1,8 +1,14 @@
+---
+name: nosql-code-reviewer
+description: "Reviews NoSQL database code (MongoDB, Redis, DynamoDB, Elasticsearch)"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # NoSQL Code Reviewer
 
 **Agent ID:** `database:nosql-code-reviewer`
 **Category:** Database
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 5-9
 
 ## Purpose

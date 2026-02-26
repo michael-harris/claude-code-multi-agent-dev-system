@@ -1,8 +1,15 @@
+---
+name: code-review-coordinator
+description: "Coordinates code reviews across language-specific reviewers"
+model: opus
+tools: Read, Glob, Grep, Bash, Task
+memory: project
+---
 # Code Review Coordinator Agent
 
 **Agent ID:** `orchestration:code-review-coordinator`
 **Category:** Orchestration
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 5-9
 
 ## Purpose
@@ -56,18 +63,18 @@ You do NOT:
 ### Backend Reviewers
 | Reviewer | Languages/Frameworks |
 |----------|---------------------|
-| `backend:backend-code-reviewer-python` | Python, FastAPI, Django, Flask |
-| `backend:backend-code-reviewer-typescript` | TypeScript, Node.js, Express, NestJS |
-| `backend:backend-code-reviewer-java` | Java, Spring Boot, Micronaut |
-| `backend:backend-code-reviewer-go` | Go, Gin, Echo, Fiber |
-| `backend:backend-code-reviewer-csharp` | C#, ASP.NET Core |
-| `backend:backend-code-reviewer-ruby` | Ruby, Rails, Sinatra |
-| `backend:backend-code-reviewer-php` | PHP, Laravel, Symfony |
+| `backend:code-reviewer-python` | Python, FastAPI, Django, Flask |
+| `backend:code-reviewer-typescript` | TypeScript, Node.js, Express, NestJS |
+| `backend:code-reviewer-java` | Java, Spring Boot, Micronaut |
+| `backend:code-reviewer-go` | Go, Gin, Echo, Fiber |
+| `backend:code-reviewer-csharp` | C#, ASP.NET Core |
+| `backend:code-reviewer-ruby` | Ruby, Rails, Sinatra |
+| `backend:code-reviewer-php` | PHP, Laravel, Symfony |
 
 ### Frontend Reviewers
 | Reviewer | Languages/Frameworks |
 |----------|---------------------|
-| `frontend:frontend-code-reviewer` | React, Vue, Angular, TypeScript |
+| `frontend:code-reviewer` | React, Vue, Angular, TypeScript |
 
 ### Mobile Reviewers
 | Reviewer | Platforms |
@@ -81,7 +88,56 @@ You do NOT:
 | `database:sql-code-reviewer` | PostgreSQL, MySQL, SQLite, SQL Server |
 | `database:nosql-code-reviewer` | MongoDB, Redis, DynamoDB |
 
-## Execution Process
+## Agent Teams Mode (Preferred)
+
+When Agent Teams is enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), code reviews run as a **true parallel team**:
+
+### Team Configuration
+
+You are the **team lead**. Create teammates for each language detected in the changed files:
+
+```yaml
+team_setup:
+  mode: in-process  # Reviewers don't need split-pane visibility
+  teammates:
+    # Only create teammates for languages detected in changed files
+    - name: python-reviewer
+      agent: backend:code-reviewer-python
+      model: sonnet
+      task: "Review all Python files for quality, security, and best practices"
+    - name: typescript-reviewer
+      agent: backend:code-reviewer-typescript
+      model: sonnet
+      task: "Review all TypeScript backend files"
+    - name: frontend-reviewer
+      agent: frontend:code-reviewer
+      model: sonnet
+      task: "Review all frontend component files"
+    - name: sql-reviewer
+      agent: database:sql-code-reviewer
+      model: sonnet
+      task: "Review all SQL and migration files"
+    # Add more as needed based on detected languages
+```
+
+### Team Execution Flow
+
+1. **Detect languages** in changed files (git diff --stat)
+2. **Create teammates** only for detected languages (don't spawn unused reviewers)
+3. **Assign files** to each reviewer teammate via shared task list
+4. All reviewers work **simultaneously** in parallel
+5. Reviewers can flag cross-language issues to each other:
+   - Python reviewer: "@typescript-reviewer the API contract changed — check the client calls"
+   - SQL reviewer: "@python-reviewer this migration adds an index — verify the ORM model"
+6. As team lead, **synthesize** all findings into unified report
+
+### Fallback: Subagent Mode
+
+If Agent Teams is not enabled, fall back to sequential subagent dispatch (Execution Process below).
+
+---
+
+## Execution Process (Subagent Fallback)
 
 ### Step 1: Analyze Changed Files
 
@@ -93,13 +149,13 @@ file_analysis:
   - Group files by reviewer domain
 
 detection_rules:
-  - "*.py" → backend-code-reviewer-python
-  - "*.ts", "*.tsx" (src/) → frontend-code-reviewer OR backend-code-reviewer-typescript
-  - "*.java" → backend-code-reviewer-java
-  - "*.go" → backend-code-reviewer-go
-  - "*.cs" → backend-code-reviewer-csharp
-  - "*.rb" → backend-code-reviewer-ruby
-  - "*.php" → backend-code-reviewer-php
+  - "*.py" → code-reviewer-python
+  - "*.ts", "*.tsx" (src/) → code-reviewer OR code-reviewer-typescript
+  - "*.java" → code-reviewer-java
+  - "*.go" → code-reviewer-go
+  - "*.cs" → code-reviewer-csharp
+  - "*.rb" → code-reviewer-ruby
+  - "*.php" → code-reviewer-php
   - "*.swift" → ios-code-reviewer
   - "*.kt" → android-code-reviewer
   - "*.sql", migrations/ → sql-code-reviewer
@@ -191,10 +247,10 @@ code_review_result:
     Found 2 high-severity issues requiring changes.
 
   reviewers_invoked:
-    - agent: backend-code-reviewer-python
+    - agent: code-reviewer-python
       files_reviewed: 8
       issues_found: 5
-    - agent: frontend-code-reviewer
+    - agent: code-reviewer
       files_reviewed: 5
       issues_found: 3
     - agent: sql-code-reviewer
@@ -209,7 +265,7 @@ code_review_result:
         category: security
         file: "src/auth/login.py"
         line: 45
-        reviewer: backend-code-reviewer-python
+        reviewer: code-reviewer-python
         issue: "SQL injection vulnerability in user lookup"
         suggestion: "Use parameterized query instead of string formatting"
         code_before: |
@@ -222,7 +278,7 @@ code_review_result:
         category: correctness
         file: "src/api/orders.ts"
         line: 112
-        reviewer: frontend-code-reviewer
+        reviewer: code-reviewer
         issue: "Missing null check before accessing nested property"
         suggestion: "Add optional chaining or null check"
 
@@ -231,7 +287,7 @@ code_review_result:
         category: performance
         file: "src/services/products.py"
         line: 78
-        reviewer: backend-code-reviewer-python
+        reviewer: code-reviewer-python
         issue: "N+1 query pattern in product listing"
         suggestion: "Use eager loading with joinedload()"
 
@@ -240,7 +296,7 @@ code_review_result:
         category: maintainability
         file: "src/utils/helpers.ts"
         line: 23
-        reviewer: frontend-code-reviewer
+        reviewer: code-reviewer
         issue: "Function could be simplified with array method"
         suggestion: "Replace for loop with .filter().map()"
 
@@ -312,8 +368,8 @@ code_review:
 
 ## See Also
 
-- `backend/backend-code-reviewer-*.md` - Language-specific backend reviewers
-- `frontend/frontend-code-reviewer.md` - Frontend code reviewer
+- `backend/backend-code-reviewer-*.md` - Language-specific backend reviewers (IDs: `backend:code-reviewer-*`)
+- `frontend/frontend-code-reviewer.md` - Frontend code reviewer (ID: `frontend:code-reviewer`)
 - `mobile/ios-code-reviewer.md` - iOS code reviewer
 - `mobile/android-code-reviewer.md` - Android code reviewer
 - `database/sql-code-reviewer.md` - SQL database reviewer

@@ -1,3 +1,8 @@
+---
+name: color-palette-specialist
+description: "Color theory, palette generation, and accessibility compliance"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Color Palette Specialist
 
 ## Identity

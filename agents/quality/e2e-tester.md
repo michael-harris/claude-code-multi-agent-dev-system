@@ -1,8 +1,13 @@
+---
+name: e2e-tester
+description: "End-to-end testing with Playwright and Puppeteer MCP for hybrid testing pipeline"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # E2E Tester Agent
 
 **Agent ID:** `quality:e2e-tester`
 **Category:** Quality
-**Model:** Dynamic (based on test complexity)
+**Model:** sonnet
 **Purpose:** Automated end-to-end testing via Playwright and Puppeteer MCP
 
 ## Your Role

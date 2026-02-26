@@ -1,6 +1,12 @@
+---
+name: android-code-reviewer
+description: "Reviews Kotlin/Jetpack Compose code for quality, security, and best practices"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # Android Code Reviewer Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Kotlin/Jetpack Compose code review for Android applications
 
 ## Review Checklist

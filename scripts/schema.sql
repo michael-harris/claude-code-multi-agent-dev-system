@@ -25,11 +25,11 @@ CREATE TABLE IF NOT EXISTS sessions (
     current_agent TEXT,
     current_model TEXT,                 -- haiku, sonnet, opus
     current_iteration INTEGER DEFAULT 0,
-    max_iterations INTEGER DEFAULT 10,
+    max_iterations INTEGER DEFAULT 10 CHECK (max_iterations > 0),
 
     -- Circuit breaker
     consecutive_failures INTEGER DEFAULT 0,
-    max_consecutive_failures INTEGER DEFAULT 5,
+    max_consecutive_failures INTEGER DEFAULT 5 CHECK (max_consecutive_failures > 0),
     circuit_breaker_state TEXT DEFAULT 'closed', -- closed, open, half-open
 
     -- Plan/Sprint context
@@ -81,7 +81,8 @@ CREATE TABLE IF NOT EXISTS events (
     phase TEXT,
 
     -- Payload
-    data JSON,
+    data JSON NOT NULL DEFAULT '{}',
+    metadata JSON NOT NULL DEFAULT '{}',
     message TEXT,
 
     -- Cost tracking per event
@@ -119,7 +120,7 @@ CREATE TABLE IF NOT EXISTS agent_runs (
     -- Timing
     started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     ended_at TIMESTAMP,
-    duration_seconds INTEGER,
+    duration_seconds INTEGER CHECK (duration_seconds >= 0),
 
     -- Result
     status TEXT,                        -- running, success, failed, escalated
@@ -127,7 +128,7 @@ CREATE TABLE IF NOT EXISTS agent_runs (
     error_type TEXT,                    -- test_failure, type_error, lint_error, etc.
 
     -- Context
-    task_id TEXT,
+    task_id TEXT REFERENCES tasks(id) ON DELETE SET NULL,
     iteration INTEGER,
     attempt INTEGER DEFAULT 1,          -- Retry attempt number
 
@@ -137,7 +138,7 @@ CREATE TABLE IF NOT EXISTS agent_runs (
     cost_cents INTEGER,
 
     -- Output summary
-    files_changed JSON,                 -- ["src/foo.ts", "src/bar.ts"]
+    files_changed JSON NOT NULL DEFAULT '[]', -- ["src/foo.ts", "src/bar.ts"]
     output_summary TEXT
 );
 
@@ -158,7 +159,7 @@ CREATE TABLE IF NOT EXISTS gate_results (
 
     -- Details
     details JSON,                       -- Gate-specific details
-    error_count INTEGER,
+    error_count INTEGER CHECK (error_count >= 0),
     warning_count INTEGER,
 
     -- For coverage gate
@@ -251,7 +252,7 @@ CREATE TABLE IF NOT EXISTS research_findings (
 
 CREATE TABLE IF NOT EXISTS bugs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    session_id TEXT REFERENCES sessions(id) ON DELETE SET NULL,
+    session_id TEXT REFERENCES sessions(id) ON DELETE CASCADE,
 
     -- Bug info
     description TEXT NOT NULL,
@@ -280,7 +281,7 @@ CREATE TABLE IF NOT EXISTS bugs (
 );
 
 -- ============================================================================
--- PLANS - Plan tracking (links to plan YAML files)
+-- PLANS - Plan tracking (links to plan JSON files)
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS plans (
@@ -311,7 +312,111 @@ CREATE TABLE IF NOT EXISTS plans (
     completed_at TIMESTAMP,
 
     -- Research link
-    research_session_id INTEGER REFERENCES research_sessions(id)
+    research_session_id INTEGER REFERENCES research_sessions(id) ON DELETE SET NULL
+);
+
+-- ============================================================================
+-- TASKS - Task tracking for scope validation and progress
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS tasks (
+    id TEXT PRIMARY KEY,                      -- TASK-001, sprint-1-task-3, etc.
+
+    -- Task info
+    name TEXT NOT NULL,
+    description TEXT,
+    task_type TEXT,                           -- feature, bugfix, refactor, test, docs
+
+    -- Parent references
+    plan_id TEXT REFERENCES plans(id) ON DELETE SET NULL,
+    sprint_id TEXT,                          -- Logical sprint reference (no sprints table; sprint tracking is file-based)
+    parent_task_id TEXT,
+    session_id TEXT REFERENCES sessions(id) ON DELETE SET NULL,
+
+    -- Status
+    status TEXT DEFAULT 'pending',            -- pending, in_progress, completed, failed, blocked
+
+    -- Scope validation (for hooks)
+    scope_files TEXT,                         -- Comma-separated allowed file patterns
+    scope_json JSON,                          -- Full scope definition as JSON
+
+    -- Assignment
+    assigned_agent TEXT,
+    assigned_model TEXT,
+
+    -- Priority and ordering
+    priority TEXT DEFAULT 'medium',           -- critical, high, medium, low
+    sequence INTEGER DEFAULT 0,
+
+    -- Dependencies
+    depends_on JSON,                          -- Array of task IDs this depends on
+    blocks JSON,                              -- Array of task IDs this blocks
+
+    -- Progress tracking
+    estimated_effort TEXT,                    -- small, medium, large, xl
+    actual_iterations INTEGER DEFAULT 0,
+    files_changed JSON,
+
+    -- Timing
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    started_at TIMESTAMP,
+    completed_at TIMESTAMP,
+
+    -- Result
+    result_summary TEXT,
+    error_message TEXT,
+    commit_sha TEXT
+);
+
+-- ============================================================================
+-- TASK_ATTEMPTS - Track retry attempts for tasks
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS task_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    session_id TEXT REFERENCES sessions(id) ON DELETE SET NULL,
+
+    -- Attempt info
+    attempt_number INTEGER NOT NULL,
+    model TEXT,
+    agent TEXT,
+
+    -- Timing
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP,
+    duration_seconds INTEGER,
+
+    -- Result
+    status TEXT,                              -- success, failed, escalated
+    error_type TEXT,
+    error_message TEXT,
+
+    -- Cost
+    tokens_input INTEGER,
+    tokens_output INTEGER,
+    cost_cents INTEGER
+);
+
+-- ============================================================================
+-- TASK_FILES - Files associated with each task (detailed scope)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS task_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+
+    -- File info
+    file_path TEXT NOT NULL,
+    file_type TEXT,                           -- source, test, config, docs
+
+    -- Access type
+    access_type TEXT DEFAULT 'allowed',       -- allowed, forbidden, read_only
+
+    -- Pattern matching
+    is_pattern BOOLEAN DEFAULT FALSE,         -- If true, file_path is a glob pattern
+
+    UNIQUE(task_id, file_path)
 );
 
 -- ============================================================================
@@ -364,6 +469,27 @@ CREATE INDEX IF NOT EXISTS idx_gate_results_gate ON gate_results(gate);
 
 -- Plans
 CREATE INDEX IF NOT EXISTS idx_plans_status ON plans(status);
+
+-- Tasks
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_plan ON tasks(plan_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_sprint ON tasks(sprint_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
+CREATE INDEX IF NOT EXISTS idx_tasks_session ON tasks(session_id);
+CREATE INDEX IF NOT EXISTS idx_task_attempts_task ON task_attempts(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_attempts_session ON task_attempts(session_id);
+CREATE INDEX IF NOT EXISTS idx_task_files_task ON task_files(task_id);
+
+-- Composite indexes for common query patterns (M12)
+CREATE INDEX IF NOT EXISTS idx_events_session_type ON events(session_id, event_type);
+CREATE INDEX IF NOT EXISTS idx_agent_runs_session_status ON agent_runs(session_id, status);
+
+-- FK indexes for CASCADE delete performance
+CREATE INDEX IF NOT EXISTS idx_interviews_session ON interviews(session_id);
+CREATE INDEX IF NOT EXISTS idx_interview_questions_interview ON interview_questions(interview_id);
+CREATE INDEX IF NOT EXISTS idx_research_sessions_session ON research_sessions(session_id);
+CREATE INDEX IF NOT EXISTS idx_research_findings_research_session ON research_findings(research_session_id);
+CREATE INDEX IF NOT EXISTS idx_bugs_session ON bugs(session_id);
 
 -- ============================================================================
 -- VIEWS
@@ -419,6 +545,37 @@ SELECT
     SUM(cost_cents) as total_cost_cents
 FROM agent_runs
 GROUP BY agent;
+
+-- Current in-progress task
+CREATE VIEW IF NOT EXISTS v_current_task AS
+SELECT * FROM tasks WHERE status = 'in_progress' ORDER BY started_at DESC LIMIT 1;
+
+-- Task progress by sprint
+CREATE VIEW IF NOT EXISTS v_sprint_progress AS
+SELECT
+    sprint_id,
+    COUNT(*) as total_tasks,
+    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+    SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
+    SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed,
+    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+    ROUND(AVG(CASE WHEN status = 'completed' THEN 1.0 ELSE 0.0 END) * 100, 1) as completion_rate
+FROM tasks
+WHERE sprint_id IS NOT NULL
+GROUP BY sprint_id;
+
+-- Task attempt summary
+CREATE VIEW IF NOT EXISTS v_task_attempts_summary AS
+SELECT
+    task_id,
+    COUNT(*) as total_attempts,
+    SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) as successes,
+    SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failures,
+    MAX(attempt_number) as last_attempt,
+    SUM(tokens_input + tokens_output) as total_tokens,
+    SUM(cost_cents) as total_cost_cents
+FROM task_attempts
+GROUP BY task_id;
 
 -- Quality gate pass rates
 CREATE VIEW IF NOT EXISTS v_gate_pass_rates AS

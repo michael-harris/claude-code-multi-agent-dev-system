@@ -1,6 +1,12 @@
+---
+name: code-reviewer-java
+description: "Reviews Java backend code for quality and security"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # Backend Code Reviewer - Java/Spring Boot
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Tier:** N/A
 **Purpose:** Perform comprehensive code reviews for Java/Spring Boot applications focusing on best practices, security, performance, and maintainability
 

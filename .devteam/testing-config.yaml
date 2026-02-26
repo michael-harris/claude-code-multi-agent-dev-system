@@ -1,0 +1,82 @@
+# DevTeam Testing Configuration
+# Referenced by: quality/test-coordinator.md, quality/runtime-verifier.md, quality/test-writer.md
+# Defines test coverage targets, distribution ratios, framework mappings, and test patterns
+#
+# NOTE: This file is the single source of truth for all testing configuration.
+# The former test-config.yaml has been merged into this file.
+
+# ===========================================
+# COVERAGE TARGETS
+# ===========================================
+testing:
+  coverage_targets:
+    overall: 80
+    new_code: 90
+    critical_paths: 100
+
+  # ===========================================
+  # TEST DISTRIBUTION RATIOS (percentage)
+  # ===========================================
+  distribution:
+    unit: 70
+    integration: 20
+    e2e: 10
+
+  # ===========================================
+  # FRAMEWORK MAPPINGS (per language)
+  # ===========================================
+  frameworks:
+    python:
+      framework: pytest
+      plugins: ["pytest-cov", "pytest-asyncio", "pytest-mock"]
+    typescript:
+      framework: jest
+      test_environment: jsdom
+      coverage_provider: v8
+      setup_files: ["jest.setup.ts"]
+    java:
+      framework: junit5
+    go:
+      framework: testing
+    csharp:
+      framework: xunit
+    ruby:
+      framework: rspec
+    php:
+      framework: phpunit
+
+  # ===========================================
+  # TEST FILE PATTERNS
+  # ===========================================
+  patterns:
+    unit: "tests/unit/**/*_test.py"
+    integration: "tests/integration/**/*_test.py"
+    e2e: "tests/e2e/**/*.spec.ts"
+
+  # ===========================================
+  # TEST MARKERS (for selective test runs)
+  # ===========================================
+  markers: ["unit", "integration", "e2e", "slow"]
+
+  # ===========================================
+  # EXCLUSIONS (files/dirs to skip)
+  # ===========================================
+  exclusions:
+    - "**/node_modules/**"
+    - "**/__pycache__/**"
+    - "**/migrations/**"
+
+  # ===========================================
+  # TIMEOUTS (seconds per test type)
+  # ===========================================
+  timeouts:
+    unit: 120
+    integration: 300
+    e2e: 600
+
+  # ===========================================
+  # RETRY CONFIGURATION
+  # ===========================================
+  retry:
+    max_retries: 2
+    retry_on_flaky: true

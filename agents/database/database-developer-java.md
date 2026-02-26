@@ -1,11 +1,16 @@
+---
+name: developer-java
+description: "Implements JPA/Hibernate models and Flyway migrations"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Database Developer Java Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** Java database implementation (JPA/Hibernate, Spring Data)
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple entities, basic CRUD operations
 - **Sonnet:** Complex relationships, query optimization
 - **Opus:** Advanced patterns, performance tuning, data integrity

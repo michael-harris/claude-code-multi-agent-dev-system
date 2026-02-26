@@ -32,7 +32,7 @@ Get help on DevTeam commands, concepts, and troubleshooting.
 | Topic | Description |
 |-------|-------------|
 | `eco` | Eco mode for cost optimization |
-| `ralph` | Ralph quality loop |
+| `task-loop` | Task Loop quality loop |
 | `interview` | Interview system |
 | `research` | Research phase |
 | `escalation` | Model escalation |
@@ -77,7 +77,7 @@ function resolveTopic(input) {
 
 ```markdown
 ╔═══════════════════════════════════════════════════════════════╗
-║  DevTeam v3.0 Help                                             ║
+║  DevTeam v3.4 Help                                             ║
 ╚═══════════════════════════════════════════════════════════════╝
 
 Quick Start
@@ -107,7 +107,7 @@ Get Help on Specific Topics
 ───────────────────────────────────────────────────────────────
   /devteam:help <command>    Help for a command
   /devteam:help eco          Eco mode explanation
-  /devteam:help ralph        Quality loop details
+  /devteam:help task-loop    Quality loop details
   /devteam:help troubleshooting  Problem solving
 
 Documentation: https://github.com/michael-harris/claude-devteam
@@ -238,7 +238,7 @@ Common Issues
      /devteam:reset --session <id>
 
 2. Tests Keep Failing
-   Symptoms: Ralph loop not converging
+   Symptoms: Task Loop not converging
    Solutions:
      - Check test output: /devteam:logs --level error
      - Force model upgrade: --model opus
@@ -266,7 +266,7 @@ Getting Help
 ───────────────────────────────────────────────────────────────
   Logs:   /devteam:logs --level error
   Status: /devteam:status --all
-  GitHub: https://github.com/repo/issues
+  GitHub: https://github.com/michael-harris/claude-devteam/issues
 ```
 
 ## See Also

@@ -3,9 +3,11 @@
 
 $ErrorActionPreference = "Stop"
 
+# Source common library for SQLite helpers
+. "$PSScriptRoot\lib\hook-common.ps1"
+
 # Configuration
 $MEMORY_DIR = ".devteam\memory"
-$STATE_FILE = ".devteam\state.yaml"
 $CONFIG_FILE = ".devteam\config.yaml"
 
 # Logging function
@@ -46,25 +48,19 @@ function Load-SessionMemory {
 # LOAD CURRENT STATE
 # ============================================
 function Load-StateSummary {
-    if (Test-Path $STATE_FILE) {
-        Write-Log "Loading project state"
+    if (Test-DatabaseExists) {
+        Write-Log "Loading project state from database"
 
-        # Simple YAML parsing (grep-based extraction)
-        $Content = Get-Content $STATE_FILE -Raw
+        $sid = Invoke-DbQuery "SELECT id FROM sessions WHERE status='running' ORDER BY started_at DESC LIMIT 1;"
+        if (-not $sid) { $sid = "unknown" }
 
-        $CurrentSprint = "unknown"
-        $CurrentTask = "unknown"
-        $Phase = "unknown"
+        $CurrentSprint = Invoke-DbQuery "SELECT sprint_id FROM sessions WHERE id = '$sid';"
+        $CurrentTask = Invoke-DbQuery "SELECT current_task_id FROM sessions WHERE id = '$sid';"
+        $Phase = Invoke-DbQuery "SELECT current_phase FROM sessions WHERE id = '$sid';"
 
-        if ($Content -match "current_sprint:\s*(.+)") {
-            $CurrentSprint = $Matches[1].Trim()
-        }
-        if ($Content -match "current_task:\s*(.+)") {
-            $CurrentTask = $Matches[1].Trim()
-        }
-        if ($Content -match "phase:\s*(.+)") {
-            $Phase = $Matches[1].Trim()
-        }
+        if (-not $CurrentSprint) { $CurrentSprint = "none" }
+        if (-not $CurrentTask) { $CurrentTask = "none" }
+        if (-not $Phase) { $Phase = "unknown" }
 
         Write-Output-Text "## Current Project State"
         Write-Output-Text ""

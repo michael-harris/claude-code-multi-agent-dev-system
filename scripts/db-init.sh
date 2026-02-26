@@ -10,9 +10,11 @@ DB_FILE="${DEVTEAM_DIR}/devteam.db"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCHEMA_FILE="${SCRIPT_DIR}/schema.sql"
 SCHEMA_V2_FILE="${SCRIPT_DIR}/schema-v2.sql"
+SCHEMA_V3_FILE="${SCRIPT_DIR}/schema-v3.sql"
+SCHEMA_V4_FILE="${SCRIPT_DIR}/schema-v4.sql"
 
 # Current schema version - increment when schema changes
-SCHEMA_VERSION="2"
+SCHEMA_VERSION="4"
 
 # Colors for output
 RED='\033[0;31m'
@@ -97,6 +99,9 @@ init_database() {
             exit 1
         fi
 
+        # Create schema_version table BEFORE migrations (H1)
+        sql_exec "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+
         # Apply schema v2 (acceptance criteria, features, context management)
         if [ -f "$SCHEMA_V2_FILE" ]; then
             if ! sqlite3 "$DB_FILE" < "$SCHEMA_V2_FILE"; then
@@ -106,8 +111,31 @@ init_database() {
             log_info "Applied schema v2 (acceptance criteria, features, context management)"
         fi
 
-        # Enable foreign keys and set schema version
-        sql_exec "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
+        # Apply schema v3 (tasks table for hook integration)
+        if [ -f "$SCHEMA_V3_FILE" ]; then
+            if ! sqlite3 "$DB_FILE" < "$SCHEMA_V3_FILE"; then
+                log_error "Failed to apply schema v3"
+                exit 1
+            fi
+            log_info "Applied schema v3 (tasks table for hook integration)"
+        fi
+
+        # Apply schema v4 (fix plans.research_session_id foreign key)
+        if [ -f "$SCHEMA_V4_FILE" ]; then
+            if ! sqlite3 "$DB_FILE" < "$SCHEMA_V4_FILE"; then
+                log_error "Failed to apply schema v4"
+                exit 1
+            fi
+            log_info "Applied schema v4 (plans.research_session_id ON DELETE SET NULL)"
+        fi
+
+        # Validate SCHEMA_VERSION is numeric before SQL interpolation
+        if [[ ! "$SCHEMA_VERSION" =~ ^[0-9]+$ ]]; then
+            log_error "Invalid SCHEMA_VERSION: $SCHEMA_VERSION"
+            exit 1
+        fi
+
+        # Record schema version
         sql_exec "INSERT INTO schema_version (version) VALUES ($SCHEMA_VERSION);"
 
         log_info "Database created: $DB_FILE (schema v$SCHEMA_VERSION)"
@@ -117,17 +145,27 @@ init_database() {
         # Create schema version table
         sql_exec "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY, applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
 
-        # Re-run schema to add any missing tables (IF NOT EXISTS handles this safely)
+        # Re-run base schema to add any missing tables (IF NOT EXISTS handles this safely)
         if ! sqlite3 "$DB_FILE" < "$SCHEMA_FILE"; then
             log_error "Failed to update database schema"
             exit 1
         fi
 
-        sql_exec "INSERT OR REPLACE INTO schema_version (version) VALUES ($SCHEMA_VERSION);"
+        # Record v1 as the base version from schema.sql
+        sql_exec "INSERT OR IGNORE INTO schema_version (version) VALUES (1);"
+
+        # Apply remaining migrations (v2, v3, v4) that the base schema doesn't include
+        run_migrations 1
+
+        # Validate schema after migrations
+        validate_schema
         log_info "Schema updated to v$SCHEMA_VERSION"
     elif [ "$current_version" -lt "$SCHEMA_VERSION" ]; then
         log_info "Database schema upgrade needed: v$current_version → v$SCHEMA_VERSION"
         run_migrations "$current_version"
+
+        # Validate schema version after migration (M11)
+        validate_schema
     else
         log_info "Database schema is current (v$current_version)"
     fi
@@ -137,21 +175,72 @@ init_database() {
 run_migrations() {
     local from_version="$1"
 
+    # Helper: apply a single migration file within a transaction (single sqlite3 process)
+    apply_migration() {
+        local version="$1"
+        local file="$2"
+        local description="$3"
+
+        local applied
+        applied=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM schema_version WHERE version = $version;" 2>/dev/null || echo "0")
+        if [ "$applied" != "0" ]; then
+            return 0  # Already applied
+        fi
+        if [ ! -f "$file" ]; then
+            return 0  # File not found, skip
+        fi
+
+        log_info "Running migration v$((version - 1)) → v$version..."
+
+        # Pipe BEGIN + schema file + version record + COMMIT through a single sqlite3 process
+        # so the transaction actually works. On failure, sqlite3 auto-rolls back.
+        if ! { echo "BEGIN TRANSACTION;"; cat "$file"; echo "INSERT INTO schema_version (version) VALUES ($version);"; echo "COMMIT;"; } | sqlite3 "$DB_FILE" 2>/dev/null; then
+            log_error "Failed to apply schema v$version migration — rolled back"
+            exit 1
+        fi
+        log_info "Applied schema v$version: $description"
+    }
+
     # Migration v1 → v2: Add acceptance criteria, features, context management
     if [ "$from_version" -lt 2 ]; then
-        log_info "Running migration v1 → v2..."
-        if [ -f "$SCHEMA_V2_FILE" ]; then
-            if ! sqlite3 "$DB_FILE" < "$SCHEMA_V2_FILE"; then
-                log_error "Failed to apply schema v2 migration"
-                exit 1
-            fi
-            log_info "Applied schema v2: acceptance_criteria, features, context_snapshots, context_budgets, progress_summaries, session_phases"
-        fi
+        apply_migration 2 "$SCHEMA_V2_FILE" "acceptance_criteria, features, context_snapshots, context_budgets, progress_summaries, session_phases"
     fi
 
-    # Update schema version
-    sql_exec "INSERT OR REPLACE INTO schema_version (version) VALUES ($SCHEMA_VERSION);"
+    # Migration v2 → v3: Add tasks table for hook integration
+    if [ "$from_version" -lt 3 ]; then
+        apply_migration 3 "$SCHEMA_V3_FILE" "tasks, task_attempts, task_files tables"
+    fi
+
+    # Migration v3 → v4: Fix plans.research_session_id foreign key
+    if [ "$from_version" -lt 4 ]; then
+        apply_migration 4 "$SCHEMA_V4_FILE" "plans.research_session_id ON DELETE SET NULL"
+    fi
+
     log_info "Migrations complete, now at v$SCHEMA_VERSION"
+}
+
+# Validate schema version and critical tables after migration (M11)
+validate_schema() {
+    local actual_version
+    actual_version=$(get_db_schema_version)
+
+    if [ "$actual_version" != "$SCHEMA_VERSION" ]; then
+        log_error "Schema validation failed: expected v$SCHEMA_VERSION, got v$actual_version"
+        exit 1
+    fi
+
+    # Verify critical tables exist
+    local critical_tables=("sessions" "events" "agent_runs" "plans" "tasks" "schema_version")
+    for table in "${critical_tables[@]}"; do
+        local exists
+        exists=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='$table';" 2>/dev/null || echo "0")
+        if [ "$exists" = "0" ]; then
+            log_error "Schema validation failed: missing critical table '$table'"
+            exit 1
+        fi
+    done
+
+    log_info "Schema validation passed (v$SCHEMA_VERSION)"
 }
 
 # Verify database integrity
@@ -166,7 +255,8 @@ verify_database() {
     fi
 }
 
-# Clean up old state files (migration from YAML)
+# Clean up old state files (migration from YAML to SQLite)
+# IMPORTANT: state.yaml is DEPRECATED. SQLite (.devteam/devteam.db) is the source of truth.
 cleanup_old_state() {
     local old_files=(
         "${DEVTEAM_DIR}/state.yaml"
@@ -177,10 +267,27 @@ cleanup_old_state() {
 
     for file in "${old_files[@]}"; do
         if [ -f "$file" ]; then
-            log_warn "Found old state file: $file"
-            log_warn "Consider removing after verifying migration: rm $file"
+            log_warn "DEPRECATED state file found: $file"
+            log_warn "  SQLite is now the sole source of truth for all state management."
+            log_warn "  The file '$file' is no longer read by any DevTeam component."
+            log_warn "  Remove it: rm $file"
         fi
     done
+
+    # Also check for old project-state YAML files in docs/planning/
+    local planning_dir="docs/planning"
+    if [ -d "$planning_dir" ]; then
+        local state_yaml_files
+        state_yaml_files=$(find "$planning_dir" -maxdepth 1 -name "*.project-state.yaml" -o -name ".feature-*-state.yaml" -o -name ".issue-*-state.yaml" 2>/dev/null || true)
+        if [ -n "$state_yaml_files" ]; then
+            log_warn "DEPRECATED planning state YAML files found:"
+            while IFS= read -r f; do
+                [ -n "$f" ] && log_warn "  $f"
+            done <<< "$state_yaml_files"
+            log_warn "  State is now managed in SQLite ($DB_FILE). These files are no longer used."
+            log_warn "  Remove them after verifying your project state has been migrated."
+        fi
+    fi
 }
 
 # Main
@@ -192,6 +299,12 @@ main() {
     cleanup_old_state
 
     log_info "Database ready: $DB_FILE"
+
+    # Suggest hook installation if not already set up (L5)
+    local hook_install="${SCRIPT_DIR}/../hooks/install.sh"
+    if [ -f "$hook_install" ] && [ ! -f "${DEVTEAM_DIR}/.hooks-installed" ]; then
+        log_info "Tip: Run 'hooks/install.sh' to set up DevTeam hooks for Claude Code"
+    fi
 }
 
 # Run if executed directly

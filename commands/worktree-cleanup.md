@@ -20,7 +20,7 @@ This command is destructive. Use with caution.
 
 ### Step 1: Load State and Validate
 
-1. Load state file
+1. Load state from SQLite database (`.devteam/devteam.db`) via `source scripts/state.sh`
 2. Verify worktree mode enabled
 3. If specific track, verify track exists
 4. Check if tracks are complete (warning if not)
@@ -96,15 +96,15 @@ for track in tracks:
 done
 ```
 
-### Step 6: Update State File
+### Step 6: Update State in SQLite
 
-```yaml
-# Update docs/planning/.project-state.yaml
+```bash
+# Update state in SQLite database (.devteam/devteam.db)
+source scripts/state.sh
 
-cleanup_info:
-  cleaned_at: "2025-11-03T16:00:00Z"
-  worktrees_removed: [1, 2, 3]
-  branches_deleted: true  # or false
+set_kv_state "cleanup_info.cleaned_at" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+set_kv_state "cleanup_info.worktrees_removed" "1,2,3"
+set_kv_state "cleanup_info.branches_deleted" "true"  # or "false"
 ```
 
 ## Output Format
@@ -205,4 +205,4 @@ To continue: /devteam:worktree cleanup --force
 - Warns about unpushed commits
 - Won't delete unmerged branches (without -D flag)
 - Can be undone if branches kept (recreate worktree)
-- Updates state file for audit trail
+- Updates SQLite state database for audit trail

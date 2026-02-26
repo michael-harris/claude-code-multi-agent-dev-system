@@ -1,8 +1,13 @@
+---
+name: unit-test-writer-ruby
+description: "Writes Ruby unit tests with RSpec, Minitest, and mocking"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Unit Test Writer - Ruby
 
 **Agent ID:** `quality:unit-test-writer-ruby`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 4-7
 
 ## Purpose
@@ -168,4 +173,4 @@ spec/
 ## See Also
 
 - `quality:test-coordinator` - Coordinates testing
-- `quality:integration-tester` - Integration tests
+- `quality:runtime-verifier` - Integration tests

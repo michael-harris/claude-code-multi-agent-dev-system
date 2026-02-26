@@ -16,7 +16,7 @@ This example shows the complete multi-agent workflow from idea to deployment.
 
 ### Command
 ```
-/devteam:prd
+/devteam:plan
 ```
 
 ### Interactive Session
@@ -54,51 +54,65 @@ This example shows the complete multi-agent workflow from idea to deployment.
 
 ### Output
 
-**File Created:** `docs/planning/PROJECT_PRD.yaml`
+**File Created:** `docs/planning/PROJECT_PRD.json`
 
-```yaml
-project:
-  name: "TaskFlow"
-  version: "0.1.0"
-
-technology:
-  backend:
-    language: python
-    framework: fastapi
-    reasoning: "Async support for WebSockets, excellent performance"
-  frontend:
-    framework: react
-  database:
-    system: postgresql
-    orm: sqlalchemy
-
-requirements:
-  must_have:
-    - id: REQ-001
-      description: "User authentication system"
-      acceptance_criteria:
-        - Users can register with email/password
-        - Users can log in and receive JWT token
-        - Token expires after 24 hours
-        - Password requirements: min 8 chars, 1 number
-      priority: critical
-
-    - id: REQ-002
-      description: "Task CRUD operations"
-      acceptance_criteria:
-        - Users can create tasks with title, description, due date
-        - Users can update task status (todo/in-progress/done)
-        - Users can delete their own tasks
-        - Tasks are filterable by status
-      priority: critical
-
-    - id: REQ-003
-      description: "Real-time task updates"
-      acceptance_criteria:
-        - Changes to tasks broadcast to all connected users
-        - Uses WebSocket connection
-        - Reconnection handling on network issues
-      priority: high
+```json
+{
+  "project": {
+    "name": "TaskFlow",
+    "version": "0.1.0"
+  },
+  "technology": {
+    "backend": {
+      "language": "python",
+      "framework": "fastapi",
+      "reasoning": "Async support for WebSockets, excellent performance"
+    },
+    "frontend": {
+      "framework": "react"
+    },
+    "database": {
+      "system": "postgresql",
+      "orm": "sqlalchemy"
+    }
+  },
+  "requirements": {
+    "must_have": [
+      {
+        "id": "REQ-001",
+        "description": "User authentication system",
+        "acceptance_criteria": [
+          "Users can register with email/password",
+          "Users can log in and receive JWT token",
+          "Token expires after 24 hours",
+          "Password requirements: min 8 chars, 1 number"
+        ],
+        "priority": "critical"
+      },
+      {
+        "id": "REQ-002",
+        "description": "Task CRUD operations",
+        "acceptance_criteria": [
+          "Users can create tasks with title, description, due date",
+          "Users can update task status (todo/in-progress/done)",
+          "Users can delete their own tasks",
+          "Tasks are filterable by status"
+        ],
+        "priority": "critical"
+      },
+      {
+        "id": "REQ-003",
+        "description": "Real-time task updates",
+        "acceptance_criteria": [
+          "Changes to tasks broadcast to all connected users",
+          "Uses WebSocket connection",
+          "Reconnection handling on network issues"
+        ],
+        "priority": "high"
+      }
+    ]
+  }
+}
 ```
 
 ---
@@ -107,7 +121,7 @@ requirements:
 
 ### Command
 ```
-/devteam:planning
+/devteam:plan
 ```
 
 ### What Happens
@@ -116,19 +130,22 @@ requirements:
 
 Analyzes PRD and creates:
 
-```yaml
-# docs/planning/tasks/TASK-001.yaml
-id: TASK-001
-name: "User Authentication System"
-type: fullstack
-estimated_hours: 12
-dependencies: []
-acceptance_criteria:
-  - User registration endpoint working
-  - Login endpoint returns JWT
-  - Token validation middleware working
-  - Password hashing implemented
-  - Test coverage ≥ 80%
+```json
+// docs/planning/tasks/TASK-001.json
+{
+  "id": "TASK-001",
+  "name": "User Authentication System",
+  "type": "fullstack",
+  "estimated_hours": 12,
+  "dependencies": [],
+  "acceptance_criteria": [
+    "User registration endpoint working",
+    "Login endpoint returns JWT",
+    "Token validation middleware working",
+    "Password hashing implemented",
+    "Test coverage >= 80%"
+  ]
+}
 ```
 
 **15 tasks created total:**
@@ -145,36 +162,34 @@ acceptance_criteria:
 
 Organizes into sprints:
 
-```yaml
-# docs/sprints/SPRINT-001.yaml
-id: SPRINT-001
-name: "Foundation & Authentication"
-estimated_hours: 40
-tasks:
-  - TASK-001  # User Authentication (no dependencies)
-  - TASK-002  # Database schema (can run parallel)
+```json
+// docs/sprints/SPRINT-001.json
+{
+  "id": "SPRINT-001",
+  "name": "Foundation & Authentication",
+  "estimated_hours": 40,
+  "tasks": ["TASK-001", "TASK-002"]
+}
 ```
 
-```yaml
-# docs/sprints/SPRINT-002.yaml
-id: SPRINT-002
-name: "Core Task Management"
-estimated_hours: 48
-tasks:
-  - TASK-003  # Depends on TASK-001, TASK-002
-  - TASK-004  # Depends on TASK-003
-  - TASK-005  # Depends on TASK-003
+```json
+// docs/sprints/SPRINT-002.json
+{
+  "id": "SPRINT-002",
+  "name": "Core Task Management",
+  "estimated_hours": 48,
+  "tasks": ["TASK-003", "TASK-004", "TASK-005"]
+}
 ```
 
-```yaml
-# docs/sprints/SPRINT-003.yaml
-id: SPRINT-003
-name: "Real-time Features & Polish"
-estimated_hours: 32
-tasks:
-  - TASK-006  # WebSocket infrastructure
-  - TASK-007  # Real-time updates (depends on TASK-006)
-  - ... (polish tasks)
+```json
+// docs/sprints/SPRINT-003.json
+{
+  "id": "SPRINT-003",
+  "name": "Real-time Features & Polish",
+  "estimated_hours": 32,
+  "tasks": ["TASK-006", "TASK-007"]
+}
 ```
 
 ---
@@ -183,7 +198,7 @@ tasks:
 
 ### Command
 ```
-/devteam:sprint SPRINT-001
+/devteam:implement --sprint SPRINT-001
 ```
 
 ### Detailed Execution Flow
@@ -192,24 +207,28 @@ tasks:
 
 #### Task: TASK-001 - User Authentication System
 
-**Task Orchestrator (Sonnet) coordinates:**
+**Task Loop (Opus) coordinates:**
 
-**Iteration 1 (T1 Agents - Haiku):**
+**Iteration 1 (Sonnet model):**
 
-1. **Database Designer (Opus)** - 2 minutes
-   ```yaml
-   Output: docs/design/database/TASK-001-schema.yaml
-
-   tables:
-     users:
-       columns:
-         id: {type: UUID, primary: true}
-         email: {type: STRING, unique: true}
-         password_hash: {type: STRING}
-         created_at: {type: TIMESTAMP}
+1. **Database Designer (Sonnet)** - 2 minutes
+   ```json
+   // Output: docs/design/database/TASK-001-schema.json
+   {
+     "tables": {
+       "users": {
+         "columns": {
+           "id": {"type": "UUID", "primary": true},
+           "email": {"type": "STRING", "unique": true},
+           "password_hash": {"type": "STRING"},
+           "created_at": {"type": "TIMESTAMP"}
+         }
+       }
+     }
+   }
    ```
 
-2. **Database Developer Python T1 (Haiku)** - 5 minutes
+2. **Database Developer Python (Sonnet)** - 5 minutes
    ```python
    Output: backend/models/user.py
 
@@ -225,22 +244,28 @@ tasks:
    Output: migrations/versions/001_create_users.py
    ```
 
-3. **API Designer (Opus)** - 3 minutes
-   ```yaml
-   Output: docs/design/api/TASK-001-api.yaml
-
-   endpoints:
-     - path: /api/auth/register
-       method: POST
-       request_body:
-         email: {type: string, format: email}
-         password: {type: string, min_length: 8}
-       responses:
-         201: {user_id: uuid, token: string}
-         400: {error: string}
+3. **API Designer (Sonnet)** - 3 minutes
+   ```json
+   // Output: docs/design/api/TASK-001-api.json
+   {
+     "endpoints": [
+       {
+         "path": "/api/auth/register",
+         "method": "POST",
+         "request_body": {
+           "email": {"type": "string", "format": "email"},
+           "password": {"type": "string", "min_length": 8}
+         },
+         "responses": {
+           "201": {"user_id": "uuid", "token": "string"},
+           "400": {"error": "string"}
+         }
+       }
+     ]
+   }
    ```
 
-4. **API Developer Python T1 (Haiku)** - 8 minutes
+4. **API Developer Python (Sonnet)** - 8 minutes
    ```python
    Output: backend/routes/auth.py
 
@@ -254,17 +279,20 @@ tasks:
 
    *Issue: Missing rate limiting, weak password validation*
 
-5. **Frontend Designer (Opus)** - 3 minutes
-   ```yaml
-   Output: docs/design/frontend/TASK-001-components.yaml
-
-   components:
-     LoginForm:
-       props: {onSubmit: function}
-       state: [email, password, isSubmitting, errors]
+5. **Frontend Designer (Sonnet)** - 3 minutes
+   ```json
+   // Output: docs/design/frontend/TASK-001-components.json
+   {
+     "components": {
+       "LoginForm": {
+         "props": {"onSubmit": "function"},
+         "state": ["email", "password", "isSubmitting", "errors"]
+       }
+     }
+   }
    ```
 
-6. **Frontend Developer T1 (Haiku)** - 10 minutes
+6. **Frontend Developer (Sonnet)** - 10 minutes
    ```tsx
    Output: src/components/LoginForm.tsx
 
@@ -317,26 +345,32 @@ tasks:
     ```
 
 11. **Requirements Validator (Opus)** - 5 minutes
-    ```yaml
-    result: FAIL
-    outstanding_requirements:
-      - criterion: "Password requirements: min 8 chars, 1 number"
-        gap: "Only checks length, not number requirement"
-        recommended_agent: "api-developer-python"
-        complexity: "straightforward"
-
-      - criterion: "Test coverage ≥ 80%"
-        current: 75%
-        gap: "Missing tests for edge cases"
-        recommended_agent: "test-writer"
-        complexity: "straightforward"
+    ```json
+    {
+      "result": "FAIL",
+      "outstanding_requirements": [
+        {
+          "criterion": "Password requirements: min 8 chars, 1 number",
+          "gap": "Only checks length, not number requirement",
+          "recommended_agent": "api-developer-python",
+          "complexity": "straightforward"
+        },
+        {
+          "criterion": "Test coverage >= 80%",
+          "current": "75%",
+          "gap": "Missing tests for edge cases",
+          "recommended_agent": "test-writer",
+          "complexity": "straightforward"
+        }
+      ]
+    }
     ```
 
-**Iteration 2 (Still T1 - Haiku):**
+**Iteration 2 (Still Sonnet):**
 
-Task Orchestrator re-runs specific agents:
+Task Loop re-runs specific agents:
 
-1. **API Developer Python T1 (Haiku)** - 5 minutes
+1. **API Developer Python (Sonnet)** - 5 minutes
    - Adds password validation with regex
    - Adds rate limiting decorator
    - Moves JWT secret to environment variable
@@ -346,31 +380,38 @@ Task Orchestrator re-runs specific agents:
    - Coverage now: 82% ✅
 
 3. **Requirements Validator (Opus)** - 5 minutes
-   ```yaml
-   result: FAIL
-   outstanding_requirements:
-      - criterion: "Token expires after 24 hours"
-        gap: "JWT expiration set to 7 days"
-        recommended_agent: "api-developer-python"
-        complexity: "straightforward"
+   ```json
+   {
+     "result": "FAIL",
+     "outstanding_requirements": [
+       {
+         "criterion": "Token expires after 24 hours",
+         "gap": "JWT expiration set to 7 days",
+         "recommended_agent": "api-developer-python",
+         "complexity": "straightforward"
+       }
+     ]
+   }
    ```
 
-**Iteration 3 (Still T1 - Haiku):**
+**Iteration 3 (Still Sonnet):**
 
-1. **API Developer Python T1 (Haiku)** - 2 minutes
+1. **API Developer Python (Sonnet)** - 2 minutes
    - Changes JWT expiration to 24 hours
 
 2. **Requirements Validator (Opus)** - 5 minutes
-   ```yaml
-   result: PASS
-   all_criteria_met: true
-   test_coverage: 82%
-   security_issues: 0
-   iterations: 3
-   tier_used: T1
+   ```json
+   {
+     "result": "PASS",
+     "all_criteria_met": true,
+     "test_coverage": "82%",
+     "security_issues": 0,
+     "iterations": 3,
+     "model_used": "sonnet"
+   }
    ```
 
-**✅ TASK-001 Complete (3 iterations, T1 only, ~90 minutes)**
+**TASK-001 Complete (3 iterations, sonnet, ~90 minutes)**
 
 ---
 
@@ -382,14 +423,14 @@ Status: ✅ COMPLETED
 
 TASK-001: User Authentication System (fullstack)
 ├─ Iterations: 3
-├─ Tier: T1 (Haiku)
+├─ Model: sonnet
 ├─ Time: ~90 minutes
 ├─ Cost: ~$0.50 (estimated)
 └─ Result: PASS
 
 TASK-002: Database Schema for Tasks (database)
 ├─ Iterations: 2
-├─ Tier: T1 (Haiku)
+├─ Model: sonnet
 ├─ Time: ~45 minutes
 ├─ Cost: ~$0.20 (estimated)
 └─ Result: PASS
@@ -397,7 +438,7 @@ TASK-002: Database Schema for Tasks (database)
 Sprint Summary:
 - Tasks: 2/2 completed
 - Total iterations: 5
-- T1→T2 escalations: 0
+- sonnet→opus escalations: 0
 - Total time: ~2.5 hours
 - Estimated cost: ~$0.70
 - All acceptance criteria met: ✅
@@ -408,13 +449,13 @@ Sprint Summary:
 ## Phase 4: Continue with Remaining Sprints
 
 ```bash
-/devteam:sprint SPRINT-002
+/devteam:implement --sprint SPRINT-002
 ```
 
 *Similar detailed workflow for core task management features*
 
 ```bash
-/devteam:sprint SPRINT-003
+/devteam:implement --sprint SPRINT-003
 ```
 
 *Real-time features and polish*
@@ -487,10 +528,10 @@ TaskFlow/
 - Timeline: 2-3 days
 - BUT: Less optimal, no cost tiers
 
-**Multi-Agent T1/T2 Approach:**
-- T1 (70% of work): ~5,600 interactions × $0.001 = $5.60
-- T2 (20% of work): ~1,600 interactions × $0.003 = $4.80
-- Opus (10% of work): ~800 interactions × $0.015 = $12
+**Multi-Agent Tiered Model Approach:**
+- Sonnet (70% of work): ~5,600 interactions × $0.003 = $16.80
+- Opus (20% of work): ~1,600 interactions × $0.015 = $24
+- Haiku (10% of work): ~800 interactions × $0.001 = $0.80
 - **Total: ~$22.40**
 - Timeline: 2-3 days
 - Quality: Same as all-Opus (requirements validator ensures it)
@@ -502,7 +543,7 @@ TaskFlow/
 ## Key Takeaways
 
 1. **PRD phase is crucial** - Good requirements = good results
-2. **T1 handles most work** - Only escalates when needed
+2. **Sonnet handles most work** - Opus used for complex tasks and audits
 3. **Quality gates work** - Requirements validator caught 12 issues
 4. **Cost optimization is real** - $22 vs $120 vs $12,000
 5. **Documentation is automatic** - No extra effort needed
@@ -514,4 +555,4 @@ TaskFlow/
 - Deploy to production
 - Set up CI/CD pipeline
 - Configure monitoring and logging
-- Plan feature roadmap (use /devteam:prd again!)
+- Plan feature roadmap (use /devteam:plan again!)

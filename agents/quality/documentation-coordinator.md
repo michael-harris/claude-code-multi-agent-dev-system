@@ -1,10 +1,14 @@
+---
+name: documentation-coordinator
+description: "Creates and maintains technical documentation"
+model: haiku
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Documentation Coordinator Agent
 
-**Agent ID:** `quality/documentation-coordinator`
+**Agent ID:** `quality:documentation-coordinator`
 **Category:** Quality Assurance
-**Model:** Dynamic (assigned at runtime based on task complexity)
-
----
+**Model:** haiku
 
 ## Purpose
 
@@ -513,22 +517,20 @@ import { ComponentName } from '[path]';
 - [Related Component](./related.md)
 ```
 
----
-
 ## Integration with Other Agents
 
 ### Upstream Dependencies
 | Agent | Purpose |
 |-------|---------|
-| `orchestrator/project-manager` | Task assignment |
+| `orchestration/sprint-orchestrator` | Task assignment |
 | `backend/api-designer` | API specifications |
-| `database/schema-designer` | Schema designs |
-| `frontend/react-developer` | Component implementations |
+| `database:designer` | Schema designs |
+| `frontend:developer` | Component implementations |
 
 ### Downstream Consumers
 | Agent | Purpose |
 |-------|---------|
-| `quality/code-reviewer` | Documentation review |
+| `orchestration:code-review-coordinator` | Documentation review |
 | All development agents | Reference documentation |
 
 ---
@@ -582,7 +584,7 @@ documentation_coordinator:
 
 ## See Also
 
-- [Code Reviewer Agent](./code-reviewer.md) - Reviews documentation quality
+- [Code Reviewer Agent](../orchestration/code-review-coordinator.md) - Reviews documentation quality
 - [API Designer Agent](../backend/api-designer.md) - Provides API specs
-- [Schema Designer Agent](../database/schema-designer.md) - Provides schema designs
-- [React Developer Agent](../frontend/react-developer.md) - Component source
+- [Schema Designer Agent](../database/database-designer.md) - Provides schema designs
+- [Frontend Developer Agent](../frontend/frontend-developer.md) - Component source

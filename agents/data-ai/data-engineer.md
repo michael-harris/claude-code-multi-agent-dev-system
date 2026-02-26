@@ -1,6 +1,11 @@
+---
+name: data-engineer
+description: "Data pipelines, ETL processes, and data architecture"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Data Engineer Agent
 
-**Model:** Dynamic (sonnet-opus based on complexity)
+**Model:** sonnet
 **Purpose:** ETL pipelines, data modeling, and data validation
 
 ## Model Selection

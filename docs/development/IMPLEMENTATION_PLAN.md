@@ -1,5 +1,7 @@
 # DevTeam Implementation Plan
 
+> **Note:** This is a historical development document. The "Dynamic Model Selection" and T1/T2 tier system described here have been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Model escalation is now handled by orchestrator agents (task-loop, sprint-orchestrator) via LLM instructions, not by executable code or complexity-scoring algorithms.
+
 Comprehensive step-by-step plan to transform the multi-agent system into an enhanced autonomous development platform.
 
 ---
@@ -32,7 +34,7 @@ Phase 2: Agent Consolidation (Reduce & Enhance)
 Phase 3: Command Restructuring (User Interface)
    └─► New /devteam:* commands, issue workflow
 
-Phase 4: Autonomous Mode (Ralph Functionality)
+Phase 4: Autonomous Mode (Task Loop Functionality)
    └─► Stop hooks, session memory, circuit breaker
 
 Phase 5: Parallel Execution (Performance)
@@ -90,7 +92,12 @@ mcp-configs/
 Update `docs/development/state-management-guide.md` with new schema:
 
 ```yaml
-# .devteam/state.yaml (new location, replaces .project-state.yaml)
+# State is now stored in SQLite at .devteam/devteam.db
+# (replaces previous .devteam/state.yaml and .project-state.yaml)
+# Access via: source scripts/state.sh; get_state "field"; set_state "field" "value"
+#
+# The schema below is for historical reference only.
+# Actual state is managed via SQLite tables: sessions, session_state, tasks, plans, events.
 version: "3.0"
 type: project | feature | issue
 
@@ -100,7 +107,7 @@ metadata:
   project_name: string
 
 # ============================================
-# AUTONOMOUS MODE (New - Ralph Functionality)
+# AUTONOMOUS MODE (New - Task Loop Functionality)
 # ============================================
 autonomous_mode:
   enabled: boolean
@@ -307,9 +314,9 @@ statistics:
 **Create `hooks/stop-hook.sh`:**
 ```bash
 #!/bin/bash
-# DevTeam Stop Hook - Implements Ralph-style session persistence
+# DevTeam Stop Hook - Implements Task Loop-style session persistence
 
-STATE_FILE=".devteam/state.yaml"
+DB_FILE=".devteam/devteam.db"
 MEMORY_DIR=".devteam/memory"
 
 # Check if autonomous mode is active
@@ -344,10 +351,10 @@ if [ "$ITERATIONS" -ge 100 ]; then
     exit 0
 fi
 
-# Check completion status from state file
-if [ -f "$STATE_FILE" ]; then
-    PENDING=$(grep -c "status: pending" "$STATE_FILE" 2>/dev/null || echo "0")
-    IN_PROGRESS=$(grep -c "status: in_progress" "$STATE_FILE" 2>/dev/null || echo "0")
+# Check completion status from SQLite database
+if [ -f "$DB_FILE" ]; then
+    PENDING=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM tasks WHERE status = 'pending';" 2>/dev/null || echo "0")
+    IN_PROGRESS=$(sqlite3 "$DB_FILE" "SELECT COUNT(*) FROM tasks WHERE status = 'in_progress';" 2>/dev/null || echo "0")
 
     if [ "$PENDING" -eq 0 ] && [ "$IN_PROGRESS" -eq 0 ]; then
         echo "[DevTeam] All work complete."
@@ -510,7 +517,7 @@ github:
 **Create `.devteam/agent-capabilities.yaml`:**
 ```yaml
 # Agent Capability Index for Dynamic Selection
-# Used by task-orchestrator to select best agent for each task
+# Used by task-loop to select best agent for each task
 
 agents:
   # ============================================
@@ -670,7 +677,7 @@ agents:
   # QUALITY AGENTS (Consolidated)
   # ============================================
   code-reviewer:
-    id: "quality:code-reviewer"
+    id: "orchestration:code-review-coordinator"
     model: opus
     triggers:
       task_types: [code_review]
@@ -922,7 +929,7 @@ Create consolidated agent definitions. Example:
 ```markdown
 # Python Developer
 
-**Model:** dynamic (selected by task-orchestrator based on complexity)
+**Model:** dynamic (selected by task-loop based on complexity)
 **Purpose:** Full-stack Python development including Django, FastAPI, Flask
 
 ## Capabilities
@@ -1120,7 +1127,7 @@ Ask the user:
 ### Step 2: PRD Generation
 
 Based on answers, generate:
-- `docs/planning/PROJECT_PRD.yaml`
+- `docs/planning/PROJECT_PRD.json`
 
 Include:
 - Project metadata
@@ -1152,7 +1159,7 @@ Display:
 ```
 Planning Complete!
 
-📋 PRD: docs/planning/PROJECT_PRD.yaml
+📋 PRD: docs/planning/PROJECT_PRD.json
 📝 Tasks: 15 tasks created
    - 8 can run in parallel
    - 7 require sequential execution
@@ -1379,11 +1386,11 @@ mv commands/feature.md commands/_deprecated_feature.md
 # Phase 4: Autonomous Mode
 
 **Duration:** 2-3 days
-**Goal:** Implement Ralph-style autonomous execution
+**Goal:** Implement Task Loop-style autonomous execution
 
-## Step 4.1: Update Task Orchestrator
+## Step 4.1: Update Task Loop
 
-**Modify `agents/orchestration/task-orchestrator.md`:**
+**Modify `agents/orchestration/task-loop.md`:**
 
 Add complexity assessment:
 ```markdown
@@ -1404,7 +1411,7 @@ Before starting iterations, assess task complexity:
    - Score 5-8: moderate (start Sonnet)
    - Score 9+: complex (start Opus)
 
-4. Record in state file
+4. Record in SQLite database
 ```
 
 Add dynamic model selection:
@@ -1479,15 +1486,11 @@ Add checkpoint creation:
 After each sprint completion:
 
 1. Create git commit with sprint summary
-2. Record checkpoint in state file:
-   ```yaml
-   checkpoints:
-     - name: "post-sprint-001"
-       timestamp: "..."
-       commit_sha: "abc123"
-       verification:
-         tests_passing: 45
-         coverage: 82%
+2. Record checkpoint in SQLite database:
+   ```sql
+   INSERT INTO session_state (session_id, key, value)
+   VALUES ($session_id, 'checkpoint_post_sprint_001',
+     '{"name":"post-sprint-001","commit_sha":"abc123","tests_passing":45,"coverage":"82%"}');
    ```
 ```
 
@@ -1539,10 +1542,12 @@ For each task, calculate:
 4. **Type eligible**: Not database migration, not security-critical
 
 Mark in task file:
-```yaml
-parallel_eligible: true
-parallel_group: 2  # Can run with other group 2 tasks
-estimated_duration: short  # short | medium | long
+```json
+{
+  "parallel_eligible": true,
+  "parallel_group": 2,
+  "estimated_duration": "short"
+}
 ```
 ```
 
@@ -1861,7 +1866,7 @@ Week 3:
 - [ ] Old commands deprecated
 
 ## Phase 4 Complete
-- [ ] Task orchestrator updated with complexity assessment
+- [ ] Task loop updated with complexity assessment
 - [ ] Dynamic model selection implemented
 - [ ] Sprint orchestrator updated with checkpoints
 - [ ] Session memory implemented

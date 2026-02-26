@@ -1,10 +1,14 @@
+---
+name: performance-auditor-csharp
+description: "C#/.NET-specific performance analysis"
+model: sonnet
+tools: Read, Glob, Grep, Bash
+---
 # Performance Auditor (C#) Agent
 
-**Agent ID:** `quality/performance-auditor-csharp`
+**Agent ID:** `quality:performance-auditor-csharp`
 **Category:** Quality Assurance
-**Model:** Dynamic (assigned at runtime based on task complexity)
-
----
+**Model:** sonnet
 
 ## Purpose
 
@@ -174,122 +178,107 @@ thresholds:
 
 ### Performance Audit Report
 
-Location: `docs/quality/performance/TASK-XXX-audit.yaml`
+Location: `docs/quality/performance/TASK-XXX-audit.json`
 
-```yaml
-audit_summary:
-  total_issues: 12
-  critical: 2
-  high: 5
-  medium: 4
-  low: 1
-  estimated_improvement: "40-60% response time reduction"
-
-issues:
-  critical:
-    - id: "PERF-001"
-      issue: "N+1 query in GetUsersWithOrders"
-      file: "Services/UserService.cs"
-      line: 45
-      impact: "Database queries scale linearly with users"
-      current_code: |
-        public async Task<List<UserDto>> GetUsersWithOrders()
-        {
-            var users = await _context.Users.ToListAsync();
-            foreach (var user in users)
-            {
-                user.Orders = await _context.Orders
-                    .Where(o => o.UserId == user.Id)
-                    .ToListAsync();  // N+1 problem!
-            }
-            return _mapper.Map<List<UserDto>>(users);
-        }
-      optimized_code: |
-        public async Task<List<UserDto>> GetUsersWithOrders()
-        {
-            var users = await _context.Users
-                .Include(u => u.Orders)
-                .Include(u => u.Profile)
-                .AsNoTracking()  // Read-only, skip change tracking
-                .ToListAsync();
-            return _mapper.Map<List<UserDto>>(users);
-        }
-      expected_improvement: "50+ queries reduced to 1"
-
-    - id: "PERF-002"
-      issue: "Synchronous database call in async method"
-      file: "Services/OrderService.cs"
-      line: 78
-      impact: "Thread pool starvation under load"
-      current_code: |
-        public async Task<Order> GetOrderAsync(int id)
-        {
-            return _context.Orders.First(o => o.Id == id);  // Sync!
-        }
-      optimized_code: |
-        public async Task<Order?> GetOrderAsync(int id)
-        {
-            return await _context.Orders
-                .FirstOrDefaultAsync(o => o.Id == id);
-        }
-      expected_improvement: "Proper async execution"
-
-  high:
-    - id: "PERF-003"
-      issue: "String concatenation in loop"
-      file: "Services/ReportService.cs"
-      line: 102
-      impact: "O(n²) memory allocations"
-      current_code: |
-        string result = "";
-        foreach (var item in items)
-        {
-            result += item.ToString() + ",";
-        }
-      optimized_code: |
-        var builder = new StringBuilder();
-        foreach (var item in items)
-        {
-            builder.Append(item.ToString());
-            builder.Append(',');
-        }
-        var result = builder.ToString();
-      expected_improvement: "Linear memory allocation"
-
-recommendations:
-  immediate:
-    - "Fix N+1 queries in UserService and OrderService"
-    - "Replace all sync database calls with async versions"
-  short_term:
-    - "Add compiled queries for frequently executed operations"
-    - "Implement response caching for read-heavy endpoints"
-  long_term:
-    - "Consider read replicas for reporting queries"
-    - "Implement distributed caching (Redis)"
-
-profiling_tools:
-  recommended:
-    - tool: "dotnet-trace"
-      command: "dotnet-trace collect --process-id {PID}"
-      purpose: "CPU profiling and trace collection"
-    - tool: "dotnet-counters"
-      command: "dotnet-counters monitor --process-id {PID}"
-      purpose: "Real-time metrics monitoring"
-    - tool: "PerfView"
-      purpose: "Deep CPU and memory analysis"
-    - tool: "BenchmarkDotNet"
-      purpose: "Micro-benchmarking code changes"
-
-benchmarks:
-  suggested:
-    - name: "UserService.GetUsersWithOrders"
-      type: "integration"
-      baseline: "Current N+1 implementation"
-      target: "Eager loading implementation"
-    - name: "ReportService.GenerateReport"
-      type: "micro"
-      baseline: "String concatenation"
-      target: "StringBuilder implementation"
+```json
+{
+  "audit_summary": {
+    "total_issues": 12,
+    "critical": 2,
+    "high": 5,
+    "medium": 4,
+    "low": 1,
+    "estimated_improvement": "40-60% response time reduction"
+  },
+  "issues": {
+    "critical": [
+      {
+        "id": "PERF-001",
+        "issue": "N+1 query in GetUsersWithOrders",
+        "file": "Services/UserService.cs",
+        "line": 45,
+        "impact": "Database queries scale linearly with users",
+        "current_code": "public async Task<List<UserDto>> GetUsersWithOrders()\n{\n    var users = await _context.Users.ToListAsync();\n    foreach (var user in users)\n    {\n        user.Orders = await _context.Orders\n            .Where(o => o.UserId == user.Id)\n            .ToListAsync();  // N+1 problem!\n    }\n    return _mapper.Map<List<UserDto>>(users);\n}",
+        "optimized_code": "public async Task<List<UserDto>> GetUsersWithOrders()\n{\n    var users = await _context.Users\n        .Include(u => u.Orders)\n        .Include(u => u.Profile)\n        .AsNoTracking()  // Read-only, skip change tracking\n        .ToListAsync();\n    return _mapper.Map<List<UserDto>>(users);\n}",
+        "expected_improvement": "50+ queries reduced to 1"
+      },
+      {
+        "id": "PERF-002",
+        "issue": "Synchronous database call in async method",
+        "file": "Services/OrderService.cs",
+        "line": 78,
+        "impact": "Thread pool starvation under load",
+        "current_code": "public async Task<Order> GetOrderAsync(int id)\n{\n    return _context.Orders.First(o => o.Id == id);  // Sync!\n}",
+        "optimized_code": "public async Task<Order?> GetOrderAsync(int id)\n{\n    return await _context.Orders\n        .FirstOrDefaultAsync(o => o.Id == id);\n}",
+        "expected_improvement": "Proper async execution"
+      }
+    ],
+    "high": [
+      {
+        "id": "PERF-003",
+        "issue": "String concatenation in loop",
+        "file": "Services/ReportService.cs",
+        "line": 102,
+        "impact": "O(n^2) memory allocations",
+        "current_code": "string result = \"\";\nforeach (var item in items)\n{\n    result += item.ToString() + \",\";\n}",
+        "optimized_code": "var builder = new StringBuilder();\nforeach (var item in items)\n{\n    builder.Append(item.ToString());\n    builder.Append(',');\n}\nvar result = builder.ToString();",
+        "expected_improvement": "Linear memory allocation"
+      }
+    ]
+  },
+  "recommendations": {
+    "immediate": [
+      "Fix N+1 queries in UserService and OrderService",
+      "Replace all sync database calls with async versions"
+    ],
+    "short_term": [
+      "Add compiled queries for frequently executed operations",
+      "Implement response caching for read-heavy endpoints"
+    ],
+    "long_term": [
+      "Consider read replicas for reporting queries",
+      "Implement distributed caching (Redis)"
+    ]
+  },
+  "profiling_tools": {
+    "recommended": [
+      {
+        "tool": "dotnet-trace",
+        "command": "dotnet-trace collect --process-id {PID}",
+        "purpose": "CPU profiling and trace collection"
+      },
+      {
+        "tool": "dotnet-counters",
+        "command": "dotnet-counters monitor --process-id {PID}",
+        "purpose": "Real-time metrics monitoring"
+      },
+      {
+        "tool": "PerfView",
+        "purpose": "Deep CPU and memory analysis"
+      },
+      {
+        "tool": "BenchmarkDotNet",
+        "purpose": "Micro-benchmarking code changes"
+      }
+    ]
+  },
+  "benchmarks": {
+    "suggested": [
+      {
+        "name": "UserService.GetUsersWithOrders",
+        "type": "integration",
+        "baseline": "Current N+1 implementation",
+        "target": "Eager loading implementation"
+      },
+      {
+        "name": "ReportService.GenerateReport",
+        "type": "micro",
+        "baseline": "String concatenation",
+        "target": "StringBuilder implementation"
+      }
+    ]
+  }
+}
 ```
 
 ---
@@ -299,8 +288,8 @@ benchmarks:
 ### Upstream Dependencies
 | Agent | Purpose |
 |-------|---------|
-| `orchestrator/project-manager` | Receives audit task assignments |
-| `quality/code-reviewer` | Initial code quality assessment |
+| `orchestration/sprint-orchestrator` | Receives audit task assignments |
+| `orchestration:code-review-coordinator` | Initial code quality assessment |
 
 ### Downstream Consumers
 | Agent | Purpose |
@@ -406,8 +395,8 @@ for (int i = 0; i < 1000000; i++)
 
 ## See Also
 
-- [Code Reviewer Agent](./code-reviewer.md) - Initial code quality review
-- [API Developer C# Agent](../backend/api-developer-csharp.md) - Implementation partner
-- [Database Developer C# Agent](../database/database-developer-csharp.md) - Query optimization
-- [Performance Auditor Python](./performance-auditor-python.md) - Python performance
-- [Documentation Coordinator](./documentation-coordinator.md) - Performance docs
+- `orchestration/code-review-coordinator.md` - Initial code quality review
+- `backend/api-developer-csharp.md` - Implementation partner
+- `database/database-developer-csharp.md` - Query optimization
+- `quality/performance-auditor-python.md` - Python performance
+- `quality/documentation-coordinator.md` - Performance docs

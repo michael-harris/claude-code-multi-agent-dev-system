@@ -1,17 +1,16 @@
 # Progress Tracking & Parallel Development Design
 
+> **Note:** This is a historical development document. The T1/T2 tier system and `tier_used: T1/T2` state fields described here have been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Escalation is now handled by orchestrator agents via LLM instructions.
+
 ## Overview
 
 This document describes the progress tracking and parallel development track system for the multi-agent development framework.
 
 ## Progress Tracking State
 
-### State File Location
+### State Storage
 
-Progress is tracked in YAML state files:
-- **Project-level**: `docs/planning/.project-state.yaml`
-- **Feature-level**: `docs/planning/.feature-{featureId}-state.yaml`
-- **Issue-level**: `docs/planning/.issue-{issueId}-state.yaml`
+Progress is now tracked in the SQLite database at `.devteam/devteam.db`. The previous YAML state files (`.project-state.yaml`, `.feature-*-state.yaml`, `.issue-*-state.yaml`) have been replaced by the `sessions`, `tasks`, and `plans` tables. Use `source scripts/state.sh` and the `get_state()` / `set_state()` / `set_phase()` helper functions to interact with session state.
 
 ### State File Schema
 
@@ -202,7 +201,7 @@ calculate_max_parallel_tracks(dependency_graph: dict) -> int
 
 ### Phase 3: Execution Updates
 - Update sprint-orchestrator to use state
-- Update task-orchestrator to record progress
+- Update task-loop to record progress
 - Modify /devteam:sprint and /devteam:sprint-all commands
 
 ### Phase 4: Documentation
@@ -255,10 +254,10 @@ calculate_max_parallel_tracks(dependency_graph: dict) -> int
 # User: "2"
 
 # System creates:
-# - docs/planning/tasks/FEATURE-001-TASK-*.yaml
-# - docs/sprints/FEATURE-001-SPRINT-001-01.yaml
-# - docs/sprints/FEATURE-001-SPRINT-001-02.yaml
-# - docs/planning/.feature-001-state.yaml
+# - docs/planning/tasks/FEATURE-001-TASK-*.json
+# - docs/sprints/FEATURE-001-SPRINT-001-01.json
+# - docs/sprints/FEATURE-001-SPRINT-001-02.json
+# - State tracked in SQLite at .devteam/devteam.db
 ```
 
 ## Migration

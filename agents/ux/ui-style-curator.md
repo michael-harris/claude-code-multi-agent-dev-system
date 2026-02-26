@@ -1,3 +1,8 @@
+---
+name: ui-style-curator
+description: "UI component styling and visual consistency"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # UI Style Curator
 
 ## Identity

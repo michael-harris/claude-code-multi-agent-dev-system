@@ -1,0 +1,42 @@
+{
+  "name": "devteam",
+  "description": "127-agent automated development system with Agent Teams, native subagent configuration, quality gates, Bug Council diagnostics, and autonomous execution",
+  "version": "4.0.0",
+  "author": {
+    "name": "Multi-Agent Development Team"
+  },
+  "homepage": "https://github.com/michael-harris/claude-devteam",
+  "license": "MIT",
+  "engines": {
+    "claude-code": ">=1.0.0"
+  },
+  "features": {
+    "agent_teams": {
+      "description": "True parallel execution via Claude Code Agent Teams",
+      "experimental": true,
+      "env_flag": "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1"
+    },
+    "native_subagents": {
+      "description": "127 agents with native frontmatter (tools, model, memory, isolation)",
+      "split_model_strategy": "63 fixed-model agents, 64 dynamic-model agents for Task Loop escalation"
+    },
+    "skills": {
+      "description": "20 slash commands converted to Skills with dynamic context injection",
+      "location": "skills/"
+    },
+    "hooks": {
+      "description": "Declarative hooks with command, prompt, and agent types",
+      "location": "hooks/hooks.json"
+    },
+    "rules": {
+      "description": "11 path-specific CLAUDE.md rules for framework guidance",
+      "location": ".claude/rules/"
+    },
+    "worktree_isolation": {
+      "description": "Native worktree isolation for parallel track execution"
+    },
+    "auto_memory": {
+      "description": "Cross-session agent learning via memory: project"
+    }
+  }
+}

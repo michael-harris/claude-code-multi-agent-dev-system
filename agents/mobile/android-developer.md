@@ -1,10 +1,13 @@
+---
+name: android-developer
+description: "Implements Android apps with Kotlin/Jetpack Compose"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Android Developer Agent
 
-**Agent ID:** `mobile/android-developer`
+**Agent ID:** `mobile:android-developer`
 **Category:** Mobile Development
-**Model:** Dynamic (assigned at runtime based on task complexity)
-
----
+**Model:** sonnet
 
 ## Purpose
 
@@ -477,16 +480,16 @@ design_specs:
 ### Upstream Dependencies
 | Agent | Purpose |
 |-------|---------|
-| `frontend/ui-designer` | Provides design specifications |
-| `orchestrator/project-manager` | Task assignment |
+| `frontend:designer` | Provides design specifications |
+| `orchestration/sprint-orchestrator` | Task assignment |
 | `backend/api-designer` | API contract reference |
 
 ### Downstream Consumers
 | Agent | Purpose |
 |-------|---------|
-| `quality/code-reviewer` | Code quality review |
-| `quality/test-runner-android` | Runs tests |
-| `devops/build-engineer` | Build configuration |
+| `orchestration:code-review-coordinator` | Code quality review |
+| `quality/runtime-verifier` | Runs tests and runtime verification |
+| `devops/cicd-specialist` | Build and CI/CD configuration |
 
 ---
 
@@ -542,6 +545,6 @@ android_developer:
 ## See Also
 
 - [iOS Developer Agent](./ios-developer.md) - iOS equivalent
-- [UI Designer Agent](../frontend/ui-designer.md) - Design specifications
+- [UI Designer Agent](../frontend/frontend-designer.md) - Design specifications
 - [API Designer Agent](../backend/api-designer.md) - API contracts
-- [Mobile Accessibility Agent](./mobile-accessibility.md) - Accessibility guidelines
+- [Mobile Accessibility Agent](../accessibility/mobile-accessibility-specialist.md) - Accessibility guidelines

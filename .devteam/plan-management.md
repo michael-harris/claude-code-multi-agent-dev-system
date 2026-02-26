@@ -38,64 +38,63 @@ plan_types:
 ```
 .devteam/
 ├── plans/
-│   ├── index.yaml                    # Master plan index
+│   ├── index.json                    # Master plan index
 │   ├── project-taskmanager/          # Project plan
-│   │   ├── PRD.yaml
+│   │   ├── PRD.json
 │   │   ├── tasks/
-│   │   ├── sprints/
-│   │   └── state.yaml
+│   │   └── sprints/
 │   ├── feature-notifications/        # Feature plan
-│   │   ├── spec.yaml
+│   │   ├── spec.json
 │   │   ├── tasks/
-│   │   ├── sprints/
-│   │   └── state.yaml
+│   │   └── sprints/
 │   └── feature-dark-mode/            # Another feature plan
-│       ├── spec.yaml
+│       ├── spec.json
 │       ├── tasks/
-│       ├── sprints/
-│       └── state.yaml
+│       └── sprints/
 │
 ├── archive/                          # Completed/abandoned plans
 │   └── feature-old-dashboard/
-│       ├── spec.yaml
-│       └── state.yaml (status: archived)
+│       └── spec.json
 │
+├── devteam.db                        # SQLite state database
 └── active-plan.txt                   # Points to current active plan
 ```
 
-### Plan Index (`plans/index.yaml`)
+### Plan Index (`plans/index.json`)
 
-```yaml
-version: "1.0"
-
-plans:
-  project-taskmanager:
-    type: project
-    name: "Task Manager Application"
-    created: "2025-01-20T10:00:00Z"
-    status: completed
-    sprints_total: 5
-    sprints_completed: 5
-
-  feature-notifications:
-    type: feature
-    name: "Push Notifications"
-    created: "2025-01-25T14:00:00Z"
-    status: in_progress
-    parent_plan: project-taskmanager  # Links to parent project
-    sprints_total: 2
-    sprints_completed: 1
-
-  feature-dark-mode:
-    type: feature
-    name: "Dark Mode Support"
-    created: "2025-01-28T09:00:00Z"
-    status: planned
-    parent_plan: project-taskmanager
-    sprints_total: 1
-    sprints_completed: 0
-
-active_plan: feature-notifications    # Currently selected plan
+```json
+{
+  "version": "1.0",
+  "plans": {
+    "project-taskmanager": {
+      "type": "project",
+      "name": "Task Manager Application",
+      "created": "2025-01-20T10:00:00Z",
+      "status": "completed",
+      "sprints_total": 5,
+      "sprints_completed": 5
+    },
+    "feature-notifications": {
+      "type": "feature",
+      "name": "Push Notifications",
+      "created": "2025-01-25T14:00:00Z",
+      "status": "in_progress",
+      "parent_plan": "project-taskmanager",
+      "sprints_total": 2,
+      "sprints_completed": 1
+    },
+    "feature-dark-mode": {
+      "type": "feature",
+      "name": "Dark Mode Support",
+      "created": "2025-01-28T09:00:00Z",
+      "status": "planned",
+      "parent_plan": "project-taskmanager",
+      "sprints_total": 1,
+      "sprints_completed": 0
+    }
+  },
+  "active_plan": "feature-notifications"
+}
 ```
 
 ### Command Updates
@@ -211,10 +210,10 @@ Parent: project-taskmanager
 ✅ Feature plan created: feature-dark-mode
 
 Files created:
-  • .devteam/plans/feature-dark-mode/spec.yaml
-  • .devteam/plans/feature-dark-mode/tasks/TASK-*.yaml
-  • .devteam/plans/feature-dark-mode/sprints/SPRINT-001.yaml
-  • .devteam/plans/feature-dark-mode/state.yaml
+  • .devteam/plans/feature-dark-mode/spec.json
+  • .devteam/plans/feature-dark-mode/tasks/TASK-*.json
+  • .devteam/plans/feature-dark-mode/sprints/SPRINT-001.json
+  • .devteam/devteam.db (state initialized)
 
 This plan is now ACTIVE.
 
@@ -264,9 +263,9 @@ If user has existing `docs/planning/` structure:
 /devteam:plan "New feature"
 
 System detects:
-  • docs/planning/PROJECT_PRD.yaml exists
+  • docs/planning/PROJECT_PRD.json exists
   • docs/sprints/ contains completed sprints
-  • .devteam/state.yaml shows project complete
+  • .devteam/devteam.db shows project complete
 
 Migrating to new plan structure...
   → Moving existing PRD to .devteam/plans/project-legacy/
@@ -276,13 +275,21 @@ Migrating to new plan structure...
 Migration complete. Your existing work is preserved.
 ```
 
-### State File Location
+### State Management
 
-Each plan has its own state file:
-- `.devteam/plans/project-taskmanager/state.yaml`
-- `.devteam/plans/feature-notifications/state.yaml`
+All plan state is managed in the SQLite database (`.devteam/devteam.db`). Each plan's state is stored with plan-scoped keys:
 
-The global `.devteam/state.yaml` is replaced by plan-specific state files.
+```bash
+source scripts/state.sh
+
+# Get state for a specific plan
+get_kv_state "plans.feature-notifications.status"
+
+# Set state for a specific plan
+set_kv_state "plans.feature-notifications.status" "in_progress"
+```
+
+The global `.devteam/state.yaml` has been replaced by the SQLite database. See `scripts/schema*.sql` for the current schema.
 
 ### Preventing Overwrites
 

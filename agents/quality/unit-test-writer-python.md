@@ -1,8 +1,13 @@
+---
+name: unit-test-writer-python
+description: "Writes Python unit tests with pytest, unittest, and mocking"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Unit Test Writer - Python
 
 **Agent ID:** `quality:unit-test-writer-python`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 4-7
 
 ## Purpose
@@ -200,5 +205,5 @@ markers =
 ## See Also
 
 - `quality:test-coordinator` - Coordinates testing activities
-- `quality:integration-tester` - Integration tests
+- `quality:runtime-verifier` - Integration tests
 - `orchestration:quality-gate-enforcer` - Runs tests

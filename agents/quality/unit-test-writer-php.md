@@ -1,8 +1,13 @@
+---
+name: unit-test-writer-php
+description: "Writes PHP unit tests with PHPUnit, Mockery, and Pest"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Unit Test Writer - PHP
 
 **Agent ID:** `quality:unit-test-writer-php`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 4-7
 
 ## Purpose
@@ -229,4 +234,4 @@ tests/
 ## See Also
 
 - `quality:test-coordinator` - Coordinates testing
-- `quality:integration-tester` - Integration tests
+- `quality:runtime-verifier` - Integration tests

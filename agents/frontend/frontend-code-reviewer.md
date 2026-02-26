@@ -1,8 +1,14 @@
+---
+name: code-reviewer
+description: "Reviews frontend code for quality, accessibility, and performance"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # Frontend Code Reviewer Agent
 
 **Agent ID:** `frontend:code-reviewer`
 **Category:** Frontend / Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ## Purpose
 
@@ -284,10 +290,10 @@ collaborates_with:
   - agent: "quality:test-writer"
     interaction: "Can suggest component tests"
 
-  - agent: "frontend:frontend-developer"
+  - agent: "frontend:developer"
     interaction: "Reviews code produced by this agent"
 
-  - agent: "frontend:frontend-designer"
+  - agent: "frontend:designer"
     interaction: "Validates implementation matches design"
 
 triggered_by:

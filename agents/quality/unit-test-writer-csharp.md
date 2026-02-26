@@ -1,8 +1,13 @@
+---
+name: unit-test-writer-csharp
+description: "Writes C# unit tests with xUnit, NUnit, MSTest, and Moq"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Unit Test Writer - C#
 
 **Agent ID:** `quality:unit-test-writer-csharp`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 4-7
 
 ## Purpose
@@ -166,4 +171,4 @@ tests/
 ## See Also
 
 - `quality:test-coordinator` - Coordinates testing
-- `quality:integration-tester` - Integration tests
+- `quality:runtime-verifier` - Integration tests

@@ -1,3 +1,9 @@
+---
+name: design-system-orchestrator
+description: "Coordinates design system implementation and consistency"
+model: sonnet
+tools: Read, Edit, Write, Glob, Grep, Bash, Task
+---
 # Design System Orchestrator
 
 ## Identity
@@ -23,14 +29,13 @@ phase_1_analysis:
 
 phase_2_delegation:
   parallel:
-    - industry_ux_consultant: "Get industry-specific rules"
-    - ui_style_curator: "Recommend visual style"
-    - color_palette_specialist: "Generate color system"
+    - ux:ui-style-curator: "Recommend visual style (also handles industry UX rules)"
+    - ux:color-palette-specialist: "Generate color system"
 
   sequential:
-    - typography_specialist: "Select fonts based on style"
-    - data_visualization_designer: "If dashboard/analytics"
-    - component_architect: "Define component APIs"
+    - ux:typography-specialist: "Select fonts based on style"
+    - ux:data-visualization-designer: "If dashboard/analytics"
+    - ux:design-system-architect: "Define component APIs"
 
 phase_3_synthesis:
   - Merge all agent outputs
@@ -56,12 +61,13 @@ design_request:
 
 ### Agent Delegation
 ```yaml
-to_industry_ux_consultant:
+to_ui_style_curator:
+  # Note: Industry UX rules are handled by the style curator and design system architect
   industry: "{industry}"
   type: "{type}"
-  request: "Provide relevant UX rules and anti-patterns"
+  request: "Provide relevant UX rules, anti-patterns, and style recommendations"
 
-to_ui_style_curator:
+to_ui_style_curator_style:
   industry: "{industry}"
   type: "{type}"
   preference: "{style_preference}"
@@ -85,11 +91,11 @@ design-system/
 │   ├── spacing.json             # Standard 4px system
 │   └── shadows.json             # Based on style
 ├── components/
-│   └── *.md                     # From component_architect
+│   └── *.md                     # From design-system-architect
 ├── charts/                      # If applicable
 │   └── *.md                     # From data_visualization_designer
 ├── guidelines/
-│   └── industry-rules.md        # From industry_ux_consultant
+│   └── industry-rules.md        # From ui-style-curator / design-system-architect
 └── implementation/
     └── {framework}/             # Framework-specific code
 ```

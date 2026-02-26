@@ -12,17 +12,17 @@ This document showcases the expanded capabilities of the multi-agent dev system 
 
 ```javascript
 Task(
-  subagent_type="multi-agent:database:designer",
+  subagent_type="database:designer",
   model="opus",
   prompt="Design a database schema for an order processing system with orders, order_items, products, customers, and payments. Include proper indexes for high-read scenarios."
 )
 ```
 
-### Step 2: Implement with JPA/Hibernate (T1 attempt)
+### Step 2: Implement with JPA/Hibernate
 
 ```javascript
 Task(
-  subagent_type="multi-agent:database:developer-java-t1",
+  subagent_type="database:developer-java",
   model="haiku",
   prompt="Implement the order processing schema using JPA/Hibernate with Spring Data repositories. Create entities with proper relationships and Flyway migrations."
 )
@@ -32,17 +32,17 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:api-designer",
+  subagent_type="backend:api-designer",
   model="opus",
   prompt="Design a RESTful API for order processing with endpoints for creating orders, listing orders, payment processing, and order status updates. Include OpenAPI specification."
 )
 ```
 
-### Step 4: Implement Spring Boot Controllers (T1 attempt)
+### Step 4: Implement Spring Boot Controllers
 
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:api-developer-java-t1",
+  subagent_type="backend:api-developer-java",
   model="haiku",
   prompt="Implement the order processing API using Spring Boot with @RestController, service layer, and proper exception handling."
 )
@@ -52,7 +52,7 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:code-reviewer-java",
+  subagent_type="backend:code-reviewer-java",
   model="sonnet",
   prompt="Review the Spring Boot implementation for best practices, security issues (SQL injection, authentication), performance optimizations, and proper exception handling."
 )
@@ -71,35 +71,35 @@ Task(
 ```javascript
 // Design schema
 Task(
-  subagent_type="multi-agent:database:designer",
+  subagent_type="database:designer",
   model="opus",
   prompt="Design multi-tenant database schema for SaaS app with tenants, users, subscriptions, and features table."
 )
 
-// Implement with Entity Framework Core (T2 for multi-tenancy complexity)
+// Implement with Entity Framework Core (sonnet for multi-tenancy complexity)
 Task(
-  subagent_type="multi-agent:database:developer-csharp-t2",
+  subagent_type="database:developer-csharp",
   model="sonnet",
   prompt="Implement multi-tenant schema using EF Core with query filters for tenant isolation, migrations, and audit trails."
 )
 
 // Design API with tenant routing
 Task(
-  subagent_type="multi-agent:backend:api-designer",
+  subagent_type="backend:api-designer",
   model="opus",
   prompt="Design multi-tenant API with tenant identification via subdomain or header, authentication with JWT, and tenant-scoped data access."
 )
 
-// Implement ASP.NET Core API (T2 for multi-tenancy)
+// Implement ASP.NET Core API (sonnet for multi-tenancy)
 Task(
-  subagent_type="multi-agent:backend:api-developer-csharp-t2",
+  subagent_type="backend:api-developer-csharp",
   model="sonnet",
   prompt="Implement multi-tenant API using ASP.NET Core with middleware for tenant resolution, scoped DbContext, and MediatR for CQRS pattern."
 )
 
 // Security audit
 Task(
-  subagent_type="multi-agent:quality:security-auditor",
+  subagent_type="quality:security-auditor",
   model="opus",
   prompt="Audit multi-tenant implementation for tenant isolation, authentication/authorization, and OWASP Top 10 vulnerabilities."
 )
@@ -118,28 +118,28 @@ Task(
 ```javascript
 // Database design
 Task(
-  subagent_type="multi-agent:database:designer",
+  subagent_type="database:designer",
   model="opus",
   prompt="Design schema for notification service with users, notifications, subscriptions, and delivery_status for tracking."
 )
 
-// Implement GORM models (T1 for basic schema)
+// Implement GORM models (haiku for basic schema)
 Task(
-  subagent_type="multi-agent:database:developer-go-t1",
+  subagent_type="database:developer-go",
   model="haiku",
   prompt="Implement notification schema using GORM v2 with PostgreSQL, including migrations and repository pattern."
 )
 
 // Design WebSocket API
 Task(
-  subagent_type="multi-agent:backend:api-designer",
+  subagent_type="backend:api-designer",
   model="opus",
   prompt="Design WebSocket-based notification API with REST endpoints for sending notifications, subscription management, and health checks."
 )
 
-// Implement with Gin + goroutines (T2 for concurrency)
+// Implement with Gin + goroutines (sonnet for concurrency)
 Task(
-  subagent_type="multi-agent:backend:api-developer-go-t2",
+  subagent_type="backend:api-developer-go",
   model="sonnet",
   prompt="Implement notification service using Gin framework with WebSocket handler, goroutine worker pools for message fanout, Redis pub/sub for horizontal scaling, and proper graceful shutdown."
 )
@@ -158,28 +158,28 @@ Task(
 ```javascript
 // Database design
 Task(
-  subagent_type="multi-agent:database:designer",
+  subagent_type="database:designer",
   model="opus",
   prompt="Design CMS schema with articles, authors, categories, tags (many-to-many), comments, and media attachments."
 )
 
-// Implement ActiveRecord models (T1 for standard Rails patterns)
+// Implement ActiveRecord models (haiku for standard Rails patterns)
 Task(
-  subagent_type="multi-agent:database:developer-ruby-t1",
+  subagent_type="database:developer-ruby",
   model="haiku",
   prompt="Implement CMS schema using ActiveRecord with Rails migrations, associations, validations, and scopes."
 )
 
-// Implement Rails controllers (T1 for standard CRUD)
+// Implement Rails controllers (haiku for standard CRUD)
 Task(
-  subagent_type="multi-agent:backend:api-developer-ruby-t1",
+  subagent_type="backend:api-developer-ruby",
   model="haiku",
   prompt="Implement RESTful Rails API controllers for CMS with strong parameters, serializers, pagination, and filtering."
 )
 
-// Add background jobs (T2 for Sidekiq integration)
+// Add background jobs (sonnet for Sidekiq integration)
 Task(
-  subagent_type="multi-agent:backend:api-developer-ruby-t2",
+  subagent_type="backend:api-developer-ruby",
   model="sonnet",
   prompt="Add Sidekiq background jobs for article publishing workflow, email notifications, and image processing with ActiveStorage."
 )
@@ -198,21 +198,21 @@ Task(
 ```javascript
 // Database design
 Task(
-  subagent_type="multi-agent:database:designer",
+  subagent_type="database:designer",
   model="opus",
   prompt="Design e-commerce schema with products, variants, inventory, orders, payments, and shopping carts."
 )
 
-// Implement Eloquent models (T2 for polymorphic relations)
+// Implement Eloquent models (sonnet for polymorphic relations)
 Task(
-  subagent_type="multi-agent:database:developer-php-t2",
+  subagent_type="database:developer-php",
   model="sonnet",
   prompt="Implement e-commerce schema using Eloquent with polymorphic relationships for product variants, Laravel migrations, and query scopes."
 )
 
-// Implement Laravel API (T2 for payment integration)
+// Implement Laravel API (sonnet for payment integration)
 Task(
-  subagent_type="multi-agent:backend:api-developer-php-t2",
+  subagent_type="backend:api-developer-php",
   model="sonnet",
   prompt="Implement e-commerce API using Laravel with Form Requests, API Resources, Sanctum authentication, payment gateway integration (Stripe), and Laravel Queue for order processing."
 )
@@ -230,7 +230,7 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:backend:api-designer",
+  subagent_type="backend:api-designer",
   model="opus",
   prompt="Design mobile-optimized REST API for task management with endpoints for CRUD operations, offline sync, and real-time updates."
 )
@@ -241,27 +241,27 @@ Task(
 ```javascript
 // Option: Go for performance
 Task(
-  subagent_type="multi-agent:backend:api-developer-go-t1",
+  subagent_type="backend:api-developer-go",
   model="haiku",
   prompt="Implement task management API using Go and Gin with JWT authentication, pagination, and proper error responses for mobile clients."
 )
 ```
 
-### Step 3: Implement iOS App (T1 for basic UI)
+### Step 3: Implement iOS App (haiku for basic UI)
 
 ```javascript
 Task(
-  subagent_type="multi-agent:mobile:ios-developer-t1",
+  subagent_type="mobile:ios-developer",
   model="haiku",
   prompt="Create SwiftUI iOS app for task management with list view, detail view, add/edit forms, and Core Data for offline storage. Implement REST API integration with URLSession."
 )
 ```
 
-### Step 4: Add Advanced Features (T2)
+### Step 4: Add Advanced Features (sonnet)
 
 ```javascript
 Task(
-  subagent_type="multi-agent:mobile:ios-developer-t2",
+  subagent_type="mobile:ios-developer",
   model="sonnet",
   prompt="Enhance iOS app with CloudKit sync, home screen widget, push notifications, and advanced SwiftUI animations for task completion."
 )
@@ -280,14 +280,14 @@ Task(
 ```javascript
 // Design mobile API
 Task(
-  subagent_type="multi-agent:backend:api-designer",
+  subagent_type="backend:api-designer",
   model="opus",
   prompt="Design social networking API with posts, comments, likes, following, and feed generation optimized for mobile pagination."
 )
 
-// Implement Android app (T2 for complex features)
+// Implement Android app (sonnet for complex features)
 Task(
-  subagent_type="multi-agent:mobile:android-developer-t2",
+  subagent_type="mobile:android-developer",
   model="sonnet",
   prompt="Create Android app using Kotlin and Jetpack Compose with feed UI (lazy loading), camera integration for posts, Room database for offline caching, WorkManager for background sync, and Firebase Cloud Messaging for notifications."
 )
@@ -305,7 +305,7 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:devops:docker-specialist",
+  subagent_type="devops:docker-specialist",
   model="sonnet",
   prompt="Create Dockerfiles for Java Spring Boot service (multi-stage with Maven), TypeScript Next.js frontend (with Node.js), and Go worker service. Include docker-compose for local development."
 )
@@ -315,7 +315,7 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:devops:kubernetes-specialist",
+  subagent_type="devops:kubernetes-specialist",
   model="sonnet",
   prompt="Create Kubernetes manifests for 3-service microservices architecture with Deployments, Services, Ingress, ConfigMaps for env-specific config, Secrets for database credentials, and HorizontalPodAutoscaler."
 )
@@ -325,7 +325,7 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:devops:cicd-specialist",
+  subagent_type="devops:cicd-specialist",
   model="sonnet",
   prompt="Create GitHub Actions workflow for multi-language monorepo with separate jobs for Java (Maven test + build), TypeScript (npm test + build), and Go (go test + build). Include Docker image building, security scanning with Trivy, and deployment to Kubernetes cluster."
 )
@@ -335,7 +335,7 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:devops:terraform-specialist",
+  subagent_type="devops:terraform-specialist",
   model="sonnet",
   prompt="Create Terraform configuration for AWS infrastructure including EKS cluster, RDS PostgreSQL database, ElastiCache Redis, Application Load Balancer, and VPC with proper security groups."
 )
@@ -349,21 +349,21 @@ Task(
 
 **Scenario**: Manage configuration across multiple environments with secrets management.
 
-### Basic Configuration (T1)
+### Basic Configuration (haiku)
 
 ```javascript
 Task(
-  subagent_type="multi-agent:infrastructure:configuration-manager-t1",
+  subagent_type="infrastructure:configuration-manager",
   model="haiku",
   prompt="Create environment-specific configuration files (.env, YAML) for dev, staging, and production with database URLs, API keys placeholders, and feature flags."
 )
 ```
 
-### Advanced with Secrets (T2)
+### Advanced with Secrets (sonnet)
 
 ```javascript
 Task(
-  subagent_type="multi-agent:infrastructure:configuration-manager-t2",
+  subagent_type="infrastructure:configuration-manager",
   model="sonnet",
   prompt="Implement secrets management using HashiCorp Vault with configuration templates, dynamic secrets for database credentials, JSON Schema validation for configs, and Kubernetes ConfigMaps/Secrets generation."
 )
@@ -381,7 +381,7 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:scripting:powershell-developer-t2",
+  subagent_type="scripting:powershell-developer",
   model="sonnet",
   prompt="Create PowerShell script for automated Azure App Service deployment with blue-green deployment strategy, health checks, automatic rollback on failure, and Slack notifications."
 )
@@ -391,7 +391,7 @@ Task(
 
 ```javascript
 Task(
-  subagent_type="multi-agent:scripting:shell-developer-t2",
+  subagent_type="scripting:shell-developer",
   model="sonnet",
   prompt="Create Bash script for multi-server deployment using parallel SSH execution, health checks, rolling updates with zero downtime, and automated database migration."
 )
@@ -424,7 +424,7 @@ Task(
 
 # 2. Autonomous execution
 /devteam:implement
-# Or execute specific sprint: /devteam:sprint SPRINT-001
+# Or execute specific sprint: /devteam:implement --sprint SPRINT-001
 # Orchestrator automatically routes tasks to appropriate language agents
 ```
 
@@ -432,9 +432,9 @@ Task(
 
 **Task**: Implement product catalog API
 ```javascript
-// Orchestrator routes to Go T1 for performance
+// Orchestrator routes to Go with haiku for performance
 Task(
-  subagent_type="multi-agent:backend:api-developer-go-t1",
+  subagent_type="backend:api-developer-go",
   model="haiku",
   prompt="Implement product catalog API with search, filtering, pagination..."
 )
@@ -442,9 +442,9 @@ Task(
 
 **Task**: Implement admin dashboard API
 ```javascript
-// Orchestrator routes to Python T1 for rapid development
+// Orchestrator routes to Python with haiku for rapid development
 Task(
-  subagent_type="multi-agent:backend:api-developer-python-t1",
+  subagent_type="backend:api-developer-python",
   model="haiku",
   prompt="Implement admin API for product management..."
 )
@@ -452,9 +452,9 @@ Task(
 
 **Task**: Implement payment processing
 ```javascript
-// Orchestrator routes to Java T2 for enterprise patterns
+// Orchestrator routes to Java with sonnet for enterprise patterns
 Task(
-  subagent_type="multi-agent:backend:api-developer-java-t2",
+  subagent_type="backend:api-developer-java",
   model="sonnet",
   prompt="Implement payment processing with Stripe integration, webhook handling..."
 )
@@ -472,10 +472,10 @@ Task(
    - Integration needs
    - Development speed priorities
 
-2. **T1/T2 Strategy**:
-   - Start with T1 for straightforward features
-   - Let validation automatically escalate to T2
-   - Use T2 directly for complex features (multi-tenancy, high concurrency, etc.)
+2. **Model Selection Strategy**:
+   - Start with haiku for straightforward features (simple CRUD, standard patterns)
+   - Let validation automatically escalate to sonnet on failure
+   - Use sonnet directly for complex features (multi-tenancy, high concurrency, etc.)
 
 3. **Code Review**: Always use language-specific reviewers:
    - `backend:code-reviewer-java`
@@ -490,9 +490,9 @@ Task(
    - `devops:cicd-specialist` for pipelines
    - `devops:terraform-specialist` for infrastructure
 
-5. **Mobile**: Leverage T1/T2 for complexity:
-   - T1 for standard CRUD mobile apps
-   - T2 for complex features (camera, sensors, background sync, widgets)
+5. **Mobile**: Leverage model selection for complexity:
+   - haiku (simple) for standard CRUD mobile apps
+   - sonnet (complex) for advanced features (camera, sensors, background sync, widgets)
 
 ---
 
@@ -530,4 +530,4 @@ Task(
 
 ---
 
-**All examples follow the same quality standards**: security audits, code review, testing, and iterative T1→T2 escalation when needed.
+**All examples follow the same quality standards**: security audits, code review, testing, and iterative haiku-to-sonnet escalation when needed.

@@ -2,12 +2,22 @@
 # DevTeam Session Start Hook
 # Loads previous session context and auto-detects project configuration
 
-set -e
+set -euo pipefail
 
 # Configuration
 MEMORY_DIR=".devteam/memory"
-STATE_FILE=".devteam/state.yaml"
 CONFIG_FILE=".devteam/config.yaml"
+
+# Source common library for SQLite helpers
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/lib/hook-common.sh" ]]; then
+    source "$SCRIPT_DIR/lib/hook-common.sh"
+elif [[ -f "$SCRIPT_DIR/../lib/hook-common.sh" ]]; then
+    source "$SCRIPT_DIR/../lib/hook-common.sh"
+else
+    echo "[DevTeam Session Start] Warning: hook-common.sh not found" >&2
+    exit 0
+fi
 
 # Logging function
 log() {
@@ -44,20 +54,20 @@ load_session_memory() {
 # LOAD CURRENT STATE
 # ============================================
 load_state_summary() {
-    if [ -f "$STATE_FILE" ]; then
-        log "Loading project state"
+    if db_exists 2>/dev/null; then
+        log "Loading project state from database"
 
-        # Extract key information
-        if command -v yq &> /dev/null; then
-            CURRENT_SPRINT=$(yq -r '.current_execution.current_sprint // "none"' "$STATE_FILE" 2>/dev/null)
-            CURRENT_TASK=$(yq -r '.current_execution.current_task // "none"' "$STATE_FILE" 2>/dev/null)
-            PHASE=$(yq -r '.current_execution.phase // "unknown"' "$STATE_FILE" 2>/dev/null)
-        else
-            # Fallback grep-based extraction
-            CURRENT_SPRINT=$(grep "current_sprint:" "$STATE_FILE" 2>/dev/null | head -1 | awk '{print $2}' || echo "unknown")
-            CURRENT_TASK=$(grep "current_task:" "$STATE_FILE" 2>/dev/null | head -1 | awk '{print $2}' || echo "unknown")
-            PHASE=$(grep "phase:" "$STATE_FILE" 2>/dev/null | head -1 | awk '{print $2}' || echo "unknown")
-        fi
+        # Extract key information from SQLite
+        local safe_session_id
+        safe_session_id=$(get_current_session 2>/dev/null || echo "")
+        safe_session_id="${safe_session_id//\'/\'\'}"
+        CURRENT_SPRINT=$(db_query "SELECT sprint_id FROM sessions WHERE id = '$safe_session_id';" 2>/dev/null || echo "none")
+        CURRENT_TASK=$(db_query "SELECT current_task_id FROM sessions WHERE id = '$safe_session_id';" 2>/dev/null || echo "none")
+        PHASE=$(db_query "SELECT current_phase FROM sessions WHERE id = '$safe_session_id';" 2>/dev/null || echo "unknown")
+
+        CURRENT_SPRINT="${CURRENT_SPRINT:-none}"
+        CURRENT_TASK="${CURRENT_TASK:-none}"
+        PHASE="${PHASE:-unknown}"
 
         output "## Current Project State"
         output ""

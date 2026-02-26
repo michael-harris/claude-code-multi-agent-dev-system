@@ -1,11 +1,16 @@
+---
+name: api-developer-go
+description: "Implements Go REST APIs with Gin/Echo"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # API Developer Go Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** Go REST API implementation (Gin, Echo, Chi, net/http)
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple CRUD endpoints, straightforward validation
 - **Sonnet:** Complex business logic, concurrency patterns, moderate integrations
 - **Opus:** Security-critical features, complex architectural decisions

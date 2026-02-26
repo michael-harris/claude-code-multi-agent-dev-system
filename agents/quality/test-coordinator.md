@@ -1,8 +1,14 @@
+---
+name: test-coordinator
+description: "Coordinates testing activities across language-specific test writers"
+model: opus
+tools: Read, Glob, Grep, Bash, Task
+---
 # Test Coordinator Agent
 
 **Agent ID:** `quality:test-coordinator`
 **Category:** Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 5-8
 
 ## Purpose
@@ -233,7 +239,7 @@ testing_plan:
       tests_needed: 20
       coverage_target: 80%
 
-    - writer: quality:integration-tester
+    - writer: quality:runtime-verifier
       component: "authentication_flow"
       tests_needed: 5
       coverage_target: 90%
@@ -280,7 +286,7 @@ testing_report:
   writers_used:
     - quality:unit-test-writer-python
     - quality:unit-test-writer-typescript
-    - quality:integration-tester
+    - quality:runtime-verifier
     - quality:e2e-tester
 ```
 
@@ -293,7 +299,7 @@ testing_report:
 
 ### Delegates To
 - `quality:unit-test-writer-*` - Language-specific unit tests
-- `quality:integration-tester` - Integration tests
+- `quality:runtime-verifier` - Integration tests
 - `quality:e2e-tester` - End-to-end tests
 - `quality:mobile-e2e-tester` - Mobile e2e tests
 
@@ -326,6 +332,6 @@ testing:
 ## See Also
 
 - `quality:unit-test-writer-*.md` - Language-specific unit test writers
-- `quality:integration-tester.md` - Integration test specialist
+- `quality:runtime-verifier.md` - Integration test specialist
 - `quality:e2e-tester.md` - End-to-end test specialist
 - `orchestration:quality-gate-enforcer.md` - Runs the tests

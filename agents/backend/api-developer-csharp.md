@@ -1,10 +1,13 @@
+---
+name: api-developer-csharp
+description: "Implements ASP.NET Core REST APIs"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # API Developer C# Agent
 
-**Agent ID:** `backend/api-developer-csharp`
+**Agent ID:** `backend:api-developer-csharp`
 **Category:** Backend Development
-**Model:** Dynamic (assigned at runtime based on task complexity)
-
----
+**Model:** sonnet
 
 ## Purpose
 
@@ -613,7 +616,7 @@ public enum ErrorCode
 ```yaml
 task_id: "TASK-XXX"
 type: "api_implementation"
-api_design: "docs/design/api/TASK-XXX-api.yaml"
+api_design: "docs/design/api/TASK-XXX-api.json"
 endpoints:
   - path: "/api/v1/users"
     methods: ["GET", "POST"]
@@ -679,15 +682,15 @@ requirements:
 | Agent | Purpose |
 |-------|---------|
 | `backend/api-designer` | Provides API design |
-| `orchestrator/project-manager` | Task assignment |
+| `orchestration/sprint-orchestrator` | Task assignment |
 | `database/database-developer-csharp` | Repository interfaces |
 
 ### Downstream Consumers
 | Agent | Purpose |
 |-------|---------|
-| `quality/code-reviewer` | Code quality review |
+| `orchestration:code-review-coordinator` | Code quality review |
 | `quality/performance-auditor-csharp` | Performance review |
-| `quality/test-runner-csharp` | Runs tests |
+| `quality/unit-test-writer-csharp` | Writes and runs tests |
 
 ---
 

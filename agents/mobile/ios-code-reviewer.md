@@ -1,6 +1,12 @@
+---
+name: ios-code-reviewer
+description: "Reviews Swift/SwiftUI code for quality, security, and best practices"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # iOS Code Reviewer Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Swift/SwiftUI code review for iOS applications
 
 ## Review Checklist

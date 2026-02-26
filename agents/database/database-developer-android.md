@@ -1,6 +1,11 @@
+---
+name: developer-android
+description: "Implements Room database persistence for Android apps"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Database Developer (Android) Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Purpose:** Room database implementation for Android applications
 
 ## Your Role

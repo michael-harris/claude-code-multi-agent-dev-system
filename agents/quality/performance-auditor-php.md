@@ -1,8 +1,14 @@
+---
+name: performance-auditor-php
+description: "PHP/Laravel-specific performance analysis"
+model: sonnet
+tools: Read, Glob, Grep, Bash
+---
 # Performance Auditor (PHP) Agent
 
 **Agent ID:** `quality:performance-auditor-php`
 **Category:** Quality / Performance
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ## Purpose
 
@@ -296,10 +302,10 @@ collaborates_with:
   - agent: "orchestration:code-review-coordinator"
     interaction: "Receives audit requests as part of code review"
 
-  - agent: "backend:backend-code-reviewer-php"
+  - agent: "backend:code-reviewer-php"
     interaction: "Works alongside for comprehensive review"
 
-  - agent: "database:database-designer"
+  - agent: "database:designer"
     interaction: "Can request schema optimization review"
 
   - agent: "devops:docker-specialist"

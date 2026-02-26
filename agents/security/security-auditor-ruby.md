@@ -1,8 +1,14 @@
+---
+name: security-auditor-ruby
+description: "Ruby security auditing with Brakeman and bundler-audit"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Security Auditor - Ruby
 
 **Agent ID:** `security:security-auditor-ruby`
 **Category:** Security
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 6-10
 
 ## Purpose
@@ -147,5 +153,5 @@ bundler-audit
 
 ## See Also
 
-- `security:security-auditor` - General security auditor
+- `quality:security-auditor` - General security auditor
 - `orchestration:sprint-loop` - Calls for sprint security audit

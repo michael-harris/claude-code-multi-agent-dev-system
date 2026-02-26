@@ -131,7 +131,7 @@
     ],
     "auto_detection": {
       "description": "DevTeam will automatically detect project languages and suggest which LSP servers to enable",
-      "config_location": "LSP settings are stored in .devteam/state.yaml under lsp_config"
+      "config_location": "LSP settings are stored in SQLite (.devteam/devteam.db) via scripts/state.sh"
     },
     "context_warning": "Each active LSP adds ~5-10k tokens. Only enable for languages in your project."
   },

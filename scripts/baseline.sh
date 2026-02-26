@@ -5,33 +5,22 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/lib/common.sh"
+
 PROJECT_ROOT="${PROJECT_ROOT:-$(pwd)}"
-DB_FILE="${PROJECT_ROOT}/.devteam/state.db"
 DEVTEAM_DIR="${PROJECT_ROOT}/.devteam"
+DB_FILE="${DEVTEAM_DIR}/devteam.db"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
-log_info() { echo -e "${GREEN}[baseline]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[baseline]${NC} $1"; }
-log_error() { echo -e "${RED}[baseline]${NC} $1"; }
-
-# Ensure we're in a git repo
-ensure_git() {
-    if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        log_error "Not a git repository"
-        exit 1
-    fi
-}
+# ensure_git is now provided by scripts/lib/common.sh
 
 # Create a baseline commit with special tag
 create_baseline() {
     local milestone="$1"
     local description="${2:-Baseline checkpoint}"
+
+    # Sanitize user inputs
+    milestone=$(sanitize_input "$milestone" 256)
+    description=$(sanitize_input "$description" 1024)
 
     ensure_git
 
@@ -68,21 +57,17 @@ This is an automatic baseline commit for rollback purposes."
 
     # Record in database if available
     if [[ -f "$DB_FILE" ]]; then
-        sqlite3 "$DB_FILE" << EOF
-INSERT INTO baselines (
-    tag_name,
-    commit_hash,
-    milestone,
-    description,
-    created_at
-) VALUES (
-    '${tag_name}',
-    '${commit_hash}',
-    '${milestone}',
-    '${description}',
-    datetime('now')
-);
-EOF
+        local sql_tag sql_hash sql_milestone sql_desc
+        sql_tag=$(sql_escape "$tag_name")
+        sql_hash=$(sql_escape "$commit_hash")
+        sql_milestone=$(sql_escape "$milestone")
+        sql_desc=$(sql_escape "$description")
+
+        local sql_branch
+        sql_branch=$(sql_escape "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')")
+
+        # Note: all values are escaped via sql_escape above to prevent SQL injection
+        sql_exec "INSERT INTO baselines (tag_name, commit_hash, milestone, description, branch, created_at) VALUES ('${sql_tag}', '${sql_hash}', '${sql_milestone}', '${sql_desc}', '${sql_branch}', datetime('now'));" > /dev/null
         log_info "Recorded baseline in database"
     fi
 
@@ -133,6 +118,12 @@ rollback_to_baseline() {
 
     ensure_git
 
+    # Validate target matches safe git ref pattern
+    if [[ ! "$target" =~ ^[a-zA-Z0-9._/@{}\~\^\-]+$ ]]; then
+        log_error "Invalid target ref: $target"
+        return 1
+    fi
+
     # Check if target is a tag or commit
     local commit_hash
     if git rev-parse "baseline/${target}" > /dev/null 2>&1; then
@@ -159,19 +150,12 @@ rollback_to_baseline() {
 
     # Record rollback in database
     if [[ -f "$DB_FILE" ]]; then
-        sqlite3 "$DB_FILE" << EOF
-INSERT INTO rollbacks (
-    target_commit,
-    target_tag,
-    rolled_back_at,
-    reason
-) VALUES (
-    '${commit_hash}',
-    '${target}',
-    datetime('now'),
-    'manual rollback'
-);
-EOF
+        local sql_hash sql_target
+        sql_hash=$(sql_escape "$commit_hash")
+        sql_target=$(sql_escape "$target")
+
+        # Note: all values are escaped via sql_escape above to prevent SQL injection
+        sql_exec "INSERT INTO rollbacks (rollback_type, target_commit, target_tag, rolled_back_at, reason) VALUES ('manual', '${sql_hash}', '${sql_target}', datetime('now'), 'manual rollback');" > /dev/null
         log_info "Recorded rollback in database"
     fi
 }

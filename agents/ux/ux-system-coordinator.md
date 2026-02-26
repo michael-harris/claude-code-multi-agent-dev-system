@@ -1,8 +1,14 @@
+---
+name: ux-system-coordinator
+description: "Coordinates UX work across platform-specific specialists"
+model: opus
+tools: Read, Glob, Grep, Bash, Task
+---
 # UX System Coordinator Agent
 
 **Agent ID:** `ux:ux-system-coordinator`
 **Category:** UX
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Complexity Range:** 6-10
 
 ## Purpose
@@ -287,7 +293,7 @@ ux_report:
 
 ### Called By
 - `orchestration:sprint-orchestrator` - For design tasks in sprint
-- `frontend:frontend-designer` - When UX coordination needed
+- `frontend:designer` - When UX coordination needed
 - Direct user request via `/devteam:design`
 
 ### Delegates To
@@ -330,4 +336,4 @@ ux:
 - `ux:ux-specialist-mobile.md` - Mobile platform specialist
 - `ux:ux-specialist-desktop.md` - Desktop platform specialist
 - `ux:design-system-architect.md` - Design system architecture
-- `frontend:frontend-designer.md` - Frontend design implementation
+- `frontend:designer` - Frontend design implementation

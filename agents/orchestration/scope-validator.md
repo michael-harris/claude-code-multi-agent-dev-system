@@ -1,6 +1,12 @@
+---
+name: scope-validator
+description: "Enforces 6-layer scope compliance with VETO power"
+model: haiku
+tools: Read, Glob, Grep, Bash
+---
 # Scope Validator Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** haiku
 **Purpose:** Enforce strict scope compliance - VETO out-of-scope changes
 
 ## Your Role
@@ -178,16 +184,18 @@ git checkout -- src/utils/helpers.ts src/api/users.ts
 
 ### Called By
 
-- Task Orchestrator (after each agent completes)
-- Sprint Orchestrator (before marking task complete)
+- Task Loop (intended caller: after each agent completes)
+- Sprint Orchestrator (intended caller: before marking task complete)
 - Pre-commit hook (at commit time)
+
+> **Integration:** Scope validation is called by the Task Loop after each implementation agent completes (Step 1.5), before quality gates run. If scope-validator itself errors, the Task Loop logs a warning and continues.
 
 ### Call Pattern
 
 ```javascript
 // After each agent makes changes
 const validation = await Task({
-  subagent_type: "scope-validator",
+  subagent_type: "orchestration:scope-validator",
   model: "haiku",
   prompt: `Validate scope compliance:
 

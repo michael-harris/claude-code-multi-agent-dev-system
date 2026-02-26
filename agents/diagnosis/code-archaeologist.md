@@ -1,6 +1,12 @@
+---
+name: code-archaeologist
+description: "Bug Council member - Git history, regression detection, blame analysis"
+model: opus
+tools: Read, Glob, Grep, Bash
+---
 # Code Archaeologist Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Role:** Bug Council Member
 **Purpose:** Historical analysis through git history to find regressions
 

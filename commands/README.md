@@ -8,11 +8,24 @@ Slash commands for the DevTeam multi-agent development system.
 |---------|-------------|
 | `/devteam:plan` | Interactive planning - creates PRD, tasks, and sprints |
 | `/devteam:implement` | Autonomous execution until project/feature complete |
-| `/devteam:list` | List all plans and their status |
-| `/devteam:select` | Select a plan to work on |
-| `/devteam:sprint <id>` | Execute a specific sprint |
+| `/devteam:bug` | Fix a bug with structured diagnostic workflow and Bug Council if needed |
 | `/devteam:issue <#>` | Fix a GitHub issue by number |
 | `/devteam:issue-new "<desc>"` | Create a new GitHub issue |
+| `/devteam:list` | List all plans and their status |
+| `/devteam:select` | Select a plan to work on |
+| `/devteam:status` | Display system health, progress, costs, and execution history |
+| `/devteam:reset` | Reset state, clear stuck sessions, and recover from errors |
+| `/devteam:merge-tracks` | Manually merge parallel tracks (auto-merge is default) |
+| `/devteam:config` | View and modify DevTeam configuration settings |
+| `/devteam:help` | Get help on commands, concepts, and troubleshooting |
+| `/devteam:logs` | View execution logs, events, and history |
+| `/devteam:worktree-status` | Show worktree status for troubleshooting |
+| `/devteam:worktree-list` | List all git worktrees for troubleshooting |
+| `/devteam:worktree-cleanup` | Manually clean up worktrees if auto-cleanup failed |
+| `/devteam:design` | Generate or update design system tokens and guidelines |
+| `/devteam:design-drift` | Detect design drift between implementation and design system |
+| `/devteam:review` | Run code review on current changes |
+| `/devteam:test` | Run test suite with appropriate test writers |
 
 ## Quick Start
 
@@ -82,10 +95,10 @@ Slash commands for the DevTeam multi-agent development system.
 Combines PRD generation and sprint planning:
 1. Interactive requirements interview
 2. Technology stack selection
-3. PRD generation (`docs/planning/PROJECT_PRD.yaml`)
+3. PRD generation (`docs/planning/PROJECT_PRD.json`)
 4. Task breakdown (`docs/planning/tasks/`)
 5. Sprint organization (`docs/sprints/`)
-6. State file initialization (`.devteam/state.yaml`)
+6. State initialization in SQLite (`.devteam/devteam.db`)
 
 ### /devteam:implement
 
@@ -96,14 +109,6 @@ Autonomous execution mode:
 - Dynamic model selection for cost optimization
 - Session memory preserved across compaction
 - Outputs `EXIT_SIGNAL: true` when complete
-
-### /devteam:sprint
-
-Manual sprint execution:
-- Execute specific sprint by ID
-- Automatic state tracking and resume
-- Quality gates between sprints
-- Supports `all` to execute all sprints
 
 ### /devteam:issue
 
@@ -144,7 +149,7 @@ DevTeam supports multiple concurrent plans:
 
 ```
 .devteam/plans/
-├── index.yaml                    # Master plan index
+├── index.json                    # Master plan index
 ├── project-taskmanager/          # Original project
 ├── feature-notifications/        # Feature 1
 └── feature-dark-mode/            # Feature 2
@@ -167,8 +172,8 @@ planned → in_progress → complete → (archive)
 
 ## State Management
 
-Each plan has its own state file:
-- `.devteam/plans/<plan-id>/state.yaml`
+Each plan has its state tracked in SQLite:
+- `.devteam/devteam.db` (sessions, tasks, plans tables)
 
 State tracks:
 - Progress (sprints, tasks)
@@ -183,13 +188,13 @@ State tracks:
 | `/devteam:prd` | `/devteam:plan` |
 | `/devteam:planning` | `/devteam:plan` |
 | `/devteam:sprint all` | `/devteam:implement` |
-| `/devteam:sprint <id>` | `/devteam:sprint <id>` |
+| `/devteam:sprint <id>` | `/devteam:implement --sprint` |
 | `/devteam:issue` | `/devteam:issue` |
 | `/devteam:feature` | `/devteam:plan` (then auto) |
 
 ## Legacy Commands
 
-The following commands are deprecated but still functional:
+The following commands are deprecated and removed - use the indicated replacement commands instead:
 - `prd.md` → Use `/devteam:plan`
 - `planning.md` → Use `/devteam:plan`
 - `sprint-all.md` → Use `/devteam:implement`

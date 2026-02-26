@@ -1,6 +1,13 @@
+---
+name: bug-council-orchestrator
+description: "Activates and coordinates 5-member bug diagnosis team for complex issues"
+model: opus
+tools: Read, Glob, Grep, Bash, Task
+memory: project
+---
 # Bug Council Orchestrator Agent
 
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** opus
 **Purpose:** Coordinate Bug Council ensemble diagnosis and ranked-choice voting
 
 ## Your Role
@@ -26,7 +33,57 @@ Activate Bug Council when:
 | Systems Thinker | Architectural | Component interactions, data flow, dependencies |
 | Adversarial Tester | Edge cases | Other failure modes, security implications |
 
-## Process
+## Agent Teams Mode (Preferred)
+
+When Agent Teams is enabled (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`), the Bug Council runs as a **true parallel team** with inter-agent communication:
+
+### Team Configuration
+
+You are the **team lead**. Create a team with 5 teammates — one for each Bug Council member:
+
+```yaml
+team_setup:
+  mode: split-pane  # Use tmux/iTerm2 for visibility into all 5 agents
+  teammates:
+    - name: root-cause-analyst
+      agent: diagnosis:root-cause-analyst
+      model: opus
+      task: "Analyze error messages, stack traces, and immediate triggers"
+    - name: code-archaeologist
+      agent: diagnosis:code-archaeologist
+      model: opus
+      task: "Investigate git history, blame analysis, regression detection"
+    - name: pattern-matcher
+      agent: diagnosis:pattern-matcher
+      model: opus
+      task: "Search for similar bugs, anti-patterns, common mistakes"
+    - name: systems-thinker
+      agent: diagnosis:systems-thinker
+      model: opus
+      task: "Analyze component interactions, data flow, dependencies"
+    - name: adversarial-tester
+      agent: diagnosis:adversarial-tester
+      model: opus
+      task: "Find edge cases, other failure modes, security implications"
+```
+
+### Team Execution Flow
+
+1. **Assign shared task list** with the bug context to all teammates
+2. All 5 teammates work **simultaneously** in parallel
+3. Teammates can **message each other directly** for cross-referencing:
+   - Root Cause Analyst: "I found a null pointer at line 34 — @code-archaeologist when was this line last changed?"
+   - Code Archaeologist: "Commit abc123 refactored this 3 days ago — @pattern-matcher have you seen similar regressions?"
+4. Each teammate submits their diagnosis with confidence score
+5. As team lead, you collect all diagnoses, run ranked-choice voting, and synthesize
+
+### Fallback: Subagent Mode
+
+If Agent Teams is not enabled, fall back to sequential subagent dispatch (Step 2 below).
+
+---
+
+## Process (Subagent Fallback)
 
 ### Step 1: Prepare Bug Context
 
@@ -61,7 +118,7 @@ Launch all 5 agents in parallel:
 ```javascript
 const diagnoses = await Promise.all([
   Task({
-    subagent_type: "diagnosis/root-cause-analyst",
+    subagent_type: "diagnosis:root-cause-analyst",
     model: "opus",
     prompt: `Analyze this bug for root cause:
       ${bug_context}
@@ -69,7 +126,7 @@ const diagnoses = await Promise.all([
       Provide diagnosis with confidence score.`
   }),
   Task({
-    subagent_type: "diagnosis/code-archaeologist",
+    subagent_type: "diagnosis:code-archaeologist",
     model: "opus",
     prompt: `Analyze git history for this bug:
       ${bug_context}
@@ -77,7 +134,7 @@ const diagnoses = await Promise.all([
       When was it introduced? What changed?`
   }),
   Task({
-    subagent_type: "diagnosis/pattern-matcher",
+    subagent_type: "diagnosis:pattern-matcher",
     model: "opus",
     prompt: `Find patterns related to this bug:
       ${bug_context}
@@ -85,7 +142,7 @@ const diagnoses = await Promise.all([
       Similar bugs? Known anti-patterns?`
   }),
   Task({
-    subagent_type: "diagnosis/systems-thinker",
+    subagent_type: "diagnosis:systems-thinker",
     model: "opus",
     prompt: `Analyze system interactions for this bug:
       ${bug_context}
@@ -93,7 +150,7 @@ const diagnoses = await Promise.all([
       Component dependencies? Data flow issues?`
   }),
   Task({
-    subagent_type: "diagnosis/adversarial-tester",
+    subagent_type: "diagnosis:adversarial-tester",
     model: "opus",
     prompt: `Find edge cases for this bug:
       ${bug_context}
@@ -242,12 +299,35 @@ final_diagnosis:
 
 ### Step 7: Execute Fix
 
+Select the implementation agent based on the bug's file extension and location:
+
+**Language-to-Agent Mapping:**
+
+| File Extension | Path Check | Agent ID |
+|---------------|------------|----------|
+| `.py` | any | `backend:api-developer-python` |
+| `.ts`, `.tsx` | `src/` or frontend path | `frontend:developer` |
+| `.ts`, `.tsx` | backend path | `backend:api-developer-typescript` |
+| `.js`, `.jsx` | `src/` or frontend path | `frontend:developer` |
+| `.go` | any | `backend:api-developer-go` |
+| `.java` | any | `backend:api-developer-java` |
+| `.rb` | any | `backend:api-developer-ruby` |
+| `.php` | any | `backend:api-developer-php` |
+| `.cs` | any | `backend:api-developer-csharp` |
+| `.sh` | any | `scripting:shell-developer` |
+| `.ps1` | any | `scripting:powershell-developer` |
+| `.sql` | any | `database:developer-python` |
+| (other/unknown) | any | `python:developer-generic` |
+
 Pass to implementation:
 
 ```javascript
+// Select agent based on file extension mapping above
+const agent = selectAgentFromMapping(final_diagnosis.recommended_fix.primary.location);
+
 Task({
-  subagent_type: "backend-developer",  // or frontend
-  model: select_model(task_complexity),
+  subagent_type: agent,
+  model: "opus",  // Bug Council is activated for complex bugs — always use opus for the fix
   prompt: `Fix bug based on Bug Council diagnosis:
 
     ${final_diagnosis}

@@ -134,17 +134,22 @@ requirements/            # Requirements folder
 ```
 
 → Extracted as:
-```yaml
-feature:
-  name: User Authentication
-  requirements:
-    - OAuth 2.0 support (Google, GitHub)
-    - Session management
-    - Password reset flow
-  acceptance_criteria:
-    - User can sign in with Google
-    - Session persists for 7 days
-    - Password reset email sent within 1 minute
+```json
+{
+  "feature": {
+    "name": "User Authentication",
+    "requirements": [
+      "OAuth 2.0 support (Google, GitHub)",
+      "Session management",
+      "Password reset flow"
+    ],
+    "acceptance_criteria": [
+      "User can sign in with Google",
+      "Session persists for 7 days",
+      "Password reset email sent within 1 minute"
+    ]
+  }
+}
 ```
 
 **From YAML directly:**
@@ -298,9 +303,8 @@ echo "✅ Changes committed"
 ```javascript
 // Spawn Research Agent
 const researchResults = await Task({
-    subagent_type: "research",
-    agent: "research-agent",
-    model: "sonnet",
+    subagent_type: "research:research-agent",
+    model: "opus",
     prompt: `Research for: ${projectDescription}
 
         Investigate:
@@ -458,64 +462,72 @@ Q3: OAuth integration is more complex than a simple feature.
 
 ### Phase 4: Generate PRD
 
-Create `docs/planning/PROJECT_PRD.yaml`:
+Create `docs/planning/PROJECT_PRD.json`:
 
-```yaml
-version: "1.0"
-project_name: "[Name]"
-created: "[Date]"
-
-technology_stack:
-  primary_language: python | typescript
-  backend_framework: fastapi | django | express | nestjs
-  frontend_framework: react | vue | svelte | none
-  database: postgresql | mongodb | sqlite
-  orm: sqlalchemy | prisma | typeorm | drizzle
-  package_manager: uv | npm | pnpm
-
-problem_statement: |
-  [Clear description of the problem]
-
-solution_overview: |
-  [How this project solves it]
-
-users:
-  primary:
-    - type: "[User type]"
-      needs: ["need1", "need2"]
-  secondary:
-    - type: "[User type]"
-      needs: ["need1"]
-
-features:
-  must_have:
-    - id: F001
-      name: "[Feature name]"
-      description: "[Description]"
-      acceptance_criteria:
-        - "[Criterion 1]"
-        - "[Criterion 2]"
-  nice_to_have:
-    - id: F010
-      name: "[Feature name]"
-      description: "[Description]"
-
-non_functional_requirements:
-  performance:
-    - "[Requirement]"
-  security:
-    - "[Requirement]"
-  scalability:
-    - "[Requirement]"
-
-constraints:
-  timeline: "[if specified]"
-  budget: "[if specified]"
-  compliance: "[if specified]"
-
-success_metrics:
-  - "[Metric 1]"
-  - "[Metric 2]"
+```json
+{
+  "version": "1.0",
+  "project_name": "[Name]",
+  "created": "[Date]",
+  "technology_stack": {
+    "primary_language": "python | typescript",
+    "backend_framework": "fastapi | django | express | nestjs",
+    "frontend_framework": "react | vue | svelte | none",
+    "database": "postgresql | mongodb | sqlite",
+    "orm": "sqlalchemy | prisma | typeorm | drizzle",
+    "package_manager": "uv | npm | pnpm"
+  },
+  "problem_statement": "[Clear description of the problem]",
+  "solution_overview": "[How this project solves it]",
+  "users": {
+    "primary": [
+      {
+        "type": "[User type]",
+        "needs": ["need1", "need2"]
+      }
+    ],
+    "secondary": [
+      {
+        "type": "[User type]",
+        "needs": ["need1"]
+      }
+    ]
+  },
+  "features": {
+    "must_have": [
+      {
+        "id": "F001",
+        "name": "[Feature name]",
+        "description": "[Description]",
+        "acceptance_criteria": [
+          "[Criterion 1]",
+          "[Criterion 2]"
+        ]
+      }
+    ],
+    "nice_to_have": [
+      {
+        "id": "F010",
+        "name": "[Feature name]",
+        "description": "[Description]"
+      }
+    ]
+  },
+  "non_functional_requirements": {
+    "performance": ["[Requirement]"],
+    "security": ["[Requirement]"],
+    "scalability": ["[Requirement]"]
+  },
+  "constraints": {
+    "timeline": "[if specified]",
+    "budget": "[if specified]",
+    "compliance": "[if specified]"
+  },
+  "success_metrics": [
+    "[Metric 1]",
+    "[Metric 2]"
+  ]
+}
 ```
 
 ### Phase 5: Task Breakdown
@@ -528,32 +540,30 @@ Generate tasks in `docs/planning/tasks/`:
 3. Identify dependencies
 4. Assign complexity scores (1-14)
 
-**Task file format (`TASK-XXX.yaml`):**
-```yaml
-id: TASK-001
-title: "[Task title]"
-description: |
-  [Detailed description]
-
-feature_ref: F001
-task_type: backend | frontend | database | fullstack | testing | infrastructure
-
-complexity:
-  score: 6  # 0-14 scale
-  factors:
-    files_affected: 4
-    estimated_lines: 150
-    new_dependencies: 1
-    risk_flags: []
-
-dependencies:
-  - TASK-000  # Setup task
-
-acceptance_criteria:
-  - "[Criterion 1]"
-  - "[Criterion 2]"
-
-suggested_agent: backend_developer | frontend_developer | ...
+**Task file format (`TASK-XXX.json`):**
+```json
+{
+  "id": "TASK-001",
+  "title": "[Task title]",
+  "description": "[Detailed description]",
+  "feature_ref": "F001",
+  "task_type": "backend | frontend | database | fullstack | testing | infrastructure",
+  "complexity": {
+    "score": 6,
+    "factors": {
+      "files_affected": 4,
+      "estimated_lines": 150,
+      "new_dependencies": 1,
+      "risk_flags": []
+    }
+  },
+  "dependencies": ["TASK-000"],
+  "acceptance_criteria": [
+    "[Criterion 1]",
+    "[Criterion 2]"
+  ],
+  "suggested_agent": "backend:api-developer-{language} | frontend:developer | ..."
+}
 ```
 
 ### Phase 6: Sprint Planning
@@ -566,61 +576,66 @@ Organize tasks into sprints in `docs/sprints/`:
 3. Group related tasks
 4. First sprint = foundation/setup
 
-**Sprint file format (`SPRINT-001.yaml`):**
-```yaml
-id: SPRINT-001
-name: "[Sprint name]"
-goal: "[Sprint goal]"
-
-tasks:
-  - TASK-001
-  - TASK-002
-  - TASK-003
-
-estimated_complexity: 15  # Sum of task complexity scores
-
-dependencies:
-  sprints: []  # First sprint has none
-
-quality_gates:
-  - All tests pass
-  - No type errors
-  - Code review complete
+**Sprint file format (`SPRINT-001.json`):**
+```json
+{
+  "id": "SPRINT-001",
+  "name": "[Sprint name]",
+  "goal": "[Sprint goal]",
+  "tasks": [
+    "TASK-001",
+    "TASK-002",
+    "TASK-003"
+  ],
+  "estimated_complexity": 15,
+  "dependencies": {
+    "sprints": []
+  },
+  "quality_gates": [
+    "All tests pass",
+    "No type errors",
+    "Code review complete"
+  ]
+}
 ```
 
 ### Phase 7: Initialize State
 
-Initialize session in SQLite database:
+Initialize project state in SQLite database via the scripts layer:
 
-```yaml
-version: "3.0"
+```bash
+# Source the state management functions
+source scripts/state.sh
 
-metadata:
-  created_at: "[timestamp]"
-  project_name: "[name]"
-  project_type: project
+# Initialize the database (creates .devteam/devteam.db if needed)
+source scripts/db-init.sh
 
-sprints:
-  SPRINT-001:
-    status: pending
-    tasks_total: 3
-  SPRINT-002:
-    status: pending
-    tasks_total: 4
-  # ...
+# Set project metadata
+set_kv_state "metadata.project_name" "[name]"
+set_kv_state "metadata.project_type" "project"
+set_kv_state "metadata.created_at" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-tasks:
-  TASK-001:
-    status: pending
-    complexity:
-      score: 6
-      tier: moderate
+# Initialize sprints
+set_kv_state "sprints.SPRINT-001.status" "pending"
+set_kv_state "sprints.SPRINT-001.tasks_total" "3"
+set_kv_state "sprints.SPRINT-002.status" "pending"
+set_kv_state "sprints.SPRINT-002.tasks_total" "4"
+# ... repeat for each sprint
 
-current_execution:
-  command: null
-  current_sprint: null
-  current_task: null
-  phase: planning_complete
+# Initialize tasks
+set_kv_state "tasks.TASK-001.status" "pending"
+set_kv_state "tasks.TASK-001.complexity.score" "6"
+set_kv_state "tasks.TASK-001.complexity.tier" "moderate"
+# ... repeat for each task
+
+# Set execution phase
+set_phase "planning_complete"
+```
+
+Or via direct SQLite:
+
+```bash
+sqlite3 "${DEVTEAM_DB:-".devteam/devteam.db"}" "INSERT INTO session_state (session_id, key, value) VALUES ('<session_id>', 'metadata.project_name', '[name]');"
 ```
 
 ## Output Summary
@@ -646,10 +661,10 @@ Planning Summary:
   • Estimated complexity: [score]
 
 Files created:
-  • docs/planning/PROJECT_PRD.yaml
-  • docs/planning/tasks/TASK-*.yaml ([N] files)
-  • docs/sprints/SPRINT-*.yaml ([M] files)
-  • .devteam/state.yaml
+  • docs/planning/PROJECT_PRD.json
+  • docs/planning/tasks/TASK-*.json ([N] files)
+  • docs/sprints/SPRINT-*.json ([M] files)
+  • .devteam/devteam.db (state initialized)
 
 Research Findings:
   • Patterns to follow: [N] identified
@@ -668,21 +683,19 @@ When a project has independent feature areas that can be developed in parallel, 
 
 ### Automatic Worktree Configuration
 
-When multiple tracks are planned, worktrees are configured automatically in the state:
+When multiple tracks are planned, worktrees are configured automatically in the SQLite state database:
 
-```yaml
-# In state database
-parallel_tracks:
-  mode: worktrees  # Automatically set for multi-track plans
-  track_info:
-    01:
-      name: "Backend API"
-      sprints: [SPRINT-001, SPRINT-002]
-      status: pending
-    02:
-      name: "Frontend"
-      sprints: [SPRINT-003, SPRINT-004]
-      status: pending
+```bash
+# Parallel track configuration stored in SQLite (.devteam/devteam.db)
+source scripts/state.sh
+
+set_kv_state "parallel_tracks.mode" "worktrees"
+set_kv_state "parallel_tracks.track_info.01.name" "Backend API"
+set_kv_state "parallel_tracks.track_info.01.sprints" "SPRINT-001,SPRINT-002"
+set_kv_state "parallel_tracks.track_info.01.status" "pending"
+set_kv_state "parallel_tracks.track_info.02.name" "Frontend"
+set_kv_state "parallel_tracks.track_info.02.sprints" "SPRINT-003,SPRINT-004"
+set_kv_state "parallel_tracks.track_info.02.status" "pending"
 ```
 
 **Note:** Users never need to interact with worktrees directly. The system handles:
@@ -702,7 +715,7 @@ For debugging worktree issues, advanced users can use:
 - Be conversational but efficient
 - Provide technology recommendations with reasoning
 - Don't generate files until you have all required information
-- Initialize state in database for progress tracking
+- Initialize state in SQLite database (.devteam/devteam.db) for progress tracking
 - Research phase prevents costly discoveries during implementation
 - Parallel tracks are automatically managed with git worktrees (hidden from users)
 

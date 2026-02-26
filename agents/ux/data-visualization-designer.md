@@ -1,3 +1,8 @@
+---
+name: data-visualization-designer
+description: "Charts, graphs, and data visualization components"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Data Visualization Designer
 
 ## Identity

@@ -1,8 +1,13 @@
+---
+name: ux-specialist-web
+description: "Specialized UX design for web applications and responsive design"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # UX Specialist - Web
 
 **Agent ID:** `ux:ux-specialist-web`
 **Category:** UX
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 5-8
 
 ## Purpose
@@ -209,4 +214,4 @@ web_ux_design:
 
 - `ux:ux-system-coordinator` - Coordinates UX work
 - `ux:ux-specialist-mobile` - Mobile UX
-- `frontend:frontend-designer` - Implements designs
+- `frontend:designer` - Implements designs

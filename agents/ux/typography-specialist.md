@@ -1,3 +1,8 @@
+---
+name: typography-specialist
+description: "Typography systems, font selection, and type hierarchy"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Typography Specialist
 
 ## Identity

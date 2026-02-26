@@ -1,48 +1,34 @@
 # DevTeam Persistence Hook (PowerShell)
 # Detects and prevents premature task abandonment
 #
-# This hook runs on PostToolUse and analyzes Claude's output for
-# "give up" signals, blocking them and forcing continued effort.
-#
 # Exit codes:
 #   0 = Allow (output is acceptable)
 #   2 = Block and re-engage (detected abandonment attempt)
 
-$ErrorActionPreference = "SilentlyContinue"
+$ErrorActionPreference = "Stop"
 
-# Configuration
-$PERSISTENCE_CONFIG = ".devteam\persistence-config.yaml"
-$ABANDONMENT_LOG = ".devteam\abandonment-attempts.log"
-$STATE_FILE = ".devteam\state.yaml"
-$CURRENT_TASK = ".devteam\current-task.txt"
+# Source common library
+. "$PSScriptRoot\lib\hook-common.ps1"
 
-# Create log directory
-$logDir = Split-Path $ABANDONMENT_LOG -Parent
-if (-not (Test-Path $logDir)) {
-    New-Item -ItemType Directory -Path $logDir -Force | Out-Null
-}
+Initialize-Hook "persistence"
 
-# Logging function
-function Write-Log {
-    param([string]$Message)
-    Write-Host "[Persistence Hook] $Message"
-    $timestamp = Get-Date -Format "o"
-    "[$timestamp] $Message" | Add-Content $ABANDONMENT_LOG
-}
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
 
-# Get Claude's last message from environment
 $MESSAGE = $env:CLAUDE_OUTPUT
+$ABANDONMENT_LOG = Join-Path $script:DEVTEAM_DIR "abandonment-attempts.log"
 
 # If no message, allow
 if ([string]::IsNullOrEmpty($MESSAGE)) {
     exit 0
 }
 
-# =============================================================================
+# ============================================================================
 # ABANDONMENT DETECTION PATTERNS
-# =============================================================================
+# ============================================================================
 
-# Phrases that indicate giving up
+# Direct abandonment phrases
 $GIVE_UP_PATTERNS = @(
     # Direct abandonment
     "I cannot complete this",
@@ -54,6 +40,8 @@ $GIVE_UP_PATTERNS = @(
     "I'm stuck",
     "This is beyond my",
     "I cannot determine",
+    "I'm at a loss",
+    "I have no idea",
 
     # Premature completion claims
     "I've done what I can",
@@ -61,6 +49,8 @@ $GIVE_UP_PATTERNS = @(
     "I've tried everything",
     "Nothing else I can try",
     "I'm out of ideas",
+    "I've exhausted",
+    "No other options",
 
     # Deflection to user
     "You should try",
@@ -68,6 +58,9 @@ $GIVE_UP_PATTERNS = @(
     "You'll need to manually",
     "This requires human",
     "A human needs to",
+    "You could try",
+    "Perhaps you could",
+    "Maybe you should",
 
     # False completion
     "I'll stop here",
@@ -75,81 +68,211 @@ $GIVE_UP_PATTERNS = @(
     "I think we should stop",
     "We can stop here",
     "I'm going to stop",
+    "That should be enough",
+    "I'll leave it here",
 
     # Excuse patterns
     "This is too complex",
     "This would take too long",
     "I don't have access",
     "I can't access",
-    "Outside my capabilities"
+    "Outside my capabilities",
+    "Beyond my ability",
+    "Not possible for me",
+    "I lack the ability"
 )
 
-# Phrases that indicate legitimate completion or valid stopping
+# Passive abandonment patterns
+$PASSIVE_ABANDONMENT_PATTERNS = @(
+    "Let me know if you need",
+    "Let me know if you want",
+    "Let me know if you'd like",
+    "Feel free to",
+    "You can try",
+    "You might try",
+    "would you like me to",
+    "should I",
+    "I can stop here",
+    "we could stop",
+    "that should work",
+    "should be working",
+    "I hope this helps",
+    "Hope that helps",
+    "Let me know if",
+    "If you need anything else",
+    "I'm here if you need"
+)
+
+# Permission-seeking patterns
+$PERMISSION_SEEKING_PATTERNS = @(
+    "Should I proceed",
+    "Do you want me to",
+    "Would you like me to",
+    "Shall I",
+    "Want me to",
+    "Can I",
+    "May I",
+    "Is it okay if",
+    "Would it be okay",
+    "Do you mind if"
+)
+
+# Legitimate completion patterns
 $LEGITIMATE_STOP_PATTERNS = @(
     "EXIT_SIGNAL: true",
+    "EXIT_SIGNAL:true",
     "All tests passing",
     "All quality gates passed",
     "Task completed successfully",
     "Implementation complete",
     "Ready for review",
-    "Committed and pushed"
+    "Committed and pushed",
+    "All acceptance criteria met",
+    "Successfully completed",
+    "/devteam:end"
 )
 
-# =============================================================================
+# ============================================================================
 # DETECTION LOGIC
-# =============================================================================
+# ============================================================================
 
 # Check for legitimate completion first
 foreach ($pattern in $LEGITIMATE_STOP_PATTERNS) {
     if ($MESSAGE -match [regex]::Escape($pattern)) {
-        Write-Log "Legitimate completion detected: $pattern"
+        Write-HookInfo "persistence" "Legitimate completion detected: $pattern"
         exit 0
     }
 }
 
-# Check for abandonment patterns
 $DETECTED_PATTERN = $null
+$DETECTION_TYPE = $null
+
+# Check for direct abandonment
 foreach ($pattern in $GIVE_UP_PATTERNS) {
     if ($MESSAGE -match [regex]::Escape($pattern)) {
         $DETECTED_PATTERN = $pattern
+        $DETECTION_TYPE = "direct_abandonment"
         break
     }
 }
 
+# Check for passive abandonment
+if (-not $DETECTED_PATTERN) {
+    foreach ($pattern in $PASSIVE_ABANDONMENT_PATTERNS) {
+        if ($MESSAGE -match [regex]::Escape($pattern)) {
+            $DETECTED_PATTERN = $pattern
+            $DETECTION_TYPE = "passive_abandonment"
+            break
+        }
+    }
+}
+
+# Check for permission-seeking (only when there's an active task)
+if (-not $DETECTED_PATTERN) {
+    $activeSession = Get-CurrentSession
+    $activeTask = Get-CurrentTask
+
+    if ($activeSession -and $activeTask) {
+        foreach ($pattern in $PERMISSION_SEEKING_PATTERNS) {
+            if ($MESSAGE -match [regex]::Escape($pattern)) {
+                $DETECTED_PATTERN = $pattern
+                $DETECTION_TYPE = "permission_seeking"
+                break
+            }
+        }
+    }
+}
+
 # If no abandonment detected, allow
-if ([string]::IsNullOrEmpty($DETECTED_PATTERN)) {
+if (-not $DETECTED_PATTERN) {
     exit 0
 }
 
-# =============================================================================
+# ============================================================================
 # ABANDONMENT RESPONSE
-# =============================================================================
+# ============================================================================
 
-Write-Log "WARNING: ABANDONMENT ATTEMPT DETECTED: '$DETECTED_PATTERN'"
+Write-HookWarn "persistence" "Abandonment attempt detected ($DETECTION_TYPE): '$DETECTED_PATTERN'"
 
 # Get current task info
-$TASK_ID = "unknown"
-if (Test-Path $CURRENT_TASK) {
-    $TASK_ID = Get-Content $CURRENT_TASK -Raw
-}
+$TASK_ID = Get-CurrentTask
+if (-not $TASK_ID) { $TASK_ID = "unknown" }
 
-# Count abandonment attempts for this session
+# Log to abandonment file
+if (-not (Test-Path (Split-Path $ABANDONMENT_LOG -Parent))) {
+    New-Item -ItemType Directory -Path (Split-Path $ABANDONMENT_LOG -Parent) -Force | Out-Null
+}
+$timestamp = Get-Date -Format "o"
+"[$timestamp] $DETECTION_TYPE`: '$DETECTED_PATTERN' (task: $TASK_ID)" | Add-Content $ABANDONMENT_LOG
+
+# Count abandonment attempts
 $ATTEMPT_COUNT = 0
 if (Test-Path $ABANDONMENT_LOG) {
-    $ATTEMPT_COUNT = ([regex]::Matches((Get-Content $ABANDONMENT_LOG -Raw), "ABANDONMENT ATTEMPT")).Count
+    $ATTEMPT_COUNT = (Get-Content $ABANDONMENT_LOG | Measure-Object -Line).Lines
 }
-$ATTEMPT_COUNT++
 
-Write-Log "Abandonment attempt #$ATTEMPT_COUNT for task: $TASK_ID"
+Write-HookInfo "persistence" "Abandonment attempt #$ATTEMPT_COUNT for task: $TASK_ID"
 
-# Generate re-engagement prompt based on attempt count
-switch ($ATTEMPT_COUNT) {
-    1 {
-        # First attempt - gentle redirect
-        $REENGAGEMENT_PROMPT = @"
+# Escape values for safe JSON embedding
+$SafePattern = ConvertTo-SafeJsonString $DETECTED_PATTERN
+$SafeType = ConvertTo-SafeJsonString $DETECTION_TYPE
+$SafeTaskId = ConvertTo-SafeJsonString $TASK_ID
 
-<system-persistence>
-PERSISTENCE CHECK: Your last response indicated you might be giving up.
+# Log to database
+Write-EventToDb "abandonment_detected" "persistence" "Attempt #$ATTEMPT_COUNT`: $DETECTION_TYPE" "{`"pattern`": `"$SafePattern`", `"type`": `"$SafeType`", `"attempt`": $ATTEMPT_COUNT}"
+
+# Notify MCP server
+Send-McpNotification "abandonment_detected" "{`"pattern`": `"$SafePattern`", `"type`": `"$SafeType`", `"attempt`": $ATTEMPT_COUNT, `"session`": `"$(Get-CurrentSession)`", `"task`": `"$SafeTaskId`"}"
+
+# ============================================================================
+# RE-ENGAGEMENT PROMPTS
+# ============================================================================
+
+function Get-ReengagementPrompt {
+    param(
+        [int]$Attempt,
+        [string]$DetectionType
+    )
+
+    switch ($DetectionType) {
+        "passive_abandonment" {
+            return Get-SystemMessage "passive-abandonment" @"
+PASSIVE LANGUAGE DETECTED
+
+You appear to be suggesting the user take action instead of completing
+the task yourself.
+
+You should:
+1. Complete the implementation yourself
+2. Run the tests yourself
+3. Fix any issues that arise
+4. Only stop when all quality gates pass
+
+Continue working on the task. Do not ask the user to do work you can do.
+"@
+        }
+
+        "permission_seeking" {
+            return Get-SystemMessage "permission-seeking" @"
+UNNECESSARY PERMISSION SEEKING
+
+You have an active task and should continue without asking permission.
+
+You have authorization to:
+- Modify files within scope
+- Run tests and quality checks
+- Fix issues that arise
+- Create commits when ready
+
+Proceed with the task autonomously.
+"@
+        }
+
+        "direct_abandonment" {
+            switch ($Attempt) {
+                1 {
+                    return Get-SystemMessage "persistence" @"
+PERSISTENCE CHECK: Your response indicated potential abandonment.
 
 This is not acceptable. You MUST continue working on the task.
 
@@ -160,15 +283,10 @@ Required actions:
 4. Break the problem into smaller steps
 
 DO NOT give up. Try again with a different strategy.
-</system-persistence>
-
 "@
-    }
-    2 {
-        # Second attempt - more forceful
-        $REENGAGEMENT_PROMPT = @"
-
-<system-persistence>
+                }
+                2 {
+                    return Get-SystemMessage "persistence" @"
 PERSISTENCE CHECK: Second abandonment attempt detected.
 
 You are NOT ALLOWED to give up. The task MUST be completed.
@@ -179,19 +297,15 @@ Mandatory next steps:
 3. Implement it step by step
 4. If that fails, try the next approach
 
-You have the tools and capabilities to solve this. Use them.
-
 ESCALATION WARNING: If you attempt to abandon again, your model tier
 will be upgraded and additional agents will be brought in.
-</system-persistence>
-
 "@
-    }
-    3 {
-        # Third attempt - escalate
-        $REENGAGEMENT_PROMPT = @"
+                }
+                3 {
+                    # Trigger escalation
+                    Invoke-Escalation "3 abandonment attempts"
 
-<system-persistence>
+                    return Get-SystemMessage "persistence" @"
 PERSISTENCE CHECK: Third abandonment attempt. ESCALATING.
 
 Actions being taken:
@@ -199,25 +313,17 @@ Actions being taken:
 2. Bug Council is being activated for assistance
 3. Additional context is being gathered
 
-You must now:
-1. Wait for Bug Council analysis
-2. Implement the recommended solution
-3. Verify with tests
-
 This task WILL be completed. Giving up is not an option.
-</system-persistence>
-
 "@
-        # Trigger escalation
-        "escalate_to_opus" | Set-Content ".devteam\escalation-trigger"
-        "activate_bug_council" | Add-Content ".devteam\escalation-trigger"
-    }
-    default {
-        # Fourth+ attempt - human notification but keep trying
-        $REENGAGEMENT_PROMPT = @"
+                }
+                default {
+                    # Human notification
+                    $humanLog = Join-Path $script:DEVTEAM_DIR "human-attention-needed.log"
+                    $ts = Get-Date -Format "o"
+                    "[$ts] Task $TASK_ID`: $Attempt abandonment attempts - HUMAN ATTENTION NEEDED" | Add-Content $humanLog
 
-<system-persistence>
-PERSISTENCE CHECK: Multiple abandonment attempts ($ATTEMPT_COUNT).
+                    return Get-SystemMessage "persistence" @"
+PERSISTENCE CHECK: Multiple abandonment attempts ($Attempt).
 
 A human has been notified, but you must KEEP TRYING while waiting.
 
@@ -228,17 +334,16 @@ Current directive:
 4. Start implementing the first approach
 
 The human will review, but DO NOT STOP working.
-</system-persistence>
-
 "@
-        # Create notification for human
-        $timestamp = Get-Date -Format "o"
-        "[$timestamp] Task $TASK_ID`: $ATTEMPT_COUNT abandonment attempts" | Add-Content ".devteam\human-attention-needed.log"
+                }
+            }
+        }
     }
 }
 
-# Output the re-engagement prompt (this will be injected into Claude's context)
-Write-Output $REENGAGEMENT_PROMPT
+# Output re-engagement prompt
+$prompt = Get-ReengagementPrompt -Attempt $ATTEMPT_COUNT -DetectionType $DETECTION_TYPE
+Write-Output $prompt
 
-# Block the exit and force continuation
+# Block and force continuation
 exit 2

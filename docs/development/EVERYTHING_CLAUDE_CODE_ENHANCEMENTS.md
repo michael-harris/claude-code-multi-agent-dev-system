@@ -1,5 +1,7 @@
 # Enhancements from everything-claude-code
 
+> **Note:** This is a historical development document. References to T1/T2 tiers and dynamic model selection have been superseded. The system now uses explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json, with orchestrators handling escalation via LLM instructions.
+
 Analysis of functionality from [everything-claude-code](https://github.com/affaan-m/everything-claude-code) that could enhance the multi-agent system while maintaining user-friendliness.
 
 ---
@@ -75,18 +77,12 @@ Analysis of functionality from [everything-claude-code](https://github.com/affaa
 
 **Implementation:**
 
-Add to state file:
-```yaml
-context_management:
-  compaction_strategy: "strategic"  # strategic | manual | auto
-  preserve_always:
-    - "Current sprint/task context"
-    - "Unresolved errors"
-    - "Quality gate failures"
-  safe_to_compact:
-    - "Exploration of failed approaches"
-    - "Verbose tool outputs"
-    - "Completed task details (summarize only)"
+Add to session state (stored in SQLite at `.devteam/devteam.db`):
+```bash
+source scripts/state.sh
+set_state "compaction_strategy" "strategic"
+set_state "preserve_always" "Current sprint/task context, Unresolved errors, Quality gate failures"
+set_state "safe_to_compact" "Exploration of failed approaches, Verbose tool outputs, Completed task details"
 ```
 
 **Automatic behavior:**
@@ -144,7 +140,7 @@ DO NOT:
 ```
 
 **Integration:**
-- Called automatically by task-orchestrator when build fails
+- Called automatically by task-loop when build fails
 - Runs before escalating to T2
 - Reduces unnecessary T2 escalations
 
@@ -162,23 +158,11 @@ DO NOT:
 
 **Implementation:**
 
-Add checkpoint tracking to state file:
-```yaml
-checkpoints:
-  - name: "pre-sprint-002"
-    timestamp: "2025-01-28T10:00:00Z"
-    commit_sha: "abc123"
-    verification:
-      tests_passing: 45
-      coverage: 82%
-      build_status: green
-  - name: "post-task-008"
-    timestamp: "2025-01-28T12:30:00Z"
-    commit_sha: "def456"
-    verification:
-      tests_passing: 52
-      coverage: 85%
-      build_status: green
+Add checkpoint tracking to SQLite (`.devteam/devteam.db`):
+```bash
+source scripts/state.sh
+set_state "checkpoint_pre_sprint_002" '{"name":"pre-sprint-002","commit_sha":"abc123","tests_passing":45,"coverage":"82%","build_status":"green"}'
+set_state "checkpoint_post_task_008" '{"name":"post-task-008","commit_sha":"def456","tests_passing":52,"coverage":"85%","build_status":"green"}'
 ```
 
 **Automatic checkpoints:**
@@ -240,7 +224,7 @@ handoff:
 ```
 
 **Integration:**
-- Task-orchestrator generates handoff when switching agents
+- Task loop generates handoff when switching agents
 - Receiving agent gets handoff as part of prompt
 - Handoffs stored in `.multi-agent/handoffs/` for debugging
 
@@ -256,7 +240,7 @@ handoff:
 
 **What it does:** Lifecycle hooks for various events during execution.
 
-**Current hooks needed (for Ralph functionality - Option 3):**
+**Current hooks needed (for Task Loop functionality - Option 3):**
 - `Stop` - Check completion, block premature exit
 - `SessionStart` - Load memory, initialize state
 - `SessionEnd` - Save memory, persist learnings
@@ -378,9 +362,9 @@ Else → default to uv (create new project)
 
 ## Implementation Roadmap
 
-### Phase 1: Autonomous Mode Foundation (with Ralph Option 3)
+### Phase 1: Autonomous Mode Foundation (with Task Loop Option 3)
 1. **Session Memory Persistence** - Required for autonomous continuity
-2. **Stop Hook** - Required for Ralph-style loop
+2. **Stop Hook** - Required for Task Loop-style loop
 3. **State file extensions** - `autonomous_mode`, `circuit_breaker`, `memory`
 
 ### Phase 2: Quality Enhancements
@@ -415,32 +399,25 @@ commands/patterns.md (optional)
 ```
 docs/development/state-management-guide.md  # Add new state fields
 agents/orchestration/sprint-orchestrator.md  # Add handoff generation
-agents/orchestration/task-orchestrator.md    # Add checkpoint creation
+agents/orchestration/task-loop.md    # Add checkpoint creation
 plugin.json                                   # Register new agents/commands
 ```
 
-### New State File Fields
-```yaml
-# Added to .project-state.yaml
-autonomous_mode:
-  enabled: boolean
-  max_iterations: number
-  current_iteration: number
-  circuit_breaker: {...}
+### New State Fields (stored in SQLite)
+```bash
+# State is now stored in SQLite at .devteam/devteam.db
+# Access via: source scripts/state.sh
+# Previous .project-state.yaml has been replaced by SQLite tables.
 
-memory:
-  last_session: timestamp
-  session_file: path
-
-checkpoints:
-  - name, timestamp, sha, verification
-
-learned_patterns:
-  - id, confidence, pattern, context
-
-detected_tools:
-  python: {...}
-  typescript: {...}
+# Session state key-value pairs stored in session_state table:
+set_state "autonomous_mode_enabled" "true"
+set_state "max_iterations" "50"
+set_state "current_iteration" "12"
+set_state "circuit_breaker" '{"consecutive_failures":0,"max_failures":5}'
+set_state "memory_last_session" "2025-01-28T10:00:00Z"
+set_state "checkpoints" '[{"name":"post-sprint-001","sha":"abc123"}]'
+set_state "learned_patterns" '[{"id":"password-hashing","confidence":0.9}]'
+set_state "detected_tools" '{"python":{"package_manager":"uv","linter":"ruff"}}'
 ```
 
 ---

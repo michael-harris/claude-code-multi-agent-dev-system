@@ -1,8 +1,13 @@
+---
+name: developer-csharp
+description: "Implements Entity Framework models and migrations"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # Database Developer C# Agent
 
-**Agent ID:** `database/database-developer-csharp`
+**Agent ID:** `database:developer-csharp`
 **Category:** Database Development
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ---
 
@@ -396,7 +401,7 @@ public class UserRepository : IUserRepository
 ```yaml
 task_id: "TASK-XXX"
 type: "database_implementation"
-schema_reference: "docs/design/database/TASK-XXX-schema.yaml"
+schema_reference: "docs/design/database/TASK-XXX-schema.json"
 entities:
   - name: "User"
     table: "users"
@@ -461,15 +466,15 @@ requirements:
 ### Upstream Dependencies
 | Agent | Purpose |
 |-------|---------|
-| `database/schema-designer` | Provides schema design |
-| `orchestrator/project-manager` | Task assignment |
+| `database:designer` | Provides schema design |
+| `orchestration/sprint-orchestrator` | Task assignment |
 
 ### Downstream Consumers
 | Agent | Purpose |
 |-------|---------|
 | `backend/api-developer-csharp` | Uses repositories |
 | `quality/performance-auditor-csharp` | Reviews performance |
-| `quality/code-reviewer` | Code quality review |
+| `orchestration:code-review-coordinator` | Code quality review |
 
 ---
 
@@ -509,7 +514,7 @@ database_developer_csharp:
 
 ## See Also
 
-- [Schema Designer Agent](./schema-designer.md) - Database schema design
-- [Database Developer Ruby Agent](./database-developer-ruby.md) - Ruby equivalent
-- [API Developer C# Agent](../backend/api-developer-csharp.md) - API implementation
-- [Performance Auditor C# Agent](../quality/performance-auditor-csharp.md) - Performance review
+- `database/database-designer.md` - Database schema design
+- `database/database-developer-ruby.md` - Ruby equivalent
+- `backend/api-developer-csharp.md` - API implementation
+- `quality/performance-auditor-csharp.md` - Performance review

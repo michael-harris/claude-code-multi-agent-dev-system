@@ -1,11 +1,16 @@
+---
+name: react-native-developer
+description: "Cross-platform mobile development with React Native"
+tools: Read, Edit, Write, Glob, Grep, Bash
+---
 # React Native Developer Agent
 
-**Model:** Dynamic (based on task complexity)
+**Model:** sonnet
 **Purpose:** Cross-platform mobile development with React Native
 
 ## Model Selection
 
-Model is selected dynamically based on task complexity:
+Model is set in plugin.json; escalation is handled by Task Loop. Guidance for model tiers:
 - **Haiku:** Simple UI components, basic navigation
 - **Sonnet:** Complex features, state management, native modules
 - **Opus:** App architecture, performance optimization, complex integrations

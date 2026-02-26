@@ -1,5 +1,7 @@
 # Multi-Agent System Expansion Plan
 
+> **Note:** This is a historical planning document. The T1/T2 tier system described here has been replaced with explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Escalation is now handled by orchestrator agents (task-loop, sprint-orchestrator) via LLM instructions, not by T1/T2 agent pairs.
+
 **Date**: 2025-10-30
 **Goal**: Expand from 27 to 66 agents covering top dev stacks and programming languages
 
@@ -120,12 +122,12 @@ For each of 5 new languages, create:
 - Sonnet: 15 agents (56%)
 - Haiku: 6 agents (22%)
 
-### After Expansion
-- Opus: 6 agents (9%) - No change, design agents only
-- Sonnet: 38 agents (58%) - T2 developers + reviewers + specialists
-- Haiku: 22 agents (33%) - All T1 developers
+### Current State (post-migration)
+- Opus: 38 agents - Architecture, security, complex reasoning tasks
+- Sonnet: 84 agents - Default for most development and review operations
+- Haiku: 5 agents - Cost-optimized for straightforward tasks
 
-**Cost optimization maintained**: T1 (Haiku) tries first, T2 (Sonnet) handles complexity
+**Cost optimization maintained**: Sonnet handles most work, opus for complex tasks, haiku for simple ones. Orchestrators escalate automatically (sonnet -> opus after 2 failures, opus -> Bug Council after 3 failures).
 
 ---
 

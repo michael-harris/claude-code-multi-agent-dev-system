@@ -1,63 +1,73 @@
 #!/bin/bash
 
 # Local Installation Script for claude-devteam plugin
+# Checks prerequisites, installs hooks, and initializes the database.
 
-echo "🔧 Installing claude-devteam plugin locally..."
+set -euo pipefail
 
 PLUGIN_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET_PROJECT="${1:-.}"
 
-echo "📁 Plugin location: $PLUGIN_DIR"
-echo "📁 Target project: $(cd "$TARGET_PROJECT" && pwd)"
+echo "Installing DevTeam plugin from: $PLUGIN_DIR"
+echo ""
 
-# Navigate to target project
-cd "$TARGET_PROJECT" || exit 1
+# --- Prerequisites ---
 
-# Initialize .claude-plugin directory if needed
-mkdir -p .claude-plugin
+MISSING=()
 
-# Initialize marketplace.json if needed
-if [ ! -f .claude-plugin/marketplace.json ]; then
-    echo '{"plugins": []}' > .claude-plugin/marketplace.json
-    echo "✅ Initialized .claude-plugin/marketplace.json"
+if ! command -v sqlite3 &>/dev/null; then
+    MISSING+=("sqlite3")
 fi
 
-# Add plugin to marketplace
-MARKETPLACE_FILE=".claude-plugin/marketplace.json"
-
-# Check if plugin already exists
-if grep -q "claude-devteam" "$MARKETPLACE_FILE" 2>/dev/null; then
-    echo "⚠️  Plugin already in marketplace, updating..."
-    # Remove old entry
-    jq 'del(.plugins[] | select(.name == "claude-devteam"))' "$MARKETPLACE_FILE" > "$MARKETPLACE_FILE.tmp"
-    mv "$MARKETPLACE_FILE.tmp" "$MARKETPLACE_FILE"
+if ! command -v git &>/dev/null; then
+    MISSING+=("git")
 fi
 
-# Add plugin entry
-jq --arg path "$PLUGIN_DIR" '.plugins += [{
-    "name": "claude-devteam",
-    "path": $path,
-    "type": "local"
-}]' "$MARKETPLACE_FILE" > "$MARKETPLACE_FILE.tmp"
-mv "$MARKETPLACE_FILE.tmp" "$MARKETPLACE_FILE"
+if ! command -v jq &>/dev/null; then
+    MISSING+=("jq")
+fi
 
-echo "✅ Plugin added to marketplace"
+# Check bash version (need 4.0+)
+if [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
+    echo "ERROR: Bash 4.0+ is required (found ${BASH_VERSION})."
+    echo "On macOS, install with: brew install bash"
+    exit 1
+fi
+
+if [ ${#MISSING[@]} -gt 0 ]; then
+    echo "ERROR: Missing required tools: ${MISSING[*]}"
+    echo "Please install them and try again."
+    exit 1
+fi
+
+echo "Prerequisites OK (sqlite3, git, jq, bash ${BASH_VERSINFO[0]})"
+
+# --- Install Hooks ---
+
 echo ""
-echo "🎉 Installation complete!"
+echo "Installing hooks..."
+if [ -x "$PLUGIN_DIR/hooks/install.sh" ]; then
+    bash "$PLUGIN_DIR/hooks/install.sh"
+else
+    chmod +x "$PLUGIN_DIR/hooks/install.sh"
+    bash "$PLUGIN_DIR/hooks/install.sh"
+fi
+
+# --- Initialize Database ---
+
 echo ""
-echo "The plugin is now available in this project."
+echo "Initializing database..."
+bash "$PLUGIN_DIR/scripts/db-init.sh"
+
+# --- Done ---
+
 echo ""
-echo "📖 Usage:"
-echo "   /devteam:plan           - Interactive planning (PRD + tasks + sprints)"
-echo "   /devteam:implement           - Autonomous execution until complete"
-echo "   /devteam:sprint SPRINT-001  - Execute specific sprint"
-echo "   /devteam:issue 123      - Fix GitHub issue #123"
+echo "Installation complete!"
 echo ""
-echo "   Or launch individual agents:"
-echo "   Task("
-echo "     subagent_type=\"multi-agent:database:designer\","
-echo "     model=\"opus\","
-echo "     prompt=\"Design user schema\""
-echo "   )"
+echo "Usage:"
+echo "  /devteam:plan           - Interactive planning (PRD + tasks + sprints)"
+echo "  /devteam:implement      - Autonomous execution until complete"
+echo "  /devteam:bug \"desc\"     - Fix a bug with diagnostic workflow"
+echo "  /devteam:issue 123      - Fix GitHub issue #123"
+echo "  /devteam:status         - Check system health and progress"
 echo ""
-echo "📚 Documentation: $PLUGIN_DIR/README.md"
+echo "Documentation: $PLUGIN_DIR/README.md"

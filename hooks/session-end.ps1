@@ -3,9 +3,11 @@
 
 $ErrorActionPreference = "Stop"
 
+# Source common library for SQLite helpers
+. "$PSScriptRoot\lib\hook-common.ps1"
+
 # Configuration
 $MEMORY_DIR = ".devteam\memory"
-$STATE_FILE = ".devteam\state.yaml"
 $Timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $MEMORY_FILE = "$MEMORY_DIR\session-$Timestamp.md"
 
@@ -27,26 +29,21 @@ function Get-StateInfo {
         TotalTasks = 0
     }
 
-    if (Test-Path $STATE_FILE) {
-        $Content = Get-Content $STATE_FILE -Raw
+    if (Test-DatabaseExists) {
+        $sid = Invoke-DbQuery "SELECT id FROM sessions WHERE status='running' ORDER BY started_at DESC LIMIT 1;"
+        if (-not $sid) { $sid = "unknown" }
 
-        if ($Content -match "current_sprint:\s*(.+)") {
-            $State.CurrentSprint = $Matches[1].Trim()
-        }
-        if ($Content -match "current_task:\s*(.+)") {
-            $State.CurrentTask = $Matches[1].Trim()
-        }
-        if ($Content -match "phase:\s*(.+)") {
-            $State.Phase = $Matches[1].Trim()
-        }
+        $sprint = Invoke-DbQuery "SELECT sprint_id FROM sessions WHERE id = '$sid';"
+        $task = Invoke-DbQuery "SELECT current_task_id FROM sessions WHERE id = '$sid';"
+        $phase = Invoke-DbQuery "SELECT current_phase FROM sessions WHERE id = '$sid';"
+        $completed = Invoke-DbQuery "SELECT COUNT(*) FROM tasks WHERE status='completed';"
+        $total = Invoke-DbQuery "SELECT COUNT(*) FROM tasks;"
 
-        # Count completed tasks
-        $CompletedMatches = [regex]::Matches($Content, "status:\s*completed")
-        $State.CompletedTasks = $CompletedMatches.Count
-
-        # Count total tasks
-        $TaskMatches = [regex]::Matches($Content, "TASK-")
-        $State.TotalTasks = $TaskMatches.Count
+        if ($sprint) { $State.CurrentSprint = $sprint }
+        if ($task) { $State.CurrentTask = $task }
+        if ($phase) { $State.Phase = $phase }
+        if ($completed) { $State.CompletedTasks = [int]$completed }
+        if ($total) { $State.TotalTasks = [int]$total }
     }
 
     return $State
@@ -75,16 +72,16 @@ function Save-Memory {
 - **Phase:** $($State.Phase)
 - **Progress:** $($State.CompletedTasks) / $($State.TotalTasks) tasks completed
 
-## State File Location
+## State Database Location
 
-The full project state is stored in: ``$STATE_FILE``
+The full project state is stored in: ``.devteam/devteam.db`` (SQLite)
 
 ## Resumption Instructions
 
 To resume this work:
-1. The state file contains all progress information
+1. The database contains all progress information
 2. Run ``/devteam:implement --resume`` to continue autonomous execution
-3. Or run ``/devteam:sprint <sprint-id>`` to continue a specific sprint
+3. Or run ``/devteam:implement --sprint <sprint-id>`` to continue a specific sprint
 
 ## Notes
 

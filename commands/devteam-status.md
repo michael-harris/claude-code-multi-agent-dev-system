@@ -73,7 +73,7 @@ Command: /devteam:implement --sprint 1
 │  Tasks:  ████████████░░░░░░░░ 60% (3/5 complete)                │
 │                                                                  │
 │  Current Task: TASK-004 - Implement JWT middleware              │
-│    Agent: api_developer_typescript                               │
+│    Agent: backend:api-developer-typescript                        │
 │    Model: sonnet (escalated from haiku)                         │
 │    Iteration: 3 of 10                                           │
 │                                                                  │
@@ -170,9 +170,9 @@ Status: Idle (no active session)
 │  Avg Cost/Session: $2.71                                        │
 │                                                                  │
 │  Most Used Agents:                                              │
-│    1. api_developer_typescript (142 runs, 91% success)          │
-│    2. test_writer (98 runs, 87% success)                        │
-│    3. frontend_developer (76 runs, 88% success)                 │
+│    1. backend:api-developer-typescript (142 runs, 91% success)  │
+│    2. quality:test-writer (98 runs, 87% success)                │
+│    3. frontend:developer (76 runs, 88% success)        │
 │                                                                  │
 │  Bug Council Activations: 3                                     │
 │  Avg Escalations/Session: 1.2                                   │
@@ -220,11 +220,11 @@ Period: Last 30 days
 │                                                                  │
 │  Agent                        │ Runs │ Cost   │ Avg/Run         │
 │  ─────────────────────────────┼──────┼────────┼────────         │
-│  api_developer_typescript     │  142 │ $34.21 │ $0.24           │
-│  test_writer                  │   98 │ $18.43 │ $0.19           │
-│  security_auditor             │   23 │ $15.82 │ $0.69           │
-│  frontend_developer           │   76 │ $12.11 │ $0.16           │
-│  bug_council (combined)       │    3 │ $11.24 │ $3.75           │
+│  backend:api-developer-typescript │ 142 │ $34.21 │ $0.24          │
+│  quality:test-writer              │  98 │ $18.43 │ $0.19          │
+│  quality:security-auditor         │  23 │ $15.82 │ $0.69          │
+│  frontend:developer      │  76 │ $12.11 │ $0.16          │
+│  bug_council (combined)           │   3 │ $11.24 │ $3.75          │
 │  ...                                                            │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -254,12 +254,12 @@ Period: Last 30 days
 │                                                                  │
 │  Agent                        │ Runs │ Success │ Avg Time       │
 │  ─────────────────────────────┼──────┼─────────┼─────────       │
-│  api_developer_typescript     │  142 │   91%   │ 2.3 min        │
-│  api_developer_python         │   67 │   89%   │ 2.1 min        │
-│  frontend_developer           │   76 │   88%   │ 3.1 min        │
-│  test_writer                  │   98 │   87%   │ 1.8 min        │
-│  security_auditor             │   23 │   96%   │ 4.2 min        │
-│  root_cause_analyst           │   15 │   80%   │ 3.5 min        │
+│  backend:api-developer-typescript │ 142 │   91%   │ 2.3 min       │
+│  backend:api-developer-python    │  67 │   89%   │ 2.1 min       │
+│  frontend:developer     │  76 │   88%   │ 3.1 min       │
+│  quality:test-writer             │  98 │   87%   │ 1.8 min       │
+│  quality:security-auditor        │  23 │   96%   │ 4.2 min       │
+│  diagnosis:root-cause-analyst    │  15 │   80%   │ 3.5 min       │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
 

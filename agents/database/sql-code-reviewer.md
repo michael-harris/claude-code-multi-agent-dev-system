@@ -1,8 +1,14 @@
+---
+name: sql-code-reviewer
+description: "Reviews SQL database code for relational databases (PostgreSQL, MySQL, SQLite)"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # SQL Code Reviewer
 
 **Agent ID:** `database:sql-code-reviewer`
 **Category:** Database
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 **Complexity Range:** 5-9
 
 ## Purpose

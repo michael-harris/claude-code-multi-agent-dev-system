@@ -1,8 +1,14 @@
+---
+name: performance-auditor-ruby
+description: "Ruby/Rails-specific performance analysis"
+model: sonnet
+tools: Read, Glob, Grep, Bash
+---
 # Performance Auditor (Ruby) Agent
 
 **Agent ID:** `quality:performance-auditor-ruby`
 **Category:** Quality / Performance
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ## Purpose
 
@@ -367,10 +373,10 @@ collaborates_with:
   - agent: "orchestration:code-review-coordinator"
     interaction: "Receives audit requests as part of code review"
 
-  - agent: "backend:backend-code-reviewer-ruby"
+  - agent: "backend:code-reviewer-ruby"
     interaction: "Works alongside for comprehensive review"
 
-  - agent: "database:database-designer"
+  - agent: "database:designer"
     interaction: "Can request schema optimization review"
 
   - agent: "devops:docker-specialist"

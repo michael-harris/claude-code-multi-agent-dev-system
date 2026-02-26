@@ -25,7 +25,7 @@ This system ensures that once a design system exists, ALL frontend implementatio
 │  └── Verify component structure matches specs                   │
 │                                                                  │
 │  Layer 4: QUALITY GATE                                           │
-│  ├── Ralph checks design compliance before completion           │
+│  ├── Task Loop checks design compliance before completion       │
 │  ├── Block EXIT_SIGNAL if violations found                      │
 │  └── Create fix tasks for violations                            │
 │                                                                  │
@@ -75,10 +75,10 @@ detection:
       spacing: 16
 ```
 
-### Task Orchestrator Integration
+### Task Loop Integration
 
 ```yaml
-# Added to task orchestrator logic
+# Added to task loop logic
 on_frontend_task:
   step_1_detect_design_system:
     action: scan_for_design_system
@@ -288,10 +288,10 @@ output:
 
 ## Layer 4: Quality Gate
 
-### Ralph Design Compliance Gate
+### Task Loop Design Compliance Gate
 
 ```yaml
-# Added to ralph-config.yaml
+# Added to task-loop-config.yaml
 quality_gates:
   design_compliance:
     enabled: true
@@ -507,7 +507,7 @@ The design system is honored through:
 1. **Automatic Detection** - Every frontend task checks for design system
 2. **Prompt Injection** - Agents receive tokens and rules automatically
 3. **Static Validation** - Code scanned for violations
-4. **Quality Gate** - Ralph blocks completion if violations found
+4. **Quality Gate** - Task Loop blocks completion if violations found
 5. **Drift Detection** - Catches gradual deviation over time
 
 **Once a design system exists, it is IMPOSSIBLE to bypass without explicit override.**

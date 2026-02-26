@@ -1,8 +1,14 @@
+---
+name: code-reviewer-python
+description: "Reviews Python backend code for quality and security"
+model: sonnet
+tools: Read, Glob, Grep
+---
 # Backend Code Reviewer (Python) Agent
 
 **Agent ID:** `backend:code-reviewer-python`
 **Category:** Backend / Quality
-**Model:** Dynamic (assigned at runtime based on task complexity)
+**Model:** sonnet
 
 ## Purpose
 
