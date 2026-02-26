@@ -41,7 +41,7 @@
         "docker",
         "ci-cd"
       ],
-      "repository": "https://github.com/michael-harris/claude-devteam",
+      "repository": "https://github.com/michael-harris/devteam",
       "license": "MIT"
     }
   ]

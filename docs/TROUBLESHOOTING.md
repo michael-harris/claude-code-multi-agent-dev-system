@@ -396,7 +396,7 @@ sqlite3 .devteam/devteam.db "SELECT * FROM v_session_summary LIMIT 5"
 ```
 
 ### Community
-- GitHub Issues: [Report bugs](https://github.com/michael-harris/claude-devteam/issues)
+- GitHub Issues: [Report bugs](https://github.com/michael-harris/devteam/issues)
 - Discussions: Ask questions and share tips
 
 ### Logs for Bug Reports

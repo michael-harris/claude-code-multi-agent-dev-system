@@ -2,7 +2,7 @@
 
 > **Note:** Documents in this directory are historical. References to the T1/T2 tier system have been superseded by explicit model assignments (haiku/sonnet/opus) in agent YAML frontmatter and plugin.json. Escalation is now handled by orchestrator agents via LLM instructions.
 
-This directory contains archived development documents from the creation and evolution of the claude-devteam plugin.
+This directory contains archived development documents from the creation and evolution of the devteam plugin.
 
 ## Purpose
 
@@ -14,16 +14,16 @@ These documents are preserved for:
 ## Important Note
 
 These documents contain references to old paths and repository names from the development process:
-- **Old path**: `../claude-devteam/` (referenced as a separate directory)
+- **Old path**: `../devteam/` (referenced as a separate directory)
 - **Old repository name**: `multi-agent-claude-workflow`
 - **Development context**: These files were created during plugin development when the structure was different
 
-**These references are historical and should NOT be updated.** They accurately reflect the development state at the time they were written.
+**Note:** Repository name references have been updated to reflect the current name `devteam`. Other historical details remain as originally written.
 
 ## Current State
 
 The plugin is now located in the root directory of this repository:
-- **Current repository**: `claude-devteam`
+- **Current repository**: `devteam`
 - **Plugin location**: Root directory (not a separate folder)
 - **Current documentation**: See `/README.md` for up-to-date information
 

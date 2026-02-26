@@ -5,7 +5,7 @@
   "author": {
     "name": "Multi-Agent Development Team"
   },
-  "homepage": "https://github.com/michael-harris/claude-devteam",
+  "homepage": "https://github.com/michael-harris/devteam",
   "license": "MIT",
   "engines": {
     "claude-code": ">=1.0.0"
