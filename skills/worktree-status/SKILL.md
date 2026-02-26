@@ -8,7 +8,7 @@ model: haiku
 ---
 
 Git worktrees: !`git worktree list 2>/dev/null || echo "Not a git repository"`
-Worktree mode: !`source scripts/state.sh && get_kv_state "parallel_tracks.mode" 2>/dev/null || echo "unknown"`
+Worktree mode: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "parallel_tracks.mode" 2>/dev/null || echo "unknown"`
 Native worktrees: !`ls -d .claude/worktrees/*/ 2>/dev/null || echo "None"`
 Legacy worktrees: !`ls -d .multi-agent/track-*/ 2>/dev/null || echo "None"`
 
@@ -32,7 +32,7 @@ Legacy worktrees: !`ls -d .multi-agent/track-*/ 2>/dev/null || echo "None"`
 Query the SQLite database (`.devteam/devteam.db`) to get worktree configuration:
 
 ```bash
-source scripts/state.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
 
 # Check worktree mode
 mode=$(get_state "parallel_tracks.mode")
@@ -67,12 +67,12 @@ if [ -d "$worktree_path" ]; then
     behind = $(git rev-list --count HEAD..@{u} 2>/dev/null || echo "N/A")
 
     # Get sprint status from SQLite database
-    sprints = get_sprints_for_track(track_num)  # via: source scripts/state.sh
+    sprints = get_sprints_for_track(track_num)  # via: source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
     completed_sprints = count(s for s in sprints if s.status == "completed")
     total_sprints = len(sprints)
 
     # Get task status from SQLite database
-    tasks = get_tasks_for_track(track_num)  # via: source scripts/state.sh
+    tasks = get_tasks_for_track(track_num)  # via: source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
     completed_tasks = count(t for t in tasks if t.status == "completed")
     total_tasks = len(tasks)
 

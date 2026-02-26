@@ -7,9 +7,9 @@ allowed-tools: Read, Edit, Write, Glob, Grep, Bash, Task
 model: opus
 ---
 
-Current session: !`source scripts/state.sh && get_current_session 2>/dev/null || echo "No active session"`
-Active sprint: !`source scripts/state.sh && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
-Failure count: !`source scripts/state.sh && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
+Current session: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_current_session 2>/dev/null || echo "No active session"`
+Active sprint: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
+Failure count: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
 
 # DevTeam Implement Command
 
@@ -68,8 +68,8 @@ Execute implementation work - plans, sprints, tasks, or ad-hoc work.
 
 ```bash
 # Source state management
-source scripts/state.sh
-source scripts/events.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
+source "${CLAUDE_PLUGIN_ROOT}/scripts/events.sh"
 
 # Start session
 SESSION_ID=$(start_session "/devteam:implement $*" "implement")

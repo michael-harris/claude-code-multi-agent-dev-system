@@ -155,7 +155,7 @@ Concrete examples of agent behavior.
 
 ### 4. Register the Agent
 
-Add your agent to `plugin.json`:
+Add your agent to `agent-registry.json`:
 
 ```json
 {
@@ -227,7 +227,7 @@ What this command does.
 
 ### 3. Register the Command
 
-Add to `plugin.json`:
+Add to `agent-registry.json`:
 
 ```json
 {

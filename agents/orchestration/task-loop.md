@@ -494,7 +494,7 @@ task_loop:
 ### Additional Error Recovery
 
 - **SQLite state unreachable:** If state read/write fails, continue execution without state persistence. Log the error and attempt to recreate the database using `scripts/db-init.sh`.
-- **All sub-agents fail to activate:** If Task() calls consistently fail, check if the agent ID exists in plugin.json. Report the error and HALT.
+- **All sub-agents fail to activate:** If Task() calls consistently fail, check if the agent ID exists in agent-registry.json. Report the error and HALT.
 - **Git operations fail:** If scope-validator cannot read git state, skip scope validation for this iteration and log a warning. Do NOT skip quality gates.
 - **Task dependency blocked:** If a task depends on a permanently failed task, mark it as "blocked" and move to the next task in the sprint.
 

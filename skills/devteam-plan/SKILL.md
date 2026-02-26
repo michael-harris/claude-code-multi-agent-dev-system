@@ -7,9 +7,9 @@ allowed-tools: Read, Glob, Grep, Bash, Write, Task
 model: opus
 ---
 
-Current session: !`source scripts/state.sh && get_current_session 2>/dev/null || echo "No active session"`
-Active sprint: !`source scripts/state.sh && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
-Failure count: !`source scripts/state.sh && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
+Current session: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_current_session 2>/dev/null || echo "No active session"`
+Active sprint: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
+Failure count: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
 
 # DevTeam Plan Command
 
@@ -612,10 +612,10 @@ Initialize project state in SQLite database via the scripts layer:
 
 ```bash
 # Source the state management functions
-source scripts/state.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
 
 # Initialize the database (creates .devteam/devteam.db if needed)
-source scripts/db-init.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/db-init.sh"
 
 # Set project metadata
 set_kv_state "metadata.project_name" "[name]"
@@ -692,7 +692,7 @@ When multiple tracks are planned, worktrees are configured automatically in the 
 
 ```bash
 # Parallel track configuration stored in SQLite (.devteam/devteam.db)
-source scripts/state.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
 
 set_kv_state "parallel_tracks.mode" "worktrees"
 set_kv_state "parallel_tracks.track_info.01.name" "Backend API"

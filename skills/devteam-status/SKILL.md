@@ -7,7 +7,7 @@ allowed-tools: Read, Glob, Grep, Bash
 model: haiku
 ---
 
-Session state: !`source scripts/state.sh && get_current_session 2>/dev/null || echo "No active session"`
+Session state: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_current_session 2>/dev/null || echo "No active session"`
 Recent events: !`sqlite3 .devteam/devteam.db "SELECT type, message FROM events ORDER BY created_at DESC LIMIT 10" 2>/dev/null || echo "No events"`
 
 # DevTeam Status Command
@@ -57,7 +57,7 @@ Display system health, current progress, costs, and execution history.
 ### Check for Running Session
 
 ```bash
-source scripts/state.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
 
 if is_session_running; then
     show_current_session_status

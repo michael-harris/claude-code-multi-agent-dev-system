@@ -38,7 +38,7 @@ git worktree list --porcelain
 Query the SQLite database (`.devteam/devteam.db`) to correlate git worktrees with development tracks:
 
 ```bash
-source scripts/state.sh
+source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
 # Track info available via get_state "parallel_tracks.track_info.*"
 ```
 

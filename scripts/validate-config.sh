@@ -1,6 +1,6 @@
 #!/bin/bash
 # DevTeam Configuration Validator
-# Validates plugin.json and config.yaml against expected schemas
+# Validates agent-registry.json and config.yaml against expected schemas
 #
 # Usage: ./validate-config.sh [options]
 #
@@ -17,7 +17,7 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 source "${SCRIPT_DIR}/lib/common.sh"
 
 # Configuration
-PLUGIN_JSON="$PROJECT_ROOT/plugin.json"
+PLUGIN_JSON="$PROJECT_ROOT/agent-registry.json"
 CONFIG_YAML="$PROJECT_ROOT/.devteam/config.yaml"
 STRICT_MODE=false
 VERBOSE=false
@@ -54,36 +54,36 @@ report_info() {
 }
 
 # ============================================================================
-# PLUGIN.JSON VALIDATION
+# AGENT-REGISTRY.JSON VALIDATION
 # ============================================================================
 
 validate_plugin_json() {
-    log_info "Validating plugin.json..." "validate"
+    log_info "Validating agent-registry.json..." "validate"
 
     if [ ! -f "$PLUGIN_JSON" ]; then
-        report_error "plugin.json" "File not found"
+        report_error "agent-registry.json" "File not found"
         return 1
     fi
 
     # Check if jq is available
     if ! command -v jq &> /dev/null; then
-        report_warning "plugin.json" "jq not installed, skipping detailed validation"
+        report_warning "agent-registry.json" "jq not installed, skipping detailed validation"
         return 0
     fi
 
     # Validate JSON syntax
     if ! jq empty "$PLUGIN_JSON" 2>/dev/null; then
-        report_error "plugin.json" "Invalid JSON syntax"
+        report_error "agent-registry.json" "Invalid JSON syntax"
         return 1
     fi
 
-    report_info "plugin.json" "JSON syntax valid"
+    report_info "agent-registry.json" "JSON syntax valid"
 
     # Required top-level fields
     local required_fields=("name" "version" "description" "agents" "commands")
     for field in "${required_fields[@]}"; do
         if [ "$(jq --arg f "$field" 'has($f)' "$PLUGIN_JSON")" != "true" ]; then
-            report_error "plugin.json" "Missing required field: $field"
+            report_error "agent-registry.json" "Missing required field: $field"
         fi
     done
 
@@ -101,10 +101,10 @@ validate_agents() {
     local agent_count
     agent_count=$(jq '.agents | length' "$PLUGIN_JSON")
 
-    report_info "plugin.json" "Found $agent_count agents"
+    report_info "agent-registry.json" "Found $agent_count agents"
 
     if [ "$agent_count" -eq 0 ]; then
-        report_error "plugin.json" "No agents defined"
+        report_error "agent-registry.json" "No agents defined"
         return
     fi
 
@@ -115,7 +115,7 @@ validate_agents() {
         agent_id=$(jq -r ".agents[$i].id // empty" "$PLUGIN_JSON")
 
         if [ -z "$agent_id" ]; then
-            report_error "plugin.json" "Agent at index $i missing 'id'"
+            report_error "agent-registry.json" "Agent at index $i missing 'id'"
             i=$((i + 1))
             continue
         fi
@@ -126,7 +126,7 @@ validate_agents() {
             local value
             value=$(jq -r ".agents[$i].$field // empty" "$PLUGIN_JSON")
             if [ -z "$value" ]; then
-                report_error "plugin.json" "Agent '$agent_id' missing field: $field"
+                report_error "agent-registry.json" "Agent '$agent_id' missing field: $field"
             fi
         done
 
@@ -134,18 +134,18 @@ validate_agents() {
         local file_path
         file_path=$(jq -r ".agents[$i].file // .agents[$i].path // empty" "$PLUGIN_JSON")
         if [ -z "$file_path" ]; then
-            report_error "plugin.json" "Agent '$agent_id' missing field: file (or path)"
+            report_error "agent-registry.json" "Agent '$agent_id' missing field: file (or path)"
         elif ! validate_file_path "$file_path" "$PROJECT_ROOT"; then
-            report_error "plugin.json" "Agent '$agent_id' path traversal or invalid path: $file_path"
+            report_error "agent-registry.json" "Agent '$agent_id' path traversal or invalid path: $file_path"
         elif [ ! -f "$PROJECT_ROOT/$file_path" ]; then
-            report_error "plugin.json" "Agent '$agent_id' file not found: $file_path"
+            report_error "agent-registry.json" "Agent '$agent_id' file not found: $file_path"
         fi
 
         # Validate model (optional, defaults to sonnet)
         local model
         model=$(jq -r ".agents[$i].model // empty" "$PLUGIN_JSON")
         if [ -n "$model" ] && [ "$model" != "opus" ] && [ "$model" != "sonnet" ] && [ "$model" != "haiku" ]; then
-            report_error "plugin.json" "Agent '$agent_id' invalid model: $model (must be opus, sonnet, or haiku)"
+            report_error "agent-registry.json" "Agent '$agent_id' invalid model: $model (must be opus, sonnet, or haiku)"
         fi
 
         # Validate category
@@ -160,7 +160,7 @@ validate_agents() {
             fi
         done
         if [ "$category_valid" = false ]; then
-            report_warning "plugin.json" "Agent '$agent_id' has unusual category: $category"
+            report_warning "agent-registry.json" "Agent '$agent_id' has unusual category: $category"
         fi
 
         i=$((i + 1))
@@ -171,7 +171,7 @@ validate_commands() {
     local cmd_count
     cmd_count=$(jq '.commands | length' "$PLUGIN_JSON")
 
-    report_info "plugin.json" "Found $cmd_count commands"
+    report_info "agent-registry.json" "Found $cmd_count commands"
 
     local i=0
     while [ $i -lt "$cmd_count" ]; do
@@ -179,7 +179,7 @@ validate_commands() {
         cmd_name=$(jq -r ".commands[$i].name // empty" "$PLUGIN_JSON")
 
         if [ -z "$cmd_name" ]; then
-            report_error "plugin.json" "Command at index $i missing 'name'"
+            report_error "agent-registry.json" "Command at index $i missing 'name'"
             i=$((i + 1))
             continue
         fi
@@ -190,7 +190,7 @@ validate_commands() {
             local value
             value=$(jq -r ".commands[$i].$field // empty" "$PLUGIN_JSON")
             if [ -z "$value" ]; then
-                report_error "plugin.json" "Command '$cmd_name' missing field: $field"
+                report_error "agent-registry.json" "Command '$cmd_name' missing field: $field"
             fi
         done
 
@@ -198,11 +198,11 @@ validate_commands() {
         local file_path
         file_path=$(jq -r ".commands[$i].file // .commands[$i].path // empty" "$PLUGIN_JSON")
         if [ -z "$file_path" ]; then
-            report_error "plugin.json" "Command '$cmd_name' missing field: file (or path)"
+            report_error "agent-registry.json" "Command '$cmd_name' missing field: file (or path)"
         elif ! validate_file_path "$file_path" "$PROJECT_ROOT"; then
-            report_error "plugin.json" "Command '$cmd_name' path traversal or invalid path: $file_path"
+            report_error "agent-registry.json" "Command '$cmd_name' path traversal or invalid path: $file_path"
         elif [ ! -f "$PROJECT_ROOT/$file_path" ]; then
-            report_error "plugin.json" "Command '$cmd_name' file not found: $file_path"
+            report_error "agent-registry.json" "Command '$cmd_name' file not found: $file_path"
         fi
 
         i=$((i + 1))
@@ -215,14 +215,14 @@ validate_unique_ids() {
     duplicates=$(jq -r '.agents[].id' "$PLUGIN_JSON" | sort | uniq -d)
 
     if [ -n "$duplicates" ]; then
-        report_error "plugin.json" "Duplicate agent IDs: $duplicates"
+        report_error "agent-registry.json" "Duplicate agent IDs: $duplicates"
     fi
 
     # Check for duplicate command names
     duplicates=$(jq -r '.commands[].name' "$PLUGIN_JSON" | sort | uniq -d)
 
     if [ -n "$duplicates" ]; then
-        report_error "plugin.json" "Duplicate command names: $duplicates"
+        report_error "agent-registry.json" "Duplicate command names: $duplicates"
     fi
 }
 
@@ -343,7 +343,7 @@ validate_cross_references() {
 
     for agent_file in $all_agents; do
         if ! echo "$registered_agents" | grep -q "^$agent_file$"; then
-            report_warning "cross-check" "Orphaned agent file (not in plugin.json): $agent_file"
+            report_warning "cross-check" "Orphaned agent file (not in agent-registry.json): $agent_file"
         fi
     done
 }

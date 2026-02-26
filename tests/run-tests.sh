@@ -430,7 +430,7 @@ test_event_logging() {
 test_file_structure() {
     log_test "Testing project file structure..."
 
-    assert_file_exists "$PROJECT_ROOT/plugin.json" "plugin.json should exist"
+    assert_file_exists "$PROJECT_ROOT/agent-registry.json" "agent-registry.json should exist"
     assert_file_exists "$PROJECT_ROOT/scripts/state.sh" "scripts/state.sh should exist"
     assert_file_exists "$PROJECT_ROOT/scripts/events.sh" "scripts/events.sh should exist"
     assert_file_exists "$PROJECT_ROOT/scripts/db-init.sh" "scripts/db-init.sh should exist"
@@ -463,25 +463,25 @@ test_configuration() {
 
     # Check plugin.json is valid JSON
     if command -v jq &> /dev/null; then
-        if jq empty "$PROJECT_ROOT/plugin.json" 2>/dev/null; then
-            log_pass "plugin.json is valid JSON"
+        if jq empty "$PROJECT_ROOT/agent-registry.json" 2>/dev/null; then
+            log_pass "agent-registry.json is valid JSON"
             ((TESTS_RUN++))
             ((TESTS_PASSED++))
         else
-            log_fail "plugin.json is not valid JSON"
+            log_fail "agent-registry.json is not valid JSON"
             ((TESTS_RUN++))
             ((TESTS_FAILED++))
         fi
 
-        # Check required fields in plugin.json
+        # Check required fields in agent-registry.json
         local name
-        name=$(jq -r '.name' "$PROJECT_ROOT/plugin.json")
-        assert_not_empty "$name" "plugin.json should have a name field"
+        name=$(jq -r '.name' "$PROJECT_ROOT/agent-registry.json")
+        assert_not_empty "$name" "agent-registry.json should have a name field"
 
         local agent_count
-        agent_count=$(jq '.agents | length' "$PROJECT_ROOT/plugin.json")
+        agent_count=$(jq '.agents | length' "$PROJECT_ROOT/agent-registry.json")
         if [ "$agent_count" -ge 80 ]; then
-            log_pass "plugin.json has sufficient agents ($agent_count)"
+            log_pass "agent-registry.json has sufficient agents ($agent_count)"
             ((TESTS_RUN++))
             ((TESTS_PASSED++))
         else

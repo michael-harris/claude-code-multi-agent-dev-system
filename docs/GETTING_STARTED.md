@@ -4,31 +4,39 @@ Welcome to DevTeam, a 127-agent automated development system for Claude Code. Th
 
 ## Quick Start (5 minutes)
 
-### 1. Install the Plugin
+### 1. Install from Claude Code Marketplace
 
-Clone or copy DevTeam to your Claude Code custom commands directory:
+The easiest way to install DevTeam is directly from within Claude Code:
 
 ```bash
-# Navigate to your project
-cd your-project
+# Add the DevTeam marketplace
+/plugin marketplace add https://github.com/michael-harris/devteam
 
-# Clone DevTeam
-git clone https://github.com/michael-harris/devteam .devteam-plugin
+# Install the plugin
+/plugin install devteam@devteam-marketplace
+```
 
-# Or copy to Claude Code custom commands location
-# (Varies by OS - check Claude Code documentation)
+All hooks, agents, skills, and rules are configured automatically.
+
+#### Alternative: Install from Local Clone
+
+For development or contributing:
+
+```bash
+git clone https://github.com/michael-harris/devteam.git
+/plugin install /path/to/devteam
 ```
 
 ### 2. Initialize the Database
 
-DevTeam uses SQLite for state management:
+DevTeam uses SQLite for state management. Navigate to your project directory:
 
 ```bash
 # Linux/macOS
-bash .devteam-plugin/scripts/db-init.sh
+bash scripts/db-init.sh
 
 # Windows
-powershell .devteam-plugin/scripts/db-init.ps1
+powershell scripts/db-init.ps1
 ```
 
 This creates `.devteam/devteam.db` in your project.

@@ -7,9 +7,9 @@ allowed-tools: Read, Glob, Grep, Bash, Task
 model: opus
 ---
 
-Current session: !`source scripts/state.sh && get_current_session 2>/dev/null || echo "No active session"`
-Active sprint: !`source scripts/state.sh && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
-Failure count: !`source scripts/state.sh && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
+Current session: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_current_session 2>/dev/null || echo "No active session"`
+Active sprint: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "active_sprint" 2>/dev/null || echo "None"`
+Failure count: !`source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh" && get_kv_state "consecutive_failures" 2>/dev/null || echo "0"`
 
 # Merge Tracks Command
 
@@ -57,7 +57,7 @@ Extract flags from command:
 
 ### Step 1: Load State and Validate
 
-1. **Load state from SQLite** (`.devteam/devteam.db` via `source scripts/state.sh`)
+1. **Load state from SQLite** (`.devteam/devteam.db` via `source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"`)
 
 2. **Verify worktree mode:**
    ```python
@@ -155,7 +155,7 @@ Task(
   description="Merge all development tracks intelligently",
   prompt=`Merge all development tracks back to main branch.
 
-State database: .devteam/devteam.db (via source scripts/state.sh)
+State database: .devteam/devteam.db (via source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh")
 
 Your responsibilities:
 1. Verify all pre-flight checks passed
@@ -196,7 +196,7 @@ After track-merger completes:
 
 2. **Update state in SQLite:**
    ```bash
-   source scripts/state.sh
+   source "${CLAUDE_PLUGIN_ROOT}/scripts/state.sh"
 
    set_kv_state "merge_info.merged_at" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
    set_kv_state "merge_info.tracks_merged" "1,2,3"

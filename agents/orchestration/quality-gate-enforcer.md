@@ -9,7 +9,7 @@ memory: project
 
 **Agent ID:** `orchestration:quality-gate-enforcer`
 **Category:** Orchestration
-**Model:** Always runs as opus (set in plugin.json)
+**Model:** Always runs as opus (set in agent-registry.json)
 
 ## Purpose
 

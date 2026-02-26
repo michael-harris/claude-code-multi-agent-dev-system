@@ -334,32 +334,9 @@ The system uses Claude Code hooks for autonomous execution. **All hooks support 
 | Session End | `session-end.sh` | `session-end.ps1` | Session cleanup |
 | Install | `install.sh` | `install.ps1` | Hook installation script |
 
-See [hooks/README.md](hooks/README.md) for detailed cross-platform installation instructions.
+When installed via the marketplace or as a plugin, all hooks are configured automatically through `hooks/hooks.json`. No manual settings.json editing is required.
 
-### Installation (Linux/macOS)
-
-Add to `~/.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "Stop": [{
-      "matcher": "",
-      "hooks": [{
-        "type": "command",
-        "command": "/path/to/hooks/stop-hook.sh"
-      }]
-    }],
-    "PostToolUse": [{
-      "matcher": "",
-      "hooks": [{
-        "type": "command",
-        "command": "/path/to/hooks/persistence-hook.sh"
-      }]
-    }]
-  }
-}
-```
+See [hooks/README.md](hooks/README.md) for hook details and troubleshooting.
 
 ---
 
@@ -549,7 +526,8 @@ skills/                      # 20 skill definitions (SKILL.md per directory)
 └── rules/                   # 11 path-specific rule files
     └── *.md
 
-settings.json                # Default settings with env flags and hooks config
+agent-registry.json          # Agent and command registry (127 agents, 20 commands)
+settings.json                # Plugin default settings
 .mcp.json                    # Bundled MCP server configs (GitHub, Memory)
 .lsp.json                    # Language server configs (8 languages)
 
@@ -716,31 +694,57 @@ System automatically:
 
 ## Installation
 
+### Install from Claude Code Marketplace (Recommended)
+
+The easiest way to install DevTeam is directly from within Claude Code:
+
+```bash
+# 1. Add the DevTeam marketplace
+/plugin marketplace add https://github.com/michael-harris/devteam
+
+# 2. Install the plugin
+/plugin install devteam@devteam-marketplace
+
+# 3. Initialize the database in your project
+bash scripts/db-init.sh
+
+# 4. Verify installation
+/devteam:status
+```
+
+That's it. Hooks, agents, skills, and rules are all configured automatically.
+
+### Install from Local Clone (Development)
+
+For contributing or local development:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/michael-harris/devteam.git
+
+# 2. Install as a local plugin
+/plugin install /path/to/devteam
+
+# 3. Initialize the database in your project
+bash scripts/db-init.sh
+
+# 4. Verify installation
+/devteam:status
+```
+
 ### Prerequisites
 
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
 - SQLite3
 - Bash 4.0+ (Linux/macOS) or PowerShell 5.1+ (Windows)
-- jq (used by install script)
 - Git
 
-### Setup
+### Environment Variable (Agent Teams)
+
+To enable Agent Teams (parallel multi-agent execution), set this environment variable before starting Claude Code:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/michael-harris/devteam.git
-cd devteam
-
-# 2. Install hooks (configures Claude Code settings)
-bash hooks/install.sh        # Linux/macOS
-# powershell hooks/install.ps1  # Windows
-
-# 3. Initialize the database
-bash scripts/db-init.sh      # Linux/macOS
-# powershell scripts/db-init.ps1  # Windows
-
-# 4. Verify installation
-/devteam:status
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 ```
 
 ---

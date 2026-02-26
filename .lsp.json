@@ -1,76 +1,63 @@
 {
   "lspServers": {
     "typescript": {
-      "command": "mcp-language-server",
-      "args": ["--workspace", "${PROJECT_ROOT}"],
-      "env": {
-        "LSP_SERVER": "typescript-language-server",
-        "LSP_SERVER_ARGS": "--stdio"
-      },
-      "detect": ["package.json", "tsconfig.json", "*.ts", "*.tsx"]
+      "command": "typescript-language-server",
+      "args": ["--stdio"],
+      "extensionToLanguage": {
+        ".ts": "typescript",
+        ".tsx": "typescriptreact",
+        ".js": "javascript",
+        ".jsx": "javascriptreact"
+      }
     },
     "python": {
-      "command": "mcp-language-server",
-      "args": ["--workspace", "${PROJECT_ROOT}"],
-      "env": {
-        "LSP_SERVER": "pyright",
-        "LSP_SERVER_ARGS": ""
-      },
-      "detect": ["pyproject.toml", "requirements.txt", "setup.py", "*.py"]
+      "command": "pyright",
+      "args": [],
+      "extensionToLanguage": {
+        ".py": "python"
+      }
     },
     "go": {
-      "command": "mcp-language-server",
-      "args": ["--workspace", "${PROJECT_ROOT}"],
-      "env": {
-        "LSP_SERVER": "gopls",
-        "LSP_SERVER_ARGS": ""
-      },
-      "detect": ["go.mod", "go.sum", "*.go"]
+      "command": "gopls",
+      "args": [],
+      "extensionToLanguage": {
+        ".go": "go"
+      }
     },
     "rust": {
-      "command": "mcp-language-server",
-      "args": ["--workspace", "${PROJECT_ROOT}"],
-      "env": {
-        "LSP_SERVER": "rust-analyzer",
-        "LSP_SERVER_ARGS": ""
-      },
-      "detect": ["Cargo.toml", "Cargo.lock", "*.rs"]
+      "command": "rust-analyzer",
+      "args": [],
+      "extensionToLanguage": {
+        ".rs": "rust"
+      }
     },
     "java": {
-      "command": "mcp-language-server",
-      "args": ["--workspace", "${PROJECT_ROOT}"],
-      "env": {
-        "LSP_SERVER": "jdtls",
-        "LSP_SERVER_ARGS": ""
-      },
-      "detect": ["pom.xml", "build.gradle", "*.java"]
+      "command": "jdtls",
+      "args": [],
+      "extensionToLanguage": {
+        ".java": "java"
+      }
     },
     "csharp": {
-      "command": "mcp-language-server",
-      "args": ["--workspace", "${PROJECT_ROOT}"],
-      "env": {
-        "LSP_SERVER": "omnisharp",
-        "LSP_SERVER_ARGS": ""
-      },
-      "detect": ["*.csproj", "*.sln", "*.cs"]
+      "command": "omnisharp",
+      "args": [],
+      "extensionToLanguage": {
+        ".cs": "csharp"
+      }
     },
     "ruby": {
-      "command": "mcp-language-server",
-      "args": ["--workspace", "${PROJECT_ROOT}"],
-      "env": {
-        "LSP_SERVER": "ruby-lsp",
-        "LSP_SERVER_ARGS": ""
-      },
-      "detect": ["Gemfile", "*.rb", "Rakefile"]
+      "command": "ruby-lsp",
+      "args": [],
+      "extensionToLanguage": {
+        ".rb": "ruby"
+      }
     },
     "php": {
-      "command": "mcp-language-server",
-      "args": ["--workspace", "${PROJECT_ROOT}"],
-      "env": {
-        "LSP_SERVER": "phpactor",
-        "LSP_SERVER_ARGS": "language-server"
-      },
-      "detect": ["composer.json", "*.php"]
+      "command": "phpactor",
+      "args": ["language-server"],
+      "extensionToLanguage": {
+        ".php": "php"
+      }
     }
   }
 }

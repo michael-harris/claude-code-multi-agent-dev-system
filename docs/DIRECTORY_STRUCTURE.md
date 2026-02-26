@@ -6,7 +6,7 @@ This document describes the directory structure of the DevTeam plugin and the fi
 
 ```
 devteam/
-├── plugin.json                 # Plugin manifest
+├── agent-registry.json         # Agent and command registry (127 agents, 20 commands)
 ├── README.md                   # Main documentation
 │
 ├── commands/                   # Slash command definitions

@@ -401,6 +401,8 @@ docker-compose.*.local.yml
 !.devteam/agent-capabilities.yaml
 # state-schema.yaml and state-example.yaml moved to docs/deprecated/
 
-# Keep scripts/lib directory (overrides Python lib/ exclusion)
+# Keep scripts/lib and hooks/lib directories (overrides Python lib/ exclusion)
 !scripts/lib/
 !scripts/lib/**
+!hooks/lib/
+!hooks/lib/**
